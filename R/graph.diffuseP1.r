@@ -87,7 +87,7 @@ graph.diffuseP1 = function(p1, startNode, G, visitedNodes, graphNumber=1, verbos
           print(sprintf("%ssubtracted %f from startNode's neighbor #%d: %s and sent to its own neighbors.",
                         paste(rep("   ", length(visitedNodes)-1), collapse=""), inherited.probability/2, z, names(startNodeUnvisitedNeighbors[z])));
         }
-        G = graph.diffuseP1(inherited.probability/2, names(startNodeUnvisitedNeighbors[z]), G, c(visitedNodes, startNodeUnvisitedNeighbors[z]), graphNumber, verbose=TRUE);
+        G = graph.diffuseP1(inherited.probability/2, names(startNodeUnvisitedNeighbors[z]), G, c(visitedNodes, startNodeUnvisitedNeighbors[z]), graphNumber, verbose=FALSE);
       }
       z=z+1;
     }

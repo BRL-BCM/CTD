@@ -1,13 +1,15 @@
-Package: GenMod
-Title: Generative Models for Modular Feature Detection
+Package: CTD
+Title: CTD method for “connecting the dots” in weighted graphs
 Version: 0.0.0.9000
 Date: 2017-05-25
 Maintainer: Lillian Thistlethwaite <lillian.thistlethwaite@bcm.edu>
 Description: An R package for probabilistic estimation of multivariate feature sets, against a partial correlation network of features.
 Depends: R (>= 3.3.0),
 	 igraph,
-	 plotly
+	 plotly,
+	 gplots,
+	 RColorBrewer
 License: MIT License
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.0.1.9000
+RoxygenNote: 6.1.0.9000

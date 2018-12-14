@@ -29,9 +29,9 @@ mle.getPatientSimilarity = function(p1.optBS, ptID, p2.optBS, ptID2, data, data.
   ind = which(sapply(p12.optBS, function(i) i==1))
   p12.optBS = p12.optBS[1:ind[length(ind)]]
 
-  p1.e = log2(length(igraphObjectG)) + log2(length(p1.sig.nodes)) + 1 + (length(p1.bs)-1)*stats.entropyFunction(p1.bs[2:length(p1.bs)])
-  p2.e = log2(length(igraphObjectG)) +  log2(length(p2.sig.nodes)) + 1 + (length(p2.bs)-1)*stats.entropyFunction(p2.bs[2:length(p2.bs)])
-  p12.e = log2(length(igraphObjectG)) +  log2(length(p12.sig.nodes)) + 1 + (length(p12.optBS)-1)*stats.entropyFunction(p12.optBS[2:length(p12.optBS)])
+  p1.e = log2(length(igraphObjectG)) + log2(length(p1.sig.nodes)+1) + (length(p1.bs)-1)*stats.entropyFunction(p1.bs[2:length(p1.bs)])
+  p2.e = log2(length(igraphObjectG)) +  log2(length(p2.sig.nodes)+1) + (length(p2.bs)-1)*stats.entropyFunction(p2.bs[2:length(p2.bs)])
+  p12.e = log2(length(igraphObjectG)) +  log2(length(p12.sig.nodes)+1) + (length(p12.optBS)-1)*stats.entropyFunction(p12.optBS[2:length(p12.optBS)])
 
   p1.dirs = data[p1.sig.nodes,ptID]
   p1.dirs[p1.dirs>0] = 1

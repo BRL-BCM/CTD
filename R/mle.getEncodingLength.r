@@ -20,19 +20,19 @@ mle.getEncodingLength = function(bs, pvals, ptID) {
     if(p.k==1) {
       e = log2(length(igraphObjectG))
     } else {
-      e = log2(length(igraphObjectG)) + log2(p.k) + 1 + (length(optBS)-1)*stats.entropyFunction(optBS[2:length(optBS)])
+      e = log2(length(igraphObjectG)) + log2(p.k+1) + (length(optBS)-1)*stats.entropyFunction(optBS[2:length(optBS)])
     }
 
     optBS.tmp = gsub("1", "T", paste(as.character(optBS), collapse=""))
     results[row, "patientID"] = ptID
     results[row, "optimalBS"] = optBS.tmp
-    results[row, "subsetSize"] = kk
+    results[row, "subsetSize"] = k
     results[row, "opt.T"] = p.k
     results[row, "varPvalue"] = paste(format(pvals[ptID, mets.k], digits=2, width=3), collapse="/")
-    results[row, "fishers.Info"] = -log2(stats.fishersMethod(pvals[ptID,mets.k]))
-    results[row, "IS.null"] = log2(choose(length(V(ig)$name), kk))
+    results[row, "fishers.Info"] = -log2(stats.fishersMethod(pvals[ptID, mets.k]))
+    results[row, "IS.null"] = log2(choose(length(igraphObjectG), k))
     results[row, "IS.alt"] = e
-    results[row, "d.score"] = log2(choose(length(V(ig)$name), kk)) - e
+    results[row, "d.score"] = log2(choose(length(igraphObjectG), k)) - e
     row = row + 1
   }
 
