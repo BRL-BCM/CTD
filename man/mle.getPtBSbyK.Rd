@@ -4,10 +4,10 @@
 \alias{mle.getPtBSbyK}
 \title{Generate patient-specific bitstrings from adaptive network walk.}
 \usage{
-mle.getPtBSbyK(data, ptID, perms, kmx)
+mle.getPtBSbyK(data_mx, ptID, perms, kmx)
 }
 \arguments{
-\item{data}{- The matrix that gives the perturbation strength (z-score) for all variables (columns) for each patient (rows).}
+\item{data_mx}{- The matrix that gives the perturbation strength (z-score) for all variables (columns) for each patient (rows).}
 
 \item{ptID}{- The rowname in pvals associated with the patient being processed.}
 
@@ -20,5 +20,33 @@ This function calculates the bitstrings (1 is a hit; 0 is a miss) associated wit
 made by the diffusion algorithm trying to find the variables in the encoded subset, given the background knowledge graph.
 }
 \examples{
-mle.getPtBSbyK(data, ptID, permutationByStartNode, kmax)
+# Read in any network via its adjacency matrix
+tmp = as.matrix(read.table("adjacency_matrix.txt", sep="\\t", header=TRUE))
+colnames(tmp) = rownames(tmp)
+ig = graph.adjacency(tmp, mode="undirected", weighted=TRUE, add.colnames="name")
+V(ig)$name = tolower(V(ig)$name)
+adjacency_matrix = list(as.matrix(get.adjacency(ig, attr="weight")))  # Must have this declared as a GLOBAL variable!!!!!
+# Set other tuning parameters
+p0=0.1  # 10\% of probability distributed uniformly
+p1=0.9  # 90\% of probability diffused based on edge weights in networks
+G = vector(mode="list", length=length(V(ig)$name))
+names(G) = names(V(ig)$name)
+# Get node permutations for graph
+perms = list()
+for (n in 1:length(G)) {
+    print(sprintf("Generating node permutation starting with node \%s", names(G)[n]))
+    perms[[names(G)[n]]] = mle.getPermN(n, G)
+}
+# Decide what the largest subset size you will consider will be
+kmx = 20
+# Load your patient data (p features as rows x n observations as columns)
+# data_mx = read.table("/your/own/data.txt", sep="\\t", header=TRUE)
+data(testData)
+data_mx = testData
+# Get bitstrings associated with each patient's top kmx variable subsets
+ptBSbyK = list()
+for (pt in 1:ncol(data_mx)) {
+    ptID = colnames(data_mx)[pt]
+    ptBSbyK[[ptID]] = mle.getPtBSbyK(data_mx, ptID, perms, kmx)
+}
 }

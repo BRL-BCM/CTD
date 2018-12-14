@@ -25,11 +25,24 @@ Recursively diffuse probability from a starting node based on the connectivity o
         most influenced by a perturbation in the starting node.
 }
 \examples{
-graph.diffuseP1(p1, startNode, G, visitedNodes, 1)
+# Read in any network via its adjacency matrix
+tmp = as.matrix(read.table("adjacency_matrix.txt", sep="\\t", header=TRUE))
+colnames(tmp) = rownames(tmp)
+ig = graph.adjacency(tmp, mode="undirected", weighted=TRUE, add.colnames="name")
+V(ig)$name = tolower(V(ig)$name)
+adjacency_matrix = list(as.matrix(get.adjacency(ig, attr="weight")))  # Must have this declared as a GLOBAL variable!!!!!
+
+p0=0.1  # 10\% of probability distributed uniformly
+p1=0.9  # 90\% of probability diffused based on edge weights in networks
+G = vector(mode="list", length=length(V(ig)$name))
+names(G) = names(V(ig)$name)
+startNode = names(G)[1]
+visitedNodes = NULL
+probs_afterCurrDraw = graph.diffuseP1(p1, startNode, G, visitedNodes, 1)
 }
-\keyword{adaptive}
 \keyword{diffusion}
 \keyword{event}
 \keyword{generative}
 \keyword{methods}
-\keyword{walk}
+\keyword{network}
+\keyword{walker}

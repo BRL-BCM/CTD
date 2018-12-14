@@ -4,7 +4,7 @@
 \alias{mle.getPatientSimilarity}
 \title{Patient similarity using mutual information MLE metric of patients' most modular, perturbed subsets.}
 \usage{
-mle.getPatientSimilarity(p1.optBS, ptID, p2.optBS, ptID2, data, data.pvals)
+mle.getPatientSimilarity(p1.optBS, ptID, p2.optBS, ptID2, data_mx)
 }
 \arguments{
 \item{p1.optBS}{- The optimal bitstring associated with patient 1.}
@@ -13,12 +13,52 @@ mle.getPatientSimilarity(p1.optBS, ptID, p2.optBS, ptID2, data, data.pvals)
 
 \item{p2.optBS}{- The optimal bitstring associated with patient 2.}
 
-\item{data}{- The matrix that gives the perturbation strength (z-scores) for all variables (columns) for each patient (rows).}
+\item{data_mx}{- The matrix that gives the perturbation strength (z-scores) for all variables (columns) for each patient (rows).}
 
 \item{ptID}{- The identifier associated with patient 2's sample.}
-
-\item{pvals}{- The matrix that gives the perturbation strength significance (p-value) for all variables (columns) for each patient (rows).}
 }
 \description{
 This function calculates the universal distance between patients, using a mutual information metric, where self-information comes from the minimum encoding length of each patient's encoded modular perturbations in the background knowledge graph.
+}
+\examples{
+# Read in any network via its adjacency matrix
+tmp = as.matrix(read.table("adjacency_matrix.txt", sep="\\t", header=TRUE))
+colnames(tmp) = rownames(tmp)
+ig = graph.adjacency(tmp, mode="undirected", weighted=TRUE, add.colnames="name")
+V(ig)$name = tolower(V(ig)$name)
+adjacency_matrix = list(as.matrix(get.adjacency(ig, attr="weight")))  # Must have this declared as a GLOBAL variable!!!!!
+# Set other tuning parameters
+p0=0.1  # 10\% of probability distributed uniformly
+p1=0.9  # 90\% of probability diffused based on edge weights in networks
+G = vector(mode="list", length=length(V(ig)$name))
+names(G) = names(V(ig)$name)
+# Get node permutations for graph
+perms = list()
+for (n in 1:length(G)) {
+    print(sprintf("Generating node permutation starting with node \%s", names(G)[n]))
+    perms[[names(G)[n]]] = mle.getPermN(n, G)
+}
+# Decide what the largest subset size you will consider will be
+kmx = 20
+# Load your patient data (p features as rows x n observations as columns)
+# data_mx = read.table("/your/own/data.txt", sep="\\t", header=TRUE)
+data(testData)
+data_mx = testData
+# Get bitstrings associated with each patient's top kmx variable subsets
+ptBSbyK = list()
+for (pt in 1:ncol(data_mx)) {
+    ptID = colnames(data_mx)[pt]
+    ptBSbyK[[ptID]] = mle.getPtBSbyK(data_mx, ptID, perms, kmx)
+}
+# Get patient distances
+patientSim = matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx))
+rownames(patientSim) = colnames(data_mx)
+colnames(patientSim) = colnames(data_mx)
+for (pt in 1:ncol(data_mx)) {
+    ptID = colnames(data_mx)[pt]
+    for (pt2 in 1:ncol(data_mx)) {
+        ptID2 = colnames(data_mx)[pt2]
+        patientSim[ptID, ptID2] = mle.getPatientSimilarity(ptBSbyK[ptID], ptID, ptBSbyK[ptID2], data_mx)
+    }
+}
 }

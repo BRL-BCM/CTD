@@ -4,13 +4,10 @@
 \alias{mle.getPermMovie}
 \title{Capture the movement of the adaptive walk of the diffusion probability method.}
 \usage{
-mle.getPermMovie(patient.sig.nodes, patient, ig, output_filepath,
-  movie = TRUE)
+mle.getPermMovie(subset.nodes, ig, output_filepath, movie = TRUE)
 }
 \arguments{
-\item{patient.sig.nodes}{- The subset of variables, S, in a background graph, G. These are the perturbed molecular phenotype variables in a given patient's profile.}
-
-\item{patient}{- The column number in data.pvals associated with the patient being examined.}
+\item{subset.nodes}{- The subset of variables, S, in a background graph, G.}
 
 \item{ig}{- The igraph object associated with the background knowledge graph.}
 
@@ -21,7 +18,18 @@ Default is TRUE. Alternatively (movie=FALSE), you could use this function to get
 Make a movie of the adaptive walk the diffusion probability method makes in search of a given patient's perturbed variables.
 }
 \examples{
-mle.getPermMovie(patient.sig.nodes, patient, ig)
+# Read in any network via its adjacency matrix
+tmp = as.matrix(read.table("adjacency_matrix.txt", sep="\\t", header=TRUE))
+colnames(tmp) = rownames(tmp)
+ig = graph.adjacency(tmp, mode="undirected", weighted=TRUE, add.colnames="name")
+V(ig)$name = tolower(V(ig)$name)
+adjacency_matrix = list(as.matrix(get.adjacency(ig, attr="weight")))  # Must have this declared as a GLOBAL variable!!!!!
+p0=0.1  # 10\% of probability distributed uniformly
+p1=0.9  # 90\% of probability diffused based on edge weights in networks
+G = vector(mode="list", length=length(V(ig)$name))
+names(G) = names(V(ig)$name)
+subset.nodes = names(G)[sample(1:length(G), 3)]
+mle.getPermMovie(subset.nodes, ig, output_filepath = getwd(), movie=TRUE)
 }
 \keyword{adaptive}
 \keyword{diffusion}
