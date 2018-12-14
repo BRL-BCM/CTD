@@ -6,14 +6,28 @@
 #' @keywords network walker algorithm
 #' @export mle.getPermN
 #' @examples
-#' mle.getPermN(n)
-mle.getPermN = function(n) {
-  all_nodes = names(igraphObjectG)
+#' # Read in any network via its adjacency matrix
+#' tmp = as.matrix(read.table("adjacency_matrix.txt", sep="\t", header=TRUE))
+#' colnames(tmp) = rownames(tmp)
+#' ig = graph.adjacency(tmp, mode="undirected", weighted=TRUE, add.colnames="name")
+#' V(ig)$name = tolower(V(ig)$name)
+#' adjacency_matrix = list(as.matrix(get.adjacency(ig, attr="weight")))  # Must have this declared as a GLOBAL variable!!!!!
+#' p0=0.1  # 10% of probability distributed uniformly
+#' p1=0.9  # 90% of probability diffused based on edge weights in networks
+#' G = vector(mode="list", length=length(V(ig)$name))
+#' names(G) = names(V(ig)$name)
+#' perms = list()
+#' for (n in 1:length(G)) {
+#'     print(sprintf("Generating node permutation starting with node %s", names(G)[n]))
+#'     perms[[names(G)[n]]] = mle.getPermN(n, G)
+#' }
+mle.getPermN = function(n, G) {
+  all_nodes = names(G)
   print(sprintf("Calculating permutation %d of %d.", n, length(all_nodes)))
   current_node_set = NULL
   stopIterating=FALSE
   startNode = all_nodes[n]
-  currentGraph = igraphObjectG
+  currentGraph = G
   while (stopIterating==FALSE) {
     current_node_set = c(current_node_set, startNode)
     #STEP 4: Diffuse p0 and p1 to connected nodes from current draw, startNode node
