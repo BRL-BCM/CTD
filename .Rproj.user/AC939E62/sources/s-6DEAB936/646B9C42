@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1544901965229.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2632017972",
+    "id" : "646B9C42",
+    "lastKnownWriteTime" : 1544816781,
+    "last_content_update" : 1544816781,
+    "path" : "~/Downloads/CTD/R/graph.diffuseP1.r",
+    "project_path" : "R/graph.diffuseP1.r",
+    "properties" : {
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

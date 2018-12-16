@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1544901967640.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3728048906",
+    "id" : "5E051AF5",
+    "lastKnownWriteTime" : 1544818562,
+    "last_content_update" : 1544818562,
+    "path" : "~/Downloads/CTD/R/mle.getPermMovie.r",
+    "project_path" : "R/mle.getPermMovie.r",
+    "properties" : {
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
