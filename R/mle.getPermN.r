@@ -7,20 +7,29 @@
 #' @export mle.getPermN
 #' @examples
 #' # Read in any network via its adjacency matrix
-#' tmp = as.matrix(read.table("adjacency_matrix.txt", sep="\t", header=TRUE))
-#' colnames(tmp) = rownames(tmp)
+#' tmp = matrix(1, nrow=100, ncol=100)
+#' for (i in 1:100) {
+#'   for (j in 1:100) {
+#'     tmp[i, j] = rnorm(1, mean=0, sd=1)
+#'   }
+#' }
+#' colnames(tmp) = sprintf("MolPheno%d", 1:100)
 #' ig = graph.adjacency(tmp, mode="undirected", weighted=TRUE, add.colnames="name")
 #' V(ig)$name = tolower(V(ig)$name)
 #' adjacency_matrix = list(as.matrix(get.adjacency(ig, attr="weight")))  # Must have this declared as a GLOBAL variable!!!!!
+#' # Set other tuning parameters
 #' p0=0.1  # 10% of probability distributed uniformly
 #' p1=0.9  # 90% of probability diffused based on edge weights in networks
+#' thresholdDiff=0.01
 #' G = vector(mode="list", length=length(V(ig)$name))
-#' names(G) = names(V(ig)$name)
+#' names(G) = V(ig)$name
+#' # Get node permutations for graph
 #' perms = list()
 #' for (n in 1:length(G)) {
-#'     print(sprintf("Generating node permutation starting with node %s", names(G)[n]))
-#'     perms[[names(G)[n]]] = mle.getPermN(n, G)
+#'   print(sprintf("Generating node permutation starting with node %s", names(G)[n]))
+#'   perms[[n]] = mle.getPermN(n, G)
 #' }
+#' names(perms) = names(G)
 mle.getPermN = function(n, G) {
   all_nodes = names(G)
   print(sprintf("Calculating permutation %d of %d.", n, length(all_nodes)))

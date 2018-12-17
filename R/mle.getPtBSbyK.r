@@ -9,36 +9,43 @@
 #' @export mle.getPtBSbyK
 #' @examples
 #' # Read in any network via its adjacency matrix
-#' tmp = as.matrix(read.table("adjacency_matrix.txt", sep="\t", header=TRUE))
-#' colnames(tmp) = rownames(tmp)
+#' tmp = matrix(1, nrow=100, ncol=100)
+#' for (i in 1:100) {
+#'   for (j in 1:100) {
+#'     tmp[i, j] = rnorm(1, mean=0, sd=1)
+#'   }
+#' }
+#' colnames(tmp) = sprintf("MolPheno%d", 1:100)
 #' ig = graph.adjacency(tmp, mode="undirected", weighted=TRUE, add.colnames="name")
 #' V(ig)$name = tolower(V(ig)$name)
 #' adjacency_matrix = list(as.matrix(get.adjacency(ig, attr="weight")))  # Must have this declared as a GLOBAL variable!!!!!
 #' # Set other tuning parameters
 #' p0=0.1  # 10% of probability distributed uniformly
 #' p1=0.9  # 90% of probability diffused based on edge weights in networks
+#' thresholdDiff=0.01
 #' G = vector(mode="list", length=length(V(ig)$name))
-#' names(G) = names(V(ig)$name)
+#' names(G) = V(ig)$name
 #' # Get node permutations for graph
 #' perms = list()
 #' for (n in 1:length(G)) {
-#'     print(sprintf("Generating node permutation starting with node %s", names(G)[n]))
-#'     perms[[names(G)[n]]] = mle.getPermN(n, G)
+#'   print(sprintf("Generating node permutation starting with node %s", names(G)[n]))
+#'   perms[[n]] = mle.getPermN(n, G)
 #' }
+#' names(perms) = names(G)
 #' # Decide what the largest subset size you will consider will be
 #' kmx = 20
 #' # Load your patient data (p features as rows x n observations as columns)
 #' # data_mx = read.table("/your/own/data.txt", sep="\t", header=TRUE)
 #' data(testData)
-#' data_mx = testData
+#' data_mx = t(testData)
+#' rownames(data_mx) = tolower(rownames(data_mx))
 #' # Get bitstrings associated with each patient's top kmx variable subsets
 #' ptBSbyK = list()
 #' for (pt in 1:ncol(data_mx)) {
-#'     ptID = colnames(data_mx)[pt]
-#'     ptBSbyK[[ptID]] = mle.getPtBSbyK(data_mx, ptID, perms, kmx)
+#'   ptID = colnames(data_mx)[pt]
+#'   ptBSbyK[[ptID]] = mle.getPtBSbyK(data_mx, ptID, perms, kmx)
 #' }
 mle.getPtBSbyK = function(data_mx, ptID, perms, kmx) {
-  pt.BSbyK = list()
   pt.sig.nodes = rownames(data_mx)[order(abs(data_mx[,ptID]), decreasing = TRUE)][1:kmx]
   pt.byK = list()
   for (k in 2:kmx) {
@@ -56,7 +63,6 @@ mle.getPtBSbyK = function(data_mx, ptID, perms, kmx) {
     }
     pt.byK[[k-1]] = pt.bitString[[which.min(bestInd)]]
   }
-  pt.BSbyK[[ptID]] = pt.byK
-  return(pt.BSbyK)
+  return(pt.byK)
 }
 

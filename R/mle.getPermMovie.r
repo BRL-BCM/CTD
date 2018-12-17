@@ -11,15 +11,20 @@
 #' @keywords adaptive walk
 #' @examples
 #' # Read in any network via its adjacency matrix
-#' tmp = as.matrix(read.table("adjacency_matrix.txt", sep="\t", header=TRUE))
-#' colnames(tmp) = rownames(tmp)
+#' tmp = matrix(1, nrow=100, ncol=100)
+#' for (i in 1:100) {
+#'   for (j in 1:100) {
+#'     tmp[i, j] = rnorm(1, mean=0, sd=1)
+#'   }
+#' }
+#' colnames(tmp) = sprintf("MolPheno%d", 1:100)
 #' ig = graph.adjacency(tmp, mode="undirected", weighted=TRUE, add.colnames="name")
 #' V(ig)$name = tolower(V(ig)$name)
 #' adjacency_matrix = list(as.matrix(get.adjacency(ig, attr="weight")))  # Must have this declared as a GLOBAL variable!!!!!
+#' # Set other tuning parameters
 #' p0=0.1  # 10% of probability distributed uniformly
 #' p1=0.9  # 90% of probability diffused based on edge weights in networks
-#' G = vector(mode="list", length=length(V(ig)$name))
-#' names(G) = names(V(ig)$name)
+#' thresholdDiff=0.01
 #' subset.nodes = names(G)[sample(1:length(G), 3)]
 #' mle.getPermMovie(subset.nodes, ig, output_filepath = getwd(), movie=TRUE)
 mle.getPermMovie = function(subset.nodes, ig, output_filepath, movie=TRUE) {
@@ -29,10 +34,11 @@ mle.getPermMovie = function(subset.nodes, ig, output_filepath, movie=TRUE) {
   V(ig.subset)$label = rep("", length(V(ig.subset)$name))
   tmp = get.adjacency(ig.subset, attr="weight")
   tmp = abs(tmp)
-  igraphTestG2 = graph.adjacency(tmp, mode="undirected", weighted=TRUE)
+  igraphTestG = graph.adjacency(tmp, mode="undirected", weighted=TRUE)
   coords = layout.fruchterman.reingold(ig.subset)
   igraphObjectG = vector(mode="list", length=length(V(ig.subset)$name))
   names(igraphObjectG) = V(ig.subset)$name
+  igraphObjectG = lapply(igraphObjectG, function(i) i[[1]]=0)
   degs = list(degree(ig.subset))
   adjacency_matrix = list(as.matrix(get.adjacency(ig.subset, attr="weight")))
 
@@ -45,8 +51,8 @@ mle.getPermMovie = function(subset.nodes, ig, output_filepath, movie=TRUE) {
     png(sprintf("%s/diffusionP1Movie%d.png", output_filepath, length(current_node_set)), 500, 500)
     plot.igraph(ig.subset, layout=coords, vertex.color=V(ig.subset)$color,
                 vertex.label=V(ig.subset)$label, edge.width=20*abs(E(ig.subset)$weight),  mark.col="dark red",
-                mark.groups = names(current_node_set))
-    title(sprintf("{%s}", paste(as.numeric(names(current_node_set) %in% subset.nodes), collapse="")), cex.main=2)
+                mark.groups = current_node_set)
+    title(sprintf("{%s}", paste(as.numeric(current_node_set %in% subset.nodes), collapse="")), cex.main=2)
     legend("bottomleft", legend=c("Jackpot Nodes", "Drawn Nodes"), fill=c("green", "dark red"))
     dev.off()
   }
@@ -84,44 +90,33 @@ mle.getPermMovie = function(subset.nodes, ig, output_filepath, movie=TRUE) {
       p1_event = sum(unlist(currentGraph[!(names(currentGraph) %in% current_node_set)]))
       if (abs(p1_event-1)>thresholdDiff) {
         extra.prob.to.diffuse = 1-p1_event
-        currentGraph[names(current_node_set)] = 0
-        currentGraph[!(names(currentGraph) %in% names(current_node_set))] = unlist(currentGraph[!(names(currentGraph) %in% names(current_node_set))]) + extra.prob.to.diffuse/sum(!(names(currentGraph) %in% names(current_node_set)))
+        currentGraph[current_node_set] = 0
+        currentGraph[!(names(currentGraph) %in% current_node_set)] = unlist(currentGraph[!(names(currentGraph) %in% current_node_set)]) + extra.prob.to.diffuse/sum(!(names(currentGraph) %in% current_node_set))
       }
       #Set startNode to a node that is the max probability in the new currentGraph
       maxProb = names(which.max(currentGraph))
 
-      if (movie==TRUE) {
-        png(sprintf("%s/diffusionP1Movie%d_%d-1.png", output_filepath, n, length(current_node_set)), 500, 500)
-        plot.igraph(ig.subset, layout=coords, vertex.color=V(ig.subset)$color,
-                    vertex.label=V(ig.subset)$label, edge.width=20*abs(E(ig.subset)$weight),
-                    vertex.size=5+round(50*sumHits, 0), mark.col="dark red",
-                    mark.groups = names(current_node_set))
-        title(sprintf("{%s}", paste(as.numeric(names(current_node_set) %in% subset.nodes), collapse="")), cex.main=2)
-        legend("bottomleft", legend=c("Jackpot Nodes", "Drawn Nodes"), fill=c("green", "dark red"))
-        dev.off()
-      }
-
       # Break ties: When there are ties, choose the first of the winners.
       startNode = names(currentGraph[maxProb[1]])
-      if (length(c(startNode,current_node_set))>=(length(V(igraphTestG)$name))) {
+      if (all(subset.nodes %in% c(startNode,current_node_set))) {
         current_node_set = c(current_node_set, startNode)
         stopIterating = TRUE
       }
 
       if (movie==TRUE) {
-        png(sprintf("%d/diffusionP1Movie%d_%d-2.png", output_filepath, n, length(current_node_set)), 500, 500)
+        png(sprintf("%s/diffusionP1Movie%d_%d.png", output_filepath, n, length(current_node_set)), 500, 500)
         plot.igraph(ig.subset, layout=coords, vertex.color=V(ig.subset)$color,
                     vertex.label=V(ig.subset)$label, edge.width=20*abs(E(ig.subset)$weight),
-                    vertex.size=5+round(50*sumHits, 0), mark.col="dark red",
-                    mark.groups = c(names(startNode), names(current_node_set)))
-        title(sprintf("{%s}", paste(as.numeric(c(names(current_node_set), names(startNode)) %in% subset.nodes), collapse="")), cex.main=2)
+                    vertex.size=5+round(50*unlist(currentGraph), 0), mark.col="dark red",
+                    mark.groups = current_node_set)
+        title(sprintf("{%s}", paste(as.numeric(current_node_set %in% subset.nodes), collapse="")), cex.main=2)
         legend("bottomleft", legend=c("Jackpot Nodes", "Drawn Nodes"), fill=c("green", "dark red"))
         dev.off()
       }
     }
 
     permutationByStartNode[[n]] = current_node_set
-    bitStrings.pt[[n]] = as.numeric(names(current_node_set) %in% subset.nodes)
+    bitStrings.pt[[n]] = as.numeric(current_node_set %in% subset.nodes)
   }
   names(permutationByStartNode) = subset.nodes
   optimalBitString[[patient]] = paste(bitStrings.pt[[which.max(unlist(lapply(lapply(bitStrings.pt, function(i) which(i==1)), function(i) sum(i))))]], collapse="")
@@ -132,14 +127,14 @@ mle.getPermMovie = function(subset.nodes, ig, output_filepath, movie=TRUE) {
     opT = sum(optBS)
     n=which(lapply(bitStrings.pt, function(i) paste(i, collapse=""))==optimalBitString[[patient]])
     startNode = subset.nodes[which(lapply(bitStrings.pt, function(i) paste(i, collapse=""))==optimalBitString[[patient]])]
-    current_node_set = permutationByStartNode[[which(subset.nodes==names(startNode)[1])]]
+    current_node_set = permutationByStartNode[[which(subset.nodes==startNode[1])]]
     png(sprintf("%s/diffusionMovie%d_summary.png", output_filepath, n), 500, 500)
     plot.igraph(ig.subset, layout=coords, vertex.color=V(ig.subset)$color,
                 vertex.label=V(ig.subset)$label, edge.width=20*abs(E(ig.subset)$weight),
-                vertex.size=5+round(50*sumHits, 0), mark.col="dark red",
-                mark.groups = c(names(startNode), names(current_node_set)))
+                vertex.size=5+round(50*unlist(currentGraph), 0), mark.col="dark red",
+                mark.groups = c(startNode, current_node_set))
     title(sprintf("compressed{%s}\ndirectly encoded{log2(choose(%d-%d, %d-%d))}",
-                  paste(as.numeric(names(current_node_set)[1:which(optBS==1)[opT]] %in% subset.nodes), collapse=""),
+                  paste(as.numeric(current_node_set[1:which(optBS==1)[opT]] %in% subset.nodes), collapse=""),
                   length(igraphObjectG), opT, length(subset.nodes), opT), cex.main=2)
     legend("bottomleft", legend=c("Jackpot Nodes", "Drawn Nodes"), fill=c("green", "dark red"))
     dev.off()
