@@ -53,7 +53,7 @@
 #'     print(res)
 #' }
 mle.getEncodingLength = function(bs, pvals, ptID, G) {
-  results = data.frame(patientID=character(), optimalBS=character(), subsetSize=integer(), opt.T=integer(), varPvalue=numeric(),
+  results = data.frame(patientID=character(), optimalBS=character(), subsetSize=integer(), varPvalue=numeric(),
                        fishers.Info=numeric(), IS.null=numeric(), IS.alt=numeric(), d.score=numeric(), stringsAsFactors = FALSE)
   row = 1
   for (k in 1:length(bs)) {
@@ -65,14 +65,12 @@ mle.getEncodingLength = function(bs, pvals, ptID, G) {
       e = log2(length(G))
     } else {
       e = log2(length(G)) + log2(p.k+1) + (length(optBS)-1)*stats.entropyFunction(optBS[2:length(optBS)])
-      #e = log2(length(G)) + log2(p.k) + (length(optBS)-1)*(1+log2(1-0.5*p.k/length(optBS)))
     }
 
     optBS.tmp = gsub("1", "T", paste(as.character(optBS), collapse=""))
     results[row, "patientID"] = ptID
     results[row, "optimalBS"] = optBS.tmp
-    results[row, "subsetSize"] = k
-    results[row, "opt.T"] = p.k
+    results[row, "subsetSize"] = p.k
     results[row, "varPvalue"] = paste(format(pvals[ptID, mets.k], digits=2, width=3), collapse="/")
     results[row, "fishers.Info"] = -log2(stats.fishersMethod(pvals[ptID, mets.k]))
     results[row, "IS.null"] = log2(choose(length(G), p.k))
