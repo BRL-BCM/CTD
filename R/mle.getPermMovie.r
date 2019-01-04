@@ -27,14 +27,18 @@
 #' thresholdDiff=0.01
 #' subset.nodes = names(G)[sample(1:length(G), 3)]
 #' mle.getPermMovie(subset.nodes, ig, output_filepath = getwd(), movie=TRUE)
-mle.getPermMovie = function(subset.nodes, ig, output_filepath, movie=TRUE) {
-  # TODO :: Test on different sized graphs. Do we like this design decision to subset neighborhood to get better view of network walk????
-  ig.subset = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% names(unlist(neighborhood(ig, nodes=subset.nodes, order=1))))])
-  V(ig.subset)$label.cex = 2
-  V(ig.subset)$label = rep("", length(V(ig.subset)$name))
-  tmp = get.adjacency(ig.subset, attr="weight")
-  tmp = abs(tmp)
-  igraphTestG = graph.adjacency(tmp, mode="undirected", weighted=TRUE)
+mle.getPermMovie = function(subset.nodes, ig, output_filepath, movie=TRUE, subset=FALSE) {
+  if (subset) {
+    # TODO :: Test on different sized graphs. Do we like this design decision to subset neighborhood to get better view of network walk????
+    ig.subset = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% names(unlist(neighborhood(ig, nodes=subset.nodes, order=1))))])
+    V(ig.subset)$label.cex = 2
+    V(ig.subset)$label = rep("", length(V(ig.subset)$name))
+    tmp = get.adjacency(ig.subset, attr="weight")
+    tmp = abs(tmp)
+    igraphTestG = graph.adjacency(tmp, mode="undirected", weighted=TRUE)
+  } else {
+    ig.subset = ig
+  }
   coords = layout.fruchterman.reingold(ig.subset)
   igraphObjectG = vector(mode="list", length=length(V(ig.subset)$name))
   names(igraphObjectG) = V(ig.subset)$name
@@ -119,26 +123,6 @@ mle.getPermMovie = function(subset.nodes, ig, output_filepath, movie=TRUE) {
     bitStrings.pt[[n]] = as.numeric(current_node_set %in% subset.nodes)
   }
   names(permutationByStartNode) = subset.nodes
-  optimalBitString[[patient]] = paste(bitStrings.pt[[which.max(unlist(lapply(lapply(bitStrings.pt, function(i) which(i==1)), function(i) sum(i))))]], collapse="")
-  names(optimalBitString[[patient]]) = paste(subset.nodes, collapse="/")
-
-  if (movie==TRUE) {
-    optBS = as.numeric(unlist(strsplit(optimalBitString[[patient]], split="")))
-    opT = sum(optBS)
-    n=which(lapply(bitStrings.pt, function(i) paste(i, collapse=""))==optimalBitString[[patient]])
-    startNode = subset.nodes[which(lapply(bitStrings.pt, function(i) paste(i, collapse=""))==optimalBitString[[patient]])]
-    current_node_set = permutationByStartNode[[which(subset.nodes==startNode[1])]]
-    png(sprintf("%s/diffusionMovie%d_summary.png", output_filepath, n), 500, 500)
-    plot.igraph(ig.subset, layout=coords, vertex.color=V(ig.subset)$color,
-                vertex.label=V(ig.subset)$label, edge.width=20*abs(E(ig.subset)$weight),
-                vertex.size=5+round(50*unlist(currentGraph), 0), mark.col="dark red",
-                mark.groups = c(startNode, current_node_set))
-    title(sprintf("compressed{%s}\ndirectly encoded{log2(choose(%d-%d, %d-%d))}",
-                  paste(as.numeric(current_node_set[1:which(optBS==1)[opT]] %in% subset.nodes), collapse=""),
-                  length(igraphObjectG), opT, length(subset.nodes), opT), cex.main=2)
-    legend("bottomleft", legend=c("Jackpot Nodes", "Drawn Nodes"), fill=c("green", "dark red"))
-    dev.off()
-  }
 
   return(permutationByStartNode)
 }
