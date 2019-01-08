@@ -1,28 +1,13 @@
 #' Generate the "adaptive walk" node permutations, starting from a given perturbed variable
 #'
 #' This function calculates the node permutation starting from a given perturbed variable in a subset of variables in the background knowledge graph.
-#' @param n - The index (out of a vector of metabolite names) of the permutation you want to calculate.
+#' @param n - The index (out of a vector of node names) of the permutation you want to calculate.
+#' @return current_node_set - A character vector of node names in the order they were drawn by the probability diffusion algorithm.
 #' @keywords probability diffusion algorithm
 #' @keywords network walker algorithm
 #' @export mle.getPermN
 #' @examples
-#' # Read in any network via its adjacency matrix
-#' tmp = matrix(1, nrow=100, ncol=100)
-#' for (i in 1:100) {
-#'   for (j in 1:100) {
-#'     tmp[i, j] = rnorm(1, mean=0, sd=1)
-#'   }
-#' }
-#' colnames(tmp) = sprintf("MolPheno%d", 1:100)
-#' ig = graph.adjacency(tmp, mode="undirected", weighted=TRUE, add.colnames="name")
-#' V(ig)$name = tolower(V(ig)$name)
-#' adjacency_matrix = list(as.matrix(get.adjacency(ig, attr="weight")))  # Must have this declared as a GLOBAL variable!!!!!
-#' # Set other tuning parameters
-#' p0=0.1  # 10% of probability distributed uniformly
-#' p1=0.9  # 90% of probability diffused based on edge weights in networks
-#' thresholdDiff=0.01
-#' G = vector(mode="list", length=length(V(ig)$name))
-#' names(G) = V(ig)$name
+#' # Look at main_CTD.r script for full analysis script: https://github.com/BRL-BCM/CTD.
 #' # Get node permutations for graph
 #' perms = list()
 #' for (n in 1:length(G)) {
@@ -70,7 +55,6 @@ mle.getPermN = function(n, G) {
       stopIterating = TRUE
     }
   }
-
   return(current_node_set)
 }
 

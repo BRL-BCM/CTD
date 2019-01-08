@@ -2,6 +2,7 @@
 #'
 #' The entropy of a bitstring (ex: 1010111000) is calculated.
 #' @param x - A vector of 0's and 1's.
+#' @return e - a floating point percentage, between 0 and 1.
 #' @export stats.entropyFunction
 #' @examples
 #' stats.entropyFunction(c(1,0,0,0,1,0,0,0,0,0,0,0,0))

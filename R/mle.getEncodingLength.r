@@ -4,52 +4,21 @@
 #' @param bs - A list of bitstrings associated with a given patient's perturbed variables.
 #' @param pvals - The matrix that gives the perturbation strength significance for all variables (columns) for each patient (rows)
 #' @param ptID - The row name in data.pvals corresponding to the patient you specifically want encoding information for.
+#' @return df - a data.frame object, for every bitstring provided in bs input parameter, a row is returned with the following data:
+#'              the patientID; the bitstring evaluated where T denotes a hit and 0 denotes a miss; the subsetSize, or the number of
+#'              hits in the bitstring; the individual p-values associated with the variable's perturbations, delimited by '/';
+#'              the combined p-value of all variables in the set using Fisher's method; Shannon's entropy, IS.null;
+#'              the minimum encoding length IS.alt; and IS.null-IS.alt, the d.score.
 #' @export mle.getEncodingLength
 #' @keywords minimum length encoding
 #' @examples
-#' # Read in any network via its adjacency matrix
-#' tmp = matrix(1, nrow=100, ncol=100)
-#' for (i in 1:100) {
-#'   for (j in 1:100) {
-#'     tmp[i, j] = rnorm(1, mean=0, sd=1)
-#'   }
-#' }
-#' colnames(tmp) = sprintf("MolPheno%d", 1:100)
-#' ig = graph.adjacency(tmp, mode="undirected", weighted=TRUE, add.colnames="name")
-#' V(ig)$name = tolower(V(ig)$name)
-#' adjacency_matrix = list(as.matrix(get.adjacency(ig, attr="weight")))  # Must have this declared as a GLOBAL variable!!!!!
-#' # Set other tuning parameters
-#' p0=0.1  # 10% of probability distributed uniformly
-#' p1=0.9  # 90% of probability diffused based on edge weights in networks
-#' thresholdDiff=0.01
-#' G = vector(mode="list", length=length(V(ig)$name))
-#' names(G) = V(ig)$name
-#' # Get node permutations for graph
-#' perms = list()
-#' for (n in 1:length(G)) {
-#'   print(sprintf("Generating node permutation starting with node %s", names(G)[n]))
-#'   perms[[n]] = mle.getPermN(n, G)
-#' }
-#' names(perms) = names(G)
-#' # Decide what the largest subset size you will consider will be
-#' kmx = 20
-#' # Load your patient data (p features as rows x n observations as columns)
-#' # data_mx = read.table("/your/own/data.txt", sep="\t", header=TRUE)
-#' data(testData)
-#' data_mx = t(testData)
-#' rownames(data_mx) = tolower(rownames(data_mx))
-#' # Get bitstrings associated with each patient's top kmx variable subsets
-#' ptBSbyK = list()
-#' for (pt in 1:ncol(data_mx)) {
-#'   ptID = colnames(data_mx)[pt]
-#'   ptBSbyK[[ptID]] = mle.getPtBSbyK(data_mx, ptID, perms, kmx)
-#' }
+#' # Look at main_CTD.r script for full analysis script: https://github.com/BRL-BCM/CTD.
 #' # Identify the most significant subset per patient, given the background graph
 #' data_mx.pvals = t(apply(data_mx, c(1,2), function(i) 2*pnorm(abs(i), lower.tail = FALSE)))
 #' for (pt in 1:ncol(data_mx)) {
 #'     ptID = colnames(data_mx)[pt]
 #'     res = mle.getEncodingLength(ptBSbyK[[ptID]], data_mx.pvals, ptID, G)
-#'     res = res[which.max(res[,"d.score"]),]
+#'     res = res[order(res[,"d.score"], decreasing=TRUE),]
 #'     print(res)
 #' }
 mle.getEncodingLength = function(bs, pvals, ptID, G) {
@@ -64,7 +33,7 @@ mle.getEncodingLength = function(bs, pvals, ptID, G) {
     if(p.k==1) {
       e = log2(length(G))
     } else {
-      e = log2(length(G)) + log2(p.k+1) + (length(optBS)-1)*stats.entropyFunction(optBS[2:length(optBS)])
+      e = log2(length(G)) + log2(p.k) + (length(optBS)-1)*stats.entropyFunction(optBS[2:length(optBS)])
     }
 
     optBS.tmp = gsub("1", "T", paste(as.character(optBS), collapse=""))

@@ -3,13 +3,15 @@
 #' Make a movie of the adaptive walk the diffusion probability method makes in search of a given patient's perturbed variables.
 #' @param subset.nodes - The subset of variables, S, in a background graph, G.
 #' @param ig - The igraph object associated with the background knowledge graph.
-#' @param movie - If you want to make a movie, set to TRUE. This will produce a set of still images that you can stream together to make a movie.
-#' Default is TRUE. Alternatively (movie=FALSE), you could use this function to get the node labels returned for each permutation starting with a perturbed variable.
+#' @param movie - If you want to make a movie, set to TRUE. This will produce a set of still images that you can stream together
+#'                to make a movie. Default is TRUE. Alternatively (movie=FALSE), you could use this function to get the node
+#'                labels returned for each permutation starting with a perturbed variable.
 #' @export mle.getPermMovie
 #' @keywords probability
 #' @keywords diffusion event
 #' @keywords adaptive walk
 #' @examples
+#' # Look at main_CTD.r script for full analysis script: https://github.com/BRL-BCM/CTD.
 #' # Read in any network via its adjacency matrix
 #' tmp = matrix(1, nrow=100, ncol=100)
 #' for (i in 1:100) {
