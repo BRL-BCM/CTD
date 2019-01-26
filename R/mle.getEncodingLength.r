@@ -36,7 +36,7 @@ mle.getEncodingLength = function(bs, pvals, ptID, G) {
     mets.k = names(optBS)[which(optBS==1)]
     found = sum(optBS)-1
     not_found = k-found
-    e = (not_found+1)*log2(length(G)) + length(optBS-1)
+    e = (not_found+1)*log2(length(G)) + length(optBS)-1
 
     optBS.tmp = gsub("1", "T", paste(as.character(optBS), collapse=""))
     if (!is.null(pvals) && !is.null(ptID)) {
