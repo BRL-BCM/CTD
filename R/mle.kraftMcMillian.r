@@ -22,7 +22,7 @@
 #' IA = mle.kraftMcMillian(G, 2)
 #' # Power to find effects is
 #' sum(2^-unlist(IA))
-mle.kraftMcMillian_memoryless = function(G, k) {
+mle.kraftMcMillian = function(G, k, memory=FALSE) {
   IA = list()
   # Get all subsets of size k in graph G
   subsets.k = combn(tolower(names(G)),k)
@@ -31,41 +31,11 @@ mle.kraftMcMillian_memoryless = function(G, k) {
     perms = list()
     for (i in 1:length(S)) {
       ind = which(names(G)==S[i])
-      perms[[S[i]]] = mle.getPermN_memoryless(ind, G)
-    }
-    pt.bitString = list()
-    for (p in 1:length(S)) {
-      pt.bitString[[S[p]]] = as.numeric(perms[[S[p]]] %in% S)
-      names(pt.bitString[[S[p]]]) = perms[[S[p]]]
-      ind = which(pt.bitString[[S[p]]] == 1)
-      pt.bitString[[S[p]]] = pt.bitString[[S[p]]][1:ind[length(ind)]]
-    }
-    # Which found the nodes in S soonest
-    bestInd = vector("numeric", length(pt.bitString))
-    for (p in 1:length(pt.bitString)) {
-      bestInd[p] = sum(which(pt.bitString[[p]] == 1))
-    }
-    optBS = pt.bitString[[which.min(bestInd)]]
-    mets.k = names(optBS)[which(optBS==1)]
-    # Encoding length of subset S in BITS
-    IA[[ss]] = log2(length(G)) + length(optBS)-1
-    names(IA[[ss]]) = paste(S, collapse="")
-  }
-
-  return(IA)
-}
-
-
-mle.kraftMcMillian_memory = function(G, k) {
-  IA = list()
-  # Get all subsets of size k in graph G
-  subsets.k = combn(tolower(names(G)),k)
-  for (ss in 1:ncol(subsets.k)) {
-    S = subsets.k[,ss]
-    perms = list()
-    for (i in 1:length(S)) {
-      ind = which(names(G)==S[i])
-      perms[[S[i]]] = mle.getPermN_memory(ind, G)
+      if (memory) {
+        perms[[S[i]]] = mle.getPermN_memory(ind, G)
+      } else {
+        perms[[S[i]]] = mle.getPermN_memoryless(ind, G)
+      }
     }
     pt.bitString = list()
     for (p in 1:length(S)) {
