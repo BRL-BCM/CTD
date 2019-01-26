@@ -4,67 +4,27 @@
 \alias{plot.mdsSim}
 \title{View patient clusters using multi-dimensional scaling.}
 \usage{
-\method{plot}{mdsSim}(simMat, diagnoses, k, diag)
+\method{plot}{mdsSim}(patientSim, diagnoses, k, diag)
 }
 \arguments{
-\item{simMat}{- The patient similarity matrix.}
-
 \item{diagnoses}{- A character vector of diagnostic labels associated with the rownames of simMat.}
 
 \item{k}{- The number of dimension you want to plot your data using multi-dimensional scaling.}
 
 \item{diag}{- The diagnosis associated with positive controls in your data.}
+
+\item{simMat}{- The patient similarity matrix.}
+}
+\value{
+p - a plotly scatter plot colored by provided diagnostic labels.
 }
 \description{
 This function plots the provided patient similarity matrix in a lower dimensional space
 using multi-dimensional scaling, which is well suited for similarity metrics.
 }
 \examples{
-# Read in any network via its adjacency matrix
-tmp = as.matrix(read.table("adjacency_matrix.txt", sep="\\t", header=TRUE))
-colnames(tmp) = rownames(tmp)
-ig = graph.adjacency(tmp, mode="undirected", weighted=TRUE, add.colnames="name")
-V(ig)$name = tolower(V(ig)$name)
-adjacency_matrix = list(as.matrix(get.adjacency(ig, attr="weight")))  # Must have this declared as a GLOBAL variable!!!!!
-# Set other tuning parameters
-p0=0.1  # 10\% of probability distributed uniformly
-p1=0.9  # 90\% of probability diffused based on edge weights in networks
-G = vector(mode="list", length=length(V(ig)$name))
-names(G) = names(V(ig)$name)
-# Get node permutations for graph
-perms = list()
-for (n in 1:length(G)) {
-    print(sprintf("Generating node permutation starting with node \%s", names(G)[n]))
-    perms[[names(G)[n]]] = mle.getPermN(n, G)
-}
-# Decide what the largest subset size you will consider will be
-kmx = 20
-# Load your patient data (p features as rows x n observations as columns)
-# data_mx = read.table("/your/own/data.txt", sep="\\t", header=TRUE)
-data(testData)
-data_mx = testData
-# Get bitstrings associated with each patient's top kmx variable subsets
-ptBSbyK = list()
-for (pt in 1:ncol(data_mx)) {
-    ptID = colnames(data_mx)[pt]
-    ptBSbyK[[ptID]] = mle.getPtBSbyK(data_mx, ptID, perms, kmx)
-}
-# Get patient distances
-data_mx.pvals = apply(data_mx, c(1,2), function(i) 2*pnorm(abs(i), lower.tail = FALSE))
-patientSim = matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx))
-rownames(patientSim) = colnames(data_mx)
-colnames(patientSim) = colnames(data_mx)
-for (pt in 1:ncol(data_mx)) {
-    ptID = colnames(data_mx)[pt]
-    for (pt2 in 1:ncol(data_mx)) {
-        ptID2 = colnames(data_mx)[pt2]
-        patientSim[ptID, ptID2] = mle.getPatientSimilarity(ptBSbyK[ptID], ptID, ptBSbyK[ptID2], data_mx, data_mx.pvals)
-    }
-}
+# Look at main_CTD.r script for full analysis script: https://github.com/BRL-BCM/CTD.
 # if you have diagnostic labels associated with the colnames(data_mx), send them using diagnoses parameter
-diagnoses = colnames(data_mx)
-diagnoses[1:50] = "diseased"
-diagnoses[51:100] = "neg_control"
 p = plot.mdsSim(patientSim, diagnoses, k=2, diag="diseased")
 p
 p = plot.mdsSim(patientSim, diagnoses, k=3, diag="diseased")

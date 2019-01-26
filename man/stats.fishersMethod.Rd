@@ -9,6 +9,9 @@ stats.fishersMethod(x)
 \arguments{
 \item{x}{- A vector of p-values (floating point numbers).}
 }
+\value{
+a floating point number, a combined p-value using Fisher's method.
+}
 \description{
 Fisher's combined p-value, used to combine the results of individual statistical tests into an overall hypothesis.
 }

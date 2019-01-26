@@ -12,7 +12,7 @@ graph.diffuseP1(p1, startNode, G, visitedNodes, graphNumber = 1,
 
 \item{startNode}{- The first variable drawn in the adaptive permutation node sequence, from which p1 gets dispersed.}
 
-\item{G}{- The igraph object associated with the background knowledge graph.}
+\item{G}{- A list of probabilities, with names of the list being the node names in the background knowledge graph.}
 
 \item{visitedNodes}{- The history of previous draws in the permutation sequence.}
 
@@ -20,25 +20,36 @@ graph.diffuseP1(p1, startNode, G, visitedNodes, graphNumber = 1,
 
 \item{verbose}{- If debugging or tracking a diffusion event, verbose=TRUE will activate print statements. Default is FALSE.}
 }
+\value{
+G - A list of returned probabilities after the diffusion of probability has truncated, with names of the list being the node names in the background knowledge graph.
+}
 \description{
 Recursively diffuse probability from a starting node based on the connectivity of the background knowledge graph, representing the likelihood that a variable will be
         most influenced by a perturbation in the starting node.
 }
 \examples{
+# Look at main_CTD.r script for full analysis script: https://github.com/BRL-BCM/CTD.
 # Read in any network via its adjacency matrix
-tmp = as.matrix(read.table("adjacency_matrix.txt", sep="\\t", header=TRUE))
-colnames(tmp) = rownames(tmp)
-ig = graph.adjacency(tmp, mode="undirected", weighted=TRUE, add.colnames="name")
-V(ig)$name = tolower(V(ig)$name)
-adjacency_matrix = list(as.matrix(get.adjacency(ig, attr="weight")))  # Must have this declared as a GLOBAL variable!!!!!
-
+tmp=matrix(1, nrow=100, ncol=100)
+for (i in 1:100) {
+  for (j in 1:100) {
+    tmp[i, j]=rnorm(1, mean=0, sd=1)
+  }
+}
+colnames(tmp)=sprintf("MolPheno\%d", 1:100)
+ig=graph.adjacency(tmp, mode="undirected", weighted=TRUE, add.colnames="name")
+V(ig)$name=tolower(V(ig)$name)
+adjacency_matrix=list(as.matrix(get.adjacency(ig, attr="weight")))  # Must have this declared as a GLOBAL variable!!!!!
+# Set other tuning parameters
 p0=0.1  # 10\% of probability distributed uniformly
 p1=0.9  # 90\% of probability diffused based on edge weights in networks
-G = vector(mode="list", length=length(V(ig)$name))
-names(G) = names(V(ig)$name)
-startNode = names(G)[1]
-visitedNodes = NULL
-probs_afterCurrDraw = graph.diffuseP1(p1, startNode, G, visitedNodes, 1)
+thresholdDiff=0.01
+G=vector(mode="list", length=length(V(ig)$name))
+names(G)=V(ig)$name
+G=lapply(G, function(i) i[[1]]=0)
+startNode=names(G)[1]
+visitedNodes=G[1]
+probs_afterCurrDraw=graph.diffuseP1(p1, startNode, G, visitedNodes, 1, TRUE)
 }
 \keyword{diffusion}
 \keyword{event}

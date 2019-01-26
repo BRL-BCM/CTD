@@ -9,6 +9,9 @@ stats.entropyFunction(bitString)
 \arguments{
 \item{x}{- A vector of 0's and 1's.}
 }
+\value{
+e - a floating point percentage, between 0 and 1.
+}
 \description{
 The entropy of a bitstring (ex: 1010111000) is calculated.
 }
