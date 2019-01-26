@@ -4,7 +4,8 @@
 #' @param G - A character vector of all node names in the background knowledge graph.
 #' @param k - The size of the node name subsets of G.
 #' @return IA - a list of bitlengths associated with all outcomes in the N choose K outcome space, with the names of the list elements the node names of the encoded nodes
-#' @export mle.kraftMcMillian
+#' @export mle.kraftMcMillian_memoryless
+#' @export mle.kraftMcMillian_memory
 #' @example
 #' G = list(A=0, B=0, C=0, D=0, E=0, F=0, G=0)
 #' names(G) = tolower(names(G))
