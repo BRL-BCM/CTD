@@ -44,52 +44,6 @@ mle.getPtBSbyK = function(S, perms) {
   return(pt.byK)
 }
 
-mle.getPtBSbyK_sn = function(S1, S2, S12, perms) {
-  pt.byK = list()
-  for (k in 1:length(S1)) {
-    p1.sig.nodes = S1[1:k]
-    p2.sig.nodes = S2[1:k]
-    p12.sig.nodes = unique(c(p1.sig.nodes, p2.sig.nodes))
-
-    pt.bitString = list(S1=vector("numeric", length=length(perms)), S2=vector("numeric", length=length(perms)), S12=vector("numeric", length=length(perms)))
-    for (p in 1:length(p12.sig.nodes)) {
-      if (p12.sig.nodes[p] %in% p1.sig.nodes) {
-        pt.bitString[[p12.sig.nodes[p]]]$S1 = as.numeric(perms[[p12.sig.nodes[p]]] %in% p1.sig.nodes)
-        names(pt.bitString[[p12.sig.nodes[p]]]$S1) = perms[[p12.sig.nodes[p]]]
-        ind = which(pt.bitString[[p12.sig.nodes[p]]]$S1 == 1)
-        pt.bitString[[p12.sig.nodes[p]]]$S1 = pt.bitString[[p12.sig.nodes[p]]][1:ind[length(ind)]]
-      }
-      if (p12.sig.nodes[p] %in% p2.sig.nodes) {
-        pt.bitString[[p12.sig.nodes[p]]]$S2 = as.numeric(perms[[p12.sig.nodes[p]]] %in% p2.sig.nodes)
-        names(pt.bitString[[p12.sig.nodes[p]]]$S2) = perms[[p12.sig.nodes[p]]]
-        ind = which(pt.bitString[[p12.sig.nodes[p]]]$S2 == 1)
-        pt.bitString[[p12.sig.nodes[p]]]$S2 = pt.bitString[[p12.sig.nodes[p]]][1:ind[length(ind)]]
-      }
-      pt.bitString[[p12.sig.nodes[p]]]$S12 = as.numeric(perms[[p12.sig.nodes[p]]] %in% p12.sig.nodes)
-      names(pt.bitString[[p12.sig.nodes[p]]]$S12) = perms[[p12.sig.nodes[p]]]
-
-      ind = which(pt.bitString[[p12.sig.nodes[p]]]$S12 == 1)
-      pt.bitString[[p12.sig.nodes[p]]]$S12 = pt.bitString[[p12.sig.nodes[p]]][1:ind[length(ind)]]
-    }
-    # Which found the most nodes
-    bestInd = vector("numeric", length(sig.nodes))
-    for (p in 1:length(sig.nodes)) {
-      bestInd[p] = sum(pt.bitString[[p]])
-    }
-    pt.bitString = pt.bitString[which(bestInd==max(bestInd))]
-    # Which found the most nodes soonest
-    bestInd = vector("numeric", length(pt.bitString))
-    for (p in 1:length(pt.bitString)) {
-      bestInd[p] = sum(which(pt.bitString[[p]] == 1))
-    }
-    pt.byK[[k]] = pt.bitString[[which.min(bestInd)]]
-  }
-
-  return(pt.byK)
-}
-
-
-
 
 
 mle.getPtBSbyK_memoryless = function(S, perms, num.misses=NULL) {
