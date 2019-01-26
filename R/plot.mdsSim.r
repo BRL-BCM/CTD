@@ -15,7 +15,7 @@
 #' p
 #' p = plot.mdsSim(patientSim, diagnoses, k=3, diag="diseased")
 #' p
-plot.mdsSim = function(simMat, diagnoses, k, diag) {
+plot.mdsSim = function(patientSim, diagnoses, k, diag) {
   if (!(k %in% c(2,3))) {
     print("K must be either 2-dimensions or 3-dimensions.")
     return(0)

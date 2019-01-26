@@ -22,83 +22,58 @@
 #'     res = res[order(res[,"d.score"], decreasing=TRUE),]
 #'     print(res)
 #' }
-mle.getEncodingLength_memoryless = function(bs, pvals, ptID, G) {
-  results = data.frame(patientID=character(), optimalBS=character(), subsetSize=integer(), opt.T=integer(), varPvalue=numeric(),
-                       fishers.Info=numeric(), IS.null=numeric(), IS.alt=numeric(), d.score=numeric(), stringsAsFactors = FALSE)
-  row = 1
-  for (k in 1:length(bs)) {
-    optBS = bs[[k]]
-    mets.k = names(optBS)[which(optBS==1)]
-    found = sum(optBS)
-    not_found = k+1-found
-
-    e = log2(length(G)) + log2(choose(length(G), not_found)) + stats.iteratedLog2(found-1)
-    if (length(optBS)>1) {
-      e = e + stats.iteratedLog2(length(optBS)-1) + (length(optBS)-1)*stats.entropyFunction(optBS[2:length(optBS)])
-    }
-
-    optBS.tmp = gsub("1", "T", paste(as.character(optBS), collapse=""))
-    results[row, "patientID"] = ptID
-    results[row, "optimalBS"] = optBS.tmp
-    results[row, "subsetSize"] = k+1
-    results[row, "opt.T"] = found
-    results[row, "varPvalue"] = paste(format(pvals[ptID, mets.k], digits=2, width=3), collapse="/")
-    results[row, "fishers.Info"] = -log2(stats.fishersMethod(pvals[ptID, mets.k]))
-    results[row, "IS.null"] = log2(choose(length(G), k+1))
-    results[row, "IS.alt"] = e
-    results[row, "d.score"] = log2(choose(length(G), k+1)) - e
-    row = row + 1
+mle.getEncodingLength = function(bs, pvals, ptID, G) {
+  if (is.null(pvals)) {
+    results = data.frame(optimalBS=character(), subsetSize=integer(), opt.T=integer(),
+                         IS.null=numeric(), IS.alt=numeric(), d.score=numeric(), stringsAsFactors = FALSE)
+  } else {
+    results = data.frame(patientID=character(), optimalBS=character(), subsetSize=integer(), opt.T=integer(), varPvalue=numeric(),
+                         fishers.Info=numeric(), IS.null=numeric(), IS.alt=numeric(), d.score=numeric(), stringsAsFactors = FALSE)
   }
-
-  return (results)
-}
-
-
-mle.getEncodingLength_memory = function(bs, pvals, ptID, G) {
-  results = data.frame(patientID=character(), optimalBS=character(), subsetSize=integer(), opt.T=integer(), varPvalue=numeric(),
-                       fishers.Info=numeric(), IS.null=numeric(), IS.alt=numeric(), d.score=numeric(), stringsAsFactors = FALSE)
   row = 1
   for (k in 1:length(bs)) {
     optBS = bs[[k]]
     mets.k = names(optBS)[which(optBS==1)]
     found = sum(optBS)-1
     not_found = k-found
-
-    e = log2(choose(length(G), not_found)) + log2(length(G)) + length(optBS-1)
-    #hits = which(optBS==1)[-1]
-    #if (length(hits)>0) {
-    #  prevHit = 1
-    #  onesIsland=1
-    #  for (h in 1:length(hits)) {
-    #    numZeros = hits[h]-prevHit
-    #    if (numZeros>1) {
-    #      e = e + stats.iteratedLog2(numZeros)
-    #      if (onesIsland>1) {
-    #        e = e + stats.iteratedLog2(onesIsland)
-    #      } else {
-    #        e = e + 1
-    #      }
-    #      onesIsland = 1
-    #    } else {
-    #      e = e + 1
-    #      onesIsland = onesIsland + 1
-    #    }
-    #    prevHit = hits[h]
-    #  }
-    #}
+    e = (not_found+1)*log2(length(G)) + length(optBS-1)
 
     optBS.tmp = gsub("1", "T", paste(as.character(optBS), collapse=""))
-    results[row, "patientID"] = ptID
+    if (!is.null(pvals) && !is.null(ptID)) {
+      results[row, "patientID"] = ptID
+      results[row, "varPvalue"] = paste(format(pvals[ptID, mets.k], digits=2, width=3), collapse="/")
+      results[row, "fishers.Info"] = -log2(stats.fishersMethod(pvals[ptID, mets.k]))
+    }
     results[row, "optimalBS"] = optBS.tmp
     results[row, "subsetSize"] = k+1
     results[row, "opt.T"] = found+1
-    results[row, "varPvalue"] = paste(format(pvals[ptID, mets.k], digits=2, width=3), collapse="/")
-    results[row, "fishers.Info"] = -log2(stats.fishersMethod(pvals[ptID, mets.k]))
     results[row, "IS.null"] = log2(choose(length(G), k+1))
     results[row, "IS.alt"] = e
     results[row, "d.score"] = log2(choose(length(G), k+1)) - e
     row = row + 1
   }
+  return (results)
+}
+
+mle.getEncodingLength_nullk = function(bs, G, null.k) {
+  results = data.frame(optimalBS=character(), subsetSize=integer(), opt.T=integer(),
+                       IS.null=numeric(), IS.alt=numeric(), d.score=numeric(), stringsAsFactors = FALSE)
+  optBS = bs[[1]]
+  mets.k = names(optBS)[which(optBS==1)]
+  found = sum(optBS)
+  not_found = null.k-found
+  e = (not_found+1)*log2(length(G)) + length(optBS-1)
+
+  optBS.tmp = gsub("1", "T", paste(as.character(optBS), collapse=""))
+  results[1, "optimalBS"] = optBS.tmp
+  results[1, "subsetSize"] = null.k
+  results[1, "opt.T"] = found
+  results[1, "IS.null"] = log2(choose(length(G), null.k))
+  results[1, "IS.alt"] = e
+  results[1, "d.score"] = log2(choose(length(G), null.k)) - e
 
   return (results)
 }
+
+
+

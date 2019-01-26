@@ -57,7 +57,7 @@ mle.getPermN_memory = function(S, G) {
       startNode = names(G[maxProb[1]])
       if (startNode %in% S) {
         numMisses = 0
-        print(sprintf("Drew %s on draw %d, a hit!", startNode, length(current_node_set)+1))
+        #print(sprintf("Drew %s on draw %d, a hit!", startNode, length(current_node_set)+1))
         hits = c(hits, startNode)
       } else {
         numMisses = numMisses + 1

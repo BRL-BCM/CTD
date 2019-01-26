@@ -52,52 +52,107 @@
 #'     }
 #'   }
 #' }
-mle.getPatientSimilarity = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, perms) {
-  p1.bs = unlist(p1.optBS[[1]])
-  p1.sig.nodes = names(p1.bs[which(p1.bs==1)])
-  p2.bs = unlist(p2.optBS[[1]])
-  p2.sig.nodes = names(p2.bs[which(p2.bs==1)])
+mle.getPatientSimilarity_memoryless = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, perms) {
+  if (length(p1.optBS) != length(p2.optBS)) {
+    print("Make sure subset from patient1 is the same size as subset from patient2.")
+    return(0)
+  }
+  G = vector(mode="list", length=nrow(data_mx))
+  names(G) = rownames(data_mx)
+
+  p1.e = mle.getEncodingLength(p1.optBS, NULL, ptID, G)[,"IS.alt"]
+  p2.e = mle.getEncodingLength(p2.optBS, NULL, ptID2, G)[,"IS.alt"]
 
   # Get optimal bitstring for encoding of patient1's union patient2's subsets
-  p12.sig.nodes = unique(c(p1.sig.nodes, p2.sig.nodes))
-  bitStrings.pt = list()
-  for (sn in 1:length(p12.sig.nodes)) {
-    startNode = p12.sig.nodes[sn]
-    current_node_set = perms[[startNode]]
-    bitStrings.pt[[sn]] = as.numeric(current_node_set %in% p12.sig.nodes)
-    names(bitStrings.pt[[sn]]) = current_node_set
+  dirSim = vector("numeric", length=length(p1.optBS))
+  p12.e = c()
+  for (k in 1:length(p1.optBS)) {
+    p1.sig.nodes = names(sort(abs(all_data[,ptID]), decreasing = TRUE))[1:(k+1)]
+    p2.sig.nodes = names(sort(abs(all_data[,ptID2]), decreasing = TRUE))[1:(k+1)]
+    p12.sig.nodes = unique(c(p1.sig.nodes, p2.sig.nodes))
+    p12.optBS = mle.getPtBSbyK_memoryless(p12.sig.nodes, perms)[[length(p12.sig.nodes)]]
+    p12.e[k] = mle.getEncodingLength_nullk(list(p12.optBS), G, length(p12.sig.nodes))[,"IS.alt"]
+
+    p1.dirs = data_mx[p1.sig.nodes,ptID]
+    p1.dirs[p1.dirs>0] = 1
+    p1.dirs[p1.dirs<0] = 0
+    names(p1.dirs) = p1.sig.nodes
+    p2.dirs = data_mx[p2.sig.nodes,ptID2]
+    p2.dirs[p2.dirs>0] = 1
+    p2.dirs[p2.dirs<0] = 0
+    names(p2.dirs) = p2.sig.nodes
+
+    p1.dirs_sign = sprintf("%s%d", names(p1.dirs), p1.dirs)
+    p2.dirs_sign = sprintf("%s%d", names(p2.dirs), p2.dirs)
+    p12.dirs = c(p1.dirs, p2.dirs)
+    ind = which(duplicated(sprintf("%s%d", names(p12.dirs), p12.dirs)))
+    if (length(ind)>0) {
+      p12.dirs = p12.dirs[-ind]
+    }
+    dirSim[k] = 1-(length(intersect(p1.dirs_sign, p2.dirs_sign))/(length(p12.dirs)))
   }
-  tmp = unlist(lapply(bitStrings.pt, function(i) sum(i)))
-  bitStrings.pt = bitStrings.pt[which(tmp==max(tmp))]
-  p12.optBS = bitStrings.pt[[which.min(unlist(lapply(bitStrings.pt, function(i) sum(which(i==1)))))]]
-  ind = which(sapply(p12.optBS, function(i) i==1))
-  p12.optBS = p12.optBS[1:ind[length(ind)]]
-
-  p1.e = log2(length(perms)) + log2(length(p1.sig.nodes)+1) + (length(p1.bs)-1)*stats.entropyFunction(p1.bs[2:length(p1.bs)])
-  p2.e = log2(length(perms)) +  log2(length(p2.sig.nodes)+1) + (length(p2.bs)-1)*stats.entropyFunction(p2.bs[2:length(p2.bs)])
-  p12.e = log2(length(perms)) +  log2(length(p12.sig.nodes)+1) + (length(p12.optBS)-1)*stats.entropyFunction(p12.optBS[2:length(p12.optBS)])
-
-  p1.dirs = data_mx[p1.sig.nodes,ptID]
-  p1.dirs[p1.dirs>0] = 1
-  p1.dirs[p1.dirs<0] = 0
-  names(p1.dirs) = p1.sig.nodes
-  p2.dirs = data_mx[p2.sig.nodes,ptID2]
-  p2.dirs[p2.dirs>0] = 1
-  p2.dirs[p2.dirs<0] = 0
-  names(p2.dirs) = p2.sig.nodes
-
-  p1.dirs_sign = sprintf("%s%d", names(p1.dirs), p1.dirs)
-  p2.dirs_sign = sprintf("%s%d", names(p2.dirs), p2.dirs)
-  p12.dirs = c(p1.dirs, p2.dirs)
-  ind = which(duplicated(sprintf("%s%d", names(p12.dirs), p12.dirs)))
-  if (length(ind)>0) {
-    p12.dirs = p12.dirs[-ind]
-  }
-  dirSim = 1-(length(intersect(p1.dirs_sign, p2.dirs_sign))/(length(p12.dirs)))
-  ncdSim = max(c(p12.e-p1.e, p12.e-p2.e))/max(c(p1.e, p2.e))
-  mutSim = 1-((p1.e+p2.e-p12.e)/p12.e)
 
   # Normalized Compression Distance, Percent Mutual Information
-  return (list(p1.e=p1.e, p2.e=p2.e, p12.e=p12.e, p1.k=length(p1.sig.nodes), p2.k=length(p2.sig.nodes), p12.k=length(p12.sig.nodes),
-               NCD=ncdSim, mutualInfoPer=mutSim, dirSim=dirSim))
+  return (list(p1.e=p1.e, p2.e=p2.e, p12.e=p12.e,
+               NCD=(p12.e-apply(cbind(p1.e, p2.e), 1, min))/apply(cbind(p1.e, p2.e), 1, max),
+               mutualInfoPer=1-((p1.e+p2.e-p12.e)/p12.e),
+               dirSim=dirSim))
 }
+
+
+
+mle.getPatientSimilarity_memory = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx) {
+  if (length(p1.optBS) != length(p2.optBS)) {
+    print("Make sure subset from patient1 is the same size as subset from patient2.")
+    return(0)
+  }
+  G = vector(mode="list", length=nrow(data_mx))
+  names(G) = rownames(data_mx)
+
+  p1.e = mle.getEncodingLength(p1.optBS, NULL, ptID, G)[,"IS.alt"]
+  p2.e = mle.getEncodingLength(p2.optBS, NULL, ptID2, G)[,"IS.alt"]
+
+  p1.bs_kmx = unlist(unique(p1.optBS))
+  p2.bs_kmx = unlist(unique(p2.optBS))
+  p1.sig.nodes = names(p1.bs_kmx[which(p1.bs_kmx==1)])
+  p2.sig.nodes = names(p2.bs_kmx[which(p2.bs_kmx==1)])
+  p12.sig.nodes = unique(c(p1.sig.nodes, p2.sig.nodes))
+  perms = mle.getPermN_memory(p12.sig.nodes, G)
+
+  dirSim = vector("numeric", length=length(p1.optBS))
+  p12.optBS = list()
+  for (k in 1:length(p1.optBS)) {
+    p1.bs = p1.optBS[[k]]
+    p2.bs = p2.optBS[[k]]
+    p1.sig.nodes = names(p1.bs[which(p1.bs==1)])
+    p2.sig.nodes = names(p2.bs[which(p2.bs==1)])
+    p12.sig.nodes = unique(c(p1.sig.nodes, p2.sig.nodes))
+    p12.optBS[[k]] = mle.getPtBSbyK(p12.sig.nodes, perms)[[length(p12.sig.nodes)]]
+
+    p1.dirs = data_mx[p1.sig.nodes,ptID]
+    p1.dirs[p1.dirs>0] = 1
+    p1.dirs[p1.dirs<0] = 0
+    names(p1.dirs) = p1.sig.nodes
+    p2.dirs = data_mx[p2.sig.nodes,ptID2]
+    p2.dirs[p2.dirs>0] = 1
+    p2.dirs[p2.dirs<0] = 0
+    names(p2.dirs) = p2.sig.nodes
+
+    p1.dirs_sign = sprintf("%s%d", names(p1.dirs), p1.dirs)
+    p2.dirs_sign = sprintf("%s%d", names(p2.dirs), p2.dirs)
+    p12.dirs = c(p1.dirs, p2.dirs)
+    ind = which(duplicated(sprintf("%s%d", names(p12.dirs), p12.dirs)))
+    if (length(ind)>0) {
+      p12.dirs = p12.dirs[-ind]
+    }
+    dirSim[k] = 1-(length(intersect(p1.dirs_sign, p2.dirs_sign))/(length(p12.dirs)))
+  }
+  p12.e = mle.getEncodingLength(p12.optBS, NULL, NULL, G)[,"IS.alt"]
+
+  # Normalized Compression Distance, Percent Mutual Information
+  return (list(p1.e=p1.e, p2.e=p2.e, p12.e=p12.e,
+               NCD=apply(cbind(p12.e-p1.e, p12.e-p2.e), 1, max)/apply(cbind(p1.e, p2.e), 1, max),
+               mutualInfoPer=1-((p1.e+p2.e-p12.e)/p12.e),
+               dirSim=dirSim))
+}
+
