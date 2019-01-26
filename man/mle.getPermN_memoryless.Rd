@@ -10,6 +10,10 @@ mle.getPermN_memoryless(n, G, S = NULL, misses.thresh = NULL)
 \item{n}{- The index (out of a vector of node names) of the permutation you want to calculate.}
 
 \item{G}{- A list of probabilities with list names being the node names of the background graph.}
+
+\item{S}{- A character vector of node names in the subset you want the network walker to find.}
+
+\item{misses.thresh}{- The number of "misses" the network walker will tolerate before switched to fixed length codes for remaining nodes to be found.}
 }
 \value{
 current_node_set - A character vector of node names in the order they were drawn by the probability diffusion algorithm.
