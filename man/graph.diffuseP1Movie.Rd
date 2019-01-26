@@ -25,6 +25,35 @@ G - A list of returned probabilities after the diffusion of probability has trun
 Recursively diffuse probability from a starting node based on the connectivity of the background knowledge graph, representing the likelihood that a variable will be
         most influenced by a perturbation in the starting node.
 }
+\examples{
+# 7 node example graph from Figure 4 (Thistlethwaite, Elsea, Milosavljevic, 2019)
+adj_mat = rbind(c(0,2,1,0,0,0,0), # A
+                c(2,0,1,0,0,0,0), # B
+                c(1,0,0,1,0,0,0), # C
+                c(0,0,1,0,2,0,0), # D
+                c(0,0,0,2,0,2,1), # E
+                c(0,0,0,1,2,0,1), # F
+                c(0,0,0,0,1,1,0)  # G
+                )
+rownames(adj_mat) = c("A", "B", "C", "D", "E", "F", "G")
+colnames(adj_mat) = c("A", "B", "C", "D", "E", "F", "G")
+ig = graph.adjacency(as.matrix(adj_mat), mode="undirected", weighted=TRUE)
+G=vector(mode="list", length=7)
+G[1:length(G)] = 0
+names(G) = c("A", "B", "C", "D", "E", "F", "G")
+startNode = "A"
+visitedNodes = startNode
+# Diffuse 100\% of probability from startNode "A"
+p1 = 1.0
+# Probability diffusion truncates at
+thresholdDiff=0.01
+coords = layout.fruchterman.reingold(ig)
+V(ig)$x = coords[,1]
+V(ig)$y = coords[,2]
+# Global variable imgNum
+imgNum=1
+G_new = graph.diffuseP1Movie(p1, startNode, G, visitedNodes, ig, 1, getwd())
+}
 \keyword{diffusion}
 \keyword{event}
 \keyword{generative}

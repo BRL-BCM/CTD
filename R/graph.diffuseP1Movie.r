@@ -12,7 +12,7 @@
 #' @keywords generative methods
 #' @keywords diffusion event
 #' @keywords network walker
-#' @example
+#' @examples
 #' # 7 node example graph from Figure 4 (Thistlethwaite, Elsea, Milosavljevic, 2019)
 #' adj_mat = rbind(c(0,2,1,0,0,0,0), # A
 #'                 c(2,0,1,0,0,0,0), # B

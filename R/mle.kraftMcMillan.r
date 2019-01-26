@@ -4,8 +4,8 @@
 #' @param G - A character vector of all node names in the background knowledge graph.
 #' @param k - The size of the node name subsets of G.
 #' @return IA - a list of bitlengths associated with all outcomes in the N choose K outcome space, with the names of the list elements the node names of the encoded nodes
-#' @export mle.kraftMcMillian
-#' @example
+#' @export mle.kraftMcMillan
+#' @examples
 #' G = list(A=0, B=0, C=0, D=0, E=0, F=0, G=0)
 #' names(G) = tolower(names(G))
 #' adj_mat = rbind(c(0,2,1,0,0,0,0), #A's neighbors
@@ -22,7 +22,7 @@
 #' IA = mle.kraftMcMillian(G, 2)
 #' # Power to find effects is
 #' sum(2^-unlist(IA))
-mle.kraftMcMillian = function(G, k, memory=FALSE) {
+mle.kraftMcMillan = function(G, k, memory=FALSE) {
   IA = list()
   # Get all subsets of size k in graph G
   subsets.k = combn(tolower(names(G)),k)
