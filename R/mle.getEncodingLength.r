@@ -45,11 +45,11 @@ mle.getEncodingLength = function(bs, pvals, ptID, G) {
       results[row, "fishers.Info"] = -log2(stats.fishersMethod(pvals[ptID, mets.k]))
     }
     results[row, "optimalBS"] = optBS.tmp
-    results[row, "subsetSize"] = k+1
+    results[row, "subsetSize"] = k
     results[row, "opt.T"] = found+1
-    results[row, "IS.null"] = log2(choose(length(G), k+1))
+    results[row, "IS.null"] = log2(choose(length(G), k))
     results[row, "IS.alt"] = e
-    results[row, "d.score"] = log2(choose(length(G), k+1)) - e
+    results[row, "d.score"] = log2(choose(length(G), k)) - e
     row = row + 1
   }
   return (results)
