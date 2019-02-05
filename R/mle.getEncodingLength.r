@@ -34,7 +34,7 @@ mle.getEncodingLength = function(bs, pvals, ptID, G) {
   for (k in 1:length(bs)) {
     optBS = bs[[k]]
     mets.k = names(optBS)[which(optBS==1)]
-    found = sum(optBS)-1
+    found = sum(optBS)
     not_found = k-found
     e = (not_found+1)*log2(length(G)) + length(optBS)-1
 
@@ -49,7 +49,7 @@ mle.getEncodingLength = function(bs, pvals, ptID, G) {
     results[row, "opt.T"] = found+1
     results[row, "IS.null"] = log2(choose(length(G), k))
     results[row, "IS.alt"] = e
-    results[row, "d.score"] = log2(choose(length(G), k)) - e
+    results[row, "d.score"] = round(log2(choose(length(G), k)) - e, 3)
     row = row + 1
   }
   return (results)
@@ -62,7 +62,7 @@ mle.getEncodingLength_nullk = function(bs, G, null.k) {
   mets.k = names(optBS)[which(optBS==1)]
   found = sum(optBS)
   not_found = null.k-found
-  e = (not_found+1)*log2(length(G)) + length(optBS-1)
+  e = (not_found+1)*log2(length(G)) + length(optBS)-1
 
   optBS.tmp = gsub("1", "T", paste(as.character(optBS), collapse=""))
   results[1, "optimalBS"] = optBS.tmp
