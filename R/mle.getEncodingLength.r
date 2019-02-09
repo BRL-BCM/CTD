@@ -46,7 +46,7 @@ mle.getEncodingLength = function(bs, pvals, ptID, G) {
     }
     results[row, "optimalBS"] = optBS.tmp
     results[row, "subsetSize"] = k
-    results[row, "opt.T"] = found+1
+    results[row, "opt.T"] = found
     results[row, "IS.null"] = log2(choose(length(G), k))
     results[row, "IS.alt"] = e
     results[row, "d.score"] = round(log2(choose(length(G), k)) - e, 3)

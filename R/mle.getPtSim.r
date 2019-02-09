@@ -87,28 +87,27 @@ mle.getPtSim = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, perms) {
 
   if (is.null(perms)) {
     # Using the "with memory" network walker, get optimal bitstring for encoding of patient1's union patient2's subsets
-    p1.bs_kmx = unlist(unique(p1.optBS))
-    p2.bs_kmx = unlist(unique(p2.optBS))
-    p1.sig.nodes = names(p1.bs_kmx[which(p1.bs_kmx==1)])
-    p2.sig.nodes = names(p2.bs_kmx[which(p2.bs_kmx==1)])
+    p1.sig.nodes = names(sort(abs(all_data[,ptID]), decreasing = TRUE)[1:kmx])
+    p2.sig.nodes = names(sort(abs(all_data[,ptID2]), decreasing = TRUE)[1:kmx])
     p12.sig.nodes = unique(c(p1.sig.nodes, p2.sig.nodes))
     perms = mle.getPermN_memory(p12.sig.nodes, G)
+    p12.e = c()
     p12.optBS = list()
-    for (k in 1:length(p1.optBS)) {
-      p1.bs = p1.optBS[[k]]
-      p2.bs = p2.optBS[[k]]
-      p1.sig.nodes = names(p1.bs[which(p1.bs==1)])
-      p2.sig.nodes = names(p2.bs[which(p2.bs==1)])
+    for (k in 1:length(p1.bs)) {
+      p1.bss = p1.bs[[k]]
+      p2.bss = p2.bs[[k]]
+      p1.sig.nodes = names(sort(abs(all_data[,ptID]), decreasing = TRUE)[1:k])
+      p2.sig.nodes = names(sort(abs(all_data[,ptID2]), decreasing = TRUE)[1:k])
       p12.sig.nodes = unique(c(p1.sig.nodes, p2.sig.nodes))
       p12.optBS[[k]] = mle.getPtBSbyK(p12.sig.nodes, perms)[[length(p12.sig.nodes)]]
+      p12.e[k] = mle.getEncodingLength_nullk(p12.optBS[k], G, length(p12.sig.nodes))[,"IS.alt"]
     }
-    p12.e = mle.getEncodingLength(p12.optBS, NULL, NULL, G)[,"IS.alt"]
   } else {
     # Using the "memoryless" network walker, get optimal bitstring for encoding of patient1's union patient2's subsets.
     p12.e = c()
     for (k in 1:length(p1.optBS)) {
-      p1.sig.nodes = names(sort(abs(all_data[,ptID]), decreasing = TRUE))[1:(k+1)]
-      p2.sig.nodes = names(sort(abs(all_data[,ptID2]), decreasing = TRUE))[1:(k+1)]
+      p1.sig.nodes = names(sort(abs(all_data[,ptID]), decreasing = TRUE))[1:k]
+      p2.sig.nodes = names(sort(abs(all_data[,ptID2]), decreasing = TRUE))[1:k]
       p12.sig.nodes = unique(c(p1.sig.nodes, p2.sig.nodes))
       p12.optBS = mle.getPtBSbyK_memoryless(p12.sig.nodes, perms)[[length(p12.sig.nodes)]]
       p12.e[k] = mle.getEncodingLength_nullk(list(p12.optBS), G, length(p12.sig.nodes))[,"IS.alt"]

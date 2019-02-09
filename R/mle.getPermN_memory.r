@@ -15,8 +15,12 @@
 #'   perms[[n]] = mle.getPermN_memory(n, G)
 #' }
 #' names(perms) = names(G)
-mle.getPermN_memory = function(S, G) {
-  thresholdDrawT = log2(length(G))
+mle.getPermN_memory = function(S, G, num.misses=NULL) {
+  if (is.null(num.misses)) {
+    thresholdDrawT = log2(length(G))
+  } else {
+    thresholdDrawT = num.misses
+  }
   perms = list()
   for (n in 1:length(S)) {
     print(sprintf("Calculating permutation %d of %d.", n, length(S)))

@@ -44,6 +44,34 @@ mle.getPtBSbyK = function(S, perms) {
   return(pt.byK)
 }
 
+mle.getPtBSbyK_all = function(S, perms) {
+  sig.nodes = S
+  pt.bitString = list()
+  for (p in 1:length(sig.nodes)) {
+    pt.bitString[[sig.nodes[p]]] = as.numeric(perms[[sig.nodes[p]]] %in% sig.nodes)
+    names(pt.bitString[[sig.nodes[p]]]) = perms[[sig.nodes[p]]]
+    ind = which(pt.bitString[[sig.nodes[p]]] == 1)
+    pt.bitString[[sig.nodes[p]]] = pt.bitString[[sig.nodes[p]]][1:ind[length(ind)]]
+  }
+  # Which found the most nodes
+  bestInd = vector("numeric", length(sig.nodes))
+  for (p in 1:length(sig.nodes)) {
+    bestInd[p] = sum(pt.bitString[[p]])
+  }
+  pt.bitString = pt.bitString[which(bestInd==max(bestInd))]
+  # Which found the most nodes soonest
+  bestInd = vector("numeric", length(pt.bitString))
+  for (p in 1:length(pt.bitString)) {
+    bestInd[p] = sum(which(pt.bitString[[p]] == 1))
+  }
+  return(pt.bitString[which.min(bestInd)])
+}
+
+
+
+
+
+
 
 
 mle.getPtBSbyK_memoryless = function(S, perms, num.misses=NULL) {
