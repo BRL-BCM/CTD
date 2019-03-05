@@ -21,6 +21,7 @@ mle.getPtBSbyK = function(S, perms) {
   pt.byK = list()
   for (k in 1:length(S)) {
     sig.nodes = S[1:k]
+    sig.nodes = sapply(sig.nodes, trimws)
     pt.bitString = list()
     for (p in 1:length(sig.nodes)) {
       pt.bitString[[sig.nodes[p]]] = as.numeric(perms[[sig.nodes[p]]] %in% sig.nodes)
@@ -81,6 +82,7 @@ mle.getPtBSbyK_memoryless = function(S, perms, num.misses=NULL) {
   pt.byK = list()
   for (k in 1:length(S)) {
     sig.nodes = S[1:k]
+    sig.nodes = sapply(sig.nodes, trimws)
     pt.bitString = list()
     for (p in 1:length(sig.nodes)) {
       miss = 0

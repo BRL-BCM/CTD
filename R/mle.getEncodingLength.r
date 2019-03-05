@@ -32,6 +32,7 @@ mle.getEncodingLength = function(bs, pvals, ptID, G) {
   }
   row = 1
   for (k in 1:length(bs)) {
+    # Assume k=1 corresponds to subset of size 1
     optBS = bs[[k]]
     mets.k = names(optBS)[which(optBS==1)]
     found = sum(optBS)
