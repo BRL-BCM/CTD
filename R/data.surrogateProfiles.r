@@ -15,11 +15,11 @@ data.surrogateProfiles = function(data, sd=1, useMnProfile=FALSE, ref_data=NULL)
     colnames(data) = "mn_data"
     # Generate disease surrogates
     rpt = ceiling(nrow(data)/ncol(data)/2)
-    data_surr = matrix(NA, nrow=nrow(data), ncol=ncol(data)+ncol(data)*(rpt+1))
+    data_surr = matrix(NA, nrow=nrow(data), ncol=ncol(data)+ncol(data)*rpt)
     c_col = ncol(data)+1
     for (pt in 1:ncol(data)) {
       data_surr[,pt] = data[,pt]
-      for (rrpt in 1:(rpt+1)) {
+      for (rrpt in 1:rpt) {
         rr = rnorm(nrow(data), mean=0, sd=sd)
         data_surr[,c_col] = as.numeric(data[,pt])+rr
         c_col = c_col+1
@@ -30,12 +30,12 @@ data.surrogateProfiles = function(data, sd=1, useMnProfile=FALSE, ref_data=NULL)
     dim(data_surr)
   } else {
     # Generate disease surrogates
-    rpt = ceiling(nrow(data)/ncol(data)/2)
-    data_surr = matrix(NA, nrow=nrow(data), ncol=ncol(data)+ncol(data)*(rpt+1))
+    rpt = floor(nrow(data)/ncol(data)/2)
+    data_surr = matrix(NA, nrow=nrow(data), ncol=ncol(data)+ncol(data)*rpt)
     c_col = ncol(data)+1
     for (pt in 1:ncol(data)) {
       data_surr[,pt] = data[,pt]
-      for (rrpt in 1:(rpt+1)) {
+      for (rrpt in 1:rpt) {
         rr = rnorm(nrow(data), mean=0, sd=sd)
         data_surr[,c_col] = as.numeric(data[,pt])+rr
         c_col = c_col+1
@@ -47,24 +47,32 @@ data.surrogateProfiles = function(data, sd=1, useMnProfile=FALSE, ref_data=NULL)
   }
 
   if (!is.null(ref_data)) {
-    ref_data = ref_data[which(rownames(ref_data) %in% rownames(data)), ]
-    # Generate control surrogates
+    ref_data = ref_data[which(rownames(ref_data) %in% rownames(data)),]
     numSurr = ceiling(nrow(data)/2)
     if (numSurr> ncol(ref_data)) {
-      numSurr = numSurr - ncol(ref_data)
-      control_surr = matrix(0, nrow=nrow(data), ncol=numSurr)
-      for (pt in 1:numSurr) {
-        control_surr[,pt] = rnorm(nrow(data), mean=0, sd=sd)
+      # Generate control surrogates from real control samples.
+      rpt = floor(nrow(ref_data)/ncol(ref_data)/2)
+      control_surr = matrix(NA, nrow=nrow(ref_data), ncol=ncol(ref_data)+ncol(ref_data)*rpt)
+      c_col = ncol(ref_data)+1
+      for (pt in 1:ncol(ref_data)) {
+        control_surr[,pt] = ref_data[,pt]
+        for (rrpt in 1:rpt) {
+          rr = rnorm(nrow(ref_data), mean=0, sd=sd)
+          control_surr[,c_col] = as.numeric(ref_data[,pt])+rr
+          c_col = c_col+1
+        }
       }
-      control_surr = cbind(ref_data, control_surr)
+      colnames(control_surr) = c(colnames(ref_data), sprintf("control_surr%d", 1:(ncol(control_surr)-ncol(ref_data))))
+      rownames(control_surr) = rownames(ref_data)
+      dim(control_surr)
     } else {
       control_surr = ref_data[,sample(1:ncol(ref_data), numSurr)]
+      colnames(control_surr) = sprintf("control_surr%d", 1:numSurr)
+      rownames(control_surr) = rownames(ref_data)
+      dim(control_surr)
     }
-    colnames(control_surr) = sprintf("control_surr%d", 1:numSurr)
-    rownames(control_surr) = rownames(ref_data)
-    dim(control_surr)
   } else {
-    # Generate control surrogates
+    # Impute control surrogates: assume all z-scores 0 are "normal".
     numSurr = ceiling(nrow(data)/2)
     control_surr = matrix(0, nrow=nrow(data), ncol=numSurr)
     for (pt in 1:numSurr) {
