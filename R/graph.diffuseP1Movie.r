@@ -8,7 +8,7 @@
 #' @param visitedNodes - A character vector of node names, storing the history of previous draws in the permutation sequence.
 #' @param graphNumber - If testing against multiple background knowledge graphs, this is the index associated with the adjacency matrix that codes for G. Default value is 1.
 #' @return G - A list of returned probabilities after the diffusion of probability has truncated, with names of the list being the node names in the background knowledge graph.
-#' @export graph.diffuseP1
+#' @export graph.diffuseP1Movie
 #' @keywords generative methods
 #' @keywords diffusion event
 #' @keywords network walker
