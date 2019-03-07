@@ -15,6 +15,8 @@ mle.getPermMovie_memory(subset.nodes, ig, output_filepath, movie = TRUE,
 \item{movie}{- If you want to make a movie, set to TRUE. This will produce a set of still images that you can stream together
 to make a movie. Default is TRUE. Alternatively (movie=FALSE), you could use this function to get the node
 labels returned for each permutation starting with a perturbed variable.}
+
+\item{zoomIn}{- Boolean. Delete nodes outside of node subset's order 1 neighborhood?. Default is FALSE.}
 }
 \description{
 Make a movie of the adaptive walk the diffusion probability method makes in search of a given patient's perturbed variables.

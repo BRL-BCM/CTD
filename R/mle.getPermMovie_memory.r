@@ -6,6 +6,7 @@
 #' @param movie - If you want to make a movie, set to TRUE. This will produce a set of still images that you can stream together
 #'                to make a movie. Default is TRUE. Alternatively (movie=FALSE), you could use this function to get the node
 #'                labels returned for each permutation starting with a perturbed variable.
+#' @param zoomIn - Boolean. Delete nodes outside of node subset's order 1 neighborhood?. Default is FALSE.
 #' @export mle.getPermMovie_memory
 #' @keywords probability
 #' @keywords diffusion event
@@ -28,8 +29,8 @@
 #' thresholdDiff=0.01
 #' subset.nodes = names(G)[sample(1:length(G), 3)]
 #' mle.getPermMovie_memory(subset.nodes, ig, output_filepath = getwd(), movie=TRUE)
-mle.getPermMovie_memory = function(subset.nodes, ig, output_filepath, movie=TRUE, subset.view=FALSE) {
-  if (subset.view) {
+mle.getPermMovie_memory = function(subset.nodes, ig, output_filepath, movie=TRUE, zoomIn=FALSE) {
+  if (zoomIn) {
     # TODO :: Test on different sized graphs. Do we like this design decision to subset neighborhood to get better view of network walk????
     ig = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% names(unlist(neighborhood(ig, nodes=subset.nodes, order=1))))])
     V(ig)$label.cex = 2
