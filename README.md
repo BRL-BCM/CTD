@@ -5,9 +5,10 @@ An R package for probabilistic estimation of multivariate feature sets against a
 In R, install the devtools package, and install CTD by install_github(“BRL-BCM/CTD”).
 
 
-## Look at the Driver Script
-The driver script is called “main_CTD.r”. It will take you across all the stages in the analysis pipeline, including:
+## Look at the package vignette.
+It will take you across all the stages in the analysis pipeline, including:
 
-1. Permutations generation
-2. Calculate minimum encoding length
-3. Calculate patient similarity, based on mutual information.
+1. Background knowledge graph generation.
+2. The encoding algorithm: including generating node permutations using a network walker, converting node permutations into bitstrings, and calculating the minimum encoding length between k codewords.
+3. Calculate the probability of a node subset based on the encoding length.
+4. Calculate similarity between two node subsets, using a metric based on mutual information.
