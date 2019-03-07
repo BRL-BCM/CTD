@@ -32,8 +32,8 @@ mle.getPermN_memoryless = function(n, G, S=NULL, misses.thresh=NULL) {
   startNode = all_nodes[n]
   currentGraph = G
   numMisses = 0
+  current_node_set = c(current_node_set, startNode)
   while (stopIterating==FALSE) {
-    current_node_set = c(current_node_set, startNode)
     # Clear probabilities
     currentGraph[1:length(currentGraph)] = 0 #set probabilities of all nodes to 0
     #determine base p0 probability
@@ -60,13 +60,14 @@ mle.getPermN_memoryless = function(n, G, S=NULL, misses.thresh=NULL) {
       } else {
         numMisses = numMisses + 1
       }
+      current_node_set = c(current_node_set, startNode)
       if (numMisses>misses.thresh || length(c(startNode,current_node_set))>=(length(G))) {
-        current_node_set = c(current_node_set, startNode)
         stopIterating = TRUE
       }
     } else {
+      # Keep drawing until you've drawn all nodes.
+      current_node_set = c(current_node_set, startNode)
       if (length(c(startNode,current_node_set))>=(length(G))) {
-        current_node_set = c(current_node_set, startNode)
         stopIterating = TRUE
       }
     }

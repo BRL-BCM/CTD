@@ -5,17 +5,12 @@
 #' @return current_node_set - A character vector of node names in the order they were drawn by the probability diffusion algorithm.
 #' @keywords probability diffusion algorithm
 #' @keywords network walker algorithm
-#' @export mle.getPermN_memory
+#' @export mle.getPerms_memory
 #' @examples
-#' # Look at main_CTD.r script for full analysis script: https://github.com/BRL-BCM/CTD.
 #' # Get node permutations for graph
-#' perms = list()
-#' for (n in 1:length(G)) {
-#'   print(sprintf("Generating node permutation starting with node %s", names(G)[n]))
-#'   perms[[n]] = mle.getPermN_memory(n, G)
-#' }
-#' names(perms) = names(G)
-mle.getPermN_memory = function(S, G, num.misses=NULL) {
+#' S = names(G)[1:3]
+#' perms = mle.getPermN_memory(S, G)
+mle.getPerms_memory = function(S, G, num.misses=NULL) {
   if (is.null(num.misses)) {
     thresholdDrawT = log2(length(G))
   } else {
@@ -29,8 +24,8 @@ mle.getPermN_memory = function(S, G, num.misses=NULL) {
     startNode = S[n]
     hits = startNode
     numMisses = 0
+    current_node_set = c(current_node_set, startNode)
     while (stopIterating==FALSE) {
-      current_node_set = c(current_node_set, startNode)
       sumHits = as.vector(matrix(0, nrow=length(G), ncol=1))
       names(sumHits) = names(G)
       for (hit in 1:length(hits)) {
@@ -67,10 +62,11 @@ mle.getPermN_memory = function(S, G, num.misses=NULL) {
         numMisses = numMisses + 1
       }
 
+      current_node_set = c(current_node_set, startNode)
       if (all(S %in% current_node_set) || numMisses>thresholdDrawT) {
-        current_node_set = c(current_node_set, startNode)
         stopIterating = TRUE
       }
+
     }
     perms[[n]] = current_node_set
   }

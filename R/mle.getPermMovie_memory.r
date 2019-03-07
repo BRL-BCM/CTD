@@ -28,8 +28,8 @@
 #' thresholdDiff=0.01
 #' subset.nodes = names(G)[sample(1:length(G), 3)]
 #' mle.getPermMovie_memory(subset.nodes, ig, output_filepath = getwd(), movie=TRUE)
-mle.getPermMovie_memory = function(subset.nodes, ig, output_filepath, movie=TRUE, subset=FALSE) {
-  if (subset) {
+mle.getPermMovie_memory = function(subset.nodes, ig, output_filepath, movie=TRUE, subset.view=FALSE) {
+  if (subset.view) {
     # TODO :: Test on different sized graphs. Do we like this design decision to subset neighborhood to get better view of network walk????
     ig = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% names(unlist(neighborhood(ig, nodes=subset.nodes, order=1))))])
     V(ig)$label.cex = 2
@@ -70,8 +70,8 @@ mle.getPermMovie_memory = function(subset.nodes, ig, output_filepath, movie=TRUE
     startNode = subset.nodes[n]
     hits = startNode
     currentGraph = G
+    current_node_set = c(current_node_set, startNode)
     while (stopIterating==FALSE) {
-      current_node_set = c(current_node_set, startNode)
       sumHits = as.vector(matrix(0, nrow=length(V(ig)$name), ncol=1))
       names(sumHits) = names(G)
       for (hit in 1:length(hits)) {
@@ -103,13 +103,26 @@ mle.getPermMovie_memory = function(subset.nodes, ig, output_filepath, movie=TRUE
       #Set startNode to a node that is the max probability in the new currentGraph
       maxProb = names(which.max(sumHits))
 
+      if (movie==TRUE) {
+        V(ig)$label = sprintf("%s:%.2f", V(ig)$name, sumHits)
+        png(sprintf("%s/diffusionP1Movie%d_%d.png", output_filepath, n, length(current_node_set)), 500, 500)
+        plot.igraph(ig, layout=coords, vertex.color=V(ig)$color,
+                    vertex.label=V(ig)$label, edge.width=5*abs(E(ig)$weight), edge.arrow.size=0.01,
+                    vertex.size=5+round(50*unlist(sumHits), 0), mark.col="dark red",
+                    mark.groups = current_node_set)
+        title(sprintf("{%s}", paste(as.numeric(current_node_set %in% subset.nodes), collapse="")), cex.main=2)
+        legend("topright", legend=c("Jackpot Nodes", "Drawn Nodes"), fill=c("green", "dark red"))
+        dev.off()
+      }
+
       # Break ties: When there are ties, choose the first of the winners.
       startNode = names(currentGraph[maxProb[1]])
+      current_node_set = c(current_node_set, startNode)
       if (all(subset.nodes %in% c(startNode,current_node_set))) {
-        current_node_set = c(current_node_set, startNode)
         stopIterating = TRUE
       }
 
+      # After we step into
       if (movie==TRUE) {
         V(ig)$label = sprintf("%s:%.2f", V(ig)$name, sumHits)
         png(sprintf("%s/diffusionP1Movie%d_%d.png", output_filepath, n, length(current_node_set)), 500, 500)
