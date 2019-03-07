@@ -4,19 +4,24 @@
 \alias{mle.getPermMovie_memory}
 \title{Capture the movement of the adaptive walk of the diffusion probability method.}
 \usage{
-mle.getPermMovie_memory(subset.nodes, ig, output_filepath, movie = TRUE,
-  subset = FALSE)
+mle.getPermMovie_memory(subset.nodes, ig, output_filepath, movie=TRUE, zoomIn=FALSE)
 }
 \arguments{
 \item{subset.nodes}{- The subset of variables, S, in a background graph, G.}
 
 \item{ig}{- The igraph object associated with the background knowledge graph.}
 
+\item{output_filepath}{- The local directory at which you want still images to be saved.}
+
 \item{movie}{- If you want to make a movie, set to TRUE. This will produce a set of still images that you can stream together
 to make a movie. Default is TRUE. Alternatively (movie=FALSE), you could use this function to get the node
 labels returned for each permutation starting with a perturbed variable.}
 
 \item{zoomIn}{- Boolean. Delete nodes outside of node subset's order 1 neighborhood?. Default is FALSE.}
+}
+\value{
+permutationByStartNode - a list object of node permutations. Each element is based on a different startNode.
+        Images are also generated in the output_directory specified.
 }
 \description{
 Make a movie of the adaptive walk the diffusion probability method makes in search of a given patient's perturbed variables.
