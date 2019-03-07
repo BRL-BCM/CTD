@@ -3,12 +3,12 @@
 
 #' Get All Metabolites In Metabolon's Pathway Knowledgebase
 #' @return mets - a character vector of unique metabolites and enzymes found in at least 1 pathway in Metabolon's pathway knowledgebase.
-#' @export get_all_metabolites_metabolon
+#' @export pathway.ListMetabolites_metabolon
 #' @import igraph
 #' @examples
-#' mets = get_all_metabolites_metabolon()
+#' mets = pathway.ListMetabolites_metabolon()
 #' print(mets)
-get_all_metabolites_metabolon = function() {
+pathway.ListMetabolites_metabolon = function() {
   ig_files = list.files(sprintf("%s/extdata/RData/", getwd()), pattern = ".RData")
   ig_files = ig_files
 
@@ -20,6 +20,6 @@ get_all_metabolites_metabolon = function() {
     mets = c(mets, V(ig)$label)
   }
   mets = unique(mets)
-  
+
   return (mets)
 }

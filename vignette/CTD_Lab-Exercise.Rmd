@@ -1,0 +1,337 @@
+---
+title: "CTD Lab Exercise"
+author: "Lillian Thistlethwaite"
+date: "3/6/2019"
+output: 
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_depth: 2
+editor_options: 
+  chunk_output_type: console
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align="center")
+require(CTD)
+setwd("/Users/lillian.rosa/Downloads/CTD/vignette")
+```
+This document was rendered at `r Sys.time()`
+
+# I. Generate background knowledge graph.
+
+## I.I: Manually build graphs from adjacency matrices.
+![Figure 1. Cartoon of graph we will build manually via its adjacency matrix.](images/probability_diffusion.svg){width=350px}
+
+```{r manually build graph}
+adj_mat = rbind(c(0,3,1,0,0,0,0,0,0), #A's neighbors
+                c(3,0,2,2,0,0,0,0,0), #B's neighbors
+                c(1,2,0,0,2,0,0,0,0), #C's neighbors
+                c(0,2,0,0,1,0,1,1,0), #D's neighbors
+                c(0,0,2,1,0,2,0,2,0), #E's neighbors
+                c(0,0,0,0,2,0,0,0,0), #F's neighbors
+                c(0,0,0,1,0,0,0,1,0), #G's neighbors
+                c(0,0,0,1,2,0,1,0,1), #H's neighbors
+                c(0,0,0,0,0,0,0,1,0) #I's neighbors
+                )
+rownames(adj_mat) = c("A", "B", "C", "D", "E", "F", "G", "H", "I")
+colnames(adj_mat) = c("A", "B", "C", "D", "E", "F", "G", "H", "I")
+# Convert adjacency matrices to igrpah objects for all three graphs.
+ig = graph.adjacency(adj_mat, mode="undirected", weighted=TRUE, add.colnames = "name")
+print(ig)
+
+```
+
+
+## I.II: Learn a graph from data.
+
+```{r learn graph from data}
+# Load the Miller2015_Heparin dataset
+data(Miller2015_Heparin)
+data(heparin_metabolites)
+metClass = heparin_metabolites[,"SUPERPATHWAY"]
+data = Miller2015_Heparin
+# Only include metabolites that are present in >90% reference samples.
+fil.rate = data[,"FillRate"]
+data = data[which(fil.rate>0.90),-c(1,2,3)]
+metClass = metClass[which(fil.rate>0.90)]
+#dim(data)
+#length(metClass)
+# Remove all Xenobiotics
+#rownames(data)[which(metClass=="Xenobiotics")]
+data = data[-which(metClass=="Xenobiotics"),]
+# Remove any metabolites where any profile has a z-score > 1000. These are likely imputed raw values that were not z-scored.
+rmMets = names(which(apply(data, 1, function(i) any(i>20))))
+if (length(rmMets)>0) {
+  data = data[-which(rownames(data) %in% rmMets),]
+}
+#dim(data)
+
+# Get the diagnoses associated with the samples
+diag = colnames(data)
+diag = gsub("[[:digit:]]", "", diag)
+# Collapse cobalamin deficiency subtypes into one category CBL
+diag[grep("cbl.a|CBLC", diag)] = "CBL"
+# Look at the diagnoses available
+diagnoses = data.frame(id=colnames(data), diagnosis=diag)
+#table(diagnoses$diagnosis)
+ind.nones = which(diagnoses$diagnosis=="None")
+
+# Get data from all patients with Argininemia
+arg_data = data[,which(diagnoses$diagnosis=="Argininemia")]
+# Add surrogate disease and surrogate reference profiles based on 1 standard deviation around profiles from real patients to improve rank of matrix when learning Gaussian Markov Random Field network on data.
+arg_data = data.surrogateProfiles(arg_data, 1, TRUE, ref_data = data[,ind.nones])
+#dim(arg_data)
+
+# Learn a Gaussian Markov Random Field model using the Graphical LASSO in the R package "huge". 
+# Select the regularization parameter based on the "STARS" stability estimate.
+require(huge)
+#This will take 30 seconds - 1 minute.
+arg = huge(t(arg_data), method="glasso")
+plot(arg)
+# This will take 3-5-ish minutes.
+#arg.select = huge.select(arg, criterion="stars")
+#plot(arg.select)
+# This is the regularization parameter the STARS method selected.
+#print(arg.select$opt.lambda)
+# This is the corresponding inverse of the covariance matrix that corresponds to the selected regularization level.
+#arg_icov = as.matrix(arg.select$opt.icov)
+arg_icov = as.matrix(arg$icov[[6]])
+# Remove all "self" edges, as we are not interested in self-relationships.
+diag(arg_icov) = 0
+rownames(arg_icov) = rownames(arg_data)
+colnames(arg_icov) = rownames(arg_data)
+# Convert adjacency matrices to an igraph object.
+ig_arg = graph.adjacency(arg_icov, mode="undirected", weighted=TRUE, add.colnames = "name")
+print(ig_arg)
+```
+
+
+
+
+
+
+
+
+
+
+
+# II. The Probability Diffusion Algorithm
+## II.I From a starting node.
+Run the following code, then go to the directory, and open all diffusionEventMovie*.png files all at once. Starting from the first image, view how the probability diffusion algorithm works to diffuse 100% probability to the rest of the graph. Be sure to pay attention to the recursion level listed in the title of each image, to imagine where in the call stack the algorithm is at the captured time the image was generated.
+```{r diffusion no visited}
+# Set some global parameters for the Probability Diffusion Algorithm. 
+p0=0.1
+p1=0.9
+thresholdDiff=0.01
+
+G=vector(mode="list", length=length(V(ig)$name))
+G[1:length(G)] = 0
+names(G) = c("A", "B", "C", "D", "E", "F", "G", "H", "I")
+startNode = "A"
+visitedNodes = startNode
+# Diffuse 100% of probability from startNode "A"
+p1 = 1.0
+# Probability diffusion truncates at
+thresholdDiff=0.01
+coords = layout.fruchterman.reingold(ig)
+V(ig)$x = coords[,1]
+V(ig)$y = coords[,2]
+# Global variable imgNum
+imgNum=1
+G_new = graph.diffuseP1Movie(p1, startNode, G, visitedNodes, ig, recursion_level=1, output_dir = "/Users/lillian.rosa/Downloads/CTD/vignette/diffusion_event")
+# Inherited probabilities across all nodes should add to 1.
+sum(unlist(G_new))
+# Which node inherited the highest probability from startNode?
+G_new[which.max(G_new)]
+```
+
+
+
+## II.II From a starting node, after visiting previous nodes.
+Now, delete all diffusionEventMovie*.png files from your current directory, and run the following code. View the new image stack in the same way we did previously.
+```{r diffusion with visited}
+# Now let's see how the probability diffusion algorithm diffuses probability after B has been "stepped" into.
+visitedNodes = c("A", "B")
+startNode = "B"
+imgNum=1
+
+G_new = graph.diffuseP1Movie(p1, startNode, G, visitedNodes, ig, 1, output_dir = "/Users/lillian.rosa/Downloads/CTD/vignette/diffusion_event2")
+# Inherited probabilities across all nodes should add to 1.
+sum(unlist(G_new))
+# Which node inherited the highest probability from startNode?
+G_new[which.max(G_new)]
+```
+
+
+## II.III Diffusing through visited nodes, based on connectivity.
+Sometimes the startNode is "stranded" by a bunch of visited nodes. The diffusion algorithm diffuses "through" visited nodes, so that nodes in the same connected component can be prioritized over nodes in a different connected component, or "island nodes" (e.g. in the below code snippet, "I" is an island node). This only works currently for nodes 2 hops away from the current startNode, however.
+```{r diffuse through visited}
+adj_mat = rbind(c(0,1,2,0,0,0,0,0,0), #A's neighbors
+                c(1,0,3,0,0,0,0,0,0), #B's neighbors
+                c(2,3,0,0,1,0,0,0,0), #C's neighbors
+                c(0,0,0,0,0,0,1,1,0), #D's neighbors
+                c(0,0,1,0,0,1,0,0,0), #E's neighbors
+                c(0,0,0,0,1,0,0,0,0), #F's neighbors
+                c(0,0,0,1,0,0,0,1,0), #G's neighbors
+                c(0,0,0,1,0,0,1,0,0), #H's neighbors
+                c(0,0,0,0,0,0,0,0,0) #I's neighbors
+                )
+rownames(adj_mat) = c("A", "B", "C", "D", "E", "F", "G", "H", "I")
+colnames(adj_mat) = c("A", "B", "C", "D", "E", "F", "G", "H", "I")
+# Convert adjacency matrices to igrpah objects for all three graphs.
+ig = graph.adjacency(adj_mat, mode="undirected", weighted=TRUE, add.colnames = "name")
+print(ig)
+adjacency_matrix = list(adj_mat)
+
+# Now let's see how the probability diffusion algorithm diffuses probability after B has been "stepped" into "C" and then "A". As you can see, startNode "A" is surrounded by visited nodes "B" and "C". It needs to be smart enough to weigh "E" and "F" before "D", "H", "G" and "I".
+visitedNodes = c("B", "C", "A")
+startNode = "A"
+G_new = graph.diffuseP1(1.0, startNode, G, visitedNodes, 1, verbose=TRUE)
+# Inherited probabilities across all nodes should add to 1.
+sum(unlist(G_new))
+# Which node inherited the highest probability from startNode?
+G_new[which.max(G_new)]
+```
+
+
+
+# III. The Network Walkers
+## III.I Biased ("With Memory") Network Walker
+```{r biased network walker}
+adj_mat = rbind(c(0,3,1,0,0,0,0,0,0), #A's neighbors
+                c(3,0,2,2,0,0,0,0,0), #B's neighbors
+                c(1,2,0,0,2,0,0,0,0), #C's neighbors
+                c(0,2,0,0,1,0,1,1,0), #D's neighbors
+                c(0,0,2,1,0,2,0,2,0), #E's neighbors
+                c(0,0,0,0,2,0,0,0,0), #F's neighbors
+                c(0,0,0,1,0,0,0,1,0), #G's neighbors
+                c(0,0,0,1,2,0,1,0,1), #H's neighbors
+                c(0,0,0,0,0,0,0,1,0) #I's neighbors
+                )
+rownames(adj_mat) = c("A", "B", "C", "D", "E", "F", "G", "H", "I")
+colnames(adj_mat) = c("A", "B", "C", "D", "E", "F", "G", "H", "I")
+# Convert adjacency matrices to igrpah objects for all three graphs.
+ig = graph.adjacency(adj_mat, mode="undirected", weighted=TRUE, add.colnames = "name")
+print(ig)
+adjacency_matrix = list(adj_mat)
+
+perms = mle.getPermMovie_memory(subset.nodes = c("A", "B"), ig, output_dir = "/Users/lillian.rosa/Downloads/CTD/vignette/biased_walker", movie=TRUE, zoomIn = FALSE)
+
+# Get perms as list object, with no images generated
+perms = mle.getPerms_memory(S = c("A", "B"), G)
+```
+
+## III.II Unbiased ("Memoryless") Network Walker
+```{r unbiased network walker}
+perms = mle.getPermMovie_memoryless(subset.nodes = c("A", "B"), ig, output_dir = "/Users/lillian.rosa/Downloads/CTD/vignette/unbiased_walker", movie=TRUE, zoomIn = FALSE)
+
+# Get perms as list object, with no images generated
+S = c("A", "B")
+perms = list()
+for (n in 1:length(S)) {
+  perms[[n]] = mle.getPermN_memoryless(n, G, S, misses.thresh = log2(length(G)))
+}
+names(perms) = S
+```
+
+
+
+
+
+
+# IV. The Encoding Process
+## IV.I Choose your node subset.
+```{r node subset}
+
+```
+
+## IV.II Get k node permutations.
+```{r node permutations}
+
+```
+
+## IV.III Convert to bitstrings.
+```{r convert to bitstrings}
+#ptBSbyK = mle.getPtBSbyK(data_mx, ptID, perms, kmx)
+```
+
+## IV.IV Get encoding length of minimum length codeword.
+```{r encoding length}
+#res = mle.getEncodingLength(ptBSbyK, data_mx.pvals, ptID, G)
+```
+
+## IV.V Get probability of node subset.
+```{r probability of set}
+#2^-res[,"IS.alt"]
+```
+
+
+
+
+# V. Patient Similarity
+```{r patient similarity}
+data_mx.pvals=apply(data_mx, c(1,2), function(i) 2*pnorm(abs(i), lower.tail=FALSE))
+res=list()
+t=list(ncd=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)),
+        dir=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)),
+        jac=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)))
+rownames(t$ncd)=colnames(data_mx)
+colnames(t$ncd)=colnames(data_mx)
+rownames(t$dir)=colnames(data_mx)
+colnames(t$dir)=colnames(data_mx)
+rownames(t$jac)=colnames(data_mx)
+colnames(t$jac)=colnames(data_mx)
+for (i in 1:(kmx-1)) {
+ res[[i]]=t
+}
+for (pt in 1:ncol(data_mx)) {
+ print(pt)
+ ptID=colnames(data_mx)[pt]
+ for (pt2 in pt:ncol(data_mx)) {
+   ptID2=colnames(data_mx)[pt2]
+   for (k in 1:(kmx-1)) {
+     tmp=mle.getPatientSimilarity(ptBSbyK[[ptID]][k], ptID, ptBSbyK[[ptID2]][k], ptID2, data_mx, perms)
+     res[[k]]$ncd[ptID, ptID2]=tmp$NCD
+     res[[k]]$dir[ptID, ptID2]=tmp$dirSim
+     res[[k]]$ncd[ptID2, ptID]=tmp$NCD
+     res[[k]]$dir[ptID2, ptID]=tmp$dirSim
+
+     p1.sig.nodes=rownames(data_mx)[order(abs(data_mx[,ptID]), decreasing=TRUE)][1:k]
+     p2.sig.nodes=rownames(data_mx)[order(abs(data_mx[,ptID2]), decreasing=TRUE)][1:k]
+     p1.dirs=data_mx[p1.sig.nodes, ptID]
+     p1.dirs[which(!(p1.dirs>0))]=0
+     p1.dirs[which(p1.dirs>0)]=1
+     p2.dirs=data_mx[p2.sig.nodes, ptID2]
+     p2.dirs[which(!(p2.dirs>0))]=0
+     p2.dirs[which(p2.dirs>0)]=1
+     p1.sig.nodes=sprintf("%s%d", p1.sig.nodes, p1.dirs)
+     p2.sig.nodes=sprintf("%s%d", p2.sig.nodes, p2.dirs)
+     res[[k]]$jac[ptID, ptID2]=1-(length(intersect(p1.sig.nodes, p2.sig.nodes))/length(union(p1.sig.nodes, p2.sig.nodes)))
+     res[[k]]$jac[ptID2, ptID]=1-(length(intersect(p1.sig.nodes, p2.sig.nodes))/length(union(p1.sig.nodes, p2.sig.nodes)))
+   }
+ }
+}
+```
+
+
+
+# VI. Visualizations
+```{r visualizations}
+# Multi-dimensional scaling
+# if you have diagnostic labels associated with the colnames(data_mx), send them using diagnoses parameter
+diagnoses=colnames(data_mx)
+diagnoses[1:25]="diseased"
+diagnoses[26:50]="neg_control"
+patientSim=0.8*res[[k]]$ncd+0.2*res[[k]]$dir
+p=plot.mdsSim(patientSim, diagnoses, k=3, diag="diseased")
+p
+
+
+# Hierarchical clustering
+plot.hmSim(patientSim, path=getwd(), diagnoses)
+
+
+# K-NN
+plot.knnSim(patientSim)
+```
