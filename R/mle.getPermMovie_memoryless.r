@@ -8,10 +8,10 @@
 #'                to make a movie. Default is TRUE. Alternatively (movie=FALSE), you could use this function to get the node
 #'                labels returned for each permutation starting with a perturbed variable.
 #' @param zoomIn - Boolean. Delete nodes outside of node subset's order 1 neighborhood?. Default is FALSE.
-#' @usage mle.getPermMovie_memory(subset.nodes, ig, output_filepath, movie=TRUE, zoomIn=FALSE)
 #' @return permutationByStartNode - a list object of node permutations. Each element is based on a different startNode.
 #'         Images are also generated in the output_directory specified.
 #' @export mle.getPermMovie_memoryless
+#' @usage mle.getPermMovie_memory(subset.nodes, ig, output_filepath, movie=TRUE, zoomIn=FALSE)
 #' @keywords probability
 #' @keywords diffusion event
 #' @keywords adaptive walk
