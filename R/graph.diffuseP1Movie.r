@@ -139,7 +139,7 @@ graph.diffuseP1Movie = function(p1, startNode, G, visitedNodes, ig, recursion_le
         .GlobalEnv$imgNum = .GlobalEnv$imgNum + 1
 
         G = graph.diffuseP1Movie(inherited.probability/2, startNodeUnvisitedNeighbors[z], G,
-                                 c(visitedNodes, startNodeUnvisitedNeighbors[z]), ig, recursion_level+1, getwd())
+                                 c(visitedNodes, startNodeUnvisitedNeighbors[z]), ig, recursion_level+1, output_dir)
       }
       z = z + 1
     }

@@ -44,5 +44,4 @@ p1=0.9  # 90\% of probability diffused based on edge weights in networks
 thresholdDiff=0.01
 subset.nodes = names(G)[sample(1:length(G), 3)]
 mle.getPermMovie_memoryless(subset.nodes, ig, output_filepath = getwd(), movie=TRUE)
-mle.getPermMovie_memory(subset.nodes, ig, output_filepath = getwd(), movie=TRUE)
 }

@@ -5,7 +5,7 @@
 \title{Capture the movement of the adaptive walk of the diffusion probability method.}
 \usage{
 mle.getPermMovie_memory(subset.nodes, ig, output_filepath, movie = TRUE,
-  subset = FALSE)
+  zoomIn = FALSE)
 }
 \arguments{
 \item{subset.nodes}{- The subset of variables, S, in a background graph, G.}
