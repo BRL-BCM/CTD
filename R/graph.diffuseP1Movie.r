@@ -41,10 +41,10 @@
 #' imgNum=1
 #' G_new = graph.diffuseP1Movie(p1, startNode, G, visitedNodes, ig, 1, getwd())
 graph.diffuseP1Movie = function(p1, startNode, G, visitedNodes, ig, recursion_level=1, output_dir=getwd()) {
-  print(sprintf("%sprob. to diffuse:%f startNode: %s, visitedNodes: %s",
-                paste(rep("   ", length(visitedNodes) - 1), collapse = ""),
-                p1, startNode, toString(visitedNodes)))
-  print(sprintf("ImgNum=%d", imgNum))
+  #print(sprintf("%sprob. to diffuse:%f startNode: %s, visitedNodes: %s",
+  #              paste(rep("   ", length(visitedNodes) - 1), collapse = ""),
+  #              p1, startNode, toString(visitedNodes)))
+  #print(sprintf("ImgNum=%d", imgNum))
 
   V(ig)$color = rep("blue", length(G))
   V(ig)$color[which(V(ig)$name %in% visitedNodes)] = "red"
@@ -90,13 +90,13 @@ graph.diffuseP1Movie = function(p1, startNode, G, visitedNodes, ig, recursion_le
   startNodeUnvisitedNeighbors = startNodeNeighbors[!(startNodeNeighbors %in% visitedNodes)]
   if (length(startNodeUnvisitedNeighbors) > 0 || length(extendedConnections) > 0) {
     weighted_edges.sum = sum(abs(adj_mat[which(rownames(adj_mat) %in% startNodeUnvisitedNeighbors), startNode]))
-    print(sprintf("%sWeighted_edges.sum=%f", paste(rep("   ", length(visitedNodes) - 1), collapse = ""), weighted_edges.sum))
+    #print(sprintf("%sWeighted_edges.sum=%f", paste(rep("   ", length(visitedNodes) - 1), collapse = ""), weighted_edges.sum))
     z = 1
     while (z <= length(startNodeUnvisitedNeighbors)) {
       inherited.probability = p1 * abs(adj_mat[startNodeUnvisitedNeighbors[z], startNode])/weighted_edges.sum
       G[[startNodeUnvisitedNeighbors[z]]] = G[[startNodeUnvisitedNeighbors[z]]] + inherited.probability
 
-      print(sprintf("%sadded diffused  probability %f to child #%d: %s", paste(rep("   ", length(visitedNodes) - 1), collapse = ""), inherited.probability, z, startNodeUnvisitedNeighbors[z]))
+      #print(sprintf("%sadded diffused  probability %f to child #%d: %s", paste(rep("   ", length(visitedNodes) - 1), collapse = ""), inherited.probability, z, startNodeUnvisitedNeighbors[z]))
 
       V(ig)$color = rep("blue", length(G))
       V(ig)$color[which(V(ig)$name %in% visitedNodes)] = "red"
@@ -118,9 +118,9 @@ graph.diffuseP1Movie = function(p1, startNode, G, visitedNodes, ig, recursion_le
       if (length(nNeighbors) > 0 && inherited.probability/2 > thresholdDiff && ((length(visitedNodes) + 1) < length(G))) {
         G[[startNodeUnvisitedNeighbors[z]]] = G[[startNodeUnvisitedNeighbors[z]]] - inherited.probability/2
 
-        print(sprintf("%ssubtracted %f from startNode's neighbor #%d: %s and sent to its own neighbors.",
-                        paste(rep("   ", length(visitedNodes) - 1), collapse = ""), inherited.probability/2,
-                        z, startNodeUnvisitedNeighbors[z]))
+        #print(sprintf("%ssubtracted %f from startNode's neighbor #%d: %s and sent to its own neighbors.",
+        #                paste(rep("   ", length(visitedNodes) - 1), collapse = ""), inherited.probability/2,
+        #                z, startNodeUnvisitedNeighbors[z]))
 
         V(ig)$color = rep("blue", length(G))
         V(ig)$color[which(V(ig)$name %in% visitedNodes)] = "red"
@@ -155,7 +155,7 @@ graph.diffuseP1Movie = function(p1, startNode, G, visitedNodes, ig, recursion_le
     dev.off()
     .GlobalEnv$imgNum=.GlobalEnv$imgNum+1
   } else {
-    print("startNode is stranded with its visited neighbors, or is a singleton. Diffuse p1 uniformly amongst all unvisited nodes")
+    #print("startNode is stranded with its visited neighbors, or is a singleton. Diffuse p1 uniformly amongst all unvisited nodes")
     t = 1
     while (t <= length(G)) {
       if (!(names(G[t]) %in% visitedNodes)) {

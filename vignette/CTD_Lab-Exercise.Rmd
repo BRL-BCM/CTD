@@ -216,7 +216,7 @@ ig = graph.adjacency(adj_mat, mode="undirected", weighted=TRUE, add.colnames = "
 print(ig)
 adjacency_matrix = list(adj_mat)
 
-perms = mle.getPermMovie_memory(subset.nodes = c("A", "B"), ig, output_dir = "/Users/lillian.rosa/Downloads/CTD/vignette/biased_walker", movie=TRUE, zoomIn = FALSE)
+perms = mle.getPermMovie_memory(subset.nodes = c("A", "B"), ig, output_filepath = "/Users/lillian.rosa/Downloads/CTD/vignette/biased_walker", movie=TRUE, zoomIn = FALSE)
 
 # Get perms as list object, with no images generated
 perms = mle.getPerms_memory(S = c("A", "B"), G)
@@ -224,7 +224,7 @@ perms = mle.getPerms_memory(S = c("A", "B"), G)
 
 ## III.II Unbiased ("Memoryless") Network Walker
 ```{r unbiased network walker}
-perms = mle.getPermMovie_memoryless(subset.nodes = c("A", "B"), ig, output_dir = "/Users/lillian.rosa/Downloads/CTD/vignette/unbiased_walker", movie=TRUE, zoomIn = FALSE)
+perms = mle.getPermMovie_memoryless(subset.nodes = c("A", "B"), ig, output_filepath = "/Users/lillian.rosa/Downloads/CTD/vignette/unbiased_walker", movie=TRUE, zoomIn = FALSE)
 
 # Get perms as list object, with no images generated
 S = c("A", "B")
@@ -271,47 +271,47 @@ names(perms) = S
 
 # V. Patient Similarity
 ```{r patient similarity}
-data_mx.pvals=apply(data_mx, c(1,2), function(i) 2*pnorm(abs(i), lower.tail=FALSE))
-res=list()
-t=list(ncd=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)),
-        dir=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)),
-        jac=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)))
-rownames(t$ncd)=colnames(data_mx)
-colnames(t$ncd)=colnames(data_mx)
-rownames(t$dir)=colnames(data_mx)
-colnames(t$dir)=colnames(data_mx)
-rownames(t$jac)=colnames(data_mx)
-colnames(t$jac)=colnames(data_mx)
-for (i in 1:(kmx-1)) {
- res[[i]]=t
-}
-for (pt in 1:ncol(data_mx)) {
- print(pt)
- ptID=colnames(data_mx)[pt]
- for (pt2 in pt:ncol(data_mx)) {
-   ptID2=colnames(data_mx)[pt2]
-   for (k in 1:(kmx-1)) {
-     tmp=mle.getPatientSimilarity(ptBSbyK[[ptID]][k], ptID, ptBSbyK[[ptID2]][k], ptID2, data_mx, perms)
-     res[[k]]$ncd[ptID, ptID2]=tmp$NCD
-     res[[k]]$dir[ptID, ptID2]=tmp$dirSim
-     res[[k]]$ncd[ptID2, ptID]=tmp$NCD
-     res[[k]]$dir[ptID2, ptID]=tmp$dirSim
+#data_mx.pvals=apply(data_mx, c(1,2), function(i) 2*pnorm(abs(i), lower.tail=FALSE))
+#res=list()
+#t=list(ncd=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)),
+#        dir=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)),
+#        jac=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)))
+#rownames(t$ncd)=colnames(data_mx)
+#colnames(t$ncd)=colnames(data_mx)
+#rownames(t$dir)=colnames(data_mx)
+#colnames(t$dir)=colnames(data_mx)
+#rownames(t$jac)=colnames(data_mx)
+#colnames(t$jac)=colnames(data_mx)
+#for (i in 1:(kmx-1)) {
+# res[[i]]=t
+#}
+#for (pt in 1:ncol(data_mx)) {
+# print(pt)
+# ptID=colnames(data_mx)[pt]
+# for (pt2 in pt:ncol(data_mx)) {
+#   ptID2=colnames(data_mx)[pt2]
+#   for (k in 1:(kmx-1)) {
+#     tmp=mle.getPatientSimilarity(ptBSbyK[[ptID]][k], ptID, ptBSbyK[[ptID2]][k], ptID2, data_mx, perms)
+#     res[[k]]$ncd[ptID, ptID2]=tmp$NCD
+#     res[[k]]$dir[ptID, ptID2]=tmp$dirSim
+#     res[[k]]$ncd[ptID2, ptID]=tmp$NCD
+#     res[[k]]$dir[ptID2, ptID]=tmp$dirSim
 
-     p1.sig.nodes=rownames(data_mx)[order(abs(data_mx[,ptID]), decreasing=TRUE)][1:k]
-     p2.sig.nodes=rownames(data_mx)[order(abs(data_mx[,ptID2]), decreasing=TRUE)][1:k]
-     p1.dirs=data_mx[p1.sig.nodes, ptID]
-     p1.dirs[which(!(p1.dirs>0))]=0
-     p1.dirs[which(p1.dirs>0)]=1
-     p2.dirs=data_mx[p2.sig.nodes, ptID2]
-     p2.dirs[which(!(p2.dirs>0))]=0
-     p2.dirs[which(p2.dirs>0)]=1
-     p1.sig.nodes=sprintf("%s%d", p1.sig.nodes, p1.dirs)
-     p2.sig.nodes=sprintf("%s%d", p2.sig.nodes, p2.dirs)
-     res[[k]]$jac[ptID, ptID2]=1-(length(intersect(p1.sig.nodes, p2.sig.nodes))/length(union(p1.sig.nodes, p2.sig.nodes)))
-     res[[k]]$jac[ptID2, ptID]=1-(length(intersect(p1.sig.nodes, p2.sig.nodes))/length(union(p1.sig.nodes, p2.sig.nodes)))
-   }
- }
-}
+#     p1.sig.nodes=rownames(data_mx)[order(abs(data_mx[,ptID]), decreasing=TRUE)][1:k]
+#     p2.sig.nodes=rownames(data_mx)[order(abs(data_mx[,ptID2]), decreasing=TRUE)][1:k]
+#     p1.dirs=data_mx[p1.sig.nodes, ptID]
+#     p1.dirs[which(!(p1.dirs>0))]=0
+#     p1.dirs[which(p1.dirs>0)]=1
+#     p2.dirs=data_mx[p2.sig.nodes, ptID2]
+#     p2.dirs[which(!(p2.dirs>0))]=0
+#     p2.dirs[which(p2.dirs>0)]=1
+#     p1.sig.nodes=sprintf("%s%d", p1.sig.nodes, p1.dirs)
+#     p2.sig.nodes=sprintf("%s%d", p2.sig.nodes, p2.dirs)
+#     res[[k]]$jac[ptID, ptID2]=1-(length(intersect(p1.sig.nodes, p2.sig.nodes))/length(union(p1.sig.nodes, p2.sig.nodes)))
+#     res[[k]]$jac[ptID2, ptID]=1-(length(intersect(p1.sig.nodes, p2.sig.nodes))/length(union(p1.sig.nodes, p2.sig.nodes)))
+#   }
+# }
+#}
 ```
 
 
@@ -320,18 +320,18 @@ for (pt in 1:ncol(data_mx)) {
 ```{r visualizations}
 # Multi-dimensional scaling
 # if you have diagnostic labels associated with the colnames(data_mx), send them using diagnoses parameter
-diagnoses=colnames(data_mx)
-diagnoses[1:25]="diseased"
-diagnoses[26:50]="neg_control"
-patientSim=0.8*res[[k]]$ncd+0.2*res[[k]]$dir
-p=plot.mdsSim(patientSim, diagnoses, k=3, diag="diseased")
-p
+#diagnoses=colnames(data_mx)
+#diagnoses[1:25]="diseased"
+#diagnoses[26:50]="neg_control"
+#patientSim=0.8*res[[k]]$ncd+0.2*res[[k]]$dir
+#p=plot.mdsSim(patientSim, diagnoses, k=3, diag="diseased")
+#p
 
 
 # Hierarchical clustering
-plot.hmSim(patientSim, path=getwd(), diagnoses)
+#plot.hmSim(patientSim, path=getwd(), diagnoses)
 
 
 # K-NN
-plot.knnSim(patientSim)
+#plot.knnSim(patientSim)
 ```
