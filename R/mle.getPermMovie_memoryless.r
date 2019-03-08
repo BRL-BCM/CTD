@@ -11,12 +11,7 @@
 #' @return permutationByStartNode - a list object of node permutations. Each element is based on a different startNode.
 #'         Images are also generated in the output_directory specified.
 #' @export mle.getPermMovie_memoryless
-#' @usage mle.getPermMovie_memory(subset.nodes, ig, output_filepath, movie=TRUE, zoomIn=FALSE)
-#' @keywords probability
-#' @keywords diffusion event
-#' @keywords adaptive walk
 #' @examples
-#' # Look at main_CTD.r script for full analysis script: https://github.com/BRL-BCM/CTD.
 #' # Read in any network via its adjacency matrix
 #' tmp = matrix(1, nrow=100, ncol=100)
 #' for (i in 1:100) {
