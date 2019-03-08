@@ -4,7 +4,8 @@
 \alias{mle.getPermMovie_memory}
 \title{Capture the movement of the adaptive walk of the diffusion probability method.}
 \usage{
-mle.getPermMovie_memory(subset.nodes, ig, output_filepath, movie=TRUE, zoomIn=FALSE)
+mle.getPermMovie_memory(subset.nodes, ig, output_filepath, movie = TRUE,
+  subset = FALSE)
 }
 \arguments{
 \item{subset.nodes}{- The subset of variables, S, in a background graph, G.}
@@ -27,7 +28,6 @@ permutationByStartNode - a list object of node permutations. Each element is bas
 Make a movie of the adaptive walk the diffusion probability method makes in search of a given patient's perturbed variables.
 }
 \examples{
-# Look at main_CTD.r script for full analysis script: https://github.com/BRL-BCM/CTD.
 # Read in any network via its adjacency matrix
 tmp = matrix(1, nrow=100, ncol=100)
 for (i in 1:100) {
@@ -45,8 +45,3 @@ thresholdDiff=0.01
 subset.nodes = names(G)[sample(1:length(G), 3)]
 mle.getPermMovie_memory(subset.nodes, ig, output_filepath = getwd(), movie=TRUE)
 }
-\keyword{adaptive}
-\keyword{diffusion}
-\keyword{event}
-\keyword{probability}
-\keyword{walk}

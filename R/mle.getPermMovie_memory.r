@@ -44,7 +44,7 @@ mle.getPermMovie_memory = function(subset.nodes, ig, output_filepath, movie=TRUE
   G = lapply(G, function(i) i[[1]]=0)
   degs = list(degree(ig))
   adjacency_matrix = list(as.matrix(get.adjacency(ig, attr="weight")))
-
+  
   # Phase 1: Do adaptive permutations ahead of time for each possible startNode in subGraphS.
   if (movie==TRUE) {
     V(ig)$color = rep("white", length(G))
@@ -99,10 +99,10 @@ mle.getPermMovie_memory = function(subset.nodes, ig, output_filepath, movie=TRUE
         sumHits = sumHits + unlist(currentGraph)
       }
       sumHits = sumHits/length(hits)
-
+      
       #Set startNode to a node that is the max probability in the new currentGraph
       maxProb = names(which.max(sumHits))
-
+      
       if (movie==TRUE) {
         V(ig)$label = sprintf("%s:%.2f", V(ig)$name, sumHits)
         png(sprintf("%s/diffusionP1Movie%d_%d.png", output_filepath, n, length(current_node_set)), 500, 500)
@@ -114,14 +114,14 @@ mle.getPermMovie_memory = function(subset.nodes, ig, output_filepath, movie=TRUE
         legend("topright", legend=c("Jackpot Nodes", "Drawn Nodes"), fill=c("green", "dark red"))
         dev.off()
       }
-
+      
       # Break ties: When there are ties, choose the first of the winners.
       startNode = names(currentGraph[maxProb[1]])
       current_node_set = c(current_node_set, startNode)
       if (all(subset.nodes %in% c(startNode,current_node_set))) {
         stopIterating = TRUE
       }
-
+      
       # After we step into
       if (movie==TRUE) {
         V(ig)$label = sprintf("%s:%.2f", V(ig)$name, sumHits)
@@ -135,12 +135,12 @@ mle.getPermMovie_memory = function(subset.nodes, ig, output_filepath, movie=TRUE
         dev.off()
       }
     }
-
+    
     permutationByStartNode[[n]] = current_node_set
     bitStrings.pt[[n]] = as.numeric(current_node_set %in% subset.nodes)
   }
   names(permutationByStartNode) = subset.nodes
-
+  
   return(permutationByStartNode)
 }
 
