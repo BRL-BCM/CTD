@@ -5,7 +5,7 @@
 #' @param S - A character vector of node names describing the node subset to be encoded.
 #' @param perms - The list of permutations calculated over all possible nodes, starting with each node in subset of interest.
 #' @return pt.byK - a list of bitstrings, with the names of the list elements the node names of the encoded nodes
-#' @export mle.getPtBSbyK
+#' @export mle.getPtBSbyK_memory
 #' @examples
 #' # Look at main_CTD.r script for full analysis script: https://github.com/BRL-BCM/CTD.
 #' # Get bitstrings associated with each patient's top kmx variable subsets
@@ -13,9 +13,9 @@
 #' ptBSbyK = list()
 #' for (pt in 1:ncol(data_mx)) {
 #'   S = data_mx[order(abs(data_mx[,pt]), decreasing=TRUE),pt][1:kmx]
-#'   ptBSbyK[[ptID]] = mle.getPtBSbyK(S, perms)
+#'   ptBSbyK[[ptID]] = mle.getPtBSbyK_memory(S, perms)
 #' }
-mle.getPtBSbyK = function(S, perms) {
+mle.getPtBSbyK_memory = function(S, perms) {
   pt.byK = list()
   for (k in 1:length(S)) {
     sig.nodes = S[1:k]
