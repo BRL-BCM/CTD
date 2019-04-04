@@ -9,19 +9,11 @@
 #' @examples
 #' plot.pathwayMap(simMat, path)
 plot.pathwayMap = function(Pathway.Name, PatientID, patient.zscore, scalingFactor, outputFilePath) {
-  gmlPath = "../inst/extdata"
+  gmlPath = "../extdata"
   load(sprintf("%s/complexNodes.RData", gmlPath))
-  if (Pathway.Name=="allPathways") {
-    load(sprintf("%s/RData/%s2.RData", gmlPath, Pathway.Name))
-  } else {
-    load(sprintf("%s/RData/%s.RData", gmlPath, Pathway.Name))
-  }
-  if (Pathway.Name=="allPathways") {
-    V(template.g)$label[which(V(template.g)$label=="Dsgegdfxaegggvr")] = ""
-    scalingFactor=1
-  } else {
-    template.g = ig
-  }
+  load(sprintf("%s/RData/%s.RData", gmlPath, Pathway.Name))
+  template.g = ig
+
 
   patient.zscore[which(is.na(patient.zscore))] = 0
   patient.zscore = patient.zscore[-which(abs(patient.zscore)<2)]

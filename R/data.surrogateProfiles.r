@@ -1,20 +1,30 @@
 #' Surrogate profiles
 #'
-#' Fill in a data matrix with low n, high p with surrogate profiles.
+#' Fill in a data matrix rank, when your data is low n, high p. Fill in rank with surrogate profiles.
 #' @param data - Data matrix with observations as rows, features as columns.
 #' @param sd - The level of variability (standard deviation) around each feature's
 #'             mean you want to add in surrogate profiles.
+#' @param useMnDiseaseProfile - Boolean. For disease cohorts not showing homogeneity, mean
+#'             across disease profiles and generate disease surrogates around this mean.
+#' @param addHealthyControls - Boolean. Add healthy control profiles to data?
 #' @return data_mx - Data matrix with added surrogate profiles.
 #' @export data.surrogateProfiles
-data.surrogateProfiles = function(data, sd=1, useMnProfile=FALSE, ref_data=NULL) {
+data.surrogateProfiles = function(data, sd=1, useMnDiseaseProfile=FALSE, addHealthyControls=TRUE, ref_data=NULL) {
+  ref_data = ref_data[which(rownames(ref_data) %in% rownames(data)),]
+  data = data[which(rownames(data) %in% rownames(ref_data)), ]
 
-  if (useMnProfile==TRUE) {
+  # Generate disease surrogates first
+  if (useMnDiseaseProfile==TRUE) {
     mn_data = apply(data, 1, function(i) mean(na.omit(i)))
     names(mn_data) = rownames(data)
     data = as.matrix(mn_data)
     colnames(data) = "mn_data"
     # Generate disease surrogates
-    rpt = ceiling(nrow(data)/ncol(data)/2)
+    if (addHealthyControls) {
+      rpt = ceiling(nrow(data)/ncol(data)/2)
+    } else {
+      rpt = ceiling(nrow(data)/ncol(data))
+    }
     data_surr = matrix(NA, nrow=nrow(data), ncol=ncol(data)+ncol(data)*rpt)
     c_col = ncol(data)+1
     for (pt in 1:ncol(data)) {
@@ -29,8 +39,12 @@ data.surrogateProfiles = function(data, sd=1, useMnProfile=FALSE, ref_data=NULL)
     rownames(data_surr) = rownames(data)
     dim(data_surr)
   } else {
-    # Generate disease surrogates
-    rpt = floor(nrow(data)/ncol(data)/2)
+    # Generate disease surrogates for each "flavor" of disease profiles.
+    if (addHealthyControls) {
+      rpt = ceiling(nrow(data)/ncol(data)/2)
+    } else {
+      rpt = ceiling(nrow(data)/ncol(data))
+    }
     data_surr = matrix(NA, nrow=nrow(data), ncol=ncol(data)+ncol(data)*rpt)
     c_col = ncol(data)+1
     for (pt in 1:ncol(data)) {
@@ -46,12 +60,12 @@ data.surrogateProfiles = function(data, sd=1, useMnProfile=FALSE, ref_data=NULL)
     dim(data_surr)
   }
 
-  if (!is.null(ref_data)) {
-    ref_data = ref_data[which(rownames(ref_data) %in% rownames(data)),]
+  # Next, if addHealthyControls is TRUE, generate reference profile surrogates.
+  if (addHealthyControls) {
     numSurr = ceiling(nrow(data)/2)
-    if (numSurr> ncol(ref_data)) {
+    if (numSurr > ncol(ref_data)) {
       # Generate control surrogates from real control samples.
-      rpt = floor(nrow(ref_data)/ncol(ref_data)/2)
+      rpt = ceiling(nrow(data)/ncol(ref_data)/2)
       control_surr = matrix(NA, nrow=nrow(ref_data), ncol=ncol(ref_data)+ncol(ref_data)*rpt)
       c_col = ncol(ref_data)+1
       for (pt in 1:ncol(ref_data)) {
@@ -66,46 +80,34 @@ data.surrogateProfiles = function(data, sd=1, useMnProfile=FALSE, ref_data=NULL)
       rownames(control_surr) = rownames(ref_data)
       dim(control_surr)
     } else {
-      control_surr = ref_data[,sample(1:ncol(ref_data), numSurr)]
-      colnames(control_surr) = sprintf("control_surr%d", 1:numSurr)
+      ind = sample(1:ncol(ref_data), numSurr)
+      control_surr = ref_data[,ind]
+      colnames(control_surr) = colnames(control_surr)[ind]
       rownames(control_surr) = rownames(ref_data)
       dim(control_surr)
     }
+    data_mx = cbind(data_surr, control_surr)
   } else {
-    # Impute control surrogates: assume all z-scores 0 are "normal".
-    numSurr = ceiling(nrow(data)/2)
-    control_surr = matrix(0, nrow=nrow(data), ncol=numSurr)
-    for (pt in 1:numSurr) {
-      control_surr[,pt] = rnorm(nrow(data), mean=0, sd=sd)
-    }
-    colnames(control_surr) = sprintf("control_surr%d", 1:numSurr)
-    rownames(control_surr) = rownames(data)
-    dim(control_surr)
+    data_mx = data_surr
   }
 
-
-  data_mx = cbind(data_surr, control_surr)
+  # Remove metabolites that are NA for all samples in data_mx
   rmThese = c()
   for (r in 1:nrow(data_mx)) {
     if (all(is.na(as.numeric(data_mx[rownames(data_mx)[r],])))) {
       rmThese = c(rmThese, r)
     } else {
-      data_mx[r, which(is.na(data_mx[r,]))] = min(na.omit(as.numeric(control_surr[rownames(data_mx)[r],])))
+      data_mx[r, which(is.na(data_mx[r, ]))] = min(na.omit(as.numeric(ref_data[rownames(data_mx)[r],])))
     }
   }
-  if (length(rmThese)>0) {
-    data_mx = data_mx[-rmThese,]
-  }
-  any(is.na(data_mx)) # Should be FALSE
-  any(is.infinite(unlist(data_mx))) # Should be FALSE
+  if (length(rmThese) > 0) { data_mx = data_mx[-rmThese, ] }
+  any(is.na(data_mx))
+  any(is.infinite(unlist(data_mx)))
 
-  # remove any metabolite with no variation (sd=0)
   var.met = apply(data_mx, 1, sd)
-  if (length(which(var.met==0))>0) {
-    data_mx = data_mx[-which(var.met==0),]
-  }
+  if (length(which(var.met == 0)) > 0) { data_mx = data_mx[-which(var.met == 0), ] }
   rownames(data_mx) = tolower(rownames(data_mx))
-  data_mx = apply(data_mx, c(1,2), as.numeric)
+  data_mx = apply(data_mx, c(1, 2), as.numeric)
   dim(data_mx)
 
   return(data_mx)
