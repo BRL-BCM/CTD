@@ -2,7 +2,7 @@
 
 export(data.HMDBtoKEGG)
 export(data.LabeltoKEGG)
-export(data.getMSEA_Metabolon)
+export(data.getORA_Metabolon)
 export(data.surrogateProfiles)
 export(getPathwayIgraph)
 export(graph.diffuseP1)

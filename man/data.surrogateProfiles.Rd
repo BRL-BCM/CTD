@@ -4,18 +4,23 @@
 \alias{data.surrogateProfiles}
 \title{Surrogate profiles}
 \usage{
-data.surrogateProfiles(data, sd = 1, useMnProfile = FALSE,
-  ref_data = NULL)
+data.surrogateProfiles(data, sd = 1, useMnDiseaseProfile = FALSE,
+  addHealthyControls = TRUE, ref_data = NULL)
 }
 \arguments{
 \item{data}{- Data matrix with observations as rows, features as columns.}
 
 \item{sd}{- The level of variability (standard deviation) around each feature's
 mean you want to add in surrogate profiles.}
+
+\item{useMnDiseaseProfile}{- Boolean. For disease cohorts not showing homogeneity, mean
+across disease profiles and generate disease surrogates around this mean.}
+
+\item{addHealthyControls}{- Boolean. Add healthy control profiles to data?}
 }
 \value{
 data_mx - Data matrix with added surrogate profiles.
 }
 \description{
-Fill in a data matrix with low n, high p with surrogate profiles.
+Fill in a data matrix rank, when your data is low n, high p. Fill in rank with surrogate profiles.
 }
