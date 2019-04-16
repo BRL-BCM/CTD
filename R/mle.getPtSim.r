@@ -66,6 +66,8 @@ mle.getPtSim = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, perms) {
   # Get optimal bitstring for encoding of patient1's union patient2's subsets
   dirSim = vector("numeric", length=length(p1.optBS))
   for (k in 1:length(p1.optBS)) {
+    p1.sig.nodes = names(sort(abs(data_mx[,ptID]), decreasing = TRUE)[1:k])
+    p2.sig.nodes = names(sort(abs(data_mx[,ptID2]), decreasing = TRUE)[1:k])
     p1.dirs = data_mx[p1.sig.nodes,ptID]
     p1.dirs[p1.dirs>0] = 1
     p1.dirs[p1.dirs<0] = 0
@@ -87,20 +89,20 @@ mle.getPtSim = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, perms) {
 
   if (is.null(perms)) {
     # Using the "with memory" network walker, get optimal bitstring for encoding of patient1's union patient2's subsets
-    p1.sig.nodes = names(sort(abs(data_mx[,ptID]), decreasing = TRUE)[1:kmx])
-    p2.sig.nodes = names(sort(abs(data_mx[,ptID2]), decreasing = TRUE)[1:kmx])
+    p1.sig.nodes = names(sort(abs(data_mx[,ptID]), decreasing = TRUE)[1:length(p1.optBS)])
+    p2.sig.nodes = names(sort(abs(data_mx[,ptID2]), decreasing = TRUE)[1:length(p2.optBS)])
     p12.sig.nodes = unique(c(p1.sig.nodes, p2.sig.nodes))
-    perms = mle.getPermN_memory(p12.sig.nodes, G)
+    perms = mle.getPerms_memory(p12.sig.nodes, G)
     p12.e = c()
     p12.optBS = list()
-    for (k in 1:length(p1.bs)) {
-      p1.bss = p1.bs[[k]]
-      p2.bss = p2.bs[[k]]
+    for (k in 1:length(p1.optBS)) {
+      p1.bss = p1.optBS[[k]]
+      p2.bss = p2.optBS[[k]]
       p1.sig.nodes = names(sort(abs(data_mx[,ptID]), decreasing = TRUE)[1:k])
       p2.sig.nodes = names(sort(abs(data_mx[,ptID2]), decreasing = TRUE)[1:k])
       p12.sig.nodes = unique(c(p1.sig.nodes, p2.sig.nodes))
-      p12.optBS[[k]] = mle.getPtBSbyK(p12.sig.nodes, perms)[[length(p12.sig.nodes)]]
-      p12.e[k] = mle.getEncodingLength_nullk(p12.optBS[k], G, length(p12.sig.nodes))[,"IS.alt"]
+      p12.optBS[[k]] = mle.getPtBSbyK_memory(p12.sig.nodes, perms)[[length(p12.sig.nodes)]]
+      p12.e[k] = mle.getEncodingLength(p12.optBS[k], NULL, NULL, G)[,"IS.alt"]
     }
   } else {
     # Using the "memoryless" network walker, get optimal bitstring for encoding of patient1's union patient2's subsets.
@@ -110,7 +112,7 @@ mle.getPtSim = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, perms) {
       p2.sig.nodes = names(sort(abs(data_mx[,ptID2]), decreasing = TRUE))[1:k]
       p12.sig.nodes = unique(c(p1.sig.nodes, p2.sig.nodes))
       p12.optBS = mle.getPtBSbyK_memoryless(p12.sig.nodes, perms)[[length(p12.sig.nodes)]]
-      p12.e[k] = mle.getEncodingLength_nullk(list(p12.optBS), G, length(p12.sig.nodes))[,"IS.alt"]
+      p12.e[k] = mle.getEncodingLength(list(p12.optBS), NULL, NULL, G)[,"IS.alt"]
     }
   }
 
