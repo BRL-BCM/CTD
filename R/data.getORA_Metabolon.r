@@ -10,7 +10,7 @@
 #' @export data.getORA_Metabolon
 #' @examples
 #'
-#' pathway.data = data.getMSEA_Metabolon(met.profile, threhold=3, "z-score", NULL)
+#' pathway.data = data.getORA_Metabolon(met.profile, threhold=3, "z-score", NULL)
 data.getORA_Metabolon = function(met.profile, threshold=3, type="zscore", gene.profile=NULL) {
   met.profile = met.profile[which(!(is.na(met.profile)))]
   if (type=="zscore") {

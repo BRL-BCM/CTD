@@ -10,8 +10,15 @@
 #' @return data_mx - Data matrix with added surrogate profiles.
 #' @export data.surrogateProfiles
 data.surrogateProfiles = function(data, sd=1, useMnDiseaseProfile=FALSE, addHealthyControls=TRUE, ref_data=NULL) {
-  ref_data = ref_data[which(rownames(ref_data) %in% rownames(data)),]
-  data = data[which(rownames(data) %in% rownames(ref_data)), ]
+  if (!is.null(ref_data)) {
+    ref_data = ref_data[which(rownames(ref_data) %in% rownames(data)),]
+    data = data[which(rownames(data) %in% rownames(ref_data)), ]
+  } else {
+    if (addHealthyControls) {
+      print("Changing addHealthyControls to FALSE because no reference data was provided.")
+      addHealthyControls = FALSE
+    }
+  }
 
   # Generate disease surrogates first
   if (useMnDiseaseProfile==TRUE) {
@@ -57,7 +64,7 @@ data.surrogateProfiles = function(data, sd=1, useMnDiseaseProfile=FALSE, addHeal
     }
     colnames(data_surr) = c(colnames(data), sprintf("disease_surr%d", 1:(ncol(data_surr)-ncol(data))))
     rownames(data_surr) = rownames(data)
-    dim(data_surr)
+    print(dim(data_surr))
   }
 
   # Next, if addHealthyControls is TRUE, generate reference profile surrogates.
@@ -97,7 +104,11 @@ data.surrogateProfiles = function(data, sd=1, useMnDiseaseProfile=FALSE, addHeal
     if (all(is.na(as.numeric(data_mx[rownames(data_mx)[r],])))) {
       rmThese = c(rmThese, r)
     } else {
-      data_mx[r, which(is.na(data_mx[r, ]))] = min(na.omit(as.numeric(ref_data[rownames(data_mx)[r],])))
+      if (addHealthyControls) {
+        data_mx[r, which(is.na(data_mx[r, ]))] = min(na.omit(as.numeric(ref_data[rownames(data_mx)[r],])))
+      } else {
+        data_mx[r, which(is.na(data_mx[r, ]))] = min(na.omit(as.numeric(data_mx[rownames(data_mx)[r],])))
+      }
     }
   }
   if (length(rmThese) > 0) { data_mx = data_mx[-rmThese, ] }
