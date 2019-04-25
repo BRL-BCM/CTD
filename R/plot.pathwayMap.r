@@ -3,12 +3,14 @@
 #' @param Pathway.Name - The name of the pathway map you want to plot patient data on.
 #' @param PatientID - An identifier string associated with the patient.
 #' @param patient.zscore - A named vector of metabolites with corresponding z-scores.
+#' @param zscore.threshold - Plot all z-scores > or < this threshold.
 #' @param scalingFactor - Integer associated with increase in node size.
 #' @param outputFilePath - The directory in which you want to store image files.
+#' @param SVG - Save as SVG or PNG? If SVG is TRUE, then an SVG image is saved. If FALSE, a PNG is saved.
 #' @export plot.pathwayMap
 #' @examples
 #' plot.pathwayMap(simMat, path)
-plot.pathwayMap = function(Pathway.Name, PatientID, patient.zscore, scalingFactor, outputFilePath) {
+plot.pathwayMap = function(Pathway.Name, PatientID, patient.zscore, zscore.threshold, scalingFactor, outputFilePath, SVG=TRUE) {
   gmlPath = "../extdata"
   load(sprintf("%s/complexNodes.RData", gmlPath))
   load(sprintf("%s/RData/%s.RData", gmlPath, Pathway.Name))
@@ -16,7 +18,7 @@ plot.pathwayMap = function(Pathway.Name, PatientID, patient.zscore, scalingFacto
 
 
   patient.zscore[which(is.na(patient.zscore))] = 0
-  patient.zscore = patient.zscore[-which(abs(patient.zscore)<2)]
+  patient.zscore = patient.zscore[-which(abs(patient.zscore)<zscore.threshold)]
   if (length(which(names(patient.zscore)=="3-ureidopropionate"))>0) {
     names(patient.zscore)[which(names(patient.zscore)=="3-ureidopropionate")] = "ureidopropionate"
   }
@@ -133,15 +135,28 @@ plot.pathwayMap = function(Pathway.Name, PatientID, patient.zscore, scalingFacto
   #       pt.cex=seq(1, ceiling(max(V(template.g)$size)), scalingFactor),
   #       col='black',pch=21, pt.bg='white', cex=2, horiz=TRUE)
   #dev.off()
-  V(template.g)$label.cex = 0.25
-  V(template.g)$label = rep("", length(V(template.g)$name))
-  svg(sprintf("%s/%s-%s.svg", outputFilePath, Pathway.Name, PatientID), width=15, height=15)
-  plot.igraph(template.g, layout=cbind(V(template.g)$x, V(template.g)$y), edge.arrow.size = 0.01, edge.width = 1,
-              vertex.frame.color=V(template.g)$color, main = gsub("-", " ", Pathway.Name))
-  legend('bottom',legend=1:max(ceiling(V(template.g)$size/scalingFactor)),
-         pt.cex=seq(1, ceiling(max(V(template.g)$size)), scalingFactor),
-         col='black',pch=21, pt.bg='white', cex=2, horiz=TRUE)
-  dev.off()
+  if (Pathway.Name=="allPathways") {
+    V(template.g)$label.cex = 0.25
+    V(template.g)$label = rep("", length(V(template.g)$name))
+  }
+  if (SVG) {
+    svg(sprintf("%s/%s-%s.svg", outputFilePath, Pathway.Name, PatientID), width=15, height=15)
+    plot.igraph(template.g, layout=cbind(V(template.g)$x, V(template.g)$y), edge.arrow.size = 0.01, edge.width = 1,
+                vertex.frame.color=V(template.g)$color, main = gsub("-", " ", Pathway.Name))
+    legend('bottom',legend=1:max(ceiling(V(template.g)$size/scalingFactor)),
+           pt.cex=seq(1, ceiling(max(V(template.g)$size)), scalingFactor),
+           col='black',pch=21, pt.bg='white', cex=2, horiz=TRUE)
+    dev.off()
+  } else {
+    png(sprintf("%s/%s-%s.png", outputFilePath, Pathway.Name, PatientID), 1000, 1000)
+    plot.igraph(template.g, layout=cbind(V(template.g)$x, V(template.g)$y), edge.arrow.size = 0.01, edge.width = 1,
+                vertex.frame.color=V(template.g)$color, main = gsub("-", " ", Pathway.Name))
+    legend('bottom',legend=1:max(ceiling(V(template.g)$size/scalingFactor)),
+           pt.cex=seq(1, ceiling(max(V(template.g)$size)), scalingFactor),
+           col='black',pch=21, pt.bg='white', cex=2, horiz=TRUE)
+    dev.off()
+  }
+
 }
 
 

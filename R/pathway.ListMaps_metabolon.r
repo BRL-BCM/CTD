@@ -10,7 +10,7 @@
 #' pwys = pathway.ListMaps_metabolon(metabolon_knowledgebase_path)
 #' print(pwys)
 pathway.ListMaps_metabolon = function(Pathway.Knowledgebase.Path) {
-  ig_files = list.files(sprintf("%s/extdata/RData/", getwd()), pattern = ".RData")
+  ig_files = list.files(sprintf("%s/extdata/RData/", Pathway.Knowledgebase.Path), pattern = ".RData")
   ig_files = ig_files
   pwys = unlist(sapply(ig_files, function(i) unlist(strsplit(i, split=".RData"))[1]))
   pwys = as.character(pwys)
