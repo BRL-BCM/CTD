@@ -37,7 +37,7 @@ rownames(t$dir) = colnames(data_mx)
 colnames(t$dir) = colnames(data_mx)
 rownames(t$jac) = colnames(data_mx)
 colnames(t$jac) = colnames(data_mx)
-for (i in 1:(kmx-1)) {
+for (i in 1:kmx) {
   res[[i]] = t
 }
 for (pt in 1:ncol(data_mx)) {
@@ -45,7 +45,7 @@ for (pt in 1:ncol(data_mx)) {
   ptID = colnames(data_mx)[pt]
   for (pt2 in pt:ncol(data_mx)) {
     ptID2 = colnames(data_mx)[pt2]
-    for (k in 1:(kmx-1)) {
+    for (k in 1:kmx) {
       tmp = mle.getPtSim(ptBSbyK[[ptID]][k], ptID, ptBSbyK[[ptID2]][k], ptID2, data_mx, perms)
       res[[k]]$ncd[ptID, ptID2] = tmp$NCD
       res[[k]]$dir[ptID, ptID2] = tmp$dirSim

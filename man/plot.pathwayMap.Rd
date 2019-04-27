@@ -5,7 +5,7 @@
 \title{Generate pathway map with patient perturbation data superimposed.}
 \usage{
 \method{plot}{pathwayMap}(Pathway.Name, PatientID, patient.zscore,
-  scalingFactor, outputFilePath)
+  zscore.threshold, scalingFactor, outputFilePath, SVG = TRUE)
 }
 \arguments{
 \item{Pathway.Name}{- The name of the pathway map you want to plot patient data on.}
@@ -14,9 +14,13 @@
 
 \item{patient.zscore}{- A named vector of metabolites with corresponding z-scores.}
 
+\item{zscore.threshold}{- Plot all z-scores > or < this threshold.}
+
 \item{scalingFactor}{- Integer associated with increase in node size.}
 
 \item{outputFilePath}{- The directory in which you want to store image files.}
+
+\item{SVG}{- Save as SVG or PNG? If SVG is TRUE, then an SVG image is saved. If FALSE, a PNG is saved.}
 }
 \description{
 Generate pathway map with patient perturbation data superimposed.

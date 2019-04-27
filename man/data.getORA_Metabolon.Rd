@@ -23,5 +23,5 @@ A function that returns the pathway enrichment score for all perturbed metabolit
 }
 \examples{
 
-pathway.data = data.getMSEA_Metabolon(met.profile, threhold=3, "z-score", NULL)
+pathway.data = data.getORA_Metabolon(met.profile, threhold=3, "z-score", NULL)
 }
