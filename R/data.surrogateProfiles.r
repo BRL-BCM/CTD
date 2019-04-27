@@ -64,7 +64,7 @@ data.surrogateProfiles = function(data, sd=1, useMnDiseaseProfile=FALSE, addHeal
     }
     colnames(data_surr) = c(colnames(data), sprintf("disease_surr%d", 1:(ncol(data_surr)-ncol(data))))
     rownames(data_surr) = rownames(data)
-    print(dim(data_surr))
+    dim(data_surr)
   }
 
   # Next, if addHealthyControls is TRUE, generate reference profile surrogates.
