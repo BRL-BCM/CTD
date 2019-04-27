@@ -4,7 +4,7 @@
 #' @param allSimMatrices - A list of all similarity matrices, across all k for a given graph, or across many graphs.
 #' @param diagnoses - A character vector of diagnostic labels associated with the colnames of each matrix in allSimMatrices.
 #' @param diseaseGraph - A diagnostic label found in diagnoses that the background knowledge graph was based on.
-#' @export plot.chooseKForMDS.r
+#' @export plot.chooseKForMDS
 #' @examples
 #' # Look at main_CTD.r script for full analysis script: https://github.com/BRL-BCM/CTD.
 #' # Get patient distances

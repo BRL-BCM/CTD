@@ -2,7 +2,7 @@
 #'
 #' A function that returns the pathway enrichment score for all perturbed metabolites in a patient's full metabolomic profile.
 #' @param allSimMatrices - A list of all similarity matrices, across all k for a given graph, or across many graphs.
-#' @export mle.getMinPtDistance.r
+#' @export mle.getMinPtDistance
 #' @examples
 #' # Look at main_CTD.r script for full analysis script: https://github.com/BRL-BCM/CTD.
 #' # Get patient distances
@@ -41,6 +41,6 @@ mle.getMinPtDistance = function(allSimMatrices) {
       }
     }
   }
-  
+
   return(ptSim)
 }
