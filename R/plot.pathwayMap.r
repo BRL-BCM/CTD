@@ -148,7 +148,7 @@ plot.pathwayMap = function(Pathway.Name, PatientID, patient.zscore, zscore.thres
            col='black',pch=21, pt.bg='white', cex=2, horiz=TRUE)
     dev.off()
   } else {
-    png(sprintf("%s/%s-%s.png", outputFilePath, Pathway.Name, PatientID), 1000, 1000)
+    png(sprintf("%s/%s-%s.png", outputFilePath, Pathway.Name, PatientID), width=10, height=10, units="in", res=300)
     plot.igraph(template.g, layout=cbind(V(template.g)$x, V(template.g)$y), edge.arrow.size = 0.01, edge.width = 1,
                 vertex.frame.color=V(template.g)$color, main = gsub("-", " ", Pathway.Name))
     legend('bottom',legend=1:max(ceiling(V(template.g)$size/scalingFactor)),

@@ -15,30 +15,65 @@
 #'   S = data_mx[order(abs(data_mx[,pt]), decreasing=TRUE),pt][1:kmx]
 #'   ptBSbyK[[ptID]] = mle.getPtBSbyK_memory(S, perms)
 #' }
+#mle.getPtBSbyK_memory = function(S, perms) {
+#  pt.byK = list()
+#  for (k in 1:length(S)) {
+#    sig.nodes = S[1:k]
+#    sig.nodes = sapply(sig.nodes, trimws)
+#    pt.bitString = list()
+#    for (p in 1:length(sig.nodes)) {
+#      pt.bitString[[sig.nodes[p]]] = as.numeric(perms[[sig.nodes[p]]] %in% sig.nodes)
+#      names(pt.bitString[[sig.nodes[p]]]) = perms[[sig.nodes[p]]]
+#      ind = which(pt.bitString[[sig.nodes[p]]] == 1)
+#      pt.bitString[[sig.nodes[p]]] = pt.bitString[[sig.nodes[p]]][1:ind[length(ind)]]
+#    }
+    # Which found the most nodes
+#    bestInd = vector("numeric", length(sig.nodes))
+#    for (p in 1:length(sig.nodes)) {
+#      bestInd[p] = sum(pt.bitString[[p]])
+#    }
+#    pt.bitString = pt.bitString[which(bestInd==max(bestInd))]
+    # Which found the most nodes soonest
+#    bestInd = vector("numeric", length(pt.bitString))
+#    for (p in 1:length(pt.bitString)) {
+#      bestInd[p] = sum(which(pt.bitString[[p]] == 1))
+#          }
+#    pt.byK[[k]] = pt.bitString[[which.min(bestInd)]]
+#  }
+#  return(pt.byK)
+#}
+
+
 mle.getPtBSbyK_memory = function(S, perms) {
+  pt.bitString = list()
+  for (p in 1:length(perms)) {
+    pt.bitString[[S[p]]] = as.numeric(perms[[S[p]]] %in% S)
+    names(pt.bitString[[S[p]]]) = perms[[S[p]]]
+    ind = which(pt.bitString[[S[p]]] == 1)
+    pt.bitString[[S[p]]] = pt.bitString[[S[p]]][1:ind[length(ind)]]
+  }
+  # For each k, find the perms that found at least k in S. Which found the first k soonest?
   pt.byK = list()
   for (k in 1:length(S)) {
-    sig.nodes = S[1:k]
-    sig.nodes = sapply(sig.nodes, trimws)
-    pt.bitString = list()
-    for (p in 1:length(sig.nodes)) {
-      pt.bitString[[sig.nodes[p]]] = as.numeric(perms[[sig.nodes[p]]] %in% sig.nodes)
-      names(pt.bitString[[sig.nodes[p]]]) = perms[[sig.nodes[p]]]
-      ind = which(pt.bitString[[sig.nodes[p]]] == 1)
-      pt.bitString[[sig.nodes[p]]] = pt.bitString[[sig.nodes[p]]][1:ind[length(ind)]]
-    }
-    # Which found the most nodes
-    bestInd = vector("numeric", length(sig.nodes))
-    for (p in 1:length(sig.nodes)) {
+    pt.byK_tmp = pt.bitString
+    # Which found at least k nodes
+    bestInd = vector("numeric", length(S))
+    for (p in 1:length(S)) {
       bestInd[p] = sum(pt.bitString[[p]])
     }
-    pt.bitString = pt.bitString[which(bestInd==max(bestInd))]
-    # Which found the most nodes soonest
-    bestInd = vector("numeric", length(pt.bitString))
-    for (p in 1:length(pt.bitString)) {
-      bestInd[p] = sum(which(pt.bitString[[p]] == 1))
+    if (length(which(bestInd>=k))>0) {
+      pt.byK_tmp = pt.byK_tmp[which(bestInd>=k)]
+      # Which found the most nodes soonest
+      bestInd = vector("numeric", length(pt.byK_tmp))
+      for (p in 1:length(pt.byK_tmp)) {
+        bestInd[p] = sum(which(pt.byK_tmp[[p]] == 1)[1:k])
+      }
+      maxInd = max(which(pt.byK_tmp[[which.min(bestInd)]] == 1)[1:k])
+      pt.byK[[k]] = pt.byK_tmp[[which.min(bestInd)]][1:maxInd]
+    } else {
+      pt.byK[[k]] = pt.byK_tmp[[which.max(bestInd)]]
     }
-    pt.byK[[k]] = pt.bitString[[which.min(bestInd)]]
   }
+
   return(pt.byK)
 }
