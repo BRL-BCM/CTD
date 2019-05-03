@@ -45,10 +45,11 @@
 
 
 mle.getPtBSbyK_memory = function(S, perms) {
+  perms2 = perms[which(names(perms) %in% S)]
   pt.bitString = list()
-  for (p in 1:length(perms)) {
-    pt.bitString[[S[p]]] = as.numeric(perms[[S[p]]] %in% S)
-    names(pt.bitString[[S[p]]]) = perms[[S[p]]]
+  for (p in 1:length(perms2)) {
+    pt.bitString[[S[p]]] = as.numeric(perms2[[S[p]]] %in% S)
+    names(pt.bitString[[S[p]]]) = perms2[[S[p]]]
     ind = which(pt.bitString[[S[p]]] == 1)
     pt.bitString[[S[p]]] = pt.bitString[[S[p]]][1:ind[length(ind)]]
   }

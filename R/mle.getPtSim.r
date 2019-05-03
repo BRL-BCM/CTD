@@ -95,22 +95,30 @@ mle.getPtSim = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, perms) {
     perms = mle.getPerms_memory(p12.sig.nodes, G)
     p12.e = c()
     for (k in 1:length(p1.optBS)) {
-      p1.sig.nodes = names(sort(abs(data_mx[,ptID]), decreasing = TRUE)[1:k])
-      p2.sig.nodes = names(sort(abs(data_mx[,ptID2]), decreasing = TRUE)[1:k])
-      p12.sig.nodes = unique(c(p1.sig.nodes, p2.sig.nodes))
-      p12.optBS = mle.getPtBSbyK_memory(p12.sig.nodes, perms)
-      p12.e[k] = mle.getEncodingLength(p12.optBS, NULL, NULL, G)[length(p12.optBS),"IS.alt"]
+      p1.sig.nodes_cpy = p1.sig.nodes
+      p2.sig.nodes_cpy = p2.sig.nodes
+
+      p1.sig.nodes_k = names(which(ptBSbyK[[ptID]][[k]]==1))
+      p2.sig.nodes_k = names(which(ptBSbyK[[ptID2]][[k]]==1))
+      while (length(p1.sig.nodes_k)<k) {
+        p1.sig.nodes_k = unique(c(p1.sig.nodes_k, p1.sig.nodes_cpy[1]))
+        p1.sig.nodes_cpy = p1.sig.nodes_cpy[-1]
+      }
+      while (length(p2.sig.nodes_k)<k) {
+        p2.sig.nodes_k = unique(c(p2.sig.nodes_k, p2.sig.nodes_cpy[1]))
+        p2.sig.nodes_cpy = p2.sig.nodes_cpy[-1]
+      }
+      p12.sig.nodes_k = unique(c(p1.sig.nodes_k, p2.sig.nodes_k))
+      p12.optBS = mle.getPtBSbyK_memory(p12.sig.nodes_k, perms)
+      p12.e[k] = mle.getEncodingLength(p12.optBS, NULL, NULL, G)[length(p12.sig.nodes_k),"IS.alt"]
     }
   } else {
     # Using the "memoryless" network walker, get optimal bitstring for encoding of patient1's union patient2's subsets.
-    p12.e = c()
-    for (k in 1:length(p1.optBS)) {
-      p1.sig.nodes = names(sort(abs(data_mx[,ptID]), decreasing = TRUE))[1:k]
-      p2.sig.nodes = names(sort(abs(data_mx[,ptID2]), decreasing = TRUE))[1:k]
-      p12.sig.nodes = unique(c(p1.sig.nodes, p2.sig.nodes))
-      p12.optBS = mle.getPtBSbyK_memoryless(p12.sig.nodes, perms)
-      p12.e[k] = mle.getEncodingLength(p12.optBS, NULL, NULL, G)[length(p12.optBS),"IS.alt"]
-    }
+    p1.sig.nodes = names(sort(abs(data_mx[,ptID]), decreasing = TRUE)[1:length(p1.optBS)])
+    p2.sig.nodes = names(sort(abs(data_mx[,ptID2]), decreasing = TRUE)[1:length(p2.optBS)])
+    p12.sig.nodes = unique(c(p1.sig.nodes, p2.sig.nodes))
+    p12.optBS = mle.getPtBSbyK_memoryless(p12.sig.nodes, perms)
+    p12.e = mle.getEncodingLength(p12.optBS, NULL, NULL, G)[,"IS.alt"]
   }
 
   # Normalized Compression Distance, Percent Mutual Information
