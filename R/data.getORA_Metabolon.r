@@ -23,7 +23,7 @@ data.getORA_Metabolon = function(met.profile, threshold=3, type="zscore", gene.p
   # The size of the population of total possible metabolites to draw from
   population = names(met.profile)
   paths.hsa = list.dirs(path="../extdata", full.names = FALSE)
-  paths.hsa = paths.hsa[-which(paths.hsa %in% c("", "RData", "allPathways"))]
+  paths.hsa = paths.hsa[-which(paths.hsa %in% c("", "RData", "allPathways", "MSEA_Datasets"))]
   row = 1
   pathway.data = data.frame(Pathway=character(), FDR=numeric(), Pvalue=numeric(), Hits=integer(), Size=integer(), stringsAsFactors = FALSE)
   for (pathway in 1:length(paths.hsa)) {
