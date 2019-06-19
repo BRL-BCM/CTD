@@ -49,6 +49,20 @@ mle.getPtSim = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, perms) {
 
   # Get optimal bitstring for encoding of patient1's union patient2's subsets
   dirSim = vector("numeric", length=length(p1.optBS))
+  for (k in 1:length(p1.optBS)) {
+    p1.sig.nodes = rownames(data_mx)[order(abs(data_mx[,ptID]), decreasing = TRUE)][1:k]
+    p2.sig.nodes = rownames(data_mx)[order(abs(data_mx[,ptID2]), decreasing = TRUE)][1:k]
+    p1.dirs = data_mx[p1.sig.nodes, ptID]
+    p1.dirs[which(!(p1.dirs>0))] = 0
+    p1.dirs[which(p1.dirs>0)] = 1
+    p2.dirs = data_mx[p2.sig.nodes, ptID2]
+    p2.dirs[which(!(p2.dirs>0))] = 0
+    p2.dirs[which(p2.dirs>0)] = 1
+    p1.sig.nodes = sprintf("%s%d", p1.sig.nodes, p1.dirs)
+    p2.sig.nodes = sprintf("%s%d", p2.sig.nodes, p2.dirs)
+    dirSim[k] = 1 - (length(intersect(p1.sig.nodes, p2.sig.nodes))/length(union(p1.sig.nodes, p2.sig.nodes)))
+  }
+
   if (is.null(perms)) {
     # Using the "with memory" network walker, get optimal bitstring for encoding of patient1's union patient2's subsets
     p1.sig.nodes = sapply(names(sort(abs(data_mx[,ptID]), decreasing = TRUE)[1:length(p1.optBS)]), trimws)
@@ -74,18 +88,6 @@ mle.getPtSim = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, perms) {
       p12.optBS = mle.getPtBSbyK_memory(p12.sig.nodes_k, perms)
       res = mle.getEncodingLength(p12.optBS, NULL, NULL, G)
       p12.e[k] = res[which.max(res[,"d.score"]), "IS.alt"] + log2(choose(length(G), 1))*(length(p12.sig.nodes_k)-which.max(res[,"d.score"]))
-
-      p1.sig.nodes2 = rownames(data_mx)[order(abs(data_mx[,ptID]), decreasing = TRUE)][1:k]
-      p2.sig.nodes2 = rownames(data_mx)[order(abs(data_mx[,ptID2]), decreasing = TRUE)][1:k]
-      p1.dirs = data_mx[p1.sig.nodes2, ptID]
-      p1.dirs[which(!(p1.dirs>0))] = 0
-      p1.dirs[which(p1.dirs>0)] = 1
-      p2.dirs = data_mx[p2.sig.nodes2, ptID2]
-      p2.dirs[which(!(p2.dirs>0))] = 0
-      p2.dirs[which(p2.dirs>0)] = 1
-      p1.sig.nodes2 = sprintf("%s%d", p1.sig.nodes2, p1.dirs)
-      p2.sig.nodes2 = sprintf("%s%d", p2.sig.nodes2, p2.dirs)
-      dirSim[k] = 1 - (length(intersect(p1.sig.nodes2, p2.sig.nodes2))/length(union(p1.sig.nodes2, p2.sig.nodes2)))
     }
   } else {
     # Using the "memoryless" network walker, get optimal bitstring for encoding of patient1's union patient2's subsets.
@@ -94,19 +96,6 @@ mle.getPtSim = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, perms) {
     p12.sig.nodes = unique(c(p1.sig.nodes, p2.sig.nodes))
     p12.optBS = mle.getPtBSbyK_memoryless(p12.sig.nodes, perms)
     p12.e = mle.getEncodingLength(p12.optBS, NULL, NULL, G)[,"IS.alt"]
-    for (k in 1:length(p1.optBS)) {
-      p1.sig.nodes2 = rownames(data_mx)[order(abs(data_mx[,ptID]), decreasing = TRUE)][1:k]
-      p2.sig.nodes2 = rownames(data_mx)[order(abs(data_mx[,ptID2]), decreasing = TRUE)][1:k]
-      p1.dirs = data_mx[p1.sig.nodes2, ptID]
-      p1.dirs[which(!(p1.dirs>0))] = 0
-      p1.dirs[which(p1.dirs>0)] = 1
-      p2.dirs = data_mx[p2.sig.nodes2, ptID2]
-      p2.dirs[which(!(p2.dirs>0))] = 0
-      p2.dirs[which(p2.dirs>0)] = 1
-      p1.sig.nodes2 = sprintf("%s%d", p1.sig.nodes2, p1.dirs)
-      p2.sig.nodes2 = sprintf("%s%d", p2.sig.nodes2, p2.dirs)
-      dirSim[k] = 1 - (length(intersect(p1.sig.nodes2, p2.sig.nodes2))/length(union(p1.sig.nodes2, p2.sig.nodes2)))
-    }
   }
 
   # Normalized Compression Distance, Percent Mutual Information
