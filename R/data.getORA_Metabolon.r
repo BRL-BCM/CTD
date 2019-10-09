@@ -22,6 +22,7 @@ data.getORA_Metabolon = function(met.profile, threshold=3, type="zscore", gene.p
 
   # The size of the population of total possible metabolites to draw from
   population = names(met.profile)
+  print(sprintf("Total number of metabolites in profile. = %d.", length(population)))
   paths.hsa = list.dirs(path="../extdata", full.names = FALSE)
   paths.hsa = paths.hsa[-which(paths.hsa %in% c("", "RData", "allPathways", "MSEA_Datasets", "Pathway_GMTs"))]
   row = 1
@@ -29,8 +30,10 @@ data.getORA_Metabolon = function(met.profile, threshold=3, type="zscore", gene.p
   for (pathway in 1:length(paths.hsa)) {
     load(sprintf("../extdata/RData/%s.RData", paths.hsa[pathway]))
 
-    pathway.compounds = V(ig)$label[which(V(ig)$shape=="circle")]
+    pathway.compounds = tolower(V(ig)$label[which(V(ig)$shape=="circle")])
     pathCompIDs = unique(tolower(pathway.compounds[which(pathway.compounds %in% population)]))
+    print(sprintf("Total number of metabolites in profile also in current Metabolon pathway. = %d.", length(pathCompIDs)))
+
     # q (sample successes), m (population successes), n (population failures), k (sample size)
     sampleSuccesses = length(which(nms.perturbed.mets %in% pathCompIDs))
     populationSuccesses = length(intersect(pathCompIDs, population))

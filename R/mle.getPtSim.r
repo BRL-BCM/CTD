@@ -67,7 +67,7 @@ mle.getPtSim = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, perms) {
     # Using the "with memory" network walker, get optimal bitstring for encoding of patient1's union patient2's subsets
     p1.sig.nodes = sapply(names(sort(abs(data_mx[,ptID]), decreasing = TRUE)[1:length(p1.optBS)]), trimws)
     p2.sig.nodes = sapply(names(sort(abs(data_mx[,ptID2]), decreasing = TRUE)[1:length(p2.optBS)]), trimws)
-    p12.sig.nodes = sapply(unique(c(p1.sig.nodes, p2.sig.nodes)), trimws)
+    p12.sig.nodes = as.character(sapply(unique(c(p1.sig.nodes, p2.sig.nodes)), trimws))
     perms = mle.getPerms_memory(p12.sig.nodes, G)
     p12.e = c()
     for (k in 1:length(p1.optBS)) {
