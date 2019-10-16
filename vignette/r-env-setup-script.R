@@ -7,7 +7,7 @@
 
 #' R package cache (precompiled packages based on colab env)
 message("Download R package cache")
-system("wget --continue https://drive.google.com/open?id=11FiOzQf7YFESIhYG4tFaL6odbnXDAHop")
+system("wget --continue https://drive.google.com/uc?export=download&id=11FiOzQf7YFESIhYG4tFaL6odbnXDAHop")
 
 #' Unpack cache locally
 message("Unzipping R package cache")
