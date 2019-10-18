@@ -19,9 +19,11 @@ downloadGDriveFile <- function(id, out){
 message("Download R package cache")
 downloadGDriveFile(out="r_binaries.tar.gz", id="1-VqZb_Cv63AH8ogWwhSp48DUowzv_GQf")
 
+system("ls")
+
 #' Unpack cache locally
 message("Unzipping R package cache")
-system("tar -xzf r_binaries.tar.gz -C /", intern=TRUE)
+system("tar -xzf r_binaries.tar.gz -C / ", intern=TRUE)
 
 #' Set correct library path
 .libPaths(Sys.getenv("R_LIBS_USER"))
