@@ -14,7 +14,9 @@ editor_options:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, fig.align="center")
 require(CTD)
+require(huge)
 setwd("/Users/lillian.rosa/Downloads/CTD/vignette")
+load("vignette.RData")
 ```
 This document was rendered at `r Sys.time()`
 
@@ -23,7 +25,7 @@ This document was rendered at `r Sys.time()`
 ## I.I: Manually build graphs from adjacency matrices.
 ![Figure 1. Cartoon of graph we will build manually via its adjacency matrix.](images/probability_diffusion.svg){width=350px}
 
-```{r manually build graph}
+```{r manually_build_graph}
 adj_mat = rbind(c(0,3,1,0,0,0,0,0,0), #A's neighbors
                 c(3,0,2,2,0,0,0,0,0), #B's neighbors
                 c(1,2,0,0,2,0,0,0,0), #C's neighbors
@@ -44,22 +46,16 @@ print(ig)
 
 
 ## I.II: Learn a graph from data.
-
-```{r learn graph from data}
+```{r learn_graph, eval=FALSE}
 # Load the Miller2015_Heparin dataset
 data(Miller2015_Heparin)
 data(heparin_metabolites)
-metClass = heparin_metabolites[,"SUPERPATHWAY"]
 data = Miller2015_Heparin
 # Only include metabolites that are present in >90% reference samples.
-fil.rate = data[,"FillRate"]
-data = data[which(fil.rate>0.90),-c(1,2,3)]
-metClass = metClass[which(fil.rate>0.90)]
+fil.rate = anno$`Times identifed in all 200 samples`/200
+names(fil.rate) = rownames(anno)
+data = data[which(fil.rate>0.90), ]
 #dim(data)
-#length(metClass)
-# Remove all Xenobiotics
-#rownames(data)[which(metClass=="Xenobiotics")]
-data = data[-which(metClass=="Xenobiotics"),]
 # Remove any metabolites where any profile has a z-score > 1000. These are likely imputed raw values that were not z-scored.
 rmMets = names(which(apply(data, 1, function(i) any(i>20))))
 if (length(rmMets)>0) {
@@ -68,35 +64,26 @@ if (length(rmMets)>0) {
 #dim(data)
 
 # Get the diagnoses associated with the samples
-diag = colnames(data)
-diag = gsub("[[:digit:]]", "", diag)
-# Collapse cobalamin deficiency subtypes into one category CBL
-diag[grep("cbl.a|CBLC", diag)] = "CBL"
-# Look at the diagnoses available
-diagnoses = data.frame(id=colnames(data), diagnosis=diag)
-#table(diagnoses$diagnosis)
-ind.nones = which(diagnoses$diagnosis=="None")
-
+data(Miller2015_diags)
 # Get data from all patients with Argininemia
 arg_data = data[,which(diagnoses$diagnosis=="Argininemia")]
 # Add surrogate disease and surrogate reference profiles based on 1 standard deviation around profiles from real patients to improve rank of matrix when learning Gaussian Markov Random Field network on data.
-arg_data = data.surrogateProfiles(arg_data, 1, TRUE, ref_data = data[,ind.nones])
+arg_data = data.surrogateProfiles(arg_data, 1, FALSE, TRUE, ref_data = data[,which(diagnoses$diagnosis=="No biochemical genetic diagnosis")])
 #dim(arg_data)
 
 # Learn a Gaussian Markov Random Field model using the Graphical LASSO in the R package "huge". 
 # Select the regularization parameter based on the "STARS" stability estimate.
-require(huge)
+# require(huge)
 #This will take 30 seconds - 1 minute.
 arg = huge(t(arg_data), method="glasso")
 plot(arg)
 # This will take 3-5-ish minutes.
-#arg.select = huge.select(arg, criterion="stars")
-#plot(arg.select)
+arg.select = huge.select(arg, criterion="stars")
+plot(arg.select)
 # This is the regularization parameter the STARS method selected.
-#print(arg.select$opt.lambda)
+print(arg.select$opt.lambda)
 # This is the corresponding inverse of the covariance matrix that corresponds to the selected regularization level.
-#arg_icov = as.matrix(arg.select$opt.icov)
-arg_icov = as.matrix(arg$icov[[6]])
+arg_icov = as.matrix(arg.select$opt.icov)
 # Remove all "self" edges, as we are not interested in self-relationships.
 diag(arg_icov) = 0
 rownames(arg_icov) = rownames(arg_data)
@@ -107,22 +94,13 @@ print(ig_arg)
 ```
 
 
-
-
-
-
-
-
-
-
-
 # II. The Probability Diffusion Algorithm
 ## II.I From a starting node.
 Run the following code, then go to the directory, and open all diffusionEventMovie*.png files all at once. Starting from the first image, view how the probability diffusion algorithm works to diffuse 100% probability to the rest of the graph. Be sure to pay attention to the recursion level listed in the title of each image, to imagine where in the call stack the algorithm is at the captured time the image was generated.
-```{r diffusion no visited}
+```{r diffusion_no_visited}
 # Set some global parameters for the Probability Diffusion Algorithm. 
-p0=0.1
-p1=0.9
+p0=0.0
+p1=1.0
 thresholdDiff=0.01
 
 G=vector(mode="list", length=length(V(ig)$name))
@@ -130,8 +108,6 @@ G[1:length(G)] = 0
 names(G) = c("A", "B", "C", "D", "E", "F", "G", "H", "I")
 startNode = "A"
 visitedNodes = startNode
-# Diffuse 100% of probability from startNode "A"
-p1 = 1.0
 # Probability diffusion truncates at
 thresholdDiff=0.01
 coords = layout.fruchterman.reingold(ig)
@@ -146,11 +122,9 @@ sum(unlist(G_new))
 G_new[which.max(G_new)]
 ```
 
-
-
 ## II.II From a starting node, after visiting previous nodes.
 Now, delete all diffusionEventMovie*.png files from your current directory, and run the following code. View the new image stack in the same way we did previously.
-```{r diffusion with visited}
+```{r diffusion_with_visited}
 # Now let's see how the probability diffusion algorithm diffuses probability after B has been "stepped" into.
 visitedNodes = c("A", "B")
 startNode = "B"
@@ -163,10 +137,9 @@ sum(unlist(G_new))
 G_new[which.max(G_new)]
 ```
 
-
 ## II.III Diffusing through visited nodes, based on connectivity.
 Sometimes the startNode is "stranded" by a bunch of visited nodes. The diffusion algorithm diffuses "through" visited nodes, so that nodes in the same connected component can be prioritized over nodes in a different connected component, or "island nodes" (e.g. in the below code snippet, "I" is an island node). This only works currently for nodes 2 hops away from the current startNode, however.
-```{r diffuse through visited}
+```{r diffuse_through_visited}
 adj_mat = rbind(c(0,1,2,0,0,0,0,0,0), #A's neighbors
                 c(1,0,3,0,0,0,0,0,0), #B's neighbors
                 c(2,3,0,0,1,0,0,0,0), #C's neighbors
@@ -195,10 +168,9 @@ G_new[which.max(G_new)]
 ```
 
 
-
-# III. The Network Walkers
-## III.I Biased ("With Memory") Network Walker
-```{r biased network walker}
+# III. The Network Encoding Algorithms
+## III.I Multi-Node Diffusion Encoding
+```{r adaptive_network_walker}
 adj_mat = rbind(c(0,3,1,0,0,0,0,0,0), #A's neighbors
                 c(3,0,2,2,0,0,0,0,0), #B's neighbors
                 c(1,2,0,0,2,0,0,0,0), #C's neighbors
@@ -222,8 +194,12 @@ perms = mle.getPermMovie_memory(subset.nodes = c("A", "B"), ig, output_filepath 
 perms = mle.getPerms_memory(S = c("A", "B"), G)
 ```
 
-## III.II Unbiased ("Memoryless") Network Walker
-```{r unbiased network walker}
+## III.II Single-Node Diffusion Encoding
+```{r unbiased_network_walker}
+# This network walker is less sensitive, but node permutations can be calculated ahead of time (along the lines of a dynamic programming solution), 
+#      so thousands of subsets can be reasoned about very quickly.
+
+# Generate PNGs to animate the network walker.
 perms = mle.getPermMovie_memoryless(subset.nodes = c("A", "B"), ig, output_filepath = "/Users/lillian.rosa/Downloads/CTD/vignette/unbiased_walker", movie=TRUE, zoomIn = FALSE)
 
 # Get perms as list object, with no images generated
@@ -237,81 +213,103 @@ names(perms) = S
 
 
 
-
-
-
 # IV. The Encoding Process
+We're going to go back to our data using the Arginase deficiency network model, and the Miller et al (2015) dataset.
 ## IV.I Choose your node subset.
-```{r node subset}
+```{r node_subset}
+# Maximum subset size to inspect
+kmx=15
+# Some global variables from before.
+adjacency_matrix = list(arg_icov)
+G=vector(mode="list", length=length(V(ig_arg)$name))
+G[1:length(G)] = 0
+names(G) = V(ig_arg)$name
 
+# Get our node subset associated with the $KMX highest perturbed (up or down) in our first Arginase deficiency sample.
+S_arg = sort(abs(arg_data[,1]), decreasing=TRUE)[1:kmx]
+print(S_arg)
 ```
 
 ## IV.II Get k node permutations.
-```{r node permutations}
-
+```{r node_permutations}
+# Get the adaptive network walker's paths starting from each node in the subset S_arg.
+perms = mle.getPerms_memory(S = names(S_arg), G)
 ```
 
 ## IV.III Convert to bitstrings.
-```{r convert to bitstrings}
-#ptBSbyK = mle.getPtBSbyK(data_mx, ptID, perms, kmx)
+```{r convert_to_bitstrings}
+ptBSbyK = mle.getPtBSbyK_memory(names(S_arg), perms)
 ```
 
 ## IV.IV Get encoding length of minimum length codeword.
-```{r encoding length}
-#res = mle.getEncodingLength(ptBSbyK, data_mx.pvals, ptID, G)
+```{r encoding_length}
+ptID = colnames(arg_data)[1]
+data_mx.pvals=apply(arg_data[,which(colnames(arg_data) %in% diagnoses$id)], c(1,2), function(i) 2*pnorm(abs(i), lower.tail=FALSE))
+res = mle.getEncodingLength(ptBSbyK, t(data_mx.pvals), ptID, G)
 ```
 
 ## IV.V Get probability of node subset.
-```{r probability of set}
-#2^-res[,"IS.alt"]
+```{r probability_of_set}
+2^-res[,"IS.alt"]
 ```
 
+## IV.V Get p-value of variable length encoding vs. fixed length encoding.
+```{r pvalue_of_set}
+2^-res[,"d.score"]
+```
 
 
 
 # V. Patient Similarity
-```{r patient similarity}
-#data_mx.pvals=apply(data_mx, c(1,2), function(i) 2*pnorm(abs(i), lower.tail=FALSE))
-#res=list()
-#t=list(ncd=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)),
-#        dir=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)),
-#        jac=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)))
-#rownames(t$ncd)=colnames(data_mx)
-#colnames(t$ncd)=colnames(data_mx)
-#rownames(t$dir)=colnames(data_mx)
-#colnames(t$dir)=colnames(data_mx)
-#rownames(t$jac)=colnames(data_mx)
-#colnames(t$jac)=colnames(data_mx)
-#for (i in 1:(kmx-1)) {
-# res[[i]]=t
-#}
-#for (pt in 1:ncol(data_mx)) {
-# print(pt)
-# ptID=colnames(data_mx)[pt]
-# for (pt2 in pt:ncol(data_mx)) {
-#   ptID2=colnames(data_mx)[pt2]
-#   for (k in 1:(kmx-1)) {
-#     tmp=mle.getPatientSimilarity(ptBSbyK[[ptID]][k], ptID, ptBSbyK[[ptID2]][k], ptID2, data_mx, perms)
-#     res[[k]]$ncd[ptID, ptID2]=tmp$NCD
-#     res[[k]]$dir[ptID, ptID2]=tmp$dirSim
-#     res[[k]]$ncd[ptID2, ptID]=tmp$NCD
-#     res[[k]]$dir[ptID2, ptID]=tmp$dirSim
+```{r patient_similarity, eval=FALSE}
+data_mx = arg_data[,which(colnames(arg_data) %in% diagnoses$id)]
+data_mx = data_mx[,1:8]
+ptBSbyK = list()
+for (pt in 1:ncol(data_mx)) {
+  ptID=colnames(data_mx)[pt]
+  S_arg = sort(abs(data_mx[,pt]), decreasing=TRUE)[1:kmx]
+  perms = mle.getPerms_memory(S = names(S_arg), G)
+  ptBSbyK[[ptID]] = mle.getPtBSbyK_memory(names(S_arg), perms)
+}
+res = list()
+t = list(ncd=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)),
+        jacdir=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)))
+rownames(t$ncd) = colnames(data_mx)
+colnames(t$ncd) = colnames(data_mx)
+rownames(t$jacdir) = colnames(data_mx)
+colnames(t$jacdir) = colnames(data_mx)
+for (i in 1:kmx) {
+  res[[i]] = t
+}
+for (pt in 1:(ncol(data_mx)-1)) {
+  print(sprintf("Patient %d vs...", pt))
+  ptID=colnames(data_mx)[pt]
+  for (pt2 in (pt+1):ncol(data_mx)) {
+    print(sprintf("Patient %d.", pt2))
+    ptID2=colnames(data_mx)[pt2]
+    tmp = mle.getPtSim(ptBSbyK[[ptID]], ptID, ptBSbyK[[ptID2]], ptID2, data_mx, NULL)
+    # Similarity based on mututal information, by subset size.
+    # plot(1:kmx, tmp$NCD)
+    # Similarity based on Jaccard set similarity with directionality, by subset size.
+    # plot(1:kmx, tmp$dirSim)
+    for (k in 1:kmx) {
+      res[[k]]$ncd[ptID, ptID2] = tmp$NCD[k]
+      res[[k]]$jacdir[ptID, ptID2] = tmp$dirSim[k]
+      res[[k]]$ncd[ptID2, ptID] = tmp$NCD[k]
+      res[[k]]$jacdir[ptID2, ptID] = tmp$dirSim[k]
+    }
+  }
+}
 
-#     p1.sig.nodes=rownames(data_mx)[order(abs(data_mx[,ptID]), decreasing=TRUE)][1:k]
-#     p2.sig.nodes=rownames(data_mx)[order(abs(data_mx[,ptID2]), decreasing=TRUE)][1:k]
-#     p1.dirs=data_mx[p1.sig.nodes, ptID]
-#     p1.dirs[which(!(p1.dirs>0))]=0
-#     p1.dirs[which(p1.dirs>0)]=1
-#     p2.dirs=data_mx[p2.sig.nodes, ptID2]
-#     p2.dirs[which(!(p2.dirs>0))]=0
-#     p2.dirs[which(p2.dirs>0)]=1
-#     p1.sig.nodes=sprintf("%s%d", p1.sig.nodes, p1.dirs)
-#     p2.sig.nodes=sprintf("%s%d", p2.sig.nodes, p2.dirs)
-#     res[[k]]$jac[ptID, ptID2]=1-(length(intersect(p1.sig.nodes, p2.sig.nodes))/length(union(p1.sig.nodes, p2.sig.nodes)))
-#     res[[k]]$jac[ptID2, ptID]=1-(length(intersect(p1.sig.nodes, p2.sig.nodes))/length(union(p1.sig.nodes, p2.sig.nodes)))
-#   }
-# }
-#}
+for (pt in 1:ncol(data_mx)) {
+  for (k in 1:kmx) {
+    res[[k]]$ncd[pt, pt] = 0
+    res[[k]]$jacdir[pt, pt] = 0
+  }
+}
+
+res_all = res
+
 ```
 
 
@@ -320,18 +318,31 @@ names(perms) = S
 ```{r visualizations}
 # Multi-dimensional scaling
 # if you have diagnostic labels associated with the colnames(data_mx), send them using diagnoses parameter
-#diagnoses=colnames(data_mx)
-#diagnoses[1:25]="diseased"
-#diagnoses[26:50]="neg_control"
-#patientSim=0.8*res[[k]]$ncd+0.2*res[[k]]$dir
-#p=plot.mdsSim(patientSim, diagnoses, k=3, diag="diseased")
-#p
+res_ncd = lapply(res_all, function(i) i$ncd)
+res_jacdir = lapply(res_all, function(i) i$jacdir)
+ncd = mle.getMinPtDistance(res_ncd)
+jacdir = mle.getMinPtDistance(res_jacdir)
+diags = colnames(data_mx)
+diags[which(diags %in% diagnoses$id[which(diagnoses$diagnosis=="Argininemia")])] = "ARG"
+diags[which(diags %in% diagnoses$id[which(diagnoses$diagnosis!="Argininemia")])] = "negCntl"
+names(diags) = colnames(res_all[[1]]$ncd)
+# alpha weighs infromation from NCD with information from Jaccard-dir. alpha must be between 0 and 1.
+p =  htmltools::tagList()
+i = 1
+for (alpha in seq(0, 1, 0.1)) {  
+  patientSim=alpha*ncd+(1-alpha)*jacdir
+  colnames(patientSim) = colnames(res_all[[1]]$ncd)
+  rownames(patientSim) = colnames(res_all[[1]]$ncd)
+  p[[i]] = as_widget(plot.mdsSim(patientSim, diags, k=2, NULL))
+  i = i + 1
+  
+  # Hierarchical clustering
+  # A PNG image called "ptSimilarity.png" will save in the path set as parameter "path" in plot.hmSim function call.
+  plot.hmSim(patientSim, path=getwd(), diags)
+  
+  # K-NN
+  plot.knnSim(patientSim, diags, diag="ARG")
+}
+p
 
-
-# Hierarchical clustering
-#plot.hmSim(patientSim, path=getwd(), diagnoses)
-
-
-# K-NN
-#plot.knnSim(patientSim)
 ```
