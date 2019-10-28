@@ -9,7 +9,7 @@
 #' an unanticipated reduction in multiple sphingomyelin species.
 #'
 #' @docType data
-#' @usage data(Wangler2017_EDTA)
+#' @usage data(Wangler2017)
 #'
 #'
 #' @keywords datasets
@@ -21,5 +21,5 @@
 #'
 #' @examples
 #' require(CTD)
-#' data(Wangler2017_EDTA)
-"Wangler2017_EDTA"
+#' data(Wangler2017)
+NULL

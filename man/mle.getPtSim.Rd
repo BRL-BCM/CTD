@@ -29,14 +29,11 @@ This function calculates the universal distance between patients, using a mutual
 data_mx.pvals = apply(data_mx, c(1,2), function(i) 2*pnorm(abs(i), lower.tail = FALSE))
 res = list()
 t = list(ncd=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)),
-         dir=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)),
-         jac=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)))
+         jacdir=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)))
 rownames(t$ncd) = colnames(data_mx)
 colnames(t$ncd) = colnames(data_mx)
-rownames(t$dir) = colnames(data_mx)
-colnames(t$dir) = colnames(data_mx)
-rownames(t$jac) = colnames(data_mx)
-colnames(t$jac) = colnames(data_mx)
+rownames(t$jacdir) = colnames(data_mx)
+colnames(t$jacdir) = colnames(data_mx)
 for (i in 1:kmx) {
   res[[i]] = t
 }
@@ -48,22 +45,9 @@ for (pt in 1:ncol(data_mx)) {
     for (k in 1:kmx) {
       tmp = mle.getPtSim(ptBSbyK[[ptID]][k], ptID, ptBSbyK[[ptID2]][k], ptID2, data_mx, perms)
       res[[k]]$ncd[ptID, ptID2] = tmp$NCD
-      res[[k]]$dir[ptID, ptID2] = tmp$dirSim
+      res[[k]]$jacdir[ptID, ptID2] = tmp$dirSim
       res[[k]]$ncd[ptID2, ptID] = tmp$NCD
-      res[[k]]$dir[ptID2, ptID] = tmp$dirSim
-
-      p1.sig.nodes = rownames(data_mx)[order(abs(data_mx[,ptID]), decreasing = TRUE)][1:k]
-      p2.sig.nodes = rownames(data_mx)[order(abs(data_mx[,ptID2]), decreasing = TRUE)][1:k]
-      p1.dirs = data_mx[p1.sig.nodes, ptID]
-      p1.dirs[which(!(p1.dirs>0))] = 0
-      p1.dirs[which(p1.dirs>0)] = 1
-      p2.dirs = data_mx[p2.sig.nodes, ptID2]
-      p2.dirs[which(!(p2.dirs>0))] = 0
-      p2.dirs[which(p2.dirs>0)] = 1
-      p1.sig.nodes = sprintf("\%s\%d", p1.sig.nodes, p1.dirs)
-      p2.sig.nodes = sprintf("\%s\%d", p2.sig.nodes, p2.dirs)
-      res[[k]]$jac[ptID, ptID2] = 1 - (length(intersect(p1.sig.nodes, p2.sig.nodes))/length(union(p1.sig.nodes, p2.sig.nodes)))
-      res[[k]]$jac[ptID2, ptID] = 1 - (length(intersect(p1.sig.nodes, p2.sig.nodes))/length(union(p1.sig.nodes, p2.sig.nodes)))
+      res[[k]]$jacdir[ptID2, ptID] = tmp$dirSim
     }
   }
 }

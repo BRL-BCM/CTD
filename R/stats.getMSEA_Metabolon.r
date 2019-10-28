@@ -7,8 +7,9 @@
 #'                     The names of the vector are the metabolite names.
 #' @export data.getMSEA_Metabolon
 #' @examples
-#' data(Miller2015_Heparin)
-#' diagnoses = gsub("[[:digit:]]", "", colnames(Miller2015_Heparin))
+#' data(Miller2015)
+#' Miller2015 = Miller2015[,grep("IEM", colnames(Miller2015))]
+#' diagnoses = gsub("[[:digit:]]", "", colnames(Miller2015))
 #' diag.ind = diagnoses
 #' diag.ind[which(diag.ind!="Argininemia")] = 0
 #' diag.ind[which(diag.ind=="Argininemia")] = 1

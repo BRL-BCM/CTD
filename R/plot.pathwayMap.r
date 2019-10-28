@@ -23,7 +23,7 @@ plot.pathwayMap = function(Pathway.Name, PatientID, patient.zscore, zscore.thres
     names(patient.zscore)[which(names(patient.zscore)=="3-ureidopropionate")] = "ureidopropionate"
   }
 
-  nodeDisplayNames= read.table(sprintf("%s/%s/DisplayName-%s.txt", gmlPath, Pathway.Name, Pathway.Name), header=TRUE, sep="\n", check.names = FALSE)
+  nodeDisplayNames= read.table(sprintf("%s/%s/Name-%s.txt", gmlPath, Pathway.Name, Pathway.Name), header=TRUE, sep="\n", check.names = FALSE)
   tmp = apply(nodeDisplayNames, 1, function(i) unlist(strsplit(i, split= " = "))[2])
   tmp.nms = apply(nodeDisplayNames, 1, function(i) unlist(strsplit(i, split= " = "))[1])
   ind = as.numeric(tmp.nms)
@@ -34,7 +34,7 @@ plot.pathwayMap = function(Pathway.Name, PatientID, patient.zscore, zscore.thres
   names(nodeDisplayNames) = tmp.nms
   nodeDisplayNames = gsub("\\+", " ", nodeDisplayNames)
   # Load id to node types mappings
-  nodeType = read.table(sprintf("%s/%s/CompoundType-%s.txt", gmlPath, Pathway.Name, Pathway.Name), header=TRUE, sep="\n", check.names = FALSE)
+  nodeType = read.table(sprintf("%s/%s/Type-%s.txt", gmlPath, Pathway.Name, Pathway.Name), header=TRUE, sep="\n", check.names = FALSE)
   tmp = apply(nodeType, 1, function(i) unlist(strsplit(i, split= " = "))[2])
   tmp.nms = apply(nodeType, 1, function(i) unlist(strsplit(i, split= " = "))[1])
   ind = as.numeric(tmp.nms)

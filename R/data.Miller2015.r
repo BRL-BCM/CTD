@@ -11,7 +11,7 @@
 #' biomarkers for some diseases.
 #'
 #' @docType data
-#' @usage data(Miller2015_Heparin)
+#' @usage data(Miller2015)
 #'
 #'
 #' @keywords datasets
@@ -23,7 +23,5 @@
 #'
 #' @examples
 #' require(CTD)
-#' data(Miller2015_Heparin)
-#' data(Miller2015_diags)
-#' data("heparin_metabolites")
-"Miller2015_Heparin"
+#' data(Miller2015)
+NULL
