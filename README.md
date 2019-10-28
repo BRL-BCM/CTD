@@ -1,7 +1,7 @@
 # Connect The Dots (CTD):: a method which interprets multivariate perturbations identified in molecular profiles by identifying highly connected nodes in disease-specific co-perturbation networks
 An R package for probabilistic estimation of multivariate feature sets against a partial correlation network.
 
-## Check out CTD via Google Colab (NEW!!!)
+## Check out CTD via Google Colab (UNDER CONSTRUCTION)
 Check it out at https://tinyurl.com/BRL-BCM-CTD.
 Here you can reproduce analysis results from Thistlethwaite et al. (2019).
 
@@ -18,4 +18,4 @@ Located in /vignette/CTD_Lab-Exercise.html. It will take you across all the stag
 4. Calculate similarity between two node subsets, using a metric based on mutual information.
 
 ## References
-Thistlethwaite, L.R. et al. (2019). CTD: a method which interprets multivariate perturbations identified in molecular profiles by identifiying highly connected nodes in disease specific co-perturbation networks. In review.
+Thistlethwaite, L.R. et al. (2019). CTD: a method which interprets multivariate perturbations identified in molecular profiles by identifiying highly connected nodes in disease specific co-perturbation networks. In preparation.
