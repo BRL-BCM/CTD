@@ -26,7 +26,6 @@ df - a data.frame object, for every bitstring provided in bs input parameter, a 
 This function calculates the mininmum encoding length associated with a subset of variables given a background knowledge graph.
 }
 \examples{
-# Look at main_CTD.r script for full analysis script: https://github.com/BRL-BCM/CTD.
 # Identify the most significant subset per patient, given the background graph
 data_mx.pvals = t(apply(data_mx, c(1,2), function(i) 2*pnorm(abs(i), lower.tail = FALSE)))
 for (pt in 1:ncol(data_mx)) {

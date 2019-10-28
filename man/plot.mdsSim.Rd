@@ -4,16 +4,16 @@
 \alias{plot.mdsSim}
 \title{View patient clusters using multi-dimensional scaling.}
 \usage{
-\method{plot}{mdsSim}(patientSim, diagnoses, k, diag)
+plot.mdsSim(patientSim, diagnoses, k, diag)
 }
 \arguments{
-\item{diagnoses}{- A character vector of diagnostic labels associated with the rownames of simMat.}
+\item{patientSim}{- The patient similarity matrix.}
+
+\item{diagnoses}{- A character vector of diagnostic labels associated with the rownames of patientSim.}
 
 \item{k}{- The number of dimension you want to plot your data using multi-dimensional scaling.}
 
 \item{diag}{- The diagnosis associated with positive controls in your data.}
-
-\item{simMat}{- The patient similarity matrix.}
 }
 \value{
 p - a plotly scatter plot colored by provided diagnostic labels.
@@ -23,7 +23,6 @@ This function plots the provided patient similarity matrix in a lower dimensiona
 using multi-dimensional scaling, which is well suited for similarity metrics.
 }
 \examples{
-# Look at main_CTD.r script for full analysis script: https://github.com/BRL-BCM/CTD.
 # if you have diagnostic labels associated with the colnames(data_mx), send them using diagnoses parameter
 p = plot.mdsSim(patientSim, diagnoses, k=2, diag="diseased")
 p

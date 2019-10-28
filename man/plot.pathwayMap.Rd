@@ -4,8 +4,7 @@
 \alias{plot.pathwayMap}
 \title{Generate pathway map with patient perturbation data superimposed.}
 \usage{
-\method{plot}{pathwayMap}(Pathway.Name, PatientID, patient.zscore,
-  zscore.threshold, scalingFactor, outputFilePath, SVG = TRUE)
+plot.pathwayMap(Pathway.Name, PatientID, patient.zscore, zscore.threshold, scalingFactor, outputFilePath, SVG=TRUE)
 }
 \arguments{
 \item{Pathway.Name}{- The name of the pathway map you want to plot patient data on.}
@@ -26,5 +25,10 @@
 Generate pathway map with patient perturbation data superimposed.
 }
 \examples{
-plot.pathwayMap(simMat, path)
+Pathway.Name = pathway.ListMaps_metabolon()
+data(Miller2015)
+Miller2015 = Miller2015[,grep("IEM", colnames(Miller2015))]
+PatientID = colnames(Miller2015)[1]
+patient.zscore = Miller2015[,1]
+plot.pathwayMap(Pathway.Name[1], PatientID, patient.zscore, zscore.threshold, scalingFactor=1, outputFilePath=getwd(), SVG=TRUE)
 }

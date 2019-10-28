@@ -8,8 +8,14 @@
 #' @param outputFilePath - The directory in which you want to store image files.
 #' @param SVG - Save as SVG or PNG? If SVG is TRUE, then an SVG image is saved. If FALSE, a PNG is saved.
 #' @export plot.pathwayMap
+#' @usage plot.pathwayMap(Pathway.Name, PatientID, patient.zscore, zscore.threshold, scalingFactor, outputFilePath, SVG=TRUE)
 #' @examples
-#' plot.pathwayMap(simMat, path)
+#' Pathway.Name = pathway.ListMaps_metabolon()
+#' data(Miller2015)
+#' Miller2015 = Miller2015[,grep("IEM", colnames(Miller2015))]
+#' PatientID = colnames(Miller2015)[1]
+#' patient.zscore = Miller2015[,1]
+#' plot.pathwayMap(Pathway.Name[1], PatientID, patient.zscore, zscore.threshold, scalingFactor=1, outputFilePath=getwd(), SVG=TRUE)
 plot.pathwayMap = function(Pathway.Name, PatientID, patient.zscore, zscore.threshold, scalingFactor, outputFilePath, SVG=TRUE) {
   gmlPath = "../extdata"
   load(sprintf("%s/complexNodes.RData", gmlPath))

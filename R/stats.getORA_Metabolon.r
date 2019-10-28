@@ -7,11 +7,10 @@
 #' @param type - Either "p-value" or "z-score".
 #' @param gene.profile - Default set to NULL, meaning the default enrichment analysis only considers metabolites. However, if you have gene data, too, set
 #' this parameter to a character vector of the gene names with found variants in the patient's record. Gene IDs must be converted to Entrez Identifiers.
-#' @export data.getORA_Metabolon
+#' @export stats.getORA_Metabolon
 #' @examples
-#'
-#' pathway.data = data.getORA_Metabolon(met.profile, threhold=3, "z-score", NULL)
-data.getORA_Metabolon = function(met.profile, threshold=3, type="zscore", gene.profile=NULL) {
+#' pathway.data = stats.getORA_Metabolon(met.profile, threhold=3, "z-score", NULL)
+stats.getORA_Metabolon = function(met.profile, threshold=3, type="zscore", gene.profile=NULL) {
   met.profile = met.profile[which(!(is.na(met.profile)))]
   if (type=="zscore") {
     perturbed.mets = met.profile[which(abs(met.profile) > threshold)]

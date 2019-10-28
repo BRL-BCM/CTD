@@ -1,17 +1,17 @@
 #' Generate heatmap plot of patient similarity matrix.
 #'
 #' This function plots a heatmap of a patient similarity matrix.
-#' @param simMat - The patient similarity matrix.
+#' @param patientSim - The patient similarity matrix.
 #' @param path - The filepath to a directory in which you want to store the .png file.
-#' @param diagnoses - A character vector of diagnostic labels associated with the rownames of simMat.
+#' @param diagnoses - A character vector of diagnostic labels associated with the rownames of patientSim.
 #' @export plot.hmSim
+#' @usage plot.hmSim(patientSim, path=getwd(), diagnoses=NULL)
 #' @examples
-#' # Look at main_CTD.r script for full analysis script: https://github.com/BRL-BCM/CTD.
 #' plot.hmSim(patientSim, path=getwd(), diagnoses)
-plot.hmSim = function(simMat, path, diagnoses=NULL) {
+plot.hmSim = function(patientSim, path, diagnoses=NULL) {
   if (is.null(diagnoses)) {
     png(sprintf("%s/ptSimilarity.png", path), 3000, 1000)
-    heatmap.2(x=simMat,
+    heatmap.2(x=patientSim,
               dendrogram="both",
               Rowv=TRUE,
               Colv=TRUE,
@@ -23,7 +23,7 @@ plot.hmSim = function(simMat, path, diagnoses=NULL) {
   } else {
     d = diagnoses
     png(sprintf("%s/ptSimilarity.png", path), 3000, 1000)
-    heatmap.2(x=simMat,
+    heatmap.2(x=patientSim,
               dendrogram="both",
               Rowv=TRUE,
               Colv=TRUE,

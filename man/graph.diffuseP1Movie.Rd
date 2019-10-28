@@ -26,7 +26,8 @@ Recursively diffuse probability from a starting node based on the connectivity o
         most influenced by a perturbation in the starting node.
 }
 \examples{
-# 7 node example graph from Figure 4 (Thistlethwaite, Elsea, Milosavljevic, 2019)
+# 7 node example graph illustrating diffusion of probability based on network connectivity
+# from Thistlethwaite et al., 2019.
 adj_mat = rbind(c(0,2,1,0,0,0,0), # A
                 c(2,0,1,0,0,0,0), # B
                 c(1,0,0,1,0,0,0), # C
@@ -37,6 +38,7 @@ adj_mat = rbind(c(0,2,1,0,0,0,0), # A
                 )
 rownames(adj_mat) = c("A", "B", "C", "D", "E", "F", "G")
 colnames(adj_mat) = c("A", "B", "C", "D", "E", "F", "G")
+adjacency_matrix = list(adj_mat)
 ig = graph.adjacency(as.matrix(adj_mat), mode="undirected", weighted=TRUE)
 G=vector(mode="list", length=7)
 G[1:length(G)] = 0

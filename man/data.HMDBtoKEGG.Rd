@@ -13,5 +13,5 @@ data.HMDBtoKEGG(hmdb.ids)
 A function that converts HMDB IDs to KEGG compounds.
 }
 \examples{
-data.kegg = data.HMDBtoKEGG(data)
+kegg.ids = data.HMDBtoKEGG(hmdb.ids)
 }

@@ -6,17 +6,18 @@
 #' @param perms - The list of permutations calculated over all possible nodes, starting with each node in subset of interest.
 #' @param num.misses - The number of misses tolerated by the network walker before path truncation occurs.
 #' @return pt.byK - a list of bitstrings, with the names of the list elements the node names of the encoded nodes
-#' @export mle.getPtBSbyK_memoryless
+#' @export singleNode.getPtBSbyK
 #' @examples
-#' # Look at main_CTD.r script for full analysis script: https://github.com/BRL-BCM/CTD.
+#' # Load in your profiling data (rows are compounds, columns are samples)
+#' data_mx = read.table("your_profiling_data.txt", sep="\t", header=TRUE)
 #' # Get bitstrings associated with each patient's top kmx variable subsets
 #' kmx = 15
 #' ptBSbyK = list()
 #' for (pt in 1:ncol(data_mx)) {
 #'   S = data_mx[order(abs(data_mx[,pt]), decreasing=TRUE),pt][1:kmx]
-#'   ptBSbyK[[ptID]] = mle.getPtBSbyK_memoryless(S, perms)
+#'   ptBSbyK[[ptID]] = singleNode.getPtBSbyK(S, perms)
 #' }
-mle.getPtBSbyK_memoryless = function(S, perms, num.misses=NULL) {
+singleNode.getPtBSbyK = function(S, perms, num.misses=NULL) {
   if (is.null(num.misses)) {
     num.misses = ceiling(log2(length(perms)))
   }

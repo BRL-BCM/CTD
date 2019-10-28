@@ -2,14 +2,14 @@
 #'
 #' This function plots the provided patient similarity matrix in a lower dimensional space
 #' using multi-dimensional scaling, which is well suited for similarity metrics.
-#' @param simMat - The patient similarity matrix.
-#' @param diagnoses - A character vector of diagnostic labels associated with the rownames of simMat.
+#' @param patientSim - The patient similarity matrix.
+#' @param diagnoses - A character vector of diagnostic labels associated with the rownames of patientSim.
 #' @param k - The number of dimension you want to plot your data using multi-dimensional scaling.
 #' @param diag - The diagnosis associated with positive controls in your data.
 #' @return p - a plotly scatter plot colored by provided diagnostic labels.
 #' @export plot.mdsSim
+#' @usage plot.mdsSim(patientSim, diagnoses, k, diag)
 #' @examples
-#' # Look at main_CTD.r script for full analysis script: https://github.com/BRL-BCM/CTD.
 #' # if you have diagnostic labels associated with the colnames(data_mx), send them using diagnoses parameter
 #' p = plot.mdsSim(patientSim, diagnoses, k=2, diag="diseased")
 #' p

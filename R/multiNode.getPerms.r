@@ -5,12 +5,24 @@
 #' @return current_node_set - A character vector of node names in the order they were drawn by the probability diffusion algorithm.
 #' @keywords probability diffusion algorithm
 #' @keywords network walker algorithm
-#' @export mle.getPerms_memory
+#' @export multiNode.getPerms
 #' @examples
+#' # Read in any network via its adjacency matrix
+#' tmp = matrix(1, nrow=100, ncol=100)
+#' for (i in 1:100) {
+#'   for (j in 1:100) {
+#'     tmp[i, j] = rnorm(1, mean=0, sd=1)
+#'   }
+#' }
+#' colnames(tmp) = sprintf("Compound%d", 1:100)
+#' ig = graph.adjacency(tmp, mode="undirected", weighted=TRUE, add.colnames="name")
+#' V(ig)$name = tolower(V(ig)$name)
 #' # Get node permutations for graph
+#' G = vector(mode="list", length=length(V(ig)$name))
+#' names(G) = V(ig)$name
 #' S = names(G)[1:3]
-#' perms = mle.getPermN_memory(S, G)
-mle.getPerms_memory = function(S, G, num.misses=NULL) {
+#' perms = multiNode.getPerms(S, G)
+multiNode.getPerms = function(S, G, num.misses=NULL) {
   if (is.null(num.misses)) {
     thresholdDrawT = log2(length(G))
   } else {

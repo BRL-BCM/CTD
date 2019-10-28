@@ -10,7 +10,7 @@
 #' @param zoomIn - Boolean. Delete nodes outside of node subset's order 1 neighborhood?. Default is FALSE.
 #' @return permutationByStartNode - a list object of node permutations. Each element is based on a different startNode.
 #'         Images are also generated in the output_directory specified.
-#' @export mle.getPermMovie_memory
+#' @export multiNode.getPermMovie
 #' @examples
 #' # Read in any network via its adjacency matrix
 #' tmp = matrix(1, nrow=100, ncol=100)
@@ -19,16 +19,18 @@
 #'     tmp[i, j] = rnorm(1, mean=0, sd=1)
 #'   }
 #' }
-#' colnames(tmp) = sprintf("MolPheno%d", 1:100)
+#' colnames(tmp) = sprintf("Compound%d", 1:100)
 #' ig = graph.adjacency(tmp, mode="undirected", weighted=TRUE, add.colnames="name")
 #' V(ig)$name = tolower(V(ig)$name)
 #' # Set other tuning parameters
 #' p0=0.1  # 10% of probability distributed uniformly
 #' p1=0.9  # 90% of probability diffused based on edge weights in networks
 #' thresholdDiff=0.01
+#' G = vector(mode="list", length=length(V(ig)$name))
+#' names(G) = V(ig)$name
 #' subset.nodes = names(G)[sample(1:length(G), 3)]
-#' mle.getPermMovie_memory(subset.nodes, ig, output_filepath = getwd(), movie=TRUE)
-mle.getPermMovie_memory = function(subset.nodes, ig, output_filepath, movie=TRUE, zoomIn=FALSE) {
+#' multiNode.getPermMovie(subset.nodes, ig, output_filepath = getwd(), movie=TRUE)
+multiNode.getPermMovie = function(subset.nodes, ig, output_filepath, movie=TRUE, zoomIn=FALSE) {
   if (zoomIn) {
     # TODO :: Test on different sized graphs. Do we like this design decision to subset neighborhood to get better view of network walk????
     ig = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% names(unlist(neighborhood(ig, nodes=subset.nodes, order=1))))])
@@ -44,7 +46,7 @@ mle.getPermMovie_memory = function(subset.nodes, ig, output_filepath, movie=TRUE
   G = lapply(G, function(i) i[[1]]=0)
   degs = list(degree(ig))
   adjacency_matrix = list(as.matrix(get.adjacency(ig, attr="weight")))
-  
+
   # Phase 1: Do adaptive permutations ahead of time for each possible startNode in subGraphS.
   if (movie==TRUE) {
     V(ig)$color = rep("white", length(G))
@@ -99,10 +101,10 @@ mle.getPermMovie_memory = function(subset.nodes, ig, output_filepath, movie=TRUE
         sumHits = sumHits + unlist(currentGraph)
       }
       sumHits = sumHits/length(hits)
-      
+
       #Set startNode to a node that is the max probability in the new currentGraph
       maxProb = names(which.max(sumHits))
-      
+
       if (movie==TRUE) {
         V(ig)$label = sprintf("%s:%.2f", V(ig)$name, sumHits)
         png(sprintf("%s/diffusionP1Movie%d_%d.png", output_filepath, n, length(current_node_set)), 500, 500)
@@ -114,14 +116,14 @@ mle.getPermMovie_memory = function(subset.nodes, ig, output_filepath, movie=TRUE
         legend("topright", legend=c("Jackpot Nodes", "Drawn Nodes"), fill=c("green", "dark red"))
         dev.off()
       }
-      
+
       # Break ties: When there are ties, choose the first of the winners.
       startNode = names(currentGraph[maxProb[1]])
       current_node_set = c(current_node_set, startNode)
       if (all(subset.nodes %in% c(startNode,current_node_set))) {
         stopIterating = TRUE
       }
-      
+
       # After we step into
       if (movie==TRUE) {
         V(ig)$label = sprintf("%s:%.2f", V(ig)$name, sumHits)
@@ -135,12 +137,12 @@ mle.getPermMovie_memory = function(subset.nodes, ig, output_filepath, movie=TRUE
         dev.off()
       }
     }
-    
+
     permutationByStartNode[[n]] = current_node_set
     bitStrings.pt[[n]] = as.numeric(current_node_set %in% subset.nodes)
   }
   names(permutationByStartNode) = subset.nodes
-  
+
   return(permutationByStartNode)
 }
 

@@ -4,7 +4,7 @@
 #' @param compound.names - A character vector of metabolite (compound) names.
 #' @export data.LabeltoKEGG
 #' @examples
-#' data.kegg = data.HMDBtoKEGG(data)
+#' kegg.ids = data.HMDBtoKEGG(compound.names)
 data.LabeltoKEGG = function(compound.names) {
   KEGG.ids = data.frame(Name=character(), KEGG=character(), stringsAsFactors=FALSE)
   for (met in 1:length(compound.names)) {

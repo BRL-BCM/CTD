@@ -4,19 +4,18 @@
 \alias{plot.hmSim}
 \title{Generate heatmap plot of patient similarity matrix.}
 \usage{
-\method{plot}{hmSim}(simMat, path, diagnoses = NULL)
+plot.hmSim(patientSim, path=getwd(), diagnoses=NULL)
 }
 \arguments{
-\item{simMat}{- The patient similarity matrix.}
+\item{patientSim}{- The patient similarity matrix.}
 
 \item{path}{- The filepath to a directory in which you want to store the .png file.}
 
-\item{diagnoses}{- A character vector of diagnostic labels associated with the rownames of simMat.}
+\item{diagnoses}{- A character vector of diagnostic labels associated with the rownames of patientSim.}
 }
 \description{
 This function plots a heatmap of a patient similarity matrix.
 }
 \examples{
-# Look at main_CTD.r script for full analysis script: https://github.com/BRL-BCM/CTD.
 plot.hmSim(patientSim, path=getwd(), diagnoses)
 }

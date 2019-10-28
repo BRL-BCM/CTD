@@ -11,7 +11,6 @@
 #' @docType data
 #' @usage data(Wangler2017)
 #'
-#'
 #' @keywords datasets
 #'
 #' @references M.F. Wangler, et al. Genetics in Medicine, 2018, 00

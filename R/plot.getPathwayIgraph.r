@@ -1,23 +1,22 @@
-#' getPathwayIgraph
+#' plot.getPathwayIgraph
 #'
 #' @param input - A list object of parameters (esp. from R shiny app). Required parameters are ptIDs, diagClass and pathwayMapId.
 #' @param Pathway.Name - The name of the pathway map for which you want the topological information.
-#'
-#'
 #' @return template.ig - Igraph object of selected pathway map.
-#' @export
+#' @export plot.getPathwayIgraph
+#' @usage plot.getPathwayIgraph(input, Pathway.Name, pmap.path = "./extdata")
 #' @import igraph
 #' @examples
-#'  data(Miller2015)
+#' data(Miller2015)
 #' # Input is supplied by R shiny app, but you can hard code parameters as a list object, too, to test functionality.
 #' input = list()
 #' input$ptIDs = colnames(Miller2015)[4]
 #' input$diagClass = "paa"
 #' input$pathwayMapId = "All"
-#' ig = getPathwayIgraph(input, Miller2015)
+#' ig = plot.getPathwayIgraph(input, Miller2015)
 #' # Returns a blank template for selected pathway.
 #' plot.igraph(ig, edge.arrow.size = 0.01)
-getPathwayIgraph = function(input, Pathway.Name, pmap.path = "./extdata") {
+plot.getPathwayIgraph = function(input, Pathway.Name, pmap.path = "./extdata") {
   if (is.null( Pathway.Name)) Pathway.Name = gsub(" ", "-", input$pathwayMapId)
 
   if (Pathway.Name=="All") {

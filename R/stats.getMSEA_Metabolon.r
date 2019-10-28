@@ -1,27 +1,41 @@
 #' Metabolite set enrichment analysis (MSEA) using pathway knowledge curated by Metabolon
 #'
 #' A function that returns the pathway enrichment score for all perturbed metabolites in a patient's full metabolomic profile.
-#' @param met.profile - A character vector of a patient's metabolomic profile, including KEGG IDs
-#'                      and the associated z-score or p-value describing the level of the metabolite compared to controls.
-#' @param p.corr - A vector of correlations representing the correlation of the metabolite level with a disease phenotype.
-#'                     The names of the vector are the metabolite names.
-#' @export data.getMSEA_Metabolon
+#' @param abs_filename_dataset - Relative or absolute path to relevant .gct file.
+#'                               A .gct file contains profiling data, rows are compounds and columns are sample IDs.
+#' @param abs_filename_classes - Relative or absolute path to relevant .cls file.
+#'                               A .cls file contains a mapping of class labels to columns in the .gct file.
+#' @param pathway.knowledgebase - The filename of the .gmt file associated with the pathway knowledge desired.
+#'                               Currently only "Metabolon" is offered, though "KEGG", "WikiPathways", "SMPDB"
+#'                               and/or "Reactome" can be added in future versions.
+#' @param output_dir - The path associated with the folder in which MSEA results will be saved.
+#' @param expt_name - A name to be associated with the experiment you are analyzing. This name will be used in filestems of results rendered in output_dir.
+#' @export stats.getMSEA_Metabolon
 #' @examples
 #' data(Miller2015)
 #' Miller2015 = Miller2015[,grep("IEM", colnames(Miller2015))]
+#' # Generate a .cls file for your data.
 #' diagnoses = gsub("[[:digit:]]", "", colnames(Miller2015))
 #' diag.ind = diagnoses
 #' diag.ind[which(diag.ind!="Argininemia")] = 0
 #' diag.ind[which(diag.ind=="Argininemia")] = 1
 #' diag.ind = as.numeric(diag.ind)
-#' profile.ind = which(diagnoses=="Argininemia")[1]
-#' met.profile = Miller2015_Heparin[,profile.ind]
-#' names(met.profile) = rownames(Miller2015_Heparin)
+#' # Manually add the following text to 1st line of .cls, where num_samples is the length of diag.ind: #num_samples 1 2
+#' # Manually add the following text to 2nd line of .cls: #disease control
+#' write.table(diag.ind, file="MSEA_Datasets/Miller2015_arg.cls", sep=" ", quote=FALSE, row.names = FALSE, col.names = FALSE)
 #'
+#' # Create a .gct file.
+#' data_mx = Miller2015
+#' data_mx = data_mx[, order(diags.ind)]
+#' data_mx = cbind(rep(NA, nrow(data_mx)), data_mx)
+#' colnames(data_mx)[1] = "DESCRIPTION"
+#' write.table(data_mx, file="MSEA_Datasets/Miller2015.gct", sep="\t", quote=FALSE, row.names = TRUE)
+#'
+#' # Generate a .gmt file.
 #' population = names(met.profile)
 #' paths.hsa = list.dirs(path="../inst/extdata", full.names = FALSE)
 #' paths.hsa = paths.hsa[-which(paths.hsa %in% c("", "RData", "allPathways"))]
-#' sink("MetaboliteSetDatabases/Miller2015.gmt")
+#' sink("Pathway_GMTs/Metabolon.gmt")
 #' for (p in 1:length(paths.hsa)) {
 #'   load(sprintf("../inst/extdata/RData/%s.RData", paths.hsa[p]))
 #'   pathway.compounds = V(ig)$label[which(V(ig)$shape=="circle")]
@@ -30,10 +44,10 @@
 #' }
 #' sink()
 #' print("test")
-#' abs_filename_dataset = "Datasets/Miller2015.gct"
-#' abs_filename_classes = "Datasets/Miller2015_arg.cls"
-#' pathway.data = data.getMSEA_Metabolon(met.profile, diag.ind, Miller2015_Heparin)
-data.getMSEA_Metabolon = function(abs_filename_dataset, abs_filename_classes, pathway_knowledgebase = "Metabolon", output_dir = getwd(), expt_name="msea_results") {
+#' abs_filename_dataset = "MSEA_Datasets/Miller2015.gct"
+#' abs_filename_classes = "MSEA_Datasets/Miller2015_arg.cls"
+#' pathway.data = stats.getMSEA_Metabolon(abs_filename_dataset, abs_filename_classes, pathway_knowledgebase = "Metabolon", output_dir = getwd(), expt_name="msea_results")
+stats.getMSEA_Metabolon = function(abs_filename_dataset, abs_filename_classes, pathway_knowledgebase = "Metabolon", output_dir = getwd(), expt_name="msea_results") {
   if (pathway_knowledgebase=="Metabolon") {
     met.db = "../extdata/Pathway_GMTs/Metabolon.gmt"
   } else {

@@ -8,17 +8,16 @@
 #' @return current_node_set - A character vector of node names in the order they were drawn by the probability diffusion algorithm.
 #' @keywords probability diffusion algorithm
 #' @keywords network walker algorithm
-#' @export mle.getPermN_memoryless
+#' @export singleNode.getPermN
 #' @examples
-#' # Look at main_CTD.r script for full analysis script: https://github.com/BRL-BCM/CTD.
 #' # Get node permutations for graph
 #' perms = list()
 #' for (n in 1:length(G)) {
 #'   print(sprintf("Generating node permutation starting with node %s", names(G)[n]))
-#'   perms[[n]] = mle.getPermN(n, G)
+#'   perms[[n]] = singleNode.getPermN(n, G)
 #' }
 #' names(perms) = names(G)
-mle.getPermN_memoryless = function(n, G, S=NULL, misses.thresh=NULL) {
+singleNode.getPermN = function(n, G, S=NULL, misses.thresh=NULL) {
   if (!is.null(misses.thresh)) {
     if (is.null(S)) {
       print("You must supply a subset of nodes as parameter S if you supply a misses.thresh.")

@@ -10,7 +10,7 @@
 #' @param zoomIn - Boolean. Delete nodes outside of node subset's order 1 neighborhood?. Default is FALSE.
 #' @return permutationByStartNode - a list object of node permutations. Each element is based on a different startNode.
 #'         Images are also generated in the output_directory specified.
-#' @export mle.getPermMovie_memoryless
+#' @export singleNode.getPermMovie
 #' @examples
 #' # Read in any network via its adjacency matrix
 #' tmp = matrix(1, nrow=100, ncol=100)
@@ -19,16 +19,19 @@
 #'     tmp[i, j] = rnorm(1, mean=0, sd=1)
 #'   }
 #' }
-#' colnames(tmp) = sprintf("MolPheno%d", 1:100)
+#' colnames(tmp) = sprintf("Compound%d", 1:100)
 #' ig = graph.adjacency(tmp, mode="undirected", weighted=TRUE, add.colnames="name")
 #' V(ig)$name = tolower(V(ig)$name)
+#' adjacency_matrix = list(tmp) # MUST BE GLOBAL VARIABLE
 #' # Set other tuning parameters
 #' p0=0.1  # 10% of probability distributed uniformly
 #' p1=0.9  # 90% of probability diffused based on edge weights in networks
 #' thresholdDiff=0.01
+#' G = vector(mode="list", length=length(V(ig)$name))
+#' names(G) = V(ig)$name
 #' subset.nodes = names(G)[sample(1:length(G), 3)]
-#' mle.getPermMovie_memoryless(subset.nodes, ig, output_filepath = getwd(), movie=TRUE)
-mle.getPermMovie_memoryless = function(subset.nodes, ig, output_filepath, movie=TRUE, zoomIn=FALSE) {
+#' singleNode.getPermMovie(subset.nodes, ig, output_filepath = getwd(), movie=TRUE)
+singleNode.getPermMovie = function(subset.nodes, ig, output_filepath, movie=TRUE, zoomIn=FALSE) {
   if (zoomIn) {
     # TODO :: Test on different sized graphs. Do we like this design decision to subset neighborhood to get better view of network walk????
     ig = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% names(unlist(neighborhood(ig, nodes=subset.nodes, order=1))))])

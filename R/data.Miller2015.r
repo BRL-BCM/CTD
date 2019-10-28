@@ -12,8 +12,6 @@
 #'
 #' @docType data
 #' @usage data(Miller2015)
-#'
-#'
 #' @keywords datasets
 #'
 #' @references Miller et al. (2015) J Inherit Metab Dis. 2015; 38: 1029–1039

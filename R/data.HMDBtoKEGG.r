@@ -4,7 +4,7 @@
 #' @param hmdb.ids - A character vector of HMDB IDs.
 #' @export data.HMDBtoKEGG
 #' @examples
-#' data.kegg = data.HMDBtoKEGG(data)
+#' kegg.ids = data.HMDBtoKEGG(hmdb.ids)
 data.HMDBtoKEGG = function(hmdb.ids) {
   KEGG.ids = data.frame(HMDB=character(), KEGG=character(), stringsAsFactors=FALSE)
   print("Mapping HMDB IDs to KEGG IDs using BridgeDB.org...")

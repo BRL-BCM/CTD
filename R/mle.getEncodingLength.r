@@ -13,7 +13,6 @@
 #' @export mle.getEncodingLength
 #' @keywords minimum length encoding
 #' @examples
-#' # Look at main_CTD.r script for full analysis script: https://github.com/BRL-BCM/CTD.
 #' # Identify the most significant subset per patient, given the background graph
 #' data_mx.pvals = t(apply(data_mx, c(1,2), function(i) 2*pnorm(abs(i), lower.tail = FALSE)))
 #' for (pt in 1:ncol(data_mx)) {

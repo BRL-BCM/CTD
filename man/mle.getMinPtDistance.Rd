@@ -13,16 +13,12 @@ mle.getMinPtDistance(allSimMatrices)
 A function that returns the pathway enrichment score for all perturbed metabolites in a patient's full metabolomic profile.
 }
 \examples{
-# Look at main_CTD.r script for full analysis script: https://github.com/BRL-BCM/CTD.
 # Get patient distances
 data_mx.pvals = apply(data_mx, c(1,2), function(i) 2*pnorm(abs(i), lower.tail = FALSE))
 res = list()
-t = list(ncd=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)),
-         dir=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)))
+t = list(ncd=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)))
 rownames(t$ncd) = colnames(data_mx)
 colnames(t$ncd) = colnames(data_mx)
-rownames(t$dir) = colnames(data_mx)
-colnames(t$dir) = colnames(data_mx)
 for (i in 1:kmx) {
   res[[i]] = t
 }
@@ -34,9 +30,7 @@ for (pt in 1:ncol(data_mx)) {
     tmp = mle.getPtSim(ptBSbyK[[ptID]], ptID, ptBSbyK[[ptID2]], ptID2, data_mx, perms)
     for (k in 1:kmx) {
       res[[k]]$ncd[ptID, ptID2] = tmp$NCD[k]
-      res[[k]]$dir[ptID, ptID2] = tmp$dirSim[k]
       res[[k]]$ncd[ptID2, ptID] = tmp$NCD[k]
-      res[[k]]$dir[ptID2, ptID] = tmp$dirSim[k]
     }
   }
 }

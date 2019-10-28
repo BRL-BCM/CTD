@@ -9,18 +9,14 @@
 #' @return patientSim - a similarity matrix, where row and columns are patient identifiers.
 #' @export mle.getPtSim
 #' @examples
-#' # Look at main_CTD.r script for full analysis script: https://github.com/BRL-BCM/CTD.
 #' # Get patient distances
 #' data_mx.pvals = apply(data_mx, c(1,2), function(i) 2*pnorm(abs(i), lower.tail = FALSE))
 #' res = list()
-#' t = list(ncd=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)),
-#'          jacdir=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)))
+#' tt = list(ncd=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)))
 #' rownames(t$ncd) = colnames(data_mx)
 #' colnames(t$ncd) = colnames(data_mx)
-#' rownames(t$jacdir) = colnames(data_mx)
-#' colnames(t$jacdir) = colnames(data_mx)
 #' for (i in 1:kmx) {
-#'   res[[i]] = t
+#'   res[[i]] = tt
 #' }
 #' for (pt in 1:ncol(data_mx)) {
 #'   print(pt)
@@ -30,9 +26,7 @@
 #'     for (k in 1:kmx) {
 #'       tmp = mle.getPtSim(ptBSbyK[[ptID]][k], ptID, ptBSbyK[[ptID2]][k], ptID2, data_mx, perms)
 #'       res[[k]]$ncd[ptID, ptID2] = tmp$NCD
-#'       res[[k]]$jacdir[ptID, ptID2] = tmp$dirSim
 #'       res[[k]]$ncd[ptID2, ptID] = tmp$NCD
-#'       res[[k]]$jacdir[ptID2, ptID] = tmp$dirSim
 #'     }
 #'   }
 #' }
@@ -98,7 +92,7 @@ mle.getPtSim = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, perms) {
     p12.e = mle.getEncodingLength(p12.optBS, NULL, NULL, G)[,"IS.alt"]
   }
 
-  # Normalized Compression Distance, Percent Mutual Information
+  # Normalized Compression Distance, Percent Mutual Information, Jaccard Set Similarity (w/ Directionality)
   return (list(p1.e=p1.e, p2.e=p2.e, p12.e=p12.e,
                NCD=(p12.e-apply(cbind(p1.e, p2.e), 1, min))/apply(cbind(p1.e, p2.e), 1, max),
                mutualInfoPer=1-((p1.e+p2.e-p12.e)/p12.e),

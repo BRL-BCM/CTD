@@ -4,17 +4,15 @@
 \alias{plot.knnSim}
 \title{Visualize the confusion matrix using nearest neighbor as classification model.}
 \usage{
-\method{plot}{knnSim}(patientSim, diagnoses, diag)
+plot.knnSim(patientSim, diagnoses, diag)
 }
 \arguments{
-\item{diagnoses}{- A character vector of diagnostic labels associated with the rownames of simMat.
+\item{patientSim}{- The patient similarity matrix.}
+
+\item{diagnoses}{- A character vector of diagnostic labels associated with the rownames of patientSim.
 The names of this vector are patient IDs, and values are diagnostic labels.}
 
 \item{diag}{- The diagnosis associated with positive controls in your data.}
-
-\item{simMat}{- The patient similarity matrix.}
-
-\item{k}{- The number of dimension you want to plot your data using multi-dimensional scaling.}
 }
 \value{
 p - a plotly scatter plot colored by provided diagnostic labels.
@@ -23,7 +21,6 @@ p - a plotly scatter plot colored by provided diagnostic labels.
 Visualize the confusion matrix using nearest neighbor as classification model.
 }
 \examples{
-# Look at main_CTD.r script for full analysis script: https://github.com/BRL-BCM/CTD.
 # if you have diagnostic labels associated with the colnames(data_mx), send them using diagnoses parameter
 p = plot.knnSim(patientSim, diagnoses, diag="diseased")
 p
