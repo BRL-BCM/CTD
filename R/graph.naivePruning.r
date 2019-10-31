@@ -1,4 +1,4 @@
-#' Diffuse Probability P1 from a starting node.
+#' Pruning edges from disease differential network that also occur in reference-only network.
 #'
 #' Recursively diffuse probability from a starting node based on the connectivity of the background knowledge graph, representing the likelihood that a variable will be
 #'         most influenced by a perturbation in the starting node.

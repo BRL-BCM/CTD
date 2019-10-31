@@ -28,7 +28,6 @@ Recursively diffuse probability from a starting node based on the connectivity o
         most influenced by a perturbation in the starting node.
 }
 \examples{
-# Look at main_CTD.r script for full analysis script: https://github.com/BRL-BCM/CTD.
 # Read in any network via its adjacency matrix
 tmp=matrix(1, nrow=100, ncol=100)
 for (i in 1:100) {
