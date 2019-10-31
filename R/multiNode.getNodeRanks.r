@@ -1,11 +1,12 @@
-#' Generate the "adaptive walk" node permutations, starting from a given perturbed variable
+#' Generate the "adaptive walk" node rankings, starting from a given perturbed variable
 #'
-#' This function calculates the node permutation starting from a given perturbed variable in a subset of variables in the background knowledge graph.
+#' This function calculates the node rankings starting from a given perturbed variable in a subset of variables in the background knowledge graph.
 #' @param S - A character vector of the node names for the subset of nodes you want to encode.
-#' @return current_node_set - A character vector of node names in the order they were drawn by the probability diffusion algorithm.
+#' @return ranks - A list of character vectors of node names in the order they were drawn by the
+#'                 probability diffusion algorithm, from each starting node in S.
 #' @keywords probability diffusion algorithm
 #' @keywords network walker algorithm
-#' @export multiNode.getPerms
+#' @export multiNode.getNodeRanks
 #' @examples
 #' # Read in any network via its adjacency matrix
 #' tmp = matrix(1, nrow=100, ncol=100)
@@ -17,20 +18,20 @@
 #' colnames(tmp) = sprintf("Compound%d", 1:100)
 #' ig = graph.adjacency(tmp, mode="undirected", weighted=TRUE, add.colnames="name")
 #' V(ig)$name = tolower(V(ig)$name)
-#' # Get node permutations for graph
+#' # Get node rankings for graph
 #' G = vector(mode="list", length=length(V(ig)$name))
 #' names(G) = V(ig)$name
 #' S = names(G)[1:3]
-#' perms = multiNode.getPerms(S, G)
-multiNode.getPerms = function(S, G, num.misses=NULL) {
+#' ranks = multiNode.getNodeRanks(S, G)
+multiNode.getNodeRanks = function(S, G, num.misses=NULL) {
   if (is.null(num.misses)) {
     thresholdDrawT = log2(length(G))
   } else {
     thresholdDrawT = num.misses
   }
-  perms = list()
+  ranks = list()
   for (n in 1:length(S)) {
-    print(sprintf("Calculating permutation %d of %d.", n, length(S)))
+    print(sprintf("Calculating node rankings %d of %d.", n, length(S)))
     current_node_set = NULL
     stopIterating=FALSE
     startNode = S[n]
@@ -80,10 +81,10 @@ multiNode.getPerms = function(S, G, num.misses=NULL) {
       }
 
     }
-    perms[[n]] = current_node_set
+    ranks[[n]] = current_node_set
   }
-  names(perms) = S
-  return(perms)
+  names(ranks) = S
+  return(ranks)
 }
 
 

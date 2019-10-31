@@ -3,7 +3,7 @@
 #' This function calculates the bitstrings (1 is a hit; 0 is a miss) associated with the adaptive network walk
 #' made by the diffusion algorithm trying to find the variables in the encoded subset, given the background knowledge graph.
 #' @param S - A character vector of node names describing the node subset to be encoded.
-#' @param perms - The list of permutations calculated over all possible nodes, starting with each node in subset of interest.
+#' @param ranks - The list of node ranks calculated over all possible nodes, starting with each node in subset of interest.
 #' @return pt.byK - a list of bitstrings, with the names of the list elements the node names of the encoded nodes
 #' @export multiNode.getPtBSbyK
 #' @examples
@@ -12,18 +12,18 @@
 #' ptBSbyK = list()
 #' for (pt in 1:ncol(data_mx)) {
 #'   S = data_mx[order(abs(data_mx[,pt]), decreasing=TRUE),pt][1:kmx]
-#'   ptBSbyK[[ptID]] = multiNode.getPtBSbyK(S, perms)
+#'   ptBSbyK[[ptID]] = multiNode.getPtBSbyK(S, ranks)
 #' }
-multiNode.getPtBSbyK = function(S, perms) {
-  perms2 = perms[which(names(perms) %in% S)]
+multiNode.getPtBSbyK = function(S, ranks) {
+  ranks2 = ranks[which(names(ranks) %in% S)]
   pt.bitString = list()
-  for (p in 1:length(perms2)) {
-    pt.bitString[[S[p]]] = as.numeric(perms2[[S[p]]] %in% S)
-    names(pt.bitString[[S[p]]]) = perms2[[S[p]]]
+  for (p in 1:length(ranks2)) {
+    pt.bitString[[S[p]]] = as.numeric(ranks2[[S[p]]] %in% S)
+    names(pt.bitString[[S[p]]]) = ranks2[[S[p]]]
     ind = which(pt.bitString[[S[p]]] == 1)
     pt.bitString[[S[p]]] = pt.bitString[[S[p]]][1:ind[length(ind)]]
   }
-  # For each k, find the perms that found at least k in S. Which found the first k soonest?
+  # For each k, find the ranks that found at least k in S. Which found the first k soonest?
   pt.byK = list()
   for (k in 1:length(S)) {
     pt.byK_tmp = pt.bitString

@@ -1,9 +1,9 @@
-#' Generate patient-specific bitstrings from adaptive network walk.
+#' Generate patient-specific bitstrings from the fixed, single-node network walker.
 #'
-#' This function calculates the bitstrings (1 is a hit; 0 is a miss) associated with the memoryless network walker
+#' This function calculates the bitstrings (1 is a hit; 0 is a miss) associated with the fixed, single-node network walker
 #' trying to find the variables in the encoded subset, given the background knowledge graph.
 #' @param S - A character vector of node names describing the node subset to be encoded.
-#' @param perms - The list of permutations calculated over all possible nodes, starting with each node in subset of interest.
+#' @param ranks - The list of node ranks calculated over all possible nodes, starting with each node in subset of interest.
 #' @param num.misses - The number of misses tolerated by the network walker before path truncation occurs.
 #' @return pt.byK - a list of bitstrings, with the names of the list elements the node names of the encoded nodes
 #' @export singleNode.getPtBSbyK
@@ -15,18 +15,18 @@
 #' ptBSbyK = list()
 #' for (pt in 1:ncol(data_mx)) {
 #'   S = data_mx[order(abs(data_mx[,pt]), decreasing=TRUE),pt][1:kmx]
-#'   ptBSbyK[[ptID]] = singleNode.getPtBSbyK(S, perms)
+#'   ptBSbyK[[ptID]] = singleNode.getPtBSbyK(S, ranks)
 #' }
-singleNode.getPtBSbyK = function(S, perms, num.misses=NULL) {
+singleNode.getPtBSbyK = function(S, ranks, num.misses=NULL) {
   if (is.null(num.misses)) {
-    num.misses = ceiling(log2(length(perms)))
+    num.misses = ceiling(log2(length(ranks)))
   }
-  perms2 = perms[which(names(perms) %in% S)]
+  ranks2 = ranks[which(names(ranks) %in% S)]
   pt.bitString = list()
   for (p in 1:length(S)) {
     miss = 0
-    for (ii in 1:length(perms2[[S[p]]])) {
-      ind_t = as.numeric(perms2[[S[p]]][ii] %in% S)
+    for (ii in 1:length(ranks2[[S[p]]])) {
+      ind_t = as.numeric(ranks2[[S[p]]][ii] %in% S)
       if (ind_t==0) {
         miss = miss + 1
         if (miss >= num.misses) {
@@ -39,12 +39,12 @@ singleNode.getPtBSbyK = function(S, perms, num.misses=NULL) {
       pt.bitString[[S[p]]][ii] = ind_t
     }
     pt.bitString[[S[p]]] = pt.bitString[[S[p]]][1:thresh]
-    names(pt.bitString[[S[p]]]) = perms2[[S[p]]][1:thresh]
+    names(pt.bitString[[S[p]]]) = ranks2[[S[p]]][1:thresh]
     ind = which(pt.bitString[[S[p]]] == 1)
     pt.bitString[[S[p]]] = pt.bitString[[S[p]]][1:ind[length(ind)]]
   }
 
-  # For each k, find the perms that found at least k in S. Which found the first k soonest?
+  # For each k, find the ranks that found at least k in S. Which found the first k soonest?
   pt.byK = list()
   for (k in 1:length(S)) {
     pt.byK_tmp = pt.bitString

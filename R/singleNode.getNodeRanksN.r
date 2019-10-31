@@ -1,23 +1,23 @@
-#' Generate the "adaptive walk" node permutations, starting from a given perturbed variable
+#' Generate the fixed , single-node diffusion node rankings, starting from a given perturbed variable.
 #'
-#' This function calculates the node permutation starting from a given perturbed variable in a subset of variables in the background knowledge graph.
-#' @param n - The index (out of a vector of node names) of the permutation you want to calculate.
+#' This function calculates the node rankings starting from a given perturbed variable in a subset of variables in the background knowledge graph.
+#' @param n - The index (out of a vector of node names) of the node ranking you want to calculate.
 #' @param G - A list of probabilities with list names being the node names of the background graph.
 #' @param S - A character vector of node names in the subset you want the network walker to find.
 #' @param misses.thresh - The number of "misses" the network walker will tolerate before switched to fixed length codes for remaining nodes to be found.
 #' @return current_node_set - A character vector of node names in the order they were drawn by the probability diffusion algorithm.
-#' @keywords probability diffusion algorithm
-#' @keywords network walker algorithm
-#' @export singleNode.getPermN
+#' @keywords probability diffusion
+#' @keywords network walker
+#' @export singleNode.getNodeRanksN
 #' @examples
-#' # Get node permutations for graph
-#' perms = list()
+#' # Get node rankings for graph
+#' ranks = list()
 #' for (n in 1:length(G)) {
-#'   print(sprintf("Generating node permutation starting with node %s", names(G)[n]))
-#'   perms[[n]] = singleNode.getPermN(n, G)
+#'   print(sprintf("Generating node rankings starting with node %s", names(G)[n]))
+#'   ranks[[n]] = singleNode.getNodeRanksN(n, G)
 #' }
-#' names(perms) = names(G)
-singleNode.getPermN = function(n, G, S=NULL, misses.thresh=NULL) {
+#' names(ranks) = names(G)
+singleNode.getNodeRanksN = function(n, G, S=NULL, misses.thresh=NULL) {
   if (!is.null(misses.thresh)) {
     if (is.null(S)) {
       print("You must supply a subset of nodes as parameter S if you supply a misses.thresh.")
@@ -25,7 +25,7 @@ singleNode.getPermN = function(n, G, S=NULL, misses.thresh=NULL) {
     }
   }
   all_nodes = names(G)
-  print(sprintf("Calculating permutation %d of %d.", n, length(all_nodes)))
+  print(sprintf("Calculating node rankings %d of %d.", n, length(all_nodes)))
   current_node_set = NULL
   stopIterating=FALSE
   startNode = all_nodes[n]
