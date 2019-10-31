@@ -24,13 +24,13 @@
 #'   for (pt2 in pt:ncol(data_mx)) {
 #'     ptID2 = colnames(data_mx)[pt2]
 #'     for (k in 1:kmx) {
-#'       tmp = mle.getPtSim(ptBSbyK[[ptID]][k], ptID, ptBSbyK[[ptID2]][k], ptID2, data_mx, perms)
+#'       tmp = mle.getPtSim(ptBSbyK[[ptID]][k], ptID, ptBSbyK[[ptID2]][k], ptID2, data_mx, ranks)
 #'       res[[k]]$ncd[ptID, ptID2] = tmp$NCD
 #'       res[[k]]$ncd[ptID2, ptID] = tmp$NCD
 #'     }
 #'   }
 #' }
-mle.getPtSim = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, perms) {
+mle.getPtSim = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, ranks) {
   if (length(p1.optBS) != length(p2.optBS)) {
     print("Make sure subset from patient1 is the same size as subset from patient2.")
     return(0)
@@ -57,12 +57,12 @@ mle.getPtSim = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, perms) {
     dirSim[k] = 1 - (length(intersect(p1.sig.nodes, p2.sig.nodes))/length(union(p1.sig.nodes, p2.sig.nodes)))
   }
 
-  if (is.null(perms)) {
+  if (is.null(ranks)) {
     # Using the "with memory" network walker, get optimal bitstring for encoding of patient1's union patient2's subsets
     p1.sig.nodes = sapply(names(sort(abs(data_mx[,ptID]), decreasing = TRUE)[1:length(p1.optBS)]), trimws)
     p2.sig.nodes = sapply(names(sort(abs(data_mx[,ptID2]), decreasing = TRUE)[1:length(p2.optBS)]), trimws)
     p12.sig.nodes = as.character(sapply(unique(c(p1.sig.nodes, p2.sig.nodes)), trimws))
-    perms = mle.getPerms_memory(p12.sig.nodes, G)
+    ranks = multiNode.getNodeRanks(p12.sig.nodes, G)
     p12.e = c()
     for (k in 1:length(p1.optBS)) {
       p1.sig.nodes_cpy = p1.sig.nodes
@@ -79,7 +79,7 @@ mle.getPtSim = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, perms) {
         p2.sig.nodes_cpy = p2.sig.nodes_cpy[-1]
       }
       p12.sig.nodes_k = sapply(unique(c(p1.sig.nodes_k, p2.sig.nodes_k)), trimws)
-      p12.optBS = mle.getPtBSbyK_memory(p12.sig.nodes_k, perms)
+      p12.optBS = multiNode.getPtBSbyK(p12.sig.nodes_k, ranks)
       res = mle.getEncodingLength(p12.optBS, NULL, NULL, G)
       p12.e[k] = res[which.max(res[,"d.score"]), "IS.alt"] + log2(choose(length(G), 1))*(length(p12.sig.nodes_k)-which.max(res[,"d.score"]))
     }
@@ -88,7 +88,7 @@ mle.getPtSim = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, perms) {
     p1.sig.nodes = names(sort(abs(data_mx[,ptID]), decreasing = TRUE)[1:length(p1.optBS)])
     p2.sig.nodes = names(sort(abs(data_mx[,ptID2]), decreasing = TRUE)[1:length(p2.optBS)])
     p12.sig.nodes = unique(c(p1.sig.nodes, p2.sig.nodes))
-    p12.optBS = mle.getPtBSbyK_memoryless(p12.sig.nodes, perms)
+    p12.optBS = singleNode.getPtBSbyK(p12.sig.nodes, ranks)
     p12.e = mle.getEncodingLength(p12.optBS, NULL, NULL, G)[,"IS.alt"]
   }
 

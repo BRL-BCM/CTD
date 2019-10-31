@@ -2,14 +2,14 @@
 % Please edit documentation in R/singleNode.getPtBSbyK.r
 \name{singleNode.getPtBSbyK}
 \alias{singleNode.getPtBSbyK}
-\title{Generate patient-specific bitstrings from adaptive network walk.}
+\title{Generate patient-specific bitstrings from the fixed, single-node network walker.}
 \usage{
-singleNode.getPtBSbyK(S, perms, num.misses = NULL)
+singleNode.getPtBSbyK(S, ranks, num.misses = NULL)
 }
 \arguments{
 \item{S}{- A character vector of node names describing the node subset to be encoded.}
 
-\item{perms}{- The list of permutations calculated over all possible nodes, starting with each node in subset of interest.}
+\item{ranks}{- The list of node ranks calculated over all possible nodes, starting with each node in subset of interest.}
 
 \item{num.misses}{- The number of misses tolerated by the network walker before path truncation occurs.}
 }
@@ -17,7 +17,7 @@ singleNode.getPtBSbyK(S, perms, num.misses = NULL)
 pt.byK - a list of bitstrings, with the names of the list elements the node names of the encoded nodes
 }
 \description{
-This function calculates the bitstrings (1 is a hit; 0 is a miss) associated with the memoryless network walker
+This function calculates the bitstrings (1 is a hit; 0 is a miss) associated with the fixed, single-node network walker
 trying to find the variables in the encoded subset, given the background knowledge graph.
 }
 \examples{
@@ -28,6 +28,6 @@ kmx = 15
 ptBSbyK = list()
 for (pt in 1:ncol(data_mx)) {
   S = data_mx[order(abs(data_mx[,pt]), decreasing=TRUE),pt][1:kmx]
-  ptBSbyK[[ptID]] = singleNode.getPtBSbyK(S, perms)
+  ptBSbyK[[ptID]] = singleNode.getPtBSbyK(S, ranks)
 }
 }

@@ -3,9 +3,9 @@
 #' Recursively diffuse probability from a starting node based on the connectivity of the background knowledge graph, representing the likelihood that a variable will be
 #'         most influenced by a perturbation in the starting node.
 #' @param p1 - The probability being dispersed from the starting node, startNode.
-#' @param startNode - The first variable drawn in the adaptive permutation node sequence, from which p1 gets dispersed.
+#' @param startNode - The first variable drawn in the node ranking, from which p1 gets dispersed.
 #' @param G - A list of probabilities, with names of the list being the node names in the background knowledge graph.
-#' @param visitedNodes - The history of previous draws in the permutation sequence.
+#' @param visitedNodes - The history of previous draws in the node ranking sequence.
 #' @param graphNumber - If testing against multiple background knowledge graphs, this is the index associated with the adjacency matrix that codes for G. Default value is 1.
 #' @param verbose - If debugging or tracking a diffusion event, verbose=TRUE will activate print statements. Default is FALSE.
 #' @return G - A list of returned probabilities after the diffusion of probability has truncated, with names of the list being the node names in the background knowledge graph.

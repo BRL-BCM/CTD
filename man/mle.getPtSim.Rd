@@ -4,7 +4,7 @@
 \alias{mle.getPtSim}
 \title{Patient similarity using mutual information MLE metric of patients' most modular, perturbed subsets.}
 \usage{
-mle.getPtSim(p1.optBS, ptID, p2.optBS, ptID2, data_mx, perms)
+mle.getPtSim(p1.optBS, ptID, p2.optBS, ptID2, data_mx, ranks)
 }
 \arguments{
 \item{p1.optBS}{- The optimal bitstring associated with patient 1.}
@@ -39,7 +39,7 @@ for (pt in 1:ncol(data_mx)) {
   for (pt2 in pt:ncol(data_mx)) {
     ptID2 = colnames(data_mx)[pt2]
     for (k in 1:kmx) {
-      tmp = mle.getPtSim(ptBSbyK[[ptID]][k], ptID, ptBSbyK[[ptID2]][k], ptID2, data_mx, perms)
+      tmp = mle.getPtSim(ptBSbyK[[ptID]][k], ptID, ptBSbyK[[ptID2]][k], ptID2, data_mx, ranks)
       res[[k]]$ncd[ptID, ptID2] = tmp$NCD
       res[[k]]$ncd[ptID2, ptID] = tmp$NCD
     }

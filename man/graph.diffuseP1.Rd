@@ -10,11 +10,11 @@ graph.diffuseP1(p1, startNode, G, visitedNodes, graphNumber = 1,
 \arguments{
 \item{p1}{- The probability being dispersed from the starting node, startNode.}
 
-\item{startNode}{- The first variable drawn in the adaptive permutation node sequence, from which p1 gets dispersed.}
+\item{startNode}{- The first variable drawn in the node ranking, from which p1 gets dispersed.}
 
 \item{G}{- A list of probabilities, with names of the list being the node names in the background knowledge graph.}
 
-\item{visitedNodes}{- The history of previous draws in the permutation sequence.}
+\item{visitedNodes}{- The history of previous draws in the node ranking sequence.}
 
 \item{graphNumber}{- If testing against multiple background knowledge graphs, this is the index associated with the adjacency matrix that codes for G. Default value is 1.}
 

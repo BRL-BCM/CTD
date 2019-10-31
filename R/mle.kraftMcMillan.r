@@ -3,6 +3,8 @@
 #' A power analysis of the encoding algorithm using to encode subsets of S in G.
 #' @param G - A character vector of all node names in the background knowledge graph.
 #' @param k - The size of the node name subsets of G.
+#' @param multiNode - Boolean, indicating whether to use the multi-node diffusion encoding algorithm (TRUE) or the single-node
+#'                    diffusion encoding algorithm (FALSE). Default is FALSE.
 #' @return IA - a list of bitlengths associated with all outcomes in the N choose K outcome space, with the names of the list elements the node names of the encoded nodes
 #' @export mle.kraftMcMillan
 #' @examples
@@ -22,25 +24,25 @@
 #' IA = mle.kraftMcMillian(G, 2)
 #' # Power to find effects is
 #' sum(2^-unlist(IA))
-mle.kraftMcMillan = function(G, k, memory=FALSE) {
+mle.kraftMcMillan = function(G, k, multiNode=FALSE) {
   IA = list()
   # Get all subsets of size k in graph G
   subsets.k = combn(tolower(names(G)),k)
   for (ss in 1:ncol(subsets.k)) {
     S = subsets.k[,ss]
-    perms = list()
-    for (i in 1:length(S)) {
-      ind = which(names(G)==S[i])
-      if (memory) {
-        perms[[S[i]]] = mle.getPermN_memory(ind, G)
-      } else {
-        perms[[S[i]]] = mle.getPermN_memoryless(ind, G)
+    if (multiNode) {
+      ranks = multiNode.getNodeRanks(S, G)
+    } else {
+      ranks = list()
+      for (i in 1:length(S)) {
+        ind = which(names(G)==S[i])
+        ranks[[S[i]]] = singleNode.getNodeRanksN(ind, G)
       }
     }
     pt.bitString = list()
     for (p in 1:length(S)) {
-      pt.bitString[[S[p]]] = as.numeric(perms[[S[p]]] %in% S)
-      names(pt.bitString[[S[p]]]) = perms[[S[p]]]
+      pt.bitString[[S[p]]] = as.numeric(ranks[[S[p]]] %in% S)
+      names(pt.bitString[[S[p]]]) = ranks[[S[p]]]
       ind = which(pt.bitString[[S[p]]] == 1)
       pt.bitString[[S[p]]] = pt.bitString[[S[p]]][1:ind[length(ind)]]
     }

@@ -18,7 +18,7 @@
 #'   ptID = colnames(data_mx)[pt]
 #'   for (pt2 in pt:ncol(data_mx)) {
 #'     ptID2 = colnames(data_mx)[pt2]
-#'     tmp = mle.getPtSim(ptBSbyK[[ptID]], ptID, ptBSbyK[[ptID2]], ptID2, data_mx, perms)
+#'     tmp = mle.getPtSim(ptBSbyK[[ptID]], ptID, ptBSbyK[[ptID2]], ptID2, data_mx, ranks)
 #'     for (k in 1:kmx) {
 #'       res[[k]]$ncd[ptID, ptID2] = tmp$NCD[k]
 #'       res[[k]]$ncd[ptID2, ptID] = tmp$NCD[k]

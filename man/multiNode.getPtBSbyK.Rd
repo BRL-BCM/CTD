@@ -4,12 +4,12 @@
 \alias{multiNode.getPtBSbyK}
 \title{Generate patient-specific bitstrings from adaptive network walk.}
 \usage{
-multiNode.getPtBSbyK(S, perms)
+multiNode.getPtBSbyK(S, ranks)
 }
 \arguments{
 \item{S}{- A character vector of node names describing the node subset to be encoded.}
 
-\item{perms}{- The list of permutations calculated over all possible nodes, starting with each node in subset of interest.}
+\item{ranks}{- The list of node ranks calculated over all possible nodes, starting with each node in subset of interest.}
 }
 \value{
 pt.byK - a list of bitstrings, with the names of the list elements the node names of the encoded nodes
@@ -24,6 +24,6 @@ kmx = 15
 ptBSbyK = list()
 for (pt in 1:ncol(data_mx)) {
   S = data_mx[order(abs(data_mx[,pt]), decreasing=TRUE),pt][1:kmx]
-  ptBSbyK[[ptID]] = multiNode.getPtBSbyK(S, perms)
+  ptBSbyK[[ptID]] = multiNode.getPtBSbyK(S, ranks)
 }
 }

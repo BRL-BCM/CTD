@@ -4,12 +4,15 @@
 \alias{mle.kraftMcMillan}
 \title{Apply the Kraft-McMillian Inequality using a specific encoding algorithm.}
 \usage{
-mle.kraftMcMillan(G, k, memory = FALSE)
+mle.kraftMcMillan(G, k, multiNode = FALSE)
 }
 \arguments{
 \item{G}{- A character vector of all node names in the background knowledge graph.}
 
 \item{k}{- The size of the node name subsets of G.}
+
+\item{multiNode}{- Boolean, indicating whether to use the multi-node diffusion encoding algorithm (TRUE) or the single-node
+diffusion encoding algorithm (FALSE). Default is FALSE.}
 }
 \value{
 IA - a list of bitlengths associated with all outcomes in the N choose K outcome space, with the names of the list elements the node names of the encoded nodes
