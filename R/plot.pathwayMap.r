@@ -7,6 +7,7 @@
 #' @param scalingFactor - Integer associated with increase in node size.
 #' @param outputFilePath - The directory in which you want to store image files.
 #' @param SVG - Save as SVG or PNG? If SVG is TRUE, then an SVG image is saved. If FALSE, a PNG is saved.
+#' @import Hmisc
 #' @export plot.pathwayMap
 #' @usage plot.pathwayMap(Pathway.Name, PatientID, patient.zscore, zscore.threshold, scalingFactor, outputFilePath, SVG=TRUE)
 #' @examples
