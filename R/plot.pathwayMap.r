@@ -17,11 +17,11 @@
 #' patient.zscore = Miller2015[,1]
 #' plot.pathwayMap(Pathway.Name[1], PatientID, patient.zscore, zscore.threshold, scalingFactor=1, outputFilePath=getwd(), SVG=TRUE)
 plot.pathwayMap = function(Pathway.Name, PatientID, patient.zscore, zscore.threshold, scalingFactor, outputFilePath, SVG=TRUE) {
-  gmlPath = "../extdata"
-  load(sprintf("%s/complexNodes.RData", gmlPath))
-  load(sprintf("%s/RData/%s.RData", gmlPath, Pathway.Name))
-  template.g = ig
+  patient.zscore = patient.zscore[-which(is.na(patient.zscore))]
 
+  load(system.file("extdata/complexNodes.RData", package = "CTD"))
+  load(system.file(sprintf("extdata/RData/%s.RData", Pathway.Name), package = "CTD"))
+  template.g = ig
 
   patient.zscore[which(is.na(patient.zscore))] = 0
   patient.zscore = patient.zscore[-which(abs(patient.zscore)<zscore.threshold)]
@@ -29,10 +29,10 @@ plot.pathwayMap = function(Pathway.Name, PatientID, patient.zscore, zscore.thres
     names(patient.zscore)[which(names(patient.zscore)=="3-ureidopropionate")] = "ureidopropionate"
   }
 
-  nodeDisplayNames= read.table(sprintf("%s/%s/Name-%s.txt", gmlPath, Pathway.Name, Pathway.Name), header=TRUE, sep="\n", check.names = FALSE)
+  nodeDisplayNames= read.table(system.file(sprintf("extdata/%s/Name-%s.txt", Pathway.Name, Pathway.Name), package = "CTD"), header=TRUE, sep="\n", check.names = FALSE)
   tmp = apply(nodeDisplayNames, 1, function(i) unlist(strsplit(i, split= " = "))[2])
   tmp.nms = apply(nodeDisplayNames, 1, function(i) unlist(strsplit(i, split= " = "))[1])
-  ind = as.numeric(tmp.nms)
+  ind = suppressWarnings(as.numeric(tmp.nms))
   ind2 = as.logical(sapply(ind, function(i) is.na(i)))
   tmp = tmp[-which(ind2)]
   tmp.nms = tmp.nms[-which(ind2)]
@@ -40,10 +40,10 @@ plot.pathwayMap = function(Pathway.Name, PatientID, patient.zscore, zscore.thres
   names(nodeDisplayNames) = tmp.nms
   nodeDisplayNames = gsub("\\+", " ", nodeDisplayNames)
   # Load id to node types mappings
-  nodeType = read.table(sprintf("%s/%s/Type-%s.txt", gmlPath, Pathway.Name, Pathway.Name), header=TRUE, sep="\n", check.names = FALSE)
+  nodeType = read.table(system.file(sprintf("extdata/%s/Type-%s.txt", Pathway.Name, Pathway.Name), package = "CTD"), header=TRUE, sep="\n", check.names = FALSE)
   tmp = apply(nodeType, 1, function(i) unlist(strsplit(i, split= " = "))[2])
   tmp.nms = apply(nodeType, 1, function(i) unlist(strsplit(i, split= " = "))[1])
-  ind = as.numeric(tmp.nms)
+  ind = suppressWarnings(as.numeric(tmp.nms))
   ind2 = as.logical(sapply(ind, function(i) is.na(i)))
   tmp = tmp[-which(ind2)]
   tmp.nms = tmp.nms[-which(ind2)]
@@ -58,9 +58,8 @@ plot.pathwayMap = function(Pathway.Name, PatientID, patient.zscore, zscore.thres
     node.types[n] = as.character(nodeType[V(template.g)$name[n]])
   }
   node.labels = as.character(sapply(node.labels, URLdecode))
-  rm(ind, ind2, n, tmp, tmp.nms, nodeDisplayNames, nodeType)
 
-  metabolon_to_data = read.csv(sprintf("%s/metabolon_to_data.txt", gmlPath), sep="\t", header=TRUE, as.is=TRUE, stringsAsFactors = FALSE)
+  metabolon_to_data = read.csv(system.file("extdata/metabolon_to_data.txt", package = "CTD"), sep="\t", header=TRUE, as.is=TRUE, stringsAsFactors = FALSE)
   metabolon_to_data = metabolon_to_data[,c(1,2,3,4)]
   metabolon_to_data = apply(metabolon_to_data, 2, tolower)
   # Relabel nodes that have different names in dataset
@@ -134,13 +133,6 @@ plot.pathwayMap = function(Pathway.Name, PatientID, patient.zscore, zscore.thres
   template.g = delete.vertices(template.g, v=grep(unlist(strsplit(Pathway.Name, split="-"))[1], V(template.g)$label))
   V(template.g)$color[which(V(template.g)$shape=="rectangle")] = rep("#32CD32", length(which(V(template.g)$shape=="rectangle")))
 
-  #png(sprintf("%s/%s-%s.png", outputFilePath, Pathway.Name, PatientID), 1000, 1000)
-  #plot.igraph(template.g, layout=cbind(V(template.g)$x, V(template.g)$y), edge.arrow.size = 0.01, edge.width = 1,
-  #            vertex.frame.color=V(template.g)$color, main = gsub("-", " ", Pathway.Name))
-  #legend('bottom',legend=1:max(ceiling(V(template.g)$size/scalingFactor)),
-  #       pt.cex=seq(1, ceiling(max(V(template.g)$size)), scalingFactor),
-  #       col='black',pch=21, pt.bg='white', cex=2, horiz=TRUE)
-  #dev.off()
   if (Pathway.Name=="allPathways") {
     V(template.g)$label.cex = 0.25
     V(template.g)$label = rep("", length(V(template.g)$name))

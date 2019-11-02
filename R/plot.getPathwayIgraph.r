@@ -16,21 +16,20 @@
 #' ig = plot.getPathwayIgraph(input, Miller2015)
 #' # Returns a blank template for selected pathway.
 #' plot.igraph(ig, edge.arrow.size = 0.01)
-plot.getPathwayIgraph = function(input, Pathway.Name, pmap.path = "./extdata") {
+plot.getPathwayIgraph = function(input, Pathway.Name) {
   if (is.null( Pathway.Name)) Pathway.Name = gsub(" ", "-", input$pathwayMapId)
 
   if (Pathway.Name=="All") {
-    load(sprintf("%s/RData/allPathways.RData", pmap.path))
+    load(system.file("extdata/RData/allPathways.RData", package="CTD"))
     V(ig)$label[which(V(ig)$label %in% c("DSGEGDFXAEGGGVR", "Dsgegdfxaegggvr"))] = ""
     Pathway.Name = "allPathways"
   } else {
-    load(sprintf("%s/RData/%s.RData", pmap.path, Pathway.Name))
+    load(system.file(sprintf("extdata/RData/%s.RData", Pathway.Name), package="CTD"))
   }
   template.ig = ig
 
   # Load id to display label mappings
-  nodeDisplayNames= read.table(sprintf("%s/%s/Name-%s.txt", pmap.path, Pathway.Name, Pathway.Name),
-                               header=TRUE, sep="\n", check.names = FALSE)
+  nodeDisplayNames= read.table(system.file(sprintf("extdata/%s/Name-%s.txt", Pathway.Name, Pathway.Name), package="CTD"), header=TRUE, sep="\n", check.names = FALSE)
   tmp = apply(nodeDisplayNames, 1, function(i) unlist(strsplit(i, split= " = "))[2])
   tmp.nms = apply(nodeDisplayNames, 1, function(i) unlist(strsplit(i, split= " = "))[1])
   ind = suppressWarnings(as.numeric(tmp.nms))
@@ -41,8 +40,7 @@ plot.getPathwayIgraph = function(input, Pathway.Name, pmap.path = "./extdata") {
   names(nodeDisplayNames) = tmp.nms
   nodeDisplayNames = gsub("\\+", " ", nodeDisplayNames)
   # Load id to node types mappings
-  nodeType = read.table(sprintf("%s/%s/Type-%s.txt", pmap.path, Pathway.Name, Pathway.Name),
-                        header=TRUE, sep="\n", check.names = FALSE)
+  nodeType = read.table(system.file(sprintf("extdata/%s/Type-%s.txt", Pathway.Name, Pathway.Name), package="CTD"), header=TRUE, sep="\n", check.names = FALSE)
   tmp = apply(nodeType, 1, function(i) unlist(strsplit(i, split= " = "))[2])
   tmp.nms = apply(nodeType, 1, function(i) unlist(strsplit(i, split= " = "))[1])
   ind = suppressWarnings(as.numeric(tmp.nms))
