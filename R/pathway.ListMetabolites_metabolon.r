@@ -9,13 +9,12 @@
 #' mets = pathway.ListMetabolites_metabolon()
 #' print(mets)
 pathway.ListMetabolites_metabolon = function() {
-  ig_files = list.files(sprintf("%s/extdata/RData/", getwd()), pattern = ".RData")
+  ig_files = list.files(system.file("extdata/RData/", package="CTD"), pattern = ".RData")
   ig_files = ig_files
 
   mets = c()
   for (pwy in 1:length(ig_files)) {
-    print(pwy)
-    load(sprintf("%s/extdata/RData/%s", getwd(), ig_files[pwy]))
+    load(system.file(sprintf("extdata/RData/%s", ig_files[pwy]), package="CTD"))
     length(V(ig)$label)
     mets = c(mets, V(ig)$label)
   }
