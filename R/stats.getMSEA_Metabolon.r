@@ -48,21 +48,8 @@
 #' abs_filename_classes = "MSEA_Datasets/Miller2015_arg.cls"
 #' pathway.data = stats.getMSEA_Metabolon(abs_filename_dataset, abs_filename_classes, pathway_knowledgebase = "Metabolon", output_dir = getwd(), expt_name="msea_results")
 stats.getMSEA_Metabolon = function(abs_filename_dataset, abs_filename_classes, pathway_knowledgebase = "Metabolon", output_dir = getwd(), expt_name="msea_results") {
-  if (pathway_knowledgebase=="Metabolon") {
-    met.db = "../extdata/Pathway_GMTs/Metabolon.gmt"
-  } else {
-    print("Selected pathway not yet available.")
-  }
-  #else if (pathway_knowledgebase=="KEGG") {
-  #  met.db = "Pathway_GMTs/KEGG.gmt"
-  #} else if (pathway_knowledgebase=="SMPDB") {
-  #  met.db = "Pathway_GMTs/SMPDB.gmt"
-  #} else if (pathway_knowledgebase=="Reactome") {
-  #  met.db = "Pathway_GMTs/Reactome.gmt"
-  #} else {
-    # WikiPathways
-  #  met.db = "Pathway_GMTs/WikiPathways.gmt"
-  #}
+  met.db = system.file(sprintf("extdata/Pathway_GMTs/%s.gmt", pathway_knowledgebase), package="CTD")
+
   res = MSEA(input.ds =  abs_filename_dataset, input.cls = abs_filename_classes, met.db = met.db,
              output.directory = output_dir, doc.string=expt_name,
              reshuffling.type="sample.labels", nperm=1000, weighted.score.type=1,
@@ -73,7 +60,7 @@ stats.getMSEA_Metabolon = function(abs_filename_dataset, abs_filename_classes, p
   return(res)
 }
 
-# M S E A -- Metabolite Set Enrichment Analysis
+# M S E A -- Metabolite Set Enrichment Analysis from the Broad Institute's GSEA-P implementation.
 MSEA.MetaboliteRanking_SingleProfile = function(A, class.labels, metabolite.labels, nperm, permutation.type = 0, sigma.correction = "MetaboliteCluster", fraction=1.0, replace=F) {
   A = A + 0.00000001
   N = length(A[,1])

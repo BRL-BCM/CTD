@@ -22,12 +22,12 @@ stats.getORA_Metabolon = function(met.profile, threshold=3, type="zscore", gene.
   # The size of the population of total possible metabolites to draw from
   population = names(met.profile)
   print(sprintf("Total number of metabolites in profile. = %d.", length(population)))
-  paths.hsa = list.dirs(path="../extdata", full.names = FALSE)
+  paths.hsa = list.dirs(path=system.file("extdata", package="CTD"), full.names = FALSE)
   paths.hsa = paths.hsa[-which(paths.hsa %in% c("", "RData", "allPathways", "MSEA_Datasets", "Pathway_GMTs"))]
   row = 1
   pathway.data = data.frame(Pathway=character(), FDR=numeric(), Pvalue=numeric(), Hits=integer(), Size=integer(), stringsAsFactors = FALSE)
   for (pathway in 1:length(paths.hsa)) {
-    load(sprintf("../extdata/RData/%s.RData", paths.hsa[pathway]))
+    load(system.file(sprintf("extdata/RData/%s.RData", paths.hsa[pathway]), package="CTD"))
 
     pathway.compounds = tolower(V(ig)$label[which(V(ig)$shape=="circle")])
     pathCompIDs = unique(tolower(pathway.compounds[which(pathway.compounds %in% population)]))
