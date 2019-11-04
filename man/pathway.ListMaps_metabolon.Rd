@@ -4,16 +4,15 @@
 \alias{pathway.ListMaps_metabolon}
 \title{Get All Metabolites In Metabolon's Pathway Knowledgebase}
 \usage{
-pathway.ListMaps_metabolon(Pathway.Knowledgebase.Path)
+pathway.ListMaps_metabolon()
 }
 \value{
-Pathway.Knowledgebase.Path - local path to extdata folder containing metabolon's pathway knowledgebase files.
+pwys - List of pathway maps curated by Metabolon's Metabolync.
 }
 \description{
 Get All Metabolites In Metabolon's Pathway Knowledgebase
 }
 \examples{
-metabolon_knowledgebase_path = sprintf("\%s/extdata", find.package("CTD"))
-pwys = pathway.ListMaps_metabolon(metabolon_knowledgebase_path)
+pwys = pathway.ListMaps_metabolon()
 print(pwys)
 }

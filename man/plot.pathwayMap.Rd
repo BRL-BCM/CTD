@@ -4,20 +4,20 @@
 \alias{plot.pathwayMap}
 \title{Generate pathway map with patient perturbation data superimposed.}
 \usage{
-plot.pathwayMap(Pathway.Name, PatientID, patient.zscore, zscore.threshold, scalingFactor, outputFilePath, SVG=TRUE)
+plot.pathwayMap(Pathway, ptID, pt.zscore, zscore.threshold, scale, out.path, SVG=TRUE)
 }
 \arguments{
-\item{Pathway.Name}{- The name of the pathway map you want to plot patient data on.}
+\item{Pathway}{- The name of the pathway map you want to plot patient data on.}
 
-\item{PatientID}{- An identifier string associated with the patient.}
+\item{ptID}{- An identifier string associated with the patient.}
 
-\item{patient.zscore}{- A named vector of metabolites with corresponding z-scores.}
+\item{pt.zscore}{- A named vector of metabolites with corresponding z-scores.}
 
 \item{zscore.threshold}{- Plot all z-scores > or < this threshold.}
 
-\item{scalingFactor}{- Integer associated with increase in node size.}
+\item{scale}{- Integer associated with increase in node size.}
 
-\item{outputFilePath}{- The directory in which you want to store image files.}
+\item{out.path}{- The directory in which you want to store image files.}
 
 \item{SVG}{- Save as SVG or PNG? If SVG is TRUE, then an SVG image is saved. If FALSE, a PNG is saved.}
 }
@@ -25,10 +25,10 @@ plot.pathwayMap(Pathway.Name, PatientID, patient.zscore, zscore.threshold, scali
 Generate pathway map with patient perturbation data superimposed.
 }
 \examples{
-Pathway.Name = pathway.ListMaps_metabolon()
+Pathway = pathway.ListMaps_metabolon()
 data(Miller2015)
 Miller2015 = Miller2015[,grep("IEM", colnames(Miller2015))]
-PatientID = colnames(Miller2015)[1]
-patient.zscore = Miller2015[,1]
-plot.pathwayMap(Pathway.Name[1], PatientID, patient.zscore, zscore.threshold, scalingFactor=1, outputFilePath=getwd(), SVG=TRUE)
+ptID = colnames(Miller2015)[1]
+pt.zscore = Miller2015[,1]
+plot.pathwayMap(Pathway[1], ptID, pt.zscore, zscore.threshold, scale=1, out.path=getwd(), SVG=TRUE)
 }

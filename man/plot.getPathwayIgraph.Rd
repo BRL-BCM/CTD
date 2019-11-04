@@ -4,7 +4,7 @@
 \alias{plot.getPathwayIgraph}
 \title{plot.getPathwayIgraph}
 \usage{
-plot.getPathwayIgraph(input, Pathway.Name, pmap.path = "./extdata")
+plot.getPathwayIgraph(input, Pathway.Name)
 }
 \arguments{
 \item{input}{- A list object of parameters (esp. from R shiny app). Required parameters are ptIDs, diagClass and pathwayMapId.}

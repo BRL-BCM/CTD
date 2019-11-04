@@ -9,7 +9,8 @@
 #'                               Currently only "Metabolon" is offered, though "KEGG", "WikiPathways", "SMPDB"
 #'                               and/or "Reactome" can be added in future versions.
 #' @param output_dir - The path associated with the folder in which MSEA results will be saved.
-#' @param expt_name - A name to be associated with the experiment you are analyzing. This name will be used in filestems of results rendered in output_dir.
+#' @param expt_name - A name to be associated with the experiment you are analyzing. This name will be used in filestems
+#'                    of results rendered in output_dir.
 #' @export stats.getMSEA_Metabolon
 #' @examples
 #' data(Miller2015)
@@ -20,22 +21,25 @@
 #' diag.ind[which(diag.ind!="Argininemia")] = 0
 #' diag.ind[which(diag.ind=="Argininemia")] = 1
 #' diag.ind = as.numeric(diag.ind)
-#' # Manually add the following text to 1st line of .cls, where num_samples is the length of diag.ind: #num_samples 1 2
+#' # Manually add the following text to 1st line of .cls,
+#'   where num_samples is the length of diag.ind: #num_samples 1 2
 #' # Manually add the following text to 2nd line of .cls: #disease control
-#' write.table(diag.ind, file="MSEA_Datasets/Miller2015_arg.cls", sep=" ", quote=FALSE, row.names = FALSE, col.names = FALSE)
+#' write.table(diag.ind, file=system.file("extdata/MSEA_Datasets/Miller2015_arg.cls", package="CTD"),
+#'             sep=" ", quote=FALSE, row.names = FALSE, col.names = FALSE)
 #'
 #' # Create a .gct file.
 #' data_mx = Miller2015
 #' data_mx = data_mx[, order(diags.ind)]
 #' data_mx = cbind(rep(NA, nrow(data_mx)), data_mx)
 #' colnames(data_mx)[1] = "DESCRIPTION"
-#' write.table(data_mx, file="MSEA_Datasets/Miller2015.gct", sep="\t", quote=FALSE, row.names = TRUE)
+#' write.table(data_mx, file=system.file("extdata/MSEA_Datasets/Miller2015.gct", package="CTD"),
+#'             sep="\t", quote=FALSE, row.names = TRUE)
 #'
 #' # Generate a .gmt file.
 #' population = names(met.profile)
 #' paths.hsa = list.dirs(path="../inst/extdata", full.names = FALSE)
 #' paths.hsa = paths.hsa[-which(paths.hsa %in% c("", "RData", "allPathways"))]
-#' sink("Pathway_GMTs/Metabolon.gmt")
+#' sink(system.file("extdata/Pathway_GMTs/Metabolon.gmt", package="CTD"))
 #' for (p in 1:length(paths.hsa)) {
 #'   load(sprintf("../inst/extdata/RData/%s.RData", paths.hsa[p]))
 #'   pathway.compounds = V(ig)$label[which(V(ig)$shape=="circle")]
@@ -44,10 +48,12 @@
 #' }
 #' sink()
 #' print("test")
-#' abs_filename_dataset = "MSEA_Datasets/Miller2015.gct"
-#' abs_filename_classes = "MSEA_Datasets/Miller2015_arg.cls"
-#' pathway.data = stats.getMSEA_Metabolon(abs_filename_dataset, abs_filename_classes, pathway_knowledgebase = "Metabolon", output_dir = getwd(), expt_name="msea_results")
-stats.getMSEA_Metabolon = function(abs_filename_dataset, abs_filename_classes, pathway_knowledgebase = "Metabolon", output_dir = getwd(), expt_name="msea_results") {
+#' abs_filename_dataset = system.file("extdata/MSEA_Datasets/Miller2015.gct", package="CTD")
+#' abs_filename_classes = system.file("extdata/MSEA_Datasets/Miller2015_arg.cls", package="CTD")
+#' pathway.data = stats.getMSEA_Metabolon(abs_filename_dataset, abs_filename_classes, pathway_knowledgebase = "Metabolon",
+#'                                        output_dir = getwd(), expt_name="msea_results")
+stats.getMSEA_Metabolon = function(abs_filename_dataset, abs_filename_classes, pathway_knowledgebase = "Metabolon",
+                                   output_dir = getwd(), expt_name="msea_results") {
   met.db = system.file(sprintf("extdata/Pathway_GMTs/%s.gmt", pathway_knowledgebase), package="CTD")
 
   res = MSEA(input.ds =  abs_filename_dataset, input.cls = abs_filename_classes, met.db = met.db,

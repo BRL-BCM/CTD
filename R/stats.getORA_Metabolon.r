@@ -5,8 +5,9 @@
 #' and the associated z-score or p-value describing the level of the metabolite compared to controls.
 #' @param threshold - A cutoff to select metabolites with a zscore > threshold or < -1*threshold.
 #' @param type - Either "p-value" or "z-score".
-#' @param gene.profile - Default set to NULL, meaning the default enrichment analysis only considers metabolites. However, if you have gene data, too, set
-#' this parameter to a character vector of the gene names with found variants in the patient's record. Gene IDs must be converted to Entrez Identifiers.
+#' @param gene.profile - Default set to NULL, meaning the default enrichment analysis only considers metabolites.
+#'                       However, if you have gene data, too, set this parameter to a character vector of the gene
+#'                      names with found variants in the patient's record. Gene IDs must be converted to Entrez Identifiers.
 #' @export stats.getORA_Metabolon
 #' @examples
 #' pathway.data = stats.getORA_Metabolon(met.profile, threhold=3, "z-score", NULL)

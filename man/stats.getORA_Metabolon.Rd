@@ -15,8 +15,9 @@ and the associated z-score or p-value describing the level of the metabolite com
 
 \item{type}{- Either "p-value" or "z-score".}
 
-\item{gene.profile}{- Default set to NULL, meaning the default enrichment analysis only considers metabolites. However, if you have gene data, too, set
-this parameter to a character vector of the gene names with found variants in the patient's record. Gene IDs must be converted to Entrez Identifiers.}
+\item{gene.profile}{- Default set to NULL, meaning the default enrichment analysis only considers metabolites.
+ However, if you have gene data, too, set this parameter to a character vector of the gene
+names with found variants in the patient's record. Gene IDs must be converted to Entrez Identifiers.}
 }
 \description{
 A function that returns the pathway enrichment score for all perturbed metabolites in a patient's full metabolomic profile.

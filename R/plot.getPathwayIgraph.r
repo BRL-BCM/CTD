@@ -4,7 +4,7 @@
 #' @param Pathway.Name - The name of the pathway map for which you want the topological information.
 #' @return template.ig - Igraph object of selected pathway map.
 #' @export plot.getPathwayIgraph
-#' @usage plot.getPathwayIgraph(input, Pathway.Name, pmap.path = "./extdata")
+#' @usage plot.getPathwayIgraph(input, Pathway.Name)
 #' @import igraph
 #' @examples
 #' data(Miller2015)
