@@ -1,12 +1,11 @@
-#' Patient similarity using mutual information MLE metric of patients' most modular, perturbed subsets.
+#' Module that best explains the patient similarity assigned between a set of patients.
 #'
-#' This function calculates the universal distance between patients, using a mutual information metric, where self-information comes from the minimum encoding length of each patient's encoded modular perturbations in the background knowledge graph.
 #' @param patientSim - A similarity matrix, where row and columns are patient identifiers.
 #' @param data_mx - The matrix that gives the perturbation strength (z-scores) for all variables (columns) for each patient (rows).
 #' @param ptIDs - The identifier associated with patient 1's sample.
 #' @param ig_pruned - The igraph object associated with the pruned disease+reference differential interaction network.
 #' @param kmx - The maximum metabolite set size probed when assessing patient similarity.
-#' @return p - A ggplot2 object showing the module blowout describing the similarity between patients in ptIDs.
+#' @return ptsim_blowout - An igraph object showing the module blowout describing the similarity between patients in ptIDs.
 #' @export mle.blowoutSim
 #' @examples
 #' require(CTD)
