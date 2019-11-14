@@ -3,7 +3,7 @@
 #' @param patientSim - A similarity matrix, where row and columns are patient identifiers.
 #' @param data_mx - The matrix that gives the perturbation strength (z-scores) for all variables (columns) for each patient (rows).
 #' @param ptIDs - The identifier associated with patient 1's sample.
-#' @param ig_pruned - The igraph object associated with the pruned disease+reference differential interaction network.
+#' @param ig_pruned - The list of igraph objects associated with the integrated, pruned disease+reference differential interaction networks.
 #' @param kmx - The maximum metabolite set size probed when assessing patient similarity.
 #' @return ptsim_blowout - An igraph object showing the module blowout describing the similarity between patients in ptIDs.
 #' @export mle.blowoutSim
@@ -20,28 +20,41 @@
 #' ptsim_blowout = mle.blowoutSim(patientSim, data_mx, ptIDs, ig_pruned, kmx=15)
 #' plot.igraph(ptsim_blowout, layout=layout.circle, edge.width=50*abs(E(ptsim_blowout)$weight))
 mle.blowoutSim = function(patientSim, data_mx, ptIDs, ig_pruned, kmx) {
-  data_mx = data_mx[which(rownames(data_mx) %in% V(ig_pruned)$name),]
+  allmets = unique(unlist(lapply(ig_pruned, function(i) V(i)$name)))
+  data_mx = data_mx[which(rownames(data_mx) %in% allmets),]
   # Get all metabolites in top kmx perturbations for all patients in ptIDs.
   # Score node based on how many patient perturbation sets it occurs
   pt_mets = sort(table(as.vector(sapply(ptIDs, function(i) rownames(data_mx)[order(abs(data_mx[,i]), decreasing = TRUE)][1:kmx]))), decreasing = TRUE)
   # Select nodes and edges based on being ranked in top 10% of each scoring.
   selected_nodes = names(pt_mets[which(pt_mets>quantile(pt_mets, 0.50))])
   
-  # Rank edges between metabolite nodes by order of strength (absolute value)
+  # Rank edges between metabolite nodes by order of strength (absolute value) across all networks in ig_pruned.
   # Keep adding until all nodes are included in a tree
-  e_ids = sort(unique(apply(combn(names(pt_mets), 2), 2, function(i) get.edge.ids(ig_pruned, i))))
-  if (any(e_ids==0)) { e_ids= e_ids[-which(e_ids==0)]}
-  e_list = get.edgelist(ig_pruned)
-  e_list2 = e_list[e_ids,]
-  rank_edges = e_list2[order(abs(E(ig_pruned)$weight[e_ids]), decreasing = TRUE),]
-  rank_edgeweights = E(ig_pruned)$weight[e_ids][order(abs(E(ig_pruned)$weight[e_ids]), decreasing = TRUE)]
-  # Rank nodes, display ranked nodes. Node size in blowout is rank of node.
-  rank_edges = rank_edges[which(abs(rank_edgeweights)>quantile(abs(rank_edgeweights), 0.5)),]
-  rank_edges = rank_edges[which(apply(rank_edges, 1, function(i) any(i %in% selected_nodes))),]
-  
-  e_ids2 = sort(apply(rank_edges, 1, function(i) get.edge.ids(ig_pruned, i)))
-  
-  ptsim_blowout = subgraph.edges(ig_pruned, E(ig_pruned)[e_ids2], delete.vertices = TRUE)
+  ptsim_blowout = make_empty_graph(directed=FALSE)
+  for (i in 1:length(ig_pruned)) {
+    ig = ig_pruned[[i]]
+    selected_nodes_ig = selected_nodes[which(selected_nodes %in% V(ig)$name)]
+    e_ids = sort(unique(apply(combn(selected_nodes_ig, 2), 2, function(i) get.edge.ids(ig, i))))
+    if (any(e_ids==0)) { e_ids= e_ids[-which(e_ids==0)]}
+    e_list = get.edgelist(ig)
+    e_list2 = e_list[e_ids,]
+    rank_edges = e_list2[order(abs(E(ig)$weight[e_ids]), decreasing = TRUE),]
+    rank_edgeweights = E(ig)$weight[e_ids][order(abs(E(ig)$weight[e_ids]), decreasing = TRUE)]
+    # Rank nodes, display ranked nodes. Node size in blowout is rank of node.
+    rank_edges = rank_edges[which(abs(rank_edgeweights)>quantile(abs(rank_edgeweights), 0.5)),]
+    rank_edges = rank_edges[which(apply(rank_edges, 1, function(i) any(i %in% selected_nodes_ig))),]
+    
+    e_ids2 = sort(apply(rank_edges, 1, function(i) get.edge.ids(ig, i)))
+    
+    ig_blowout = subgraph.edges(ig, E(ig)[e_ids2], delete.vertices = TRUE)
+    print(ig_blowout)
+    
+    vv = V(ig_blowout)$name[which(!(V(ig_blowout)$name %in% V(ptsim_blowout)$name))]
+    ptsim_blowout = add.vertices(ptsim_blowout, nv = length(vv), attr=list(name=vv))
+    ptsim_blowout = add.edges(ptsim_blowout, 
+                              edges = as.vector(apply(get.edgelist(ig_blowout), 1, function(i) i)), 
+                              attr=list(weight=E(ig_blowout)$weight))
+  }
   #plot.igraph(ptsim_blowout, layout=layout.circle, edge.width=50*abs(E(ptsim_blowout)$weight))
   
   return(ptsim_blowout)
