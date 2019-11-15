@@ -88,8 +88,27 @@ mle.getPtSim = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, ranks) {
     p1.sig.nodes = names(sort(abs(data_mx[,ptID]), decreasing = TRUE)[1:length(p1.optBS)])
     p2.sig.nodes = names(sort(abs(data_mx[,ptID2]), decreasing = TRUE)[1:length(p2.optBS)])
     p12.sig.nodes = unique(c(p1.sig.nodes, p2.sig.nodes))
-    p12.optBS = singleNode.getPtBSbyK(p12.sig.nodes, ranks)
-    p12.e = mle.getEncodingLength(p12.optBS, NULL, NULL, G)[,"IS.alt"]
+    
+    p12.e = c()
+    for (k in 1:length(p1.optBS)) {
+      p1.sig.nodes_cpy = p1.sig.nodes
+      p2.sig.nodes_cpy = p2.sig.nodes
+      
+      p1.sig.nodes_k = names(which(p1.optBS[[k]]==1))
+      p2.sig.nodes_k = names(which(p2.optBS[[k]]==1))
+      while (length(p1.sig.nodes_k)<k) {
+        p1.sig.nodes_k = unique(c(p1.sig.nodes_k, p1.sig.nodes_cpy[1]))
+        p1.sig.nodes_cpy = p1.sig.nodes_cpy[-1]
+      }
+      while (length(p2.sig.nodes_k)<k) {
+        p2.sig.nodes_k = unique(c(p2.sig.nodes_k, p2.sig.nodes_cpy[1]))
+        p2.sig.nodes_cpy = p2.sig.nodes_cpy[-1]
+      }
+      p12.sig.nodes_k = sapply(unique(c(p1.sig.nodes_k, p2.sig.nodes_k)), trimws)
+      p12.optBS = singleNode.getPtBSbyK(p12.sig.nodes_k, ranks)
+      res = mle.getEncodingLength(p12.optBS, NULL, NULL, G)
+      p12.e[k] = res[which.max(res[,"d.score"]), "IS.alt"] + log2(choose(length(G), 1))*(length(p12.sig.nodes_k)-which.max(res[,"d.score"]))
+    }
   }
 
   # Normalized Compression Distance, Percent Mutual Information, Jaccard Set Similarity (w/ Directionality)
