@@ -2,6 +2,9 @@
 #'
 #' This function calculates the node rankings starting from a given perturbed variable in a subset of variables in the background knowledge graph.
 #' @param S - A character vector of the node names for the subset of nodes you want to encode.
+#' @param G - A list of probabilities with list names being the node names of the background graph.
+#' @param num.misses - The number of "misses" the network walker will tolerate before switching to fixed length codes for remaining nodes to be found.
+#' @param verbose - If TRUE, print statements will execute as progress is made. Default is FALSE.
 #' @return ranks - A list of character vectors of node names in the order they were drawn by the
 #'                 probability diffusion algorithm, from each starting node in S.
 #' @keywords probability diffusion algorithm
@@ -23,7 +26,7 @@
 #' names(G) = V(ig)$name
 #' S = names(G)[1:3]
 #' ranks = multiNode.getNodeRanks(S, G)
-multiNode.getNodeRanks = function(S, G, num.misses=NULL) {
+multiNode.getNodeRanks = function(S, G, num.misses=NULL, verbose=FALSE) {
   if (is.null(num.misses)) {
     thresholdDrawT = log2(length(G))
   } else {
@@ -31,7 +34,9 @@ multiNode.getNodeRanks = function(S, G, num.misses=NULL) {
   }
   ranks = list()
   for (n in 1:length(S)) {
-    print(sprintf("Calculating node rankings %d of %d.", n, length(S)))
+    if (verbose) {
+      print(sprintf("Calculating node rankings %d of %d.", n, length(S)))
+    }
     current_node_set = NULL
     stopIterating=FALSE
     startNode = S[n]

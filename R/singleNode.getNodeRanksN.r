@@ -4,7 +4,8 @@
 #' @param n - The index (out of a vector of node names) of the node ranking you want to calculate.
 #' @param G - A list of probabilities with list names being the node names of the background graph.
 #' @param S - A character vector of node names in the subset you want the network walker to find.
-#' @param misses.thresh - The number of "misses" the network walker will tolerate before switched to fixed length codes for remaining nodes to be found.
+#' @param num.misses - The number of "misses" the network walker will tolerate before switching to fixed length codes for remaining nodes to be found.
+#' @param verbose - If TRUE, print statements will execute as progress is made. Default is FALSE.
 #' @return current_node_set - A character vector of node names in the order they were drawn by the probability diffusion algorithm.
 #' @keywords probability diffusion
 #' @keywords network walker
@@ -17,15 +18,17 @@
 #'   ranks[[n]] = singleNode.getNodeRanksN(n, G)
 #' }
 #' names(ranks) = names(G)
-singleNode.getNodeRanksN = function(n, G, S=NULL, misses.thresh=NULL) {
-  if (!is.null(misses.thresh)) {
+singleNode.getNodeRanksN = function(n, G, S=NULL, num.misses=NULL, verbose=FALSE) {
+  if (!is.null(num.misses)) {
     if (is.null(S)) {
-      print("You must supply a subset of nodes as parameter S if you supply a misses.thresh.")
+      print("You must supply a subset of nodes as parameter S if you supply num.misses.")
       return(0)
     }
   }
   all_nodes = names(G)
-  print(sprintf("Calculating node rankings %d of %d.", n, length(all_nodes)))
+  if (verbose) {
+    print(sprintf("Calculating node rankings %d of %d.", n, length(all_nodes)))
+  }
   current_node_set = NULL
   stopIterating=FALSE
   startNode = all_nodes[n]
@@ -53,14 +56,14 @@ singleNode.getNodeRanksN = function(n, G, S=NULL, misses.thresh=NULL) {
     maxProb = names(which.max(currentGraph))
     # Break ties: When there are ties, choose the first of the winners.
     startNode = names(currentGraph[maxProb[1]])
-    if (!is.null(misses.thresh)) {
+    if (!is.null(num.misses)) {
       if (startNode %in% S) {
         numMisses = 0
       } else {
         numMisses = numMisses + 1
       }
       current_node_set = c(current_node_set, startNode)
-      if (numMisses>misses.thresh || length(c(startNode,current_node_set))>=(length(G))) {
+      if (numMisses>num.misses || length(c(startNode,current_node_set))>=(length(G))) {
         stopIterating = TRUE
       }
     } else {
