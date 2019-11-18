@@ -4,10 +4,16 @@
 \alias{multiNode.getNodeRanks}
 \title{Generate the "adaptive walk" node rankings, starting from a given perturbed variable}
 \usage{
-multiNode.getNodeRanks(S, G, num.misses = NULL)
+multiNode.getNodeRanks(S, G, num.misses = NULL, verbose = FALSE)
 }
 \arguments{
 \item{S}{- A character vector of the node names for the subset of nodes you want to encode.}
+
+\item{G}{- A list of probabilities with list names being the node names of the background graph.}
+
+\item{num.misses}{- The number of "misses" the network walker will tolerate before switching to fixed length codes for remaining nodes to be found.}
+
+\item{verbose}{- If TRUE, print statements will execute as progress is made. Default is FALSE.}
 }
 \value{
 ranks - A list of character vectors of node names in the order they were drawn by the

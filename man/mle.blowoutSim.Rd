@@ -13,7 +13,7 @@ mle.blowoutSim(patientSim, data_mx, ptIDs, ig_pruned, kmx)
 
 \item{ptIDs}{- The identifier associated with patient 1's sample.}
 
-\item{ig_pruned}{- The igraph object associated with the pruned disease+reference differential interaction network.}
+\item{ig_pruned}{- The list of igraph objects associated with the integrated, pruned disease+reference differential interaction networks.}
 
 \item{kmx}{- The maximum metabolite set size probed when assessing patient similarity.}
 }

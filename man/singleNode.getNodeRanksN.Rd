@@ -4,7 +4,8 @@
 \alias{singleNode.getNodeRanksN}
 \title{Generate the fixed , single-node diffusion node rankings, starting from a given perturbed variable.}
 \usage{
-singleNode.getNodeRanksN(n, G, S = NULL, misses.thresh = NULL)
+singleNode.getNodeRanksN(n, G, S = NULL, num.misses = NULL,
+  verbose = FALSE)
 }
 \arguments{
 \item{n}{- The index (out of a vector of node names) of the node ranking you want to calculate.}
@@ -13,7 +14,9 @@ singleNode.getNodeRanksN(n, G, S = NULL, misses.thresh = NULL)
 
 \item{S}{- A character vector of node names in the subset you want the network walker to find.}
 
-\item{misses.thresh}{- The number of "misses" the network walker will tolerate before switched to fixed length codes for remaining nodes to be found.}
+\item{num.misses}{- The number of "misses" the network walker will tolerate before switching to fixed length codes for remaining nodes to be found.}
+
+\item{verbose}{- If TRUE, print statements will execute as progress is made. Default is FALSE.}
 }
 \value{
 current_node_set - A character vector of node names in the order they were drawn by the probability diffusion algorithm.
