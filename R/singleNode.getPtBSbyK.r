@@ -18,13 +18,12 @@
 #'   ptBSbyK[[ptID]] = singleNode.getPtBSbyK(S, ranks)
 #' }
 singleNode.getPtBSbyK = function(S, ranks, num.misses=NULL) {
-  if (is.null(num.misses)) {
-    num.misses = ceiling(log2(length(ranks)))
-  }
+  if (is.null(num.misses)) { num.misses = log2(length(ranks)) }
   ranks2 = ranks[which(names(ranks) %in% S)]
   pt.bitString = list()
   for (p in 1:length(S)) {
     miss = 0
+    thresh = length(ranks2[[S[p]]])
     for (ii in 1:length(ranks2[[S[p]]])) {
       ind_t = as.numeric(ranks2[[S[p]]][ii] %in% S)
       if (ind_t==0) {
@@ -33,9 +32,7 @@ singleNode.getPtBSbyK = function(S, ranks, num.misses=NULL) {
           thresh = ii
           break;
         }
-      } else {
-        miss = 0
-      }
+      } else { miss = 0 }
       pt.bitString[[S[p]]][ii] = ind_t
     }
     pt.bitString[[S[p]]] = pt.bitString[[S[p]]][1:thresh]
