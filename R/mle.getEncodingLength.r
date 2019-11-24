@@ -12,6 +12,7 @@
 #'              the minimum encoding length IS.alt; and IS.null-IS.alt, the d.score.
 #' @export mle.getEncodingLength
 #' @keywords minimum length encoding
+#' @import gmp
 #' @examples
 #' # Identify the most significant subset per patient, given the background graph
 #' data_mx.pvals = t(apply(data_mx, c(1,2), function(i) 2*pnorm(abs(i), lower.tail = FALSE)))
@@ -47,31 +48,11 @@ mle.getEncodingLength = function(bs, pvals, ptID, G) {
     results[row, "optimalBS"] = optBS.tmp
     results[row, "subsetSize"] = k
     results[row, "opt.T"] = found
-    results[row, "IS.null"] = log2(choose(length(G), k))
+    results[row, "IS.null"] =  log2(chooseZ(length(G), k))
     results[row, "IS.alt"] = e
-    results[row, "d.score"] = round(log2(choose(length(G), k)) - e, 3)
+    results[row, "d.score"] = round(log2(chooseZ(length(G), k)) - e, 3)
     row = row + 1
   }
-  return (results)
-}
-
-mle.getEncodingLength_nullk = function(bs, G, null.k) {
-  results = data.frame(optimalBS=character(), subsetSize=integer(), opt.T=integer(),
-                       IS.null=numeric(), IS.alt=numeric(), d.score=numeric(), stringsAsFactors = FALSE)
-  optBS = bs[[1]]
-  mets.k = names(optBS)[which(optBS==1)]
-  found = sum(optBS)
-  not_found = null.k-found
-  e = (not_found+1)*log2(length(G)) + length(optBS)-1
-
-  optBS.tmp = gsub("1", "T", paste(as.character(optBS), collapse=""))
-  results[1, "optimalBS"] = optBS.tmp
-  results[1, "subsetSize"] = null.k
-  results[1, "opt.T"] = found
-  results[1, "IS.null"] = log2(choose(length(G), null.k))
-  results[1, "IS.alt"] = e
-  results[1, "d.score"] = log2(choose(length(G), null.k)) - e
-
   return (results)
 }
 
