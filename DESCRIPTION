@@ -8,7 +8,8 @@ Depends: R (>= 3.3.0),
 	 igraph,
 	 plotly,
 	 gplots,
-	 RColorBrewer
+	 RColorBrewer,
+         gmp
 License: MIT License
 Encoding: UTF-8
 LazyData: true
