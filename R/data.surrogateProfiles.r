@@ -2,14 +2,14 @@
 #'
 #' Fill in a data matrix rank, when your data is low n, high p. Fill in rank with surrogate profiles.
 #' @param data - Data matrix with observations as rows, features as columns.
-#' @param sd - The level of variability (standard deviation) around each feature's
+#' @param std - The level of variability (standard deviation) around each feature's
 #'             mean you want to add in surrogate profiles.
 #' @param useMnDiseaseProfile - Boolean. For disease cohorts not showing homogeneity, mean
 #'             across disease profiles and generate disease surrogates around this mean.
 #' @param addHealthyControls - Boolean. Add healthy control profiles to data?
 #' @return data_mx - Data matrix with added surrogate profiles.
 #' @export data.surrogateProfiles
-data.surrogateProfiles = function(data, sd=1, useMnDiseaseProfile=FALSE, addHealthyControls=TRUE, ref_data=NULL) {
+data.surrogateProfiles = function(data, std=1, useMnDiseaseProfile=FALSE, addHealthyControls=TRUE, ref_data=NULL) {
   if (!is.null(ref_data)) {
     ref_data = ref_data[which(rownames(ref_data) %in% rownames(data)),]
     data = data[which(rownames(data) %in% rownames(ref_data)), ]
@@ -37,7 +37,7 @@ data.surrogateProfiles = function(data, sd=1, useMnDiseaseProfile=FALSE, addHeal
     for (pt in 1:ncol(data)) {
       data_surr[,pt] = data[,pt]
       for (rrpt in 1:rpt) {
-        rr = rnorm(nrow(data), mean=0, sd=sd)
+        rr = rnorm(nrow(data), mean=0, sd=std)
         data_surr[,c_col] = as.numeric(data[,pt])+rr
         c_col = c_col+1
       }
@@ -57,7 +57,7 @@ data.surrogateProfiles = function(data, sd=1, useMnDiseaseProfile=FALSE, addHeal
     for (pt in 1:ncol(data)) {
       data_surr[,pt] = data[,pt]
       for (rrpt in 1:rpt) {
-        rr = rnorm(nrow(data), mean=0, sd=sd)
+        rr = rnorm(nrow(data), mean=0, sd=std)
         data_surr[,c_col] = as.numeric(data[,pt])+rr
         c_col = c_col+1
       }
@@ -78,7 +78,7 @@ data.surrogateProfiles = function(data, sd=1, useMnDiseaseProfile=FALSE, addHeal
       for (pt in 1:ncol(ref_data)) {
         control_surr[,pt] = ref_data[,pt]
         for (rrpt in 1:rpt) {
-          rr = rnorm(nrow(ref_data), mean=0, sd=sd)
+          rr = rnorm(nrow(ref_data), mean=0, sd=std)
           control_surr[,c_col] = as.numeric(ref_data[,pt])+rr
           c_col = c_col+1
         }
