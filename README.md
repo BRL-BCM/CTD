@@ -1,5 +1,5 @@
 # Connect The Dots (CTD):: a method which interprets multivariate perturbations identified in molecular profiles by identifying highly connected nodes in disease-specific co-perturbation networks
-An R package for probabilistic estimation of multivariate feature sets against a partial correlation network.
+Our novel network-based approach, CTD, “connects the dots” between metabolite perturbations observed in individual metabolomics profiles and a given disease state by calculating how connected those metabolites are in the context of a disease-specific network.
 
 ## Check out CTD via Google Colab (UNDER CONSTRUCTION)
 Check it out at https://tinyurl.com/BRL-BCM-CTD.
