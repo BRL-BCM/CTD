@@ -6,7 +6,7 @@ Our novel network-based approach, CTD, “connects the dots” between metabolit
 In R, install the devtools package, and install CTD by install_github(“BRL-BCM/CTD”).
 
 ### Look at the package Rmd vignette.
-Located in /vignette/CTD_Lab-Exercise.html. It will take you across all the stages in the analysis pipeline, including:
+Located in /vignette/CTD_Lab-Exercise.Rmd. It will take you across all the stages in the analysis pipeline, including:
 
 1. Background knowledge graph generation.
 2. The encoding algorithm: including generating node permutations using a network walker, converting node permutations into bitstrings, and calculating the minimum encoding length between k codewords.
