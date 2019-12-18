@@ -1,4 +1,4 @@
-# Connect The Dots (CTD):: a method which interprets multivariate perturbations identified in molecular profiles by identifying highly connected nodes in disease-specific co-perturbation networks
+# CTD:: a method which interprets multivariate perturbations identified in molecular profiles by identifying highly connected nodes in disease-specific co-perturbation networks
 Our novel network-based approach, CTD, “connects the dots” between metabolite perturbations observed in individual metabolomics profiles and a given disease state by calculating how connected those metabolites are in the context of a disease-specific network.
 
 ## Using CTD in R.
