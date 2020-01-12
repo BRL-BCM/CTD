@@ -3,6 +3,7 @@
 export(data.HMDBtoKEGG)
 export(data.LabeltoKEGG)
 export(data.surrogateProfiles)
+export(data.zscoreData)
 export(graph.diffuseP1)
 export(graph.diffuseP1Movie)
 export(graph.naivePruning)

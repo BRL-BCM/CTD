@@ -4,13 +4,13 @@
 \alias{data.surrogateProfiles}
 \title{Surrogate profiles}
 \usage{
-data.surrogateProfiles(data, sd = 1, useMnDiseaseProfile = FALSE,
+data.surrogateProfiles(data, std = 1, useMnDiseaseProfile = FALSE,
   addHealthyControls = TRUE, ref_data = NULL)
 }
 \arguments{
 \item{data}{- Data matrix with observations as rows, features as columns.}
 
-\item{sd}{- The level of variability (standard deviation) around each feature's
+\item{std}{- The level of variability (standard deviation) around each feature's
 mean you want to add in surrogate profiles.}
 
 \item{useMnDiseaseProfile}{- Boolean. For disease cohorts not showing homogeneity, mean
