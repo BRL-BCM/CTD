@@ -2,6 +2,8 @@
 
 export(data.HMDBtoKEGG)
 export(data.LabeltoKEGG)
+export(data.combineData)
+export(data.imputeData)
 export(data.surrogateProfiles)
 export(data.zscoreData)
 export(graph.diffuseP1)
