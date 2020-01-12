@@ -4,7 +4,7 @@
 #' @param ref - Reference samples normalized, imputed data.
 #' @return combined.data - Z-transformed data.
 #' @export data.combineData
-combineDatasets = function(ref, data) {
+data.combineData = function(ref, data) {
   ref = as.matrix(ref)
   data = as.matrix(data)
   
