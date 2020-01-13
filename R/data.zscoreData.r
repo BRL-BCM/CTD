@@ -29,7 +29,9 @@ data.zscoreData = function(data, ref) {
     if (all(is.na(x))) {
       
     } else {
-      x = x[intersect(which(x>quantile(x, 0.025)), which(x<quantile(x, .975)))]
+      if (length(x[intersect(which(x>quantile(x, 0.025)), which(x<quantile(x, .975)))]) > 3) {
+        x = x[intersect(which(x>quantile(x, 0.025)), which(x<quantile(x, .975)))]
+      }
       d = qqnorm(x, plot.it = FALSE);
       x = as.numeric(d$y)
       z = as.numeric(d$x)
