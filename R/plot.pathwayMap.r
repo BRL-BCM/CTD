@@ -18,8 +18,12 @@
 #' pt.zscore = Miller2015[,1]
 #' plot.pathwayMap(Pathway[1], ptID, pt.zscore, zscore.threshold, scale=1, out.path=getwd(), SVG=TRUE)
 plot.pathwayMap = function(Pathway, ptID, pt.zscore, zscore.threshold, scale, out.path, SVG=TRUE) {
-  pt.zscore = pt.zscore[-which(is.na(pt.zscore))]
-
+  if (length(which(is.na(pt.zscore)))>0) {
+    pt.zscore = pt.zscore[-which(is.na(pt.zscore))]
+  }
+  names(pt.zscore) = tolower(trimws(names(pt.zscore)))
+  names(pt.zscore) = gsub("\\\"", "", names(pt.zscore))
+  names(pt.zscore) = gsub("\\*", "", names(pt.zscore))
   load(system.file("extdata/complexNodes.RData", package = "CTD"))
   load(system.file(sprintf("extdata/RData/%s.RData", Pathway), package = "CTD"))
   template.g = ig

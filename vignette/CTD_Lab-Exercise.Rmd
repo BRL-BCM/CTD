@@ -15,8 +15,6 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE, fig.align="center")
 require(CTD)
 require(huge)
-setwd("/Users/lillian.rosa/Downloads/CTD/vignette")
-load("vignette.RData")
 ```
 This document was rendered at `r Sys.time()`
 
@@ -46,38 +44,39 @@ print(ig)
 
 
 ## I.II: Learn a graph from data.
+Note all code chunks in sections I - IV may rely on lines in previous code chunks, so do not empty your environment between code chunks.
 ```{r learn_graph, eval=FALSE}
 # Load the Miller2015_Heparin dataset
-data(Miller2015_Heparin)
-data(heparin_metabolites)
-data = Miller2015_Heparin
+data(Miller2015)
 # Only include metabolites that are present in >90% reference samples.
-fil.rate = anno$`Times identifed in all 200 samples`/200
-names(fil.rate) = rownames(anno)
-data = data[which(fil.rate>0.90), ]
-#dim(data)
+fil.rate = Miller2015$`Times identifed in all 200 samples`/200
+names(fil.rate) = rownames(Miller2015)
+data_mx = Miller2015[,grep("IEM_", colnames(Miller2015))]
+data_mx = data_mx[which(fil.rate>0.90), ]
+dim(data_mx)
 # Remove any metabolites where any profile has a z-score > 1000. These are likely imputed raw values that were not z-scored.
-rmMets = names(which(apply(data, 1, function(i) any(i>20))))
+rmMets = names(which(apply(data_mx, 1, function(i) any(i>20))))
 if (length(rmMets)>0) {
-  data = data[-which(rownames(data) %in% rmMets),]
+  data_mx = data_mx[-which(rownames(data_mx) %in% rmMets),]
 }
-#dim(data)
+dim(data_mx)
 
-# Get the diagnoses associated with the samples
-data(Miller2015_diags)
 # Get data from all patients with Argininemia
-arg_data = data[,which(diagnoses$diagnosis=="Argininemia")]
-# Add surrogate disease and surrogate reference profiles based on 1 standard deviation around profiles from real patients to improve rank of matrix when learning Gaussian Markov Random Field network on data.
-arg_data = data.surrogateProfiles(arg_data, 1, FALSE, TRUE, ref_data = data[,which(diagnoses$diagnosis=="No biochemical genetic diagnosis")])
-#dim(arg_data)
+arg_data = data_mx[,which(diagnoses$diagnosis=="Argininemia")]
+# Add surrogate disease and surrogate reference profiles based on 1 standard deviation 
+# around profiles from real patients to improve rank of matrix when learning Gaussian 
+# Markov Random Field network on data. While surrogate profiles are not required, they tend 
+# to learn less complex networks (i.e., networks with less edges) and in faster time.
+arg_data = data.surrogateProfiles(arg_data, 1, FALSE, TRUE, ref_data = data_mx[,which(diagnoses$diagnosis=="No biochemical genetic diagnosis")])
+dim(arg_data)
 
 # Learn a Gaussian Markov Random Field model using the Graphical LASSO in the R package "huge". 
 # Select the regularization parameter based on the "STARS" stability estimate.
-# require(huge)
+require(huge)
 #This will take 30 seconds - 1 minute.
 arg = huge(t(arg_data), method="glasso")
 plot(arg)
-# This will take 3-5-ish minutes.
+# This will take several minutes. For a faster option, you can use the "ebic" criterion instead of "stars", but we recommend "stars".
 arg.select = huge.select(arg, criterion="stars")
 plot(arg.select)
 # This is the regularization parameter the STARS method selected.
@@ -115,7 +114,7 @@ V(ig)$x = coords[,1]
 V(ig)$y = coords[,2]
 # Global variable imgNum
 imgNum=1
-G_new = graph.diffuseP1Movie(p1, startNode, G, visitedNodes, ig, recursion_level=1, output_dir = "/Users/lillian.rosa/Downloads/CTD/vignette/diffusion_event")
+G_new = graph.diffuseP1Movie(p1, startNode, G, visitedNodes, ig, recursion_level=1, output_dir = sprintf("%s/images", getwd()))
 # Inherited probabilities across all nodes should add to 1.
 sum(unlist(G_new))
 # Which node inherited the highest probability from startNode?
@@ -130,7 +129,7 @@ visitedNodes = c("A", "B")
 startNode = "B"
 imgNum=1
 
-G_new = graph.diffuseP1Movie(p1, startNode, G, visitedNodes, ig, 1, output_dir = "/Users/lillian.rosa/Downloads/CTD/vignette/diffusion_event2")
+G_new = graph.diffuseP1Movie(p1, startNode, G, visitedNodes, ig, 1, output_dir = sprintf("%s/images", getwd()))
 # Inherited probabilities across all nodes should add to 1.
 sum(unlist(G_new))
 # Which node inherited the highest probability from startNode?
@@ -188,27 +187,28 @@ ig = graph.adjacency(adj_mat, mode="undirected", weighted=TRUE, add.colnames = "
 print(ig)
 adjacency_matrix = list(adj_mat)
 
-perms = mle.getPermMovie_memory(subset.nodes = c("A", "B"), ig, output_filepath = "/Users/lillian.rosa/Downloads/CTD/vignette/biased_walker", movie=TRUE, zoomIn = FALSE)
+# Generate PNGs to animate the multi-node encoding node ranks.
+ranks = multiNode.getNodeRanksMovie(subset.nodes = c("A", "B"), ig, output_filepath = sprintf("%s/images", getwd()), movie=TRUE, zoomIn = FALSE)
 
-# Get perms as list object, with no images generated
-perms = mle.getPerms_memory(S = c("A", "B"), G)
+# Get node ranks as list object, with no images generated
+ranks = multiNode.getNodeRanks(S = c("A", "B"), G)
 ```
 
 ## III.II Single-Node Diffusion Encoding
 ```{r unbiased_network_walker}
-# This network walker is less sensitive, but node permutations can be calculated ahead of time (along the lines of a dynamic programming solution), 
-#      so thousands of subsets can be reasoned about very quickly.
+# This network walker is less sensitive, but node permutations can be calculated ahead of time (along the lines of a dynamic programming solution), so thousands of subsets can be reasoned about very quickly.
 
-# Generate PNGs to animate the network walker.
-perms = mle.getPermMovie_memoryless(subset.nodes = c("A", "B"), ig, output_filepath = "/Users/lillian.rosa/Downloads/CTD/vignette/unbiased_walker", movie=TRUE, zoomIn = FALSE)
+# Generate PNGs to animate the single-node encoding node ranks.
+ranks = singleNode.getNodeRanksMovie(subset.nodes = c("A", "B"), ig, output_filepath = sprintf("%s/images", getwd()), num.misses = log2(length(G)), zoomIn = FALSE)
 
-# Get perms as list object, with no images generated
+# Get node ranks as list object, with no images generated
 S = c("A", "B")
-perms = list()
+ranks = list()
 for (n in 1:length(S)) {
-  perms[[n]] = mle.getPermN_memoryless(n, G, S, misses.thresh = log2(length(G)))
+  ind = which(names(G)==S[n])
+  ranks[[n]] = singleNode.getNodeRanksN(ind, G, S, num.misses = log2(length(G)))
 }
-names(perms) = S
+names(ranks) = S
 ```
 
 
@@ -232,13 +232,15 @@ print(S_arg)
 
 ## IV.II Get k node permutations.
 ```{r node_permutations}
-# Get the adaptive network walker's paths starting from each node in the subset S_arg.
-perms = mle.getPerms_memory(S = names(S_arg), G)
+# Get the multi-node encoding node ranks starting from each node in the subset S_arg.
+ranks = multiNode.getNodeRanks(S = names(S_arg), G, verbose=TRUE)
 ```
 
 ## IV.III Convert to bitstrings.
 ```{r convert_to_bitstrings}
-ptBSbyK = mle.getPtBSbyK_memory(names(S_arg), perms)
+# Get the bitstrings associated with the patient's perturbed metabolites in "S_arg" based 
+# on the node ranks calculated in the previous step, "ranks".
+ptBSbyK = multiNode.getPtBSbyK(names(S_arg), ranks)
 ```
 
 ## IV.IV Get encoding length of minimum length codeword.
@@ -246,68 +248,87 @@ ptBSbyK = mle.getPtBSbyK_memory(names(S_arg), perms)
 ptID = colnames(arg_data)[1]
 data_mx.pvals=apply(arg_data[,which(colnames(arg_data) %in% diagnoses$id)], c(1,2), function(i) 2*pnorm(abs(i), lower.tail=FALSE))
 res = mle.getEncodingLength(ptBSbyK, t(data_mx.pvals), ptID, G)
+ind.mx = which.max(res$d.score)
+res[ind.mx,]
 ```
 
 ## IV.V Get probability of node subset.
 ```{r probability_of_set}
-2^-res[,"IS.alt"]
+# This is the lower bound of the probability associated with the metabolites in S_arg. 
+# The higher the probability relative to a random set of the same size, the more 
+# tightly connected the metabolite set is.
+2^-res[ind.mx,"IS.alt"]
+# Note the probability printed above may seem low, but there are log2(length(G), kmx) outcomes that probability is assigned between. We should expect a probability for a node set of size kmx in a length(G) network to have probability:
+2^-(log2(choose(length(G), kmx)))
+# You'll notice the probability associated with the metabolite set we encoded, S_arg, is orders of magnitude higher than a uniform probability model. This implies the metabolites in S_arg are  connected in the network ig_arg more than is expected by chance.
 ```
 
 ## IV.V Get p-value of variable length encoding vs. fixed length encoding.
 ```{r pvalue_of_set}
-2^-res[,"d.score"]
+# You can interpret the probability assigned to this metabolite set by comparing it to a null encoding algorithm, which 
+# uses fixed codes for all metabolites in the set. The "d.score" is the difference in bitlength between the null and alternative
+# encoding models. Using the Algorithmic Significance theorem, we can estimate the upper bounds on a p-value by 2^-d.score.
+2^-res[ind.mx,"d.score"]
+
+# All metabolites in S_arg 
+names(S_arg)
+# Which metabolites were a part of the 11 metabolite subset of patient IEM_1006's top 15 perturbed metabolites that had the above p-value?
+ptBSbyK[[ind.mx]] # all metabolites in the bitstring
+names(which(ptBSbyK[[ind.mx]]==1)) # just the F metabolites that are in S_arg that were were "found"
 ```
 
 
 
-# V. Patient Similarity
+# V. Patient Similarity, Single-Node Encoding Recommended
 ```{r patient_similarity, eval=FALSE}
 data_mx = arg_data[,which(colnames(arg_data) %in% diagnoses$id)]
 data_mx = data_mx[,1:8]
+for (pt in 1:ncol(data_mx)) {
+  ptID=colnames(data_mx)[pt]
+  S_arg = c(S_arg, names(sort(abs(data_mx[,pt]), decreasing=TRUE)[1:kmx]))
+}
+S_arg = unique(S_arg)
+# Pre-computing node ranks from all perturbed metabolites across all patients is the overhead we have to pay for when using this mutual information-based similarity metric, but will pay off when we go to compute several pairwise calculations of similarity.
+# It feels like a lot of overhead when run serially, but when run in parallel (recommended) (e.g., a computing cluster) this finishes in minutes. 
+ranks = list()
+for (n in 1:length(S_arg)) {
+  print(sprintf("Calculating node ranks for perturbed metabolite %d/%d across %d patients.", n, length(S_arg), ncol(data_mx)))
+  ind = which(names(G)==S_arg[n])
+  ranks[[n]] = singleNode.getNodeRanksN(ind, G, S_arg)
+}
+names(ranks) = S_arg
+# Calculate patient bitstrings
 ptBSbyK = list()
 for (pt in 1:ncol(data_mx)) {
   ptID=colnames(data_mx)[pt]
-  S_arg = sort(abs(data_mx[,pt]), decreasing=TRUE)[1:kmx]
-  perms = mle.getPerms_memory(S = names(S_arg), G)
-  ptBSbyK[[ptID]] = mle.getPtBSbyK_memory(names(S_arg), perms)
+  S_pt = names(sort(abs(data_mx[,pt]), decreasing=TRUE)[1:kmx])
+  ptBSbyK[[ptID]] = singleNode.getPtBSbyK(S_pt, ranks)
 }
+# Now perform mutual information-based patient similarity scoring
 res = list()
 t = list(ncd=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)),
-        jacdir=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)))
+        jac=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)))
 rownames(t$ncd) = colnames(data_mx)
 colnames(t$ncd) = colnames(data_mx)
-rownames(t$jacdir) = colnames(data_mx)
-colnames(t$jacdir) = colnames(data_mx)
-for (i in 1:kmx) {
-  res[[i]] = t
-}
-for (pt in 1:(ncol(data_mx)-1)) {
+rownames(t$jac) = colnames(data_mx)
+colnames(t$jac) = colnames(data_mx)
+for (i in 1:kmx) { res[[i]] = t }
+for (pt in 1:ncol(data_mx)) {
   print(sprintf("Patient %d vs...", pt))
   ptID=colnames(data_mx)[pt]
-  for (pt2 in (pt+1):ncol(data_mx)) {
+  for (pt2 in pt:ncol(data_mx)) {
     print(sprintf("Patient %d.", pt2))
     ptID2=colnames(data_mx)[pt2]
-    tmp = mle.getPtSim(ptBSbyK[[ptID]], ptID, ptBSbyK[[ptID2]], ptID2, data_mx, NULL)
-    # Similarity based on mututal information, by subset size.
-    # plot(1:kmx, tmp$NCD)
-    # Similarity based on Jaccard set similarity with directionality, by subset size.
-    # plot(1:kmx, tmp$dirSim)
+    # Because we pre-computed node ranks for all perturbed metabolites across our 8 patients, this will complete very quickly.
+    tmp = mle.getPtSim(ptBSbyK[[ptID]], ptID, ptBSbyK[[ptID2]], ptID2, data_mx, ranks)
     for (k in 1:kmx) {
       res[[k]]$ncd[ptID, ptID2] = tmp$NCD[k]
-      res[[k]]$jacdir[ptID, ptID2] = tmp$dirSim[k]
+      res[[k]]$jac[ptID, ptID2] = tmp$dirSim[k]
       res[[k]]$ncd[ptID2, ptID] = tmp$NCD[k]
-      res[[k]]$jacdir[ptID2, ptID] = tmp$dirSim[k]
+      res[[k]]$jac[ptID2, ptID] = tmp$dirSim[k]
     }
   }
 }
-
-for (pt in 1:ncol(data_mx)) {
-  for (k in 1:kmx) {
-    res[[k]]$ncd[pt, pt] = 0
-    res[[k]]$jacdir[pt, pt] = 0
-  }
-}
-
 res_all = res
 
 ```
@@ -319,9 +340,9 @@ res_all = res
 # Multi-dimensional scaling
 # if you have diagnostic labels associated with the colnames(data_mx), send them using diagnoses parameter
 res_ncd = lapply(res_all, function(i) i$ncd)
-res_jacdir = lapply(res_all, function(i) i$jacdir)
+res_jac = lapply(res_all, function(i) i$jac)
 ncd = mle.getMinPtDistance(res_ncd)
-jacdir = mle.getMinPtDistance(res_jacdir)
+jacdir = mle.getMinPtDistance(res_jac)
 diags = colnames(data_mx)
 diags[which(diags %in% diagnoses$id[which(diagnoses$diagnosis=="Argininemia")])] = "ARG"
 diags[which(diags %in% diagnoses$id[which(diagnoses$diagnosis!="Argininemia")])] = "negCntl"
@@ -343,6 +364,16 @@ for (alpha in seq(0, 1, 0.1)) {
   # K-NN
   plot.knnSim(patientSim, diags, diag="ARG")
 }
-p
+p[[1]]
+p[[2]]
+p[[3]]
+p[[4]]
+p[[5]]
+p[[6]]
+p[[7]]
+p[[8]]
+p[[9]]
+p[[10]]
+p[[11]]
 
 ```

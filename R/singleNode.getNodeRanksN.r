@@ -69,7 +69,7 @@ singleNode.getNodeRanksN = function(n, G, S=NULL, num.misses=NULL, verbose=FALSE
     } else {
       # Keep drawing until you've drawn all nodes.
       current_node_set = c(current_node_set, startNode)
-      if (length(c(startNode,current_node_set))>=(length(G))) {
+      if (length(current_node_set)>=(length(G))) {
         stopIterating = TRUE
       }
     }

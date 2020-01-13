@@ -5,7 +5,7 @@
 \title{Capture the movement of the fixed, single-node walk of the diffusion probability method.}
 \usage{
 singleNode.getNodeRanksMovie(subset.nodes, ig, output_filepath,
-  movie = TRUE, zoomIn = FALSE)
+  num.misses = NULL, zoomIn = FALSE)
 }
 \arguments{
 \item{subset.nodes}{- The subset of variables, S, in a background graph, G.}
@@ -14,11 +14,11 @@ singleNode.getNodeRanksMovie(subset.nodes, ig, output_filepath,
 
 \item{output_filepath}{- The local directory at which you want still images to be saved.}
 
+\item{zoomIn}{- Boolean. Delete nodes outside of node subset's order 1 neighborhood?. Default is FALSE.}
+
 \item{movie}{- If you want to make a movie, set to TRUE. This will produce a set of still images that you can stream together
 to make a movie. Default is TRUE. Alternatively (movie=FALSE), you could use this function to get the node
 labels returned for each node ranking starting with a perturbed variable.}
-
-\item{zoomIn}{- Boolean. Delete nodes outside of node subset's order 1 neighborhood?. Default is FALSE.}
 }
 \value{
 ranksByStartNode - a list object of node rankings Each element is based on a different startNode.
@@ -46,5 +46,5 @@ thresholdDiff=0.01
 G = vector(mode="list", length=length(V(ig)$name))
 names(G) = V(ig)$name
 subset.nodes = names(G)[sample(1:length(G), 3)]
-singleNode.getNodeRanksMovie(subset.nodes, ig, output_filepath = getwd(), movie=TRUE)
+singleNode.getNodeRanksMovie(subset.nodes, ig, output_filepath = getwd())
 }
