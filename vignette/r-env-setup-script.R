@@ -30,4 +30,4 @@ system("tar -xzf r_binaries.tar.gz -C / ", intern=TRUE)
 
 
 # Options to make plots smaller
-options(repr.plot.width=4, repr.plot.height=4)
+options(repr.plot.width=10, repr.plot.height=10)
