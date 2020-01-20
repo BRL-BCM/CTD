@@ -11,6 +11,7 @@
 graph.naivePruning = function(ig_dis, ig_ref) {
   ig_pruned = ig_dis
   ee = get.edgelist(ig_ref)
+  ee = ee[which(apply(ee, 1, function(i) all(i %in% V(ig_dis)$name))),]
   it = 0
   for (e in 1:nrow(ee)) {
     e.id = get.edge.ids(ig_pruned, vp=ee[e,])

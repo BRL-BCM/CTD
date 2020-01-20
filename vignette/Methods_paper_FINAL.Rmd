@@ -109,7 +109,7 @@ diag.ind = as.numeric(diag.ind)
 diag.ind[which(diag.ind==1)] = "D"
 diag.ind[which(diag.ind==0)] = "C"
 diag.ind = paste(diag.ind, collapse=" ")
-# Add #num_samples 1 2, where num_samples is a numeric value equal to the nrow(data_mx2)-1
+# Add num_samples 1 2, where num_samples is a numeric value equal to the nrow(data_mx2)-1
 # Add #disease control
 write.table(diag.ind, file="EDTA_abat.cls", sep=" ", quote=FALSE, row.names = FALSE, col.names = FALSE)
 abs_filename_classes = "EDTA_abat.cls"
