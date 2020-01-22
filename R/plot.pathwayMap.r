@@ -21,6 +21,7 @@ plot.pathwayMap = function(Pathway, ptID, pt.zscore, zscore.threshold, scale, ou
   pt.zscore = pt.zscore[-which(is.na(pt.zscore))]
 
   load(system.file("extdata/complexNodes.RData", package = "CTD"))
+  if (Pathway != "All Pathways") Pathway= paste0(unlist(strsplit(Pathway," ")),collapse = "-")  else Pathway ="allPathways"
   load(system.file(sprintf("extdata/RData/%s.RData", Pathway), package = "CTD"))
   template.g = ig
 
@@ -122,7 +123,7 @@ plot.pathwayMap = function(Pathway, ptID, pt.zscore, zscore.threshold, scale, ou
   }
 
   V(template.g)$size[which(node.types=="Class")]
-  V(template.g)$label = capitalize(tolower(V(template.g)$label))
+  V(template.g)$label = Hmisc::capitalize(tolower(V(template.g)$label))
   wrap_strings = function(vector_of_strings,width){
     as.character(sapply(vector_of_strings, FUN=function(x){
       paste(strwrap(x, width=width), collapse="\n")
