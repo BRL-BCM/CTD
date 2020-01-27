@@ -30,13 +30,13 @@ data_mx = data_mx[,-c(1,2,3,4,5,6,7,8)]
 ## Plot Patient's Metabolomic Profiles onto Pathway Maps
 ``` {r pathway-vis}
 # ABAT patients
-#plot.pathwayMap("allPathways", "ABAT001", data_mx[,"ABAT001"], 1, 1, getwd())
-#plot.pathwayMap("allPathways", "ABAT002", data_mx[,"ABAT002"], 1, 1, getwd())
-#plot.pathwayMap("allPathways", "ABAT003", data_mx[,"ABAT003"], 1, 1, getwd())
-#plot.pathwayMap("allPathways", "ABAT004", data_mx[,"ABAT004"], 1, 1, getwd())
-#plot.pathwayMap("allPathways", "ABAT005", data_mx[,"ABAT005"], 1, 1, getwd())
-#plot.pathwayMap("allPathways", "ABAT006", data_mx[,"ABAT006"], 1, 1, getwd())
-#plot.pathwayMap("allPathways", "ABAT007", data_mx[,"ABAT007"], 1, 1, getwd())
+#plot.pathwayMap("allPathways", "GABAT001", data_mx[,"GABAT001"], 1, 1, getwd())
+#plot.pathwayMap("allPathways", "GABAT002", data_mx[,"GABAT002"], 1, 1, getwd())
+#plot.pathwayMap("allPathways", "GABAT003", data_mx[,"GABAT003"], 1, 1, getwd())
+#plot.pathwayMap("allPathways", "GABAT004", data_mx[,"GABAT004"], 1, 1, getwd())
+#plot.pathwayMap("allPathways", "GABAT005", data_mx[,"GABAT005"], 1, 1, getwd())
+#plot.pathwayMap("allPathways", "GABAT006", data_mx[,"GABAT006"], 1, 1, getwd())
+#plot.pathwayMap("allPathways", "GABAT007", data_mx[,"GABAT007"], 1, 1, getwd())
 # AADC patients
 #plot.pathwayMap("allPathways", "AADC001", data_mx[,"AADC001"], 1, 1, getwd())
 #plot.pathwayMap("allPathways", "AADC002", data_mx[,"AADC002"], 1, 1, getwd())
@@ -48,23 +48,23 @@ plot.pathwayMap("allPathways", "ADSL002", data_mx[,"ADSL002"], 1, 1, getwd())
 plot.pathwayMap("allPathways", "ADSL003", data_mx[,"ADSL003"], 2, 1, getwd())
 
 #pathway.ListMaps_metabolon()
-#plot.pathwayMap("TCA-Cycle", "ABAT001", abat_data[,"ABAT001"], 1, 2, getwd())
+#plot.pathwayMap("TCA-Cycle", "GABAT001", abat_data[,"GABAT001"], 1, 2, getwd())
 # For PNG (not SVG)
-#plot.pathwayMap("TCA-Cycle", "ABAT001", abat_data[,"ABAT001"], 1, 2, getwd(), FALSE)
-#plot.pathwayMap("Asp-Glu-Metabolism", "ABAT001", abat_data[,"ABAT001"], 1, 2, getwd(), FALSE)
-#plot.pathwayMap("FattyAcid-Metabolism", "ABAT001", data_mx[,"ABAT001"], 1, 1, getwd(), FALSE)
+#plot.pathwayMap("TCA-Cycle", "GABAT001", abat_data[,"GABAT001"], 1, 2, getwd(), FALSE)
+#plot.pathwayMap("Asp-Glu-Metabolism", "GABAT001", abat_data[,"GABAT001"], 1, 2, getwd(), FALSE)
+#plot.pathwayMap("FattyAcid-Metabolism", "GABAT001", data_mx[,"GABAT001"], 1, 1, getwd(), FALSE)
 ```
 
 ## Interpret Patient Metabolomics Profiles with Over-Representation Analysis
 ``` {r ora}
 # ABAT patients: selected X624685 for visualization
-stats.getORA_Metabolon(data_mx[,"ABAT001"], threshold = 2, type = "zscore")
-stats.getORA_Metabolon(data_mx[,"ABAT002"], threshold = 2, type = "zscore")
-stats.getORA_Metabolon(data_mx[,"ABAT003"], threshold = 2, type = "zscore")
-stats.getORA_Metabolon(data_mx[,"ABAT004"], threshold = 2, type = "zscore") ## This one
-stats.getORA_Metabolon(data_mx[,"ABAT005"], threshold = 2, type = "zscore")
-stats.getORA_Metabolon(data_mx[,"ABAT006"], threshold = 2, type = "zscore")
-stats.getORA_Metabolon(data_mx[,"ABAT007"], threshold = 2, type = "zscore")
+stats.getORA_Metabolon(data_mx[,"GABAT001"], threshold = 2, type = "zscore")
+stats.getORA_Metabolon(data_mx[,"GABAT002"], threshold = 2, type = "zscore")
+stats.getORA_Metabolon(data_mx[,"GABAT003"], threshold = 2, type = "zscore")
+stats.getORA_Metabolon(data_mx[,"GABAT004"], threshold = 2, type = "zscore") ## This one
+stats.getORA_Metabolon(data_mx[,"GABAT005"], threshold = 2, type = "zscore")
+stats.getORA_Metabolon(data_mx[,"GABAT006"], threshold = 2, type = "zscore")
+stats.getORA_Metabolon(data_mx[,"GABAT007"], threshold = 2, type = "zscore")
 
 # AADC patients: Selected X624843 for visualization
 stats.getORA_Metabolon(data_mx[,"AADC001"], threshold = 2, type = "zscore")
@@ -616,9 +616,9 @@ for (model in c("aadc", "abat", "adsl")) {
 
 # Step 2: Once you have the pre-computed node ranks (using single-node diffusion) from cluster, get the metabolomics evidence for each disease network context using the single-node encoding algorithm. (Table 2)
 
-# ABAT patient X624685, ABAT004.
+# ABAT patient X624685, GABAT004.
 rm(list=ls())
-data("Thistlethwaite2019")
+data(Thistlethwaite2019)
 data_mx = as.matrix(data_mx)
 data_mx = suppressWarnings(apply(data_mx, c(1,2), as.numeric))
 model="abat"
@@ -634,7 +634,7 @@ data_mx = data_mx[which(rownames(data_mx) %in% V(ig)$name), ]
 data_mx = data_mx[-grep("x - ", rownames(data_mx)), ]
 data.pvals = apply(data_mx, c(1,2), function(i) 2*pnorm(abs(i), lower.tail = FALSE))
 data.pvals = t(data.pvals)
-p = which(colnames(data_mx)=="ABAT004")
+p = which(colnames(data_mx)=="GABAT004")
 ptID = colnames(data_mx)[p]
 S = data_mx[order(abs(data_mx[,p]), decreasing = TRUE),p][1:kmx]
 ranks = list()
@@ -745,7 +745,7 @@ ggplot(data = dff, aes(x=diags, y=zscore, fill=diags)) + geom_boxplot(size=2) + 
 ``` {r multiNode-nof1}
 #### TABLE 2, Multi-Node Diffusion Encoding Algorithm ######
 setwd("/Users/lillian.rosa/OneDrive/MacFiles/9thCommitteeMeeting/Methods_paper/nof1")
-### ABAT patient X624685, ABAT004. ####
+### ABAT patient X624685, GABAT004. ####
 rm(list=ls())
 data("Thistlethwaite2019")
 data_mx = as.matrix(data_mx)
@@ -763,7 +763,7 @@ data_mx = data_mx[which(rownames(data_mx) %in% V(ig)$name), ]
 data_mx = data_mx[-grep("x - ", rownames(data_mx)), ]
 data.pvals = apply(data_mx, c(1,2), function(i) 2*pnorm(abs(i), lower.tail = FALSE))
 data.pvals = t(data.pvals)
-p = which(colnames(data_mx)=="ABAT004")
+p = which(colnames(data_mx)=="GABAT004")
 ptID = colnames(data_mx)[p]
 S = data_mx[order(abs(data_mx[,p]), decreasing = TRUE),p][1:kmx]
 ranks = multiNode.getNodeRanks(names(S), G)
@@ -777,10 +777,10 @@ S[names(which(ptBSbyK[[which.max(res[,"d.score"])]]==1))]
 mets = names(S)
 e = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% mets)])
 e = delete.vertices(e, v=names(which(degree(e)==0)))
-png("/Users/lillian.rosa/OneDrive/MacFiles/9thCommitteeMeeting/Methods_paper/nof1/ABAT004_module.png")
+png("/Users/lillian.rosa/OneDrive/MacFiles/9thCommitteeMeeting/Methods_paper/nof1/GABAT004_module.png")
 plot.igraph(e, layout=layout.circle, edge.width=50*abs(E(e)$weight))
 dev.off()
-svg("/Users/lillian.rosa/OneDrive/MacFiles/9thCommitteeMeeting/Methods_paper/nof1/ABAT004_module.svg")
+svg("/Users/lillian.rosa/OneDrive/MacFiles/9thCommitteeMeeting/Methods_paper/nof1/GABAT004_module.svg")
 plot.igraph(e, layout=layout.circle, edge.width=50*abs(E(e)$weight))
 dev.off()
 
@@ -1021,11 +1021,11 @@ dev.off()
 ## CTD vs. Partial Least Squares Regression
 Precision is more focused in the positive class than in the negative class, it actually measures the probability of correct detection of positive values, while FPR and TPR (ROC metrics) measure the ability to distinguish between the classes.
 ``` {r ctd_feature_select}
-setwd("/Users/lillian.rosa/OneDrive/MacFiles/9thCommitteeMeeting/Methods_paper/")
+
 kmx=15
 # Module Feature Select, memory
 for (model in c("abat", "aadc", "adsl")) {
-  load(sprintf("pls_vs_ctd/mn_model_%s_maps.RData", model))
+  load(sprintf("MultiNode/mn_model_%s_maps.RData", model))
   df_memory = data.frame(ptID=character(), m=numeric(), stringsAsFactors = FALSE)
   pts = unique(df[,"ptID"])
   pts = pts[grep(toupper(model), pts)]
@@ -1066,7 +1066,7 @@ module_select = list()
 module_select[["aadc"]] = aadc_module_select
 module_select[["abat"]] = abat_module_select
 module_select[["adsl"]] = adsl_module_select
-for (model in c("aadc", "abat", "adsl")) {
+
   # ABAT fill rate
   abat_data = data_mx[, grep("ABAT", colnames(data_mx))]
   abat_fill = apply(abat_data, 1, function(i) sum(is.na(i))/length(i))
@@ -1078,7 +1078,12 @@ for (model in c("aadc", "abat", "adsl")) {
   adsl_fill = apply(adsl_data, 1, function(i) sum(is.na(i))/length(i))
   df_fillrate = data_mx[intersect(intersect(which(abat_fill<0.50), which(aadc_fill<0.50)), which(adsl_fill<0.50)), ]
   #dim(df_fillrate)  
-  load(sprintf("pls_vs_ctd/mn_model_%s_maps.RData", model))
+
+df_vis=list()
+
+for (model in c("aadc", "abat", "adsl")) {
+
+  load(sprintf("./MultiNode/mn_model_%s_maps.RData", model))
   df_memory = data.frame(ptID=character(), m=numeric(), stringsAsFactors = FALSE)
   pts = unique(df[,"ptID"])
   for (pt in 1:length(pts)) {
@@ -1149,13 +1154,13 @@ for (model in c("aadc", "abat", "adsl")) {
     ctd_tst = predict(ctd_res, ncomp=ctd_res$ncomp, newdata=as.data.frame(t(tst_data)))
     dff_model[it, "pls_ctd_ctd"] = ctd_tst
     
-    # No features, just CTD as only covariate
-    #xx_tmp = df2_ctd[-(3:nrow(df2_ctd)),]
-    #x_res = plsr(diag~., data = as.data.frame(t(xx_tmp[,isTrain])))
-    #tst_data = xx_tmp[-1,-isTrain]
-    #names(tst_data) = "metabolomics_evidence"
-    #x_tst = predict(x_res, ncomp=x_res$ncomp, newdata=as.data.frame(t(tst_data)))
-    #dff_model[it, "pls_x_ctd"] = ctd_tst
+    #No features, just CTD as only covariate
+    xx_tmp = df2_ctd[-(3:nrow(df2_ctd)),]
+    x_res = plsr(diag~., data = as.data.frame(t(xx_tmp[,isTrain])))
+    tst_data = xx_tmp[-1,-isTrain]
+    names(tst_data) = "metabolomics_evidence"
+    x_tst = predict(x_res, ncomp=x_res$ncomp, newdata=as.data.frame(t(tst_data)))
+    dff_model[it, "pls_x_ctd"] = ctd_tst
   }
   
   if (model=="abat") {
@@ -1244,7 +1249,7 @@ for (model in c("aadc", "abat", "adsl")) {
 
   
   # Visualize ROCs
-  df_vis = data.frame(specificity=c(1-plsvar_auc$specificities, 1-plsctd_auc$specificities, 
+  df_vis[[model]] = data.frame(specificity=c(1-plsvar_auc$specificities, 1-plsctd_auc$specificities, 
                                     1-plsvar_ctd_auc$specificities, 1-ctd_auc$specificities),
                       sensitivity=c(plsvar_auc$sensitivities, plsctd_auc$sensitivities, 
                                     plsvar_ctd_auc$sensitivities, ctd_auc$sensitivities),
@@ -1252,11 +1257,25 @@ for (model in c("aadc", "abat", "adsl")) {
                                rep("PLSctd", length(plsctd_auc$specificities)),
                                rep("PLSvar-CTD", length(plsvar_ctd_auc$specificities)),
                                rep("CTD", length(ctd_auc$specificities))))
-  png(sprintf("pls_vs_ctd/ctd_pls_%s.png", model))
-  ggplot(df_vis) + geom_line(aes(x=specificity, y=sensitivity, colour=method), size=3) +
-    ggtitle(sprintf("ROC for Diagnosis of %s deficiency\nwith CTD as a Covariate and\nFeature Selection Method", toupper(model)))
-  dev.off()
 }
+
+model='aadc'
+png(sprintf("./ctd_pls/ctd_pls_%s.png", model))
+ggplot(df_vis[[model]]) + geom_line(aes(x=specificity, y=sensitivity, colour=method), size=3) +
+  ggtitle(sprintf("ROC for Diagnosis of %s deficiency\nwith CTD as a Covariate and\nFeature Selection Method", toupper(model)))
+dev.off()
+
+model='abat'
+png(sprintf("./ctd_pls/ctd_pls_%s.png", model))
+ggplot(df_vis[[model]]) + geom_line(aes(x=specificity, y=sensitivity, colour=method), size=3) +
+  ggtitle(sprintf("ROC for Diagnosis of %s deficiency\nwith CTD as a Covariate and\nFeature Selection Method", toupper(model)))
+dev.off()
+
+model='adsl'
+png(sprintf("./ctd_pls/ctd_pls_%s.png", model))
+ggplot(df_vis[[model]]) + geom_line(aes(x=specificity, y=sensitivity, colour=method), size=3) +
+  ggtitle(sprintf("ROC for Diagnosis of %s deficiency\nwith CTD as a Covariate and\nFeature Selection Method", toupper(model)))
+dev.off()
 
 ```
 
@@ -1313,240 +1332,41 @@ for (model in c("abat", "aadc", "adsl")) {
 
 ## CTD Similarity and Naive Distance Metrics Compare ------------------------------------------
 ```{r udn_matches_both_encodings}
-setwd("/Users/lillian.rosa/OneDrive/MacFiles/9thCommitteeMeeting/Methods_paper/")
-#### Multi-node Bonferroni corrected matches ####
-load(sprintf("ptSim/v2/mn_model_%s_maps.RData", "adsl"))
-df_memory = data.frame(ptID=character(), m=numeric(), S=character(), stringsAsFactors = FALSE)
-pts = unique(df[,"ptID"])
-for (pt in 1:length(pts)) {
-  pt_dt = df[which(df[,"ptID"]==pts[pt]),]
-  df_memory[pt, "ptID"] = pts[pt]
-  df_memory[pt, "m"] = pt_dt[which.max(pt_dt[,"d"]), "d"]-log2(nrow(pt_dt))-log2(length(pts))
-  df_memory[pt, "S"] = pt_dt[which.max(pt_dt[,"d"]), "S"]
+
+dir.create("./ptSim", showWarnings = TRUE)
+#### Look for patients, referece and udn cases that show significance ####
+for (corr in c(TRUE,FALSE)){
+  for (mem in c('sn','mn')){
+    dir_name = if (mem == 'sn') 'SingleNode' else 'MultiNode'
+    udns_matches = list()
+    for (model in c('aadc','abat','adsl')){
+      load(sprintf("%s/%s_model_%s_maps.RData",dir_name,mem,model))
+      df_memory = data.frame(ptID=character(), m=numeric(), S=character(), stringsAsFactors = FALSE)
+      pts = unique(df[,"ptID"])
+      for (pt in 1:length(pts)) {
+        pt_dt = df[which(df[,"ptID"]==pts[pt]),]
+        df_memory[pt, "ptID"] = pts[pt]
+        if (corr == TRUE) {
+          df_memory[pt, "m"] = pt_dt[which.max(pt_dt[,"d"]), "d"]-log2(nrow(pt_dt))-log2(length(pts))
+        }else{
+          df_memory[pt, "m"] = pt_dt[which.max(pt_dt[,"d"]), "d"]-log2(nrow(pt_dt))
+        }
+        df_memory[pt, "S"] = pt_dt[which.max(pt_dt[,"d"]), "S"]
+      }
+      pt_sig = df_memory[which(df_memory$m>4.32), "ptID"]
+      pt_sig2 = pt_sig[grep("UDN", pt_sig)]
+      bm_df = df_memory[which(df_memory$ptID %in% pt_sig2),]
+      sprintf('diffusion:%s; model:%s; Bonferoni Correction:%i',mem,model,corr)
+      dim(bm_df)
+      bm_df[grep("succinamic acid|2-pyrrolidinone|n6-succinyladenosine|3-methoxytyrosine", bm_df$S),] #optional
+      pt_sig2_bm=bm_df[
+        grep("succinamic acid|2-pyrrolidinone|n6-succinyladenosine|3-methoxytyrosine", bm_df$S), "ptID"]
+      udns_matches[[model]] = pt_sig
+      udns_matches[["bm"]] = unique(c(udns_matches[["bm"]],pt_sig2_bm))
+      save(udns_matches, file=sprintf("ptSim/%s_udns_cor%i_matches.RData",mem,corr))
+    }
+  }
 }
-adsl_pt_sig = df_memory[which(df_memory$m>4.32), "ptID"]
-adsl_pt_sig2 = adsl_pt_sig[grep("UDN", adsl_pt_sig)]
-adsl_bm_df = df_memory[which(df_memory$ptID %in% adsl_pt_sig2),]
-dim(adsl_bm_df)
-adsl_bm_df[grep("succinimide|2-pyrrolidinone|n6-succinyladenosine|3-methoxytyrosine", adsl_bm_df$S),]
-
-load(sprintf("ptSim/v2/mn_model_%s_maps.RData", "aadc"))
-df_memory = data.frame(ptID=character(), m=numeric(), S=character(), stringsAsFactors = FALSE)
-pts = unique(df[,"ptID"])
-for (pt in 1:length(pts)) {
-  pt_dt = df[which(df[,"ptID"]==pts[pt]),]
-  df_memory[pt, "ptID"] = pts[pt]
-  df_memory[pt, "m"] = pt_dt[which.max(pt_dt[,"d"]), "d"]-log2(nrow(pt_dt))-log2(length(pts))
-  df_memory[pt, "S"] = pt_dt[which.max(pt_dt[,"d"]), "S"]
-}
-aadc_pt_sig = df_memory[which(df_memory$m>4.32), "ptID"]
-aadc_pt_sig2 = aadc_pt_sig[grep("UDN", aadc_pt_sig)]
-aadc_bm_df = df_memory[which(df_memory$ptID %in% aadc_pt_sig2),]
-dim(aadc_bm_df)
-#aadc_bm_df[grep("succinimide|2-pyrrolidinone|n6-succinyladenosine|3-methoxytyrosine", aadc_bm_df$S),]
-
-load(sprintf("ptSim/v2/mn_model_%s_maps.RData", "abat"))
-df_memory = data.frame(ptID=character(), m=numeric(), S=character(), stringsAsFactors = FALSE)
-pts = unique(df[,"ptID"])
-for (pt in 1:length(pts)) {
-  pt_dt = df[which(df[,"ptID"]==pts[pt]),]
-  df_memory[pt, "ptID"] = pts[pt]
-  df_memory[pt, "m"] = pt_dt[which.max(pt_dt[,"d"]), "d"]-log2(nrow(pt_dt))-log2(length(pts))
-  df_memory[pt, "S"] = pt_dt[which.max(pt_dt[,"d"]), "S"]
-}
-abat_pt_sig = df_memory[which(df_memory$m>4.32), "ptID"]
-abat_pt_sig2 = abat_pt_sig[grep("UDN", abat_pt_sig)]
-abat_bm_df = df_memory[which(df_memory$ptID %in% abat_pt_sig2),]
-dim(abat_bm_df)
-#abat_bm_df[grep("succinimide|2-pyrrolidinone|n6-succinyladenosine|3-methoxytyrosine", abat_bm_df$S),]
-
-udns_matches = list()
-udns_matches[["aadc"]] = aadc_pt_sig
-udns_matches[["abat"]] = abat_pt_sig
-udns_matches[["adsl"]] = adsl_pt_sig
-udns_matches[["bm"]] = unique(c(adsl_bm_df[grep("succinimide|2-pyrrolidinone|n6-succinyladenosine|3-methoxytyrosine", adsl_bm_df$S), "ptID"],
-                                aadc_bm_df[grep("succinimide|2-pyrrolidinone|n6-succinyladenosine|3-methoxytyrosine", aadc_bm_df$S), "ptID"],
-                                abat_bm_df[grep("succinimide|2-pyrrolidinone|n6-succinyladenosine|3-methoxytyrosine", abat_bm_df$S), "ptID"]))
-save(udns_matches, file="mn_udns_matches.RData")
-
-#### Multi-node raw matches ####
-load(sprintf("ptSim/v2/mn_model_%s_maps.RData", "adsl"))
-df_memory = data.frame(ptID=character(), m=numeric(), S=character(), stringsAsFactors = FALSE)
-pts = unique(df[,"ptID"])
-for (pt in 1:length(pts)) {
-  pt_dt = df[which(df[,"ptID"]==pts[pt]),]
-  df_memory[pt, "ptID"] = pts[pt]
-  df_memory[pt, "m"] = pt_dt[which.max(pt_dt[,"d"]), "d"]-log2(nrow(pt_dt))
-  df_memory[pt, "S"] = pt_dt[which.max(pt_dt[,"d"]), "S"]
-}
-adsl_pt_sig = df_memory[which(df_memory$m>4.32), "ptID"]
-adsl_pt_sig2 = adsl_pt_sig[grep("UDN", adsl_pt_sig)]
-adsl_bm_df = df_memory[which(df_memory$ptID %in% adsl_pt_sig2),]
-adsl_bm_df[grep("succinimide|2-pyrrolidinone|n6-succinyladenosine|3-methoxytyrosine", adsl_bm_df$S),]
-
-
-load(sprintf("ptSim/v2/mn_model_%s_maps.RData", "aadc"))
-df_memory = data.frame(ptID=character(), m=numeric(), S=character(), stringsAsFactors = FALSE)
-pts = unique(df[,"ptID"])
-for (pt in 1:length(pts)) {
-  pt_dt = df[which(df[,"ptID"]==pts[pt]),]
-  df_memory[pt, "ptID"] = pts[pt]
-  df_memory[pt, "m"] = pt_dt[which.max(pt_dt[,"d"]), "d"]-log2(nrow(pt_dt))
-  df_memory[pt, "S"] = pt_dt[which.max(pt_dt[,"d"]), "S"]
-}
-aadc_pt_sig = df_memory[which(df_memory$m>4.32), "ptID"]
-aadc_pt_sig2 = aadc_pt_sig[grep("UDN", aadc_pt_sig)]
-aadc_bm_df = df_memory[which(df_memory$ptID %in% aadc_pt_sig2),]
-aadc_bm_df[grep("succinimide|2-pyrrolidinone|n6-succinyladenosine|3-methoxytyrosine", aadc_bm_df$S),]
-
-load(sprintf("ptSim/v2/mn_model_%s_maps.RData", "abat"))
-df_memory = data.frame(ptID=character(), m=numeric(), S=character(), stringsAsFactors = FALSE)
-pts = unique(df[,"ptID"])
-for (pt in 1:length(pts)) {
-  pt_dt = df[which(df[,"ptID"]==pts[pt]),]
-  df_memory[pt, "ptID"] = pts[pt]
-  df_memory[pt, "m"] = pt_dt[which.max(pt_dt[,"d"]), "d"]-log2(nrow(pt_dt))
-  df_memory[pt, "S"] = pt_dt[which.max(pt_dt[,"d"]), "S"]
-}
-abat_pt_sig = df_memory[which(df_memory$m>4.32), "ptID"]
-abat_pt_sig2 = abat_pt_sig[grep("UDN", abat_pt_sig)]
-abat_bm_df = df_memory[which(df_memory$ptID %in% abat_pt_sig2),]
-abat_bm_df[grep("succinimide|2-pyrrolidinone|n6-succinyladenosine|3-methoxytyrosine", abat_bm_df$S),]
-
-udns_matches = list()
-udns_matches[["aadc"]] = aadc_pt_sig
-udns_matches[["abat"]] = abat_pt_sig
-udns_matches[["adsl"]] = adsl_pt_sig
-udns_matches[["bm"]] = unique(c(adsl_bm_df[grep("succinimide|2-pyrrolidinone|n6-succinyladenosine|3-methoxytyrosine", adsl_bm_df$S), "ptID"],
-                                aadc_bm_df[grep("succinimide|2-pyrrolidinone|n6-succinyladenosine|3-methoxytyrosine", aadc_bm_df$S), "ptID"],
-                                abat_bm_df[grep("succinimide|2-pyrrolidinone|n6-succinyladenosine|3-methoxytyrosine", abat_bm_df$S), "ptID"]))
-save(udns_matches, file="ptSim/v2/mnRAW_udns_matches.RData")
-
-abat_bm_df[which(abat_bm_df$ptID %in% udns_matches$bm),]
-aadc_bm_df[which(aadc_bm_df$ptID %in% udns_matches$bm),]
-adsl_bm_df[which(adsl_bm_df$ptID %in% udns_matches$bm),]
-
-#### Single-node UDN matches, Bonferroni corrected ####
-load(sprintf("ptSim/v2/single-node/model_%s_maps.RData", "adsl"))
-df_memory = data.frame(ptID=character(), m=numeric(), S=character(), stringsAsFactors = FALSE)
-pts = unique(df[,"ptID"])
-for (pt in 1:length(pts)) {
-  pt_dt = df[which(df[,"ptID"]==pts[pt]),]
-  df_memory[pt, "ptID"] = pts[pt]
-  df_memory[pt, "m"] = pt_dt[which.max(pt_dt[,"d"]), "d"]-log2(nrow(pt_dt))-log2(length(pts))
-  df_memory[pt, "S"] = pt_dt[which.max(pt_dt[,"d"]), "S"]
-}
-adsl_pt_sig = df_memory[which(df_memory$m>4.32), "ptID"]
-adsl_pt_sig2 = adsl_pt_sig[grep("UDN", adsl_pt_sig)]
-adsl_bm_df = df_memory[which(df_memory$ptID %in% adsl_pt_sig2),]
-dim(adsl_bm_df)
-adsl_bm_df[grep("succinimide|2-pyrrolidinone|n6-succinyladenosine|3-methoxytyrosine", adsl_bm_df$S),]
-
-
-load(sprintf("ptSim/v2/single-node/model_%s_maps.RData", "aadc"))
-df_memory = data.frame(ptID=character(), m=numeric(), S=character(), stringsAsFactors = FALSE)
-pts = unique(df[,"ptID"])
-for (pt in 1:length(pts)) {
-  pt_dt = df[which(df[,"ptID"]==pts[pt]),]
-  df_memory[pt, "ptID"] = pts[pt]
-  df_memory[pt, "m"] = pt_dt[which.max(pt_dt[,"d"]), "d"]-log2(nrow(pt_dt))-log2(length(pts))
-  df_memory[pt, "S"] = pt_dt[which.max(pt_dt[,"d"]), "S"]
-}
-aadc_pt_sig = df_memory[which(df_memory$m>4.32), "ptID"]
-aadc_pt_sig2 = aadc_pt_sig[grep("UDN", aadc_pt_sig)]
-aadc_bm_df = df_memory[which(df_memory$ptID %in% aadc_pt_sig2),]
-dim(aadc_bm_df)
-aadc_bm_df[grep("succinimide|2-pyrrolidinone|n6-succinyladenosine|3-methoxytyrosine", aadc_bm_df$S),]
-
-load(sprintf("ptSim/v2/single-node/model_%s_maps.RData", "abat"))
-df_memory = data.frame(ptID=character(), m=numeric(), S=character(), stringsAsFactors = FALSE)
-pts = unique(df[,"ptID"])
-for (pt in 1:length(pts)) {
-  pt_dt = df[which(df[,"ptID"]==pts[pt]),]
-  df_memory[pt, "ptID"] = pts[pt]
-  df_memory[pt, "m"] = pt_dt[which.max(pt_dt[,"d"]), "d"]-log2(nrow(pt_dt))-log2(length(pts))
-  df_memory[pt, "S"] = pt_dt[which.max(pt_dt[,"d"]), "S"]
-}
-abat_pt_sig = df_memory[which(df_memory$m>4.32), "ptID"]
-abat_pt_sig2 = abat_pt_sig[grep("UDN", abat_pt_sig)]
-abat_bm_df = df_memory[which(df_memory$ptID %in% abat_pt_sig2),]
-dim(abat_bm_df)
-abat_bm_df[grep("succinimide|2-pyrrolidinone|n6-succinyladenosine|3-methoxytyrosine", abat_bm_df$S),]
-
-udns_matches = list()
-udns_matches[["aadc"]] = aadc_pt_sig
-udns_matches[["abat"]] = abat_pt_sig
-udns_matches[["adsl"]] = adsl_pt_sig
-# These are the 11 UDN patients in the CTD patient similarity section of the paper - 3 of which are confirmed AADC/ABAT/or ADSL cases, 8 of which are not.
-udns_matches[["bm"]] = unique(c(adsl_bm_df[grep("succinimide|2-pyrrolidinone|n6-succinyladenosine|3-methoxytyrosine", adsl_bm_df$S), "ptID"],
-                                aadc_bm_df[grep("succinimide|2-pyrrolidinone|n6-succinyladenosine|3-methoxytyrosine", aadc_bm_df$S), "ptID"],
-                                abat_bm_df[grep("succinimide|2-pyrrolidinone|n6-succinyladenosine|3-methoxytyrosine", abat_bm_df$S), "ptID"]))
-save(udns_matches, file="ptSim/v2/single-node/sn_udns_matches.RData")
-
-abat_bm_df[which(abat_bm_df$ptID %in% udns_matches$bm),]
-aadc_bm_df[which(aadc_bm_df$ptID %in% udns_matches$bm),]
-adsl_bm_df[which(adsl_bm_df$ptID %in% udns_matches$bm),]
-
-
-#### Single-node raw matches #### 
-load(sprintf("ptSim/v2/single-node/model_%s_maps.RData", "adsl"))
-df_memory = data.frame(ptID=character(), m=numeric(), S=character(), stringsAsFactors = FALSE)
-pts = unique(df[,"ptID"])
-for (pt in 1:length(pts)) {
-  pt_dt = df[which(df[,"ptID"]==pts[pt]),]
-  df_memory[pt, "ptID"] = pts[pt]
-  df_memory[pt, "m"] = pt_dt[which.max(pt_dt[,"d"]), "d"]-log2(nrow(pt_dt))
-  df_memory[pt, "S"] = pt_dt[which.max(pt_dt[,"d"]), "S"]
-}
-adsl_pt_sig = df_memory[which(df_memory$m>4.32), "ptID"]
-adsl_pt_sig2 = adsl_pt_sig[grep("UDN", adsl_pt_sig)]
-adsl_bm_df = df_memory[which(df_memory$ptID %in% adsl_pt_sig2),]
-adsl_bm_df[grep("succinimide|2-pyrrolidinone|n6-succinyladenosine|3-methoxytyrosine", adsl_bm_df$S),]
-
-
-load(sprintf("ptSim/v2/single-node/model_%s_maps.RData", "aadc"))
-df_memory = data.frame(ptID=character(), m=numeric(), S=character(), stringsAsFactors = FALSE)
-pts = unique(df[,"ptID"])
-for (pt in 1:length(pts)) {
-  pt_dt = df[which(df[,"ptID"]==pts[pt]),]
-  df_memory[pt, "ptID"] = pts[pt]
-  df_memory[pt, "m"] = pt_dt[which.max(pt_dt[,"d"]), "d"]-log2(nrow(pt_dt))
-  df_memory[pt, "S"] = pt_dt[which.max(pt_dt[,"d"]), "S"]
-}
-aadc_pt_sig = df_memory[which(df_memory$m>4.32), "ptID"]
-aadc_pt_sig2 = aadc_pt_sig[grep("UDN", aadc_pt_sig)]
-aadc_bm_df = df_memory[which(df_memory$ptID %in% aadc_pt_sig2),]
-aadc_bm_df[grep("succinimide|2-pyrrolidinone|n6-succinyladenosine|3-methoxytyrosine", aadc_bm_df$S),]
-
-load(sprintf("ptSim/v2/single-node/model_%s_maps.RData", "abat"))
-df_memory = data.frame(ptID=character(), m=numeric(), S=character(), stringsAsFactors = FALSE)
-pts = unique(df[,"ptID"])
-for (pt in 1:length(pts)) {
-  pt_dt = df[which(df[,"ptID"]==pts[pt]),]
-  df_memory[pt, "ptID"] = pts[pt]
-  df_memory[pt, "m"] = pt_dt[which.max(pt_dt[,"d"]), "d"]-log2(nrow(pt_dt))
-  df_memory[pt, "S"] = pt_dt[which.max(pt_dt[,"d"]), "S"]
-}
-abat_pt_sig = df_memory[which(df_memory$m>4.32), "ptID"]
-abat_pt_sig2 = abat_pt_sig[grep("UDN", abat_pt_sig)]
-abat_bm_df = df_memory[which(df_memory$ptID %in% abat_pt_sig2),]
-abat_bm_df[grep("succinimide|2-pyrrolidinone|n6-succinyladenosine|3-methoxytyrosine", abat_bm_df$S),]
-
-udns_matches = list()
-udns_matches[["aadc"]] = aadc_pt_sig
-udns_matches[["abat"]] = abat_pt_sig
-udns_matches[["adsl"]] = adsl_pt_sig
-# These are the 11 UDN patients in the CTD patient similarity section of the paper - 3 of which are confirmed AADC/ABAT/or ADSL cases, 8 of which are not.
-udns_matches[["bm"]] = unique(c(adsl_bm_df[grep("succinimide|2-pyrrolidinone|n6-succinyladenosine|3-methoxytyrosine", adsl_bm_df$S), "ptID"],
-                                aadc_bm_df[grep("succinimide|2-pyrrolidinone|n6-succinyladenosine|3-methoxytyrosine", aadc_bm_df$S), "ptID"],
-                                abat_bm_df[grep("succinimide|2-pyrrolidinone|n6-succinyladenosine|3-methoxytyrosine", abat_bm_df$S), "ptID"]))
-save(udns_matches, file="ptSim/v2/single-node/snRAW_udns_matches.RData")
-
-abat_bm_df[which(abat_bm_df$ptID %in% udns_matches$bm),]
-aadc_bm_df[which(aadc_bm_df$ptID %in% udns_matches$bm),]
-adsl_bm_df[which(adsl_bm_df$ptID %in% udns_matches$bm),]
-
-
 
 ```
 
@@ -1558,38 +1378,40 @@ kmx=30
 p0=0.1
 p1=0.9
 thresholdDiff=0.01
-setwd("/Users/lillian.rosa/OneDrive/MacFiles/9thCommitteeMeeting/Methods_paper/ptSim/v2/single-node")
-load("snRAW_udns_matches.RData")
-sn_udn_bm = udns_matches$bm
-refs_no_hits = c(udns_matches$aadc[grep("REF", udns_matches$aadc)],
-                 udns_matches$abat[grep("REF", udns_matches$abat)],
-                 udns_matches$adsl[grep("REF", udns_matches$adsl)])
-load("/Users/lillian.rosa/OneDrive/MacFiles/9thCommitteeMeeting/Methods_paper/ptSim/v2/mnRAW_udns_matches.RData")
-mn_udn_bm = udns_matches$bm
-udn_bm = unique(c(sn_udn_bm, mn_udn_bm))
-refs_no_hits = c(refs_no_hits, 
-                 udns_matches$aadc[grep("REF", udns_matches$aadc)],
-                 udns_matches$abat[grep("REF", udns_matches$abat)],
-                 udns_matches$adsl[grep("REF", udns_matches$adsl)])
-refs_no_hits = unique(refs_no_hits)
-load("sn_udns_matches.RData")
-sn_udn_bm = udns_matches$bm
-load("../mn_udns_matches.RData")
-mn_udn_bm = udns_matches$bm
-udn_bm = unique(c(sn_udn_bm, mn_udn_bm))
+
+setwd(getwd())
+
+refs_no_hits=c()
+udn_bm = c()
+for (mem in c('sn','mn')){
+  for (corr in c(TRUE,FALSE)){
+      if (corr == TRUE){
+        load(sprintf("ptSim/%s_udns_cor%i_matches.RData",mem,corr))
+        udn_bm = c(udn_bm,udns_matches$bm)
+        refs_no_hits=unique(c(refs_no_hits,unlist(udns_matches)[grep("REF", unlist(udns_matches))]))
+      }else{
+        load(sprintf("ptSim/%s_udns_cor%i_matches.RData",mem,corr))
+        refs_no_hits=unique(c(refs_no_hits,unlist(udns_matches)[grep("REF", unlist(udns_matches))]))
+      }
+  }
+
+}
+
 data(Thistlethwaite2019)
 data_mx = as.matrix(data_mx)
 data_mx = suppressWarnings(apply(data_mx, c(1,2), as.numeric))
-data_mx = data_mx[, c(grep("AADC|ABAT|ADSL", colnames(data_mx)), 
+data_mx = data_mx[, c(grep("AADC|GABAT|ADSL", colnames(data_mx)), 
                       grep("REF", colnames(data_mx)), 
                       which(colnames(data_mx) %in% udn_bm))]
 data_mx = data_mx[, -which(colnames(data_mx) %in% refs_no_hits)]
-for (model in c("abat", "aadc", "adsl")) {
+
+
+for (model in c("aadc", "abat", "adsl")) {
   ig = loadToEnv(system.file(sprintf("networks/bg_%s_maps_naive.RData", model), package="CTD"))[["ig_pruned"]]
   adjacency_matrix = list(as.matrix(get.adjacency(ig, attr="weight")))
   data_mx2 = data_mx[which(rownames(data_mx) %in% V(ig)$name),]
   data_mx.pvals = apply(data_mx2, c(1,2), function(i) 2*pnorm(abs(i), lower.tail = FALSE))
-  ranks = loadToEnv(sprintf("%snaive-ranks.RData", toupper(model)))[["permutationByStartNode"]]
+  ranks = loadToEnv(sprintf("./SingleNodeRankings/%snaive-ranks.RData", toupper(model)))[["permutationByStartNode"]]
   ranks = lapply(ranks, function(i) tolower(i))
   names(ranks) = as.character(lapply(ranks, function(i) i[[1]][1]))
    
@@ -1619,19 +1441,20 @@ for (model in c("abat", "aadc", "adsl")) {
       }
     }
   }
-  save.image(sprintf("sn_ptSim_%s.RData", model))
+  save.image(sprintf("./ptSim/sn_ptSim_%s.RData", model))
   # Normalize rows by max value size k
   for (k in 1:kmx) {
     diag(res_all[[k]]$ncd) = 0
     res_all[[k]]$ncd = res_all[[k]]$ncd/max(na.omit(res_all[[k]]$ncd))
   }
   print(lapply(res_all, function(i) max(i$ncd))) # should be 1 for all k
-  save.image(sprintf("sn_ptSim_%s_norm.RData", model))
+  save.image(sprintf("./ptSim/sn_ptSim_%s_norm.RData", model))
 }
 
 #### CTDsim (NCD+Jaccard) ####
 # For all 3 similarity matrices (for models GABA-T, AADC and ADSL), take the min patient distance for each k, 
 # and then across k, for each pairwise patient comparison. You will end up with one similarity matrix.
+
 rm(list=ls())
 require(R.utils)
 require(CTD)
@@ -1644,26 +1467,17 @@ mean_prec = c()
 r = 1
 for (alpha in c(1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0)) {
   print(sprintf("CTDsim for alpha = %.2f...", alpha))
-  setwd("/Users/lillian.rosa/OneDrive/MacFiles/9thCommitteeMeeting/Methods_paper/ptSim/v2/single-node")
-  res_all = loadToEnv(sprintf("sn_ptSim_%s_norm.RData", "abat"))[["res_all"]]
-  res_tmp = lapply(res_all, function(i) i$ncd)
-  res_tmp2 = lapply(res_all, function(i) i$jac)
-  res_abat = alpha*mle.getMinPtDistance(res_tmp) + (1-alpha)*mle.getMinPtDistance(res_tmp2)
-  diag(res_abat) = 0
+  setwd(getwd())
   
-  res_all = loadToEnv(sprintf("sn_ptSim_%s_norm.RData", "aadc"))[["res_all"]]
-  res_tmp = lapply(res_all, function(i) i$ncd)
-  res_tmp2 = lapply(res_all, function(i) i$jac)
-  res_aadc = alpha*mle.getMinPtDistance(res_tmp) + (1-alpha)*mle.getMinPtDistance(res_tmp2)
-  diag(res_aadc) = 0
+  for (model in c('aadc','abat','adsl')){
+    res_all = loadToEnv(sprintf("./ptSim/sn_ptSim_%s_norm.RData", "abat"))[["res_all"]]
+    res_tmp = lapply(res_all, function(i) i$ncd)
+    res_tmp2 = lapply(res_all, function(i) i$jac)
+    res_model[[model]]= alpha*mle.getMinPtDistance(res_tmp) + (1-alpha)*mle.getMinPtDistance(res_tmp2)
+    diag(res_model[[model]]) = 0
+  }
   
-  res_all = loadToEnv(sprintf("sn_ptSim_%s_norm.RData", "adsl"))[["res_all"]]
-  res_tmp = lapply(res_all, function(i) i$ncd)
-  res_tmp2 = lapply(res_all, function(i) i$jac)
-  res_adsl = alpha*mle.getMinPtDistance(res_tmp) + (1-alpha)*mle.getMinPtDistance(res_tmp2)
-  diag(res_adsl) = 0
-  
-  res_overall = mle.getMinPtDistance(list(res_abat, res_aadc, res_adsl))
+  res_overall = mle.getMinPtDistance(res_model)
   colnames(res_overall) = colnames(res_all[[1]]$ncd)
   res_overall[which(res_overall<0)] = 0
   res_overall = res_overall/max(res_overall)
@@ -1672,15 +1486,17 @@ for (alpha in c(1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0)) {
   diags = gsub("[[:digit:]]", "", diags)
   
   ctd_p = plot.mdsSim(res_overall, diags, 2, NULL)
-  #ctd_p = plot.mdsSim(res_overall, diags, 3, NULL)
-  orca(ctd_p, sprintf("ncd_v2_%d.png", 100*alpha))
+  orca(ctd_p, sprintf("ncd_2D_%d.png", 100*alpha))
+  ctd_p = plot.mdsSim(res_overall, diags, 3, NULL)
+  htmlwidgets::saveWidget(as_widget(ctd_p), sprintf("./ncd_%g.html",100*alpha))
   
-  # CTD Kmeans K=3
-  aadc.centroid = apply(res_overall[which(diags=="AADC"),], 2, mean)
-  abat.centroid = apply(res_overall[which(diags=="ABAT"),], 2, mean)
-  adsl.centroid = apply(res_overall[which(diags=="ADSL"),], 2, mean)
-  negCntl.centroid = apply(res_overall[which(diags=="REF"),], 2, mean)
-  kmns = kmeans(res_overall, centers = rbind(aadc.centroid, abat.centroid, adsl.centroid, negCntl.centroid))
+  # Kmeans
+  centroid = list()
+  for (diag in c('aadc','gabat','adsl','ref')){
+    centroid[[diag]] = apply(res_overall[which(diags==toupper(diag)),], 2, mean)
+  }
+  names(centroid) <- c('aadc','gabat','adsl','negCntl')
+  kmns = kmeans(res_overall, centers = rbind(centroid[[1]],centroid[[2]],centroid[[3]],centroid[[4]]))
   df = cbind(as.numeric(kmns$cluster), diags, colnames(res_overall))
   colnames(df) = c("cluster.num", "diag", "ptID")
   c1 = df[which(df[,1]=="1"), "diag"]
@@ -1692,33 +1508,27 @@ for (alpha in c(1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0)) {
   c4 = df[which(df[,1]=="4"), "diag"]
   if (length(which(c4=="UDN"))>0) { c4 = c4[-which(c4=="UDN")] }
   
-  tp = length(which(c1=="AADC")) 
-  tn = length(c(which(c2!="AADC"), which(c3!="AADC"), which(c4!="AADC")))
-  fp = length(c(which(c2=="AADC"), which(c3=="AADC"), which(c4=="AADC")))
-  c1_acc = (tp+tn)/length(c(c1, c2, c3, c4))
-  c1_prec = tp/(fp+tp)
-  tp = length(which(c2=="ABAT")) 
-  tn = length(c(which(c1!="ABAT"), which(c3!="ABAT"), which(c4!="ABAT")))
-  fp = length(c(which(c1=="ABAT"), which(c3=="ABAT"), which(c4=="ABAT")))
-  c2_acc = (tp+tn)/length(c(c1, c2, c3, c4))
-  c2_prec = tp/(fp+tp)
-  tp = length(which(c3=="ADSL")) 
-  tn = length(c(which(c1!="ADSL"), which(c2!="ADSL"), which(c4!="ADSL")))
-  fp = length(c(which(c1=="ADSL"), which(c2=="ADSL"), which(c4=="ADSL")))
-  c3_acc = (tp+tn)/length(c(c1, c2, c3, c4))
-  c3_prec = tp/(fp+tp)
-  tp = length(which(c4=="REF")) 
-  tn = length(c(which(c1!="REF"), which(c2!="REF"), which(c3!="REF")))
-  fp = length(c(which(c1=="REF"), which(c2=="REF"), which(c3=="REF")))
-  c4_acc = (tp+tn)/length(c(c1, c2, c3, c4))
-  c4_prec = tp/(fp+tp)
+  acc=list()
+  prec=list()
+  for (i in 1:length(unique(df[,'cluster.num']))){
+    diag = c('AADC','GABAT','ADSL','REF')[[i]]
+    diag_rest=c('AADC','GABAT','ADSL','REF')[-i]
+    cluster_OI = list(c1, c2, c3, c4)[[i]]
+    cluster_rest = list(c1, c2, c3, c4)[-i]
+    tp = length(which(cluster_OI==diag))
+    tn = length(c(which(cluster_rest[[1]]!=diag), which(cluster_rest[[2]]!=diag), which(cluster_rest[[3]]!=diag)))
+    fp = length(c(which(cluster_rest[[1]]==diag), which(cluster_rest[[2]]==diag), which(cluster_rest[[3]]==diag)))
+    acc[[diag]] = (tp+tn)/length(c(c1, c2, c3, c4))
+    prec[[diag]] = tp/(fp+tp)
+  }
   
-  total_dist_centroids[r] = sum(dist(rbind(aadc.centroid, abat.centroid, adsl.centroid, negCntl.centroid)))
-  mean_acc[r] = mean(c(c1_acc, c2_acc, c3_acc, c4_acc))
-  mean_prec[r] = mean(c(c1_prec, c2_prec, c3_prec, c4_prec))
+  total_dist_centroids[r] = sum(dist(rbind(centroid[[1]], centroid[[2]], centroid[[3]], centroid[[4]])))
+  mean_acc[r] = mean(unlist(acc))
+  mean_prec[r] = mean(unlist(prec))
   r = r + 1
 }
-
+dir.create("./ptSim/figure", showWarnings = TRUE)
+system('mv ./ncd_*.html ./ptSim/figure')
 
 dff = data.frame(alpha=seq(1, 0, -0.1), centroids = total_dist_centroids,
                  acc = mean_acc, prec = mean_prec)
@@ -1734,39 +1544,33 @@ dev.off()
 #### PtSim Blowouts ####
 alpha=0.4
 print(sprintf("CTDsim for alpha = %.2f...", alpha))
-setwd("/Users/lillian.rosa/OneDrive/MacFiles/9thCommitteeMeeting/Methods_paper/ptSim/v2/single-node")
-res_all = loadToEnv(sprintf("sn_ptSim_%s_norm.RData", "abat"))[["res_all"]]
-res_tmp = lapply(res_all, function(i) i$ncd)
-res_tmp2 = lapply(res_all, function(i) i$jac)
-res_abat = alpha*mle.getMinPtDistance(res_tmp) + (1-alpha)*mle.getMinPtDistance(res_tmp2)
-diag(res_abat) = 0
 
-res_all = loadToEnv(sprintf("sn_ptSim_%s_norm.RData", "aadc"))[["res_all"]]
-res_tmp = lapply(res_all, function(i) i$ncd)
-res_tmp2 = lapply(res_all, function(i) i$jac)
-res_aadc = alpha*mle.getMinPtDistance(res_tmp) + (1-alpha)*mle.getMinPtDistance(res_tmp2)
-diag(res_aadc) = 0
+setwd(getwd())
 
-res_all = loadToEnv(sprintf("sn_ptSim_%s_norm.RData", "adsl"))[["res_all"]]
-res_tmp = lapply(res_all, function(i) i$ncd)
-res_tmp2 = lapply(res_all, function(i) i$jac)
-res_adsl = alpha*mle.getMinPtDistance(res_tmp) + (1-alpha)*mle.getMinPtDistance(res_tmp2)
-diag(res_adsl) = 0
-
-res_overall = mle.getMinPtDistance(list(res_abat, res_aadc, res_adsl))
+res_model=list()
+for (model in c('aadc','abat','adsl')){
+  res_all = loadToEnv(sprintf(".ptSim/sn_ptSim_%s_norm.RData", "abat"))[["res_all"]]
+  res_tmp = lapply(res_all, function(i) i$ncd)
+  res_tmp2 = lapply(res_all, function(i) i$jac)
+  res_model[[model]]= alpha*mle.getMinPtDistance(res_tmp) + (1-alpha)*mle.getMinPtDistance(res_tmp2)
+  diag(res_model[[model]]) = 0
+}
+res_overall = mle.getMinPtDistance(res_model)
 colnames(res_overall) = colnames(res_all[[1]]$ncd)
 res_overall[which(res_overall<0)] = 0
 res_overall = res_overall/max(res_overall)
+
 
 diags = colnames(res_all[[1]]$ncd)
 diags = gsub("[[:digit:]]", "", diags)
 
 # CTD Kmeans K=4
-aadc.centroid = apply(res_overall[which(diags=="AADC"),], 2, mean)
-abat.centroid = apply(res_overall[which(diags=="ABAT"),], 2, mean)
-adsl.centroid = apply(res_overall[which(diags=="ADSL"),], 2, mean)
-negCntl.centroid = apply(res_overall[which(diags=="REF"),], 2, mean)
-kmns = kmeans(res_overall, centers = rbind(aadc.centroid, abat.centroid, adsl.centroid, negCntl.centroid))
+centroid = list()
+for (diag in c('aadc','gabat','adsl','ref')){
+  centroid[[diag]] = apply(res_overall[which(diags==toupper(diag)),], 2, mean)
+}
+names(centroid) <- c('aadc','abat','adsl','negCntl')
+kmns = kmeans(res_overall, centers = rbind(centroid[[1]],centroid[[2]],centroid[[3]],centroid[[4]]))
 df = cbind(as.numeric(kmns$cluster), diags, colnames(res_overall))
 colnames(df) = c("cluster.num", "diag", "ptID")
 c1 = df[which(df[,1]=="1"), "diag"]
@@ -1775,9 +1579,9 @@ c3 = df[which(df[,1]=="3"), "diag"]
 c4 = df[which(df[,1]=="4"), "diag"]
 
 ig_pruned = list()
-ig_pruned$abat = loadToEnv("../graphs/bg_abat_maps_naive.RData")[["ig_pruned"]]
-ig_pruned$aadc = loadToEnv("../graphs/bg_aadc_maps_naive.RData")[["ig_pruned"]]
-ig_pruned$adsl = loadToEnv("../graphs/bg_adsl_maps_naive.RData")[["ig_pruned"]]
+for (model in c('aadc','abat','adsl')){
+  ig_pruned[[model]]=loadToEnv(system.file('networks', 'bg_abat_maps_naive.RData', package='CTD'))[['ig_pruned']]
+}
 c1 = mle.blowoutSim(res_overall, data_mx, df[which(df[,1]=="1"),"ptID"], ig_pruned, 15)
 c2 = mle.blowoutSim(res_overall, data_mx, df[which(df[,1]=="2"),"ptID"], ig_pruned, 15)
 c3 = mle.blowoutSim(res_overall, data_mx, df[which(df[,1]=="3"),"ptID"], ig_pruned, 15)
@@ -1815,31 +1619,20 @@ data_mx[c("glutamine", "13-hode + 9-hode", "2-pyrrolidinone", "leucylleucine", "
 data_mx[c("n-acetylaspartate (naa)", "anserine", "2-pyrrolidinone", "4-guanidinobutanoate", "erythritol"), "UDN154"]
 
 
-
-
 #### JACCARD SET SIMILARITY (w/ Directionality) ####
 alpha=0.0
 print(sprintf("CTDsim for alpha = %.2f...", alpha))
-setwd("/Users/lillian.rosa/OneDrive/MacFiles/9thCommitteeMeeting/Methods_paper/ptSim/v2/single-node")
-res_all = loadToEnv(sprintf("sn_ptSim_%s_norm.RData", "abat"))[["res_all"]]
-res_tmp = lapply(res_all, function(i) i$ncd)
-res_tmp2 = lapply(res_all, function(i) i$jac)
-res_abat = alpha*mle.getMinPtDistance(res_tmp) + (1-alpha)*mle.getMinPtDistance(res_tmp2)
-diag(res_abat) = 0
 
-res_all = loadToEnv(sprintf("sn_ptSim_%s_norm.RData", "aadc"))[["res_all"]]
-res_tmp = lapply(res_all, function(i) i$ncd)
-res_tmp2 = lapply(res_all, function(i) i$jac)
-res_aadc = alpha*mle.getMinPtDistance(res_tmp) + (1-alpha)*mle.getMinPtDistance(res_tmp2)
-diag(res_aadc) = 0
+res_model=list()
+for (model in c('aadc','abat','adsl')){
+  res_all = loadToEnv(sprintf("./output/ptSim/sn_ptSim_%s_norm.RData", "abat"))[["res_all"]]
+  res_tmp = lapply(res_all, function(i) i$ncd)
+  res_tmp2 = lapply(res_all, function(i) i$jac)
+  res_model[[model]]= alpha*mle.getMinPtDistance(res_tmp) + (1-alpha)*mle.getMinPtDistance(res_tmp2)
+  diag(res_model[[model]]) = 0
+}
 
-res_all = loadToEnv(sprintf("sn_ptSim_%s_norm.RData", "adsl"))[["res_all"]]
-res_tmp = lapply(res_all, function(i) i$ncd)
-res_tmp2 = lapply(res_all, function(i) i$jac)
-res_adsl = alpha*mle.getMinPtDistance(res_tmp) + (1-alpha)*mle.getMinPtDistance(res_tmp2)
-diag(res_adsl) = 0
-
-res_overall = mle.getMinPtDistance(list(res_abat, res_aadc, res_adsl))
+res_overall = mle.getMinPtDistance(res_model)
 colnames(res_overall) = colnames(res_all[[1]]$ncd)
 res_overall[which(res_overall<0)] = 0
 res_overall = res_overall/max(res_overall)
@@ -1848,11 +1641,12 @@ diags = colnames(res_all[[1]]$ncd)
 diags = gsub("[[:digit:]]", "", diags)
 
 # CTD Kmeans K=4
-aadc.centroid = apply(res_overall[which(diags=="AADC"),], 2, mean)
-abat.centroid = apply(res_overall[which(diags=="ABAT"),], 2, mean)
-adsl.centroid = apply(res_overall[which(diags=="ADSL"),], 2, mean)
-negCntl.centroid = apply(res_overall[which(diags=="REF"),], 2, mean)
-kmns = kmeans(res_overall, centers = rbind(aadc.centroid, abat.centroid, adsl.centroid, negCntl.centroid))
+centroid = list()
+for (diag in c('aadc','gabat','adsl','ref')){
+  centroid[[diag]] = apply(res_overall[which(diags==toupper(diag)),], 2, mean)
+}
+names(centroid) <- c('aadc','abat','adsl','negCntl')
+kmns = kmeans(res_overall, centers = rbind(centroid[[1]],centroid[[2]],centroid[[3]],centroid[[4]]))
 df = cbind(as.numeric(kmns$cluster), diags, colnames(res_overall))
 colnames(df) = c("cluster.num", "diag", "ptID")
 c1 = df[which(df[,1]=="1"), "diag"]
@@ -1860,15 +1654,13 @@ c2 = df[which(df[,1]=="2"), "diag"]
 c3 = df[which(df[,1]=="3"), "diag"]
 c4 = df[which(df[,1]=="4"), "diag"]
 
-
-
 ```
 
 ``` {r compare_naive_dist}
 #### COMPARE TO VECTOR-BASED DISTANCE METRICS ####
 #setwd("/Users/lillian.rosa/OneDrive/MacFiles/9thCommitteeMeeting/Methods_paper/ptSim/v2/multi-node")
 rm(list=ls())
-setwd("/Users/lillian.rosa/OneDrive/MacFiles/9thCommitteeMeeting/Methods_paper/ptSim/v2/single-node")
+
 imputeMissingValues = function(data, ref) {
   data = data[which(rownames(data) %in% rownames(ref)),]
   ref = ref[which(rownames(ref) %in% rownames(data)),]
@@ -1903,7 +1695,7 @@ data_mx = as.matrix(data_mx)
 data_mx = suppressWarnings(apply(data_mx, c(1,2), as.numeric))
 data_mx = data_mx[,-c(1,2,3,4,5,6,7,8)]
 ref_data = data_mx[, grep("REF", colnames(data_mx))]
-load("sn_ptSim_aadc_norm.RData")
+load("./ptSim/sn_ptSim_aadc_norm.RData")
 data_mx = data_mx[, which(colnames(data_mx) %in% colnames(res_all[[1]]$ncd))]
 data_mx = imputeMissingValues(data_mx, ref_data)
 
@@ -1924,28 +1716,28 @@ for (pt in 1:ncol(data_mx)) {
   pearson[pt,] = pearson[pt,]/abs(max(pearson[pt,]))
 }
 pear_p = plot.mdsSim(pearson, diags, 2, NULL)
-orca(pear_p, "pearson_v2.png")
+orca(pear_p, "./ptSim/figure/pearson_v2.png")
 mx = as.matrix(dist(t(data_mx), method="maximum"))
 for (pt in 1:ncol(data_mx)) {
   mx[pt,] = mx[pt,] + abs(min(mx[pt,]))
   mx[pt,] = mx[pt,]/abs(max(mx[pt,]))
 }
 mx_p = plot.mdsSim(mx, diags, 2, NULL)
-orca(mx_p, "mx_v2.png")
+orca(mx_p, "./ptSim/figure/mx_v2.png")
 euc = as.matrix(dist(t(data_mx), method="euclidean"))
 for (pt in 1:ncol(data_mx)) {
   euc[pt,] = euc[pt,] + abs(min(euc[pt,]))
   euc[pt,] = euc[pt,]/abs(max(euc[pt,]))
 }
 euc_p = plot.mdsSim(euc, diags, 2, NULL)
-orca(euc_p, "euc_v2.png")
+orca(euc_p, "./ptSim/figure/euc_v2.png")
 man = as.matrix(dist(t(data_mx), method="manhattan"))
 for (pt in 1:ncol(data_mx)) {
   man[pt,] = man[pt,] + abs(min(man[pt,]))
   man[pt,] = man[pt,]/abs(max(man[pt,]))
 }
 man_p = plot.mdsSim(man, diags, 2, NULL)
-orca(man_p, "man_v2.png")
+orca(man_p, "./ptSim/figure/man_v2.png")
 
 # Pearson
 aadc.centroid = apply(pearson[which(diags=="AADC"),], 2, mean)
