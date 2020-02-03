@@ -164,13 +164,11 @@ plot.pathwayMap_CaseCntl = function(Pathway, groupName, pvalues, out.path, SVG=T
     svg(sprintf("%s/%s-%s.svg", out.path, Pathway, groupName), width=15, height=15)
     plot.igraph(template.g, layout=cbind(V(template.g)$x, V(template.g)$y), edge.arrow.size = 0.01, edge.width = 1,
                 vertex.frame.color=V(template.g)$color, main = gsub("-", " ", Pathway))
-    legend('bottom',legend=1:max(ceiling(V(template.g)$size)), col='black',pch=21, pt.bg='white', cex=2, horiz=TRUE)
     dev.off()
   } else {
     png(sprintf("%s/%s-%s.png", out.path, Pathway, groupName), width=10, height=10, units="in", res=300)
     plot.igraph(template.g, layout=cbind(V(template.g)$x, V(template.g)$y), edge.arrow.size = 0.01, edge.width = 1,
                 vertex.frame.color=V(template.g)$color, main = gsub("-", " ", Pathway))
-    legend('bottom',legend=1:max(ceiling(V(template.g)$size)), col='black',pch=21, pt.bg='white', cex=2, horiz=TRUE)
     dev.off()
   }
 

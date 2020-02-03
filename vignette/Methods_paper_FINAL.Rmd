@@ -284,7 +284,7 @@ for (model in c("aadc", "abat", "adsl")) {
 
 ```
 ## Interpret Patient Metabolomics Profiles using CTD and Disease-Specific Networks
-``` {r multinode-model-allpts-without-X-compounds}
+``` {r multinode-model-allpts}
 # Run memory on all patients against pruned graphs as disease network. 
 # If run on cluster, launch 1 disease model per PBS script.
 # PBS script is called rrunCTD_multiNode.pbs and R script is called runCTD_multiNode.r. 
@@ -394,38 +394,6 @@ for (model in c('aadc','abat','adsl')){
               row.names=TRUE)
 }
 
-#---- define function singleNodeDiffusion.getRanksN ----
-singleNodeDiffusion.getRanksN = function (n, G) {
-  all_nodes = names(G)
-  #print(sprintf("Calculating permutation %d of %d.", n, length(all_nodes)))
-  current_node_set = NULL
-  stopIterating = FALSE
-  startNode = all_nodes[n]
-  currentGraph = G
-  numMisses = 0
-  current_node_set = c(current_node_set, startNode)
-  while (stopIterating == FALSE) {
-    print(length(current_node_set))
-    currentGraph[1:length(currentGraph)] = 0
-    baseP = p0/(length(currentGraph) - length(current_node_set))
-    currentGraph[!(names(currentGraph) %in% current_node_set)] = baseP
-    p0_event = sum(unlist(currentGraph[!(names(currentGraph) %in% current_node_set)]))
-    currentGraph = graph.diffuseP1(p1, startNode, currentGraph, current_node_set, 1, verbose = FALSE)
-    p1_event = sum(unlist(currentGraph[!(names(currentGraph) %in% current_node_set)]))
-    if (abs(p1_event - 1) > thresholdDiff) {
-      extra.prob.to.diffuse = 1 - p1_event
-      currentGraph[names(current_node_set)] = 0
-      currentGraph[!(names(currentGraph) %in% names(current_node_set))] = unlist(currentGraph[!(names(currentGraph) %in% 
-                names(current_node_set))]) + extra.prob.to.diffuse/sum(!(names(currentGraph) %in% names(current_node_set)))
-    }
-    maxProb = names(which.max(currentGraph))
-    startNode = names(currentGraph[maxProb[1]])
-    current_node_set = c(current_node_set, startNode)
-    if (length(c(startNode, current_node_set)) >= (length(G))) {stopIterating = TRUE}
-  }
-  return(current_node_set)
-}
-
 #---wrapper_ranks.r----
 # the following script will batch generate pbs job request one node per job
 args = commandArgs(trailingOnly=TRUE)
@@ -497,8 +465,6 @@ print(type)
 print(n)
 
 require(CTD)
-source("singleNodeDiffusion.getRanksN.r")
-
 if (type=="REF") {
   tmp = as.matrix(read.table(sprintf("../graphs/graph%s%s_glasso_maps.txt", diag, type), sep="\t", header=TRUE, check.names=FALSE))
 } else if (type=="D") {
