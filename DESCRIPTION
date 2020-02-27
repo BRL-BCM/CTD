@@ -1,6 +1,6 @@
 Package: CTD
 Title: CTD method for “connecting the dots” in weighted graphs
-Version: 0.0.0.9000
+Version: 0.0.1.0000
 Date: 2017-05-25
 Maintainer: Lillian Thistlethwaite <lillian.thistlethwaite@bcm.edu>
 Description: An R package for pattern discovery in weighted graphs. Two use cases are achieved: 1) Given a weighted graph and a subset of its nodes; do the nodes show significant connectedness? 2) Given a weighted graph and two subsets of its nodes; do the subsets show significant similarity?
