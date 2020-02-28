@@ -9,18 +9,28 @@
 #' @examples
 #' ig_pruned=graph.naivePruning(ig_dis, ig_ref)
 graph.naivePruning = function(ig_dis, ig_ref) {
-  ig_pruned = ig_dis
   ee = get.edgelist(ig_ref)
+  ee = ee[which(apply(ee, 1, function(i) all(i %in% V(ig_dis)$name))),]
   it = 0
   for (e in 1:nrow(ee)) {
-    e.id = get.edge.ids(ig_pruned, vp=ee[e,])
-    if (e.id != 0) {
-      it = it + 1
-      ig_pruned = delete.edges(ig_pruned, edges = E(ig_pruned)[[e.id]])
+    e.id.dis = get.edge.ids(ig_dis, vp=ee[e,])
+    e.id.ref = get.edge.ids(ig_ref, vp=ee[e,])
+    if (e.id.dis != 0) {
+      isSameDirection = ifelse((((E(ig_dis)$weight[e.id.dis]<0) && (E(ig_ref)$weight[e.id.ref]<0)) || 
+                               ((E(ig_dis)$weight[e.id.dis]>0) && (E(ig_ref)$weight[e.id.ref]>0))), TRUE, FALSE)
+      
+      if (isSameDirection && (abs(E(ig_ref)$weight[e.id.ref]) < abs(E(ig_dis)$weight[e.id.dis]))) {
+        E(ig_dis)$weight[e.id.dis] = E(ig_dis)$weight[e.id.dis] - E(ig_ref)$weight[e.id.ref]
+        it = it + 1
+      }
+      if (isSameDirection && (abs(E(ig_ref)$weight[e.id.ref]) > abs(E(ig_dis)$weight[e.id.dis]))) {
+        ig_dis = delete.edges(ig_dis, edges = E(ig_dis)[[e.id.dis]])
+        it = it + 1
+      }
     }
   }
-  print(sprintf("%s edges overlapped between reference and disease+reference networks.", it))
-  return (ig_pruned)
+  print(sprintf("%s edges were modified in the disease+reference network.", it))
+  return (ig_dis)
 }
 
 
