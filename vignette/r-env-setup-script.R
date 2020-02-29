@@ -17,7 +17,7 @@ downloadGDriveFile <- function(id, out){
 
 #' R package cache (precompiled packages based on colab env)
 message("Download R package cache")
-downloadGDriveFile(out="r_binaries.tar.gz", id="1oEbx6WcTgE0OE2X0FFACaOz6826M8173")
+downloadGDriveFile(out="r_binaries.tar.gz", id="166AfpzFwfWU8gtu6su120RYhmETgSZrn")
 
 system("ls")
 
@@ -30,4 +30,4 @@ system("tar -xzf r_binaries.tar.gz -C / ", intern=TRUE)
 
 
 # Options to make plots smaller
-options(repr.plot.width=4, repr.plot.height=4)
+options(repr.plot.width=10, repr.plot.height=10)
