@@ -320,7 +320,7 @@ for (model in c("cit", "gamt", "msud", "mma", "pa", "pku")) {
 
     rm(diag_data, ref_data, diagnoses, inv_covmat, inv_covmatt, inv_covmatt_select,
        Miller2015, refs, refs2, diag_pts, fill.rate, ind)
-    save.image(sprintf("Clinical_paper/graphs/bg_%s_ind_fold%d.RData", model, fold))
+    save.image(sprintf("Methods_paper/graphs/bg_%s_ind_fold%d.RData", model, fold))
     rm(ig, ig_ref)
   }
 }
@@ -328,7 +328,7 @@ for (model in c("cit", "gamt", "msud", "mma", "pa", "pku")) {
 
 
 ## Interpret Patient Metabolomics Profiles using CTD and Disease-Specific Networks
-``` {r pre-compute_single-node_rankings}
+``` {r pre-compute-node-rankings}
 
 #This section is done on the cluster 
 
@@ -430,7 +430,6 @@ print(n)
 print(type)
 
 
-load("clinical_data.RData")
 require(CTD)
 require(R.utils)
 if (type=="noLatent") {
@@ -478,30 +477,34 @@ save(current_node_set, file=sprintf("./diag%s%d/%d.RData", diag, fold, n))
 
 ```
 
-## Figure 7: Illustration of CTD's specificity.
-``` {r singlenode-model-allpts}
+## Figure 7: Illustration of CTD's specificity, and patient module blowouts.
+``` {r ctd-model-allpts}
+setwd("/Users/lillian.rosa/OneDrive/MacFiles/9thCommitteeMeeting/Methods_paper/")
 rm(list=ls())
 require(R.utils)
 require(CTD)
-setwd("/Users/lillian.rosa/OneDrive/MacFiles/9thCommitteeMeeting/Clinical_paper/")
-rm(list=ls())
-load("clinical_data.RData")
-cohorts = lapply(cohorts, sort)
-cohorts = lapply(cohorts, function(i) i[which(i %in% colnames(data_mx))])
-data("Miller2015")
-Miller2015 = Miller2015[,grep("IEM_", colnames(Miller2015))]
-Miller2015 = Miller2015[, which(colnames(Miller2015) %in% 
-                                diagnoses$id[which(diagnoses$diagnosis %in% 
-                                                     c("Citrullinemia", "Guanidinoacetate methyltransferase", 
-                                                       "Maple syrup urine disease", "Methylmalonic aciduria", 
-                                                       "Phenylketonuria", "Propionic aciduria", 
-                                                       "No biochemical genetic diagnosis"))])]
+data(Miller2015)
+data_mx = as.matrix(Miller2015[,grep("IEM_", colnames(Miller2015))])
+cohorts = list()
+cohorts$mcc = diagnoses$id[which(diagnoses$diagnosis=="3-methylcrotonyl CoA carboxylase")]
+cohorts$arg = diagnoses$id[which(diagnoses$diagnosis=="Argininemia")]
+cohorts$cit = diagnoses$id[which(diagnoses$diagnosis=="Citrullinemia")]
+cohorts$cob = diagnoses$id[which(diagnoses$diagnosis=="Cobalamin biosynthesis")]
+cohorts$ga = diagnoses$id[which(diagnoses$diagnosis=="Glutaric Aciduria")]
+cohorts$gamt = diagnoses$id[which(diagnoses$diagnosis=="Guanidinoacetate methyltransferase")]
+cohorts$msud = diagnoses$id[which(diagnoses$diagnosis=="Maple syrup urine disease")]
+cohorts$mma = diagnoses$id[which(diagnoses$diagnosis=="Methylmalonic aciduria")]
+cohorts$otc = diagnoses$id[which(diagnoses$diagnosis=="Ornithine transcarbamoylase")]
+cohorts$pa = diagnoses$id[which(diagnoses$diagnosis=="Propionic aciduria")]
+cohorts$pku = diagnoses$id[which(diagnoses$diagnosis=="Phenylketonuria")]
+cohorts$tmhle = diagnoses$id[which(diagnoses$diagnosis=="Trimethyllysine hydroxylase epsilon")]
+cohorts$ref = diagnoses$id[which(diagnoses$diagnosis=="No biochemical genetic diagnosis")]
 p0=0.1
 p1=0.9
 thresholdDiff=0.01
 kmx=15
 for (type in c("ind", "noPruning", "noLatent")) {
-  for (model in c("cit", "gamt", "msud", "mma", "pa", "pku")) {
+  for (model in c("cit", "msud", "mma", "pa", "pku")) {
     for (fold in 1:length(which(cohorts[[model]] %in% colnames(Miller2015)))) {
       if (type=="noPruning") {
         load(sprintf("loocv/loocv_nets/ind_foldNets/bg_%s_ind_fold%d.RData", model, fold))
@@ -529,23 +532,21 @@ for (type in c("ind", "noPruning", "noLatent")) {
         print(sprintf("Patient %d/%d...", p, ncol(data_mx)))
         if (ptID %in% unlist(cohorts)) {
           diag = names(cohorts)[which(unlist(lapply(cohorts, function(i) ptID %in% i)))]
-        } else {
-          diag = "reference"
-        }
-        S = data_mx[order(abs(data_mx[,p]), decreasing = TRUE),p][1:kmx]
-        ptBSbyK = singleNode.getPtBSbyK(names(S), ranks, num.misses = log2(length(G)))
-        res = mle.getEncodingLength(ptBSbyK, data.pvals, ptID, G)
-        for (k in 1:kmx) {
-          df[r, "ptID"] = colnames(data_mx)[p]
-          df[r, "diag"] = diag
-          df[r, "S"] = paste(names(S)[1:k], collapse="/")
-          df[r, "lenS"] = k
-          df[r, "optT"] = res[k, "opt.T"]
-          df[r, "fishers"] = res[k, "fishers.Info"]
-          df[r, "I0"] = res[k, "IS.null"]
-          df[r, "IA"] = res[k, "IS.alt"]
-          df[r, "d"] = res[k, "d.score"]
-          r = r + 1
+          S = data_mx[order(abs(data_mx[,p]), decreasing = TRUE),p][1:kmx]
+          ptBSbyK = singleNode.getPtBSbyK(names(S), ranks, num.misses = log2(length(G)))
+          res = mle.getEncodingLength(ptBSbyK, data.pvals, ptID, G)
+          for (k in 1:kmx) {
+            df[r, "ptID"] = colnames(data_mx)[p]
+            df[r, "diag"] = diag
+            df[r, "S"] = paste(names(S)[1:k], collapse="/")
+            df[r, "lenS"] = k
+            df[r, "optT"] = res[k, "opt.T"]
+            df[r, "fishers"] = res[k, "fishers.Info"]
+            df[r, "I0"] = res[k, "IS.null"]
+            df[r, "IA"] = res[k, "IS.alt"]
+            df[r, "d"] = res[k, "d.score"]
+            r = r + 1
+          }
         }
       }
       save(ptBSbyK, df, file=sprintf("loocv/loocv_%s_runCTD/model_%s_%s_fold%d_kmx%d.RData", type, model, type, fold, kmx))
@@ -553,19 +554,34 @@ for (type in c("ind", "noPruning", "noLatent")) {
   }
 }
 
-# Figure 7: Plot patient ID vs. bits for each disease-specific network
+# Figure: Plot patient ID vs. bits for each disease-specific network
 rm(list=ls())
 setwd("/Users/lillian.rosa/OneDrive/MacFiles/9thCommitteeMeeting/")
 require(ggplot2)
-require(plotly)
 require(pROC)
-for (model in c("gamt", "pku", "pa", "mma", "msud", "cit")) {
+data(Miller2015)
+data_mx = as.matrix(Miller2015[,grep("IEM_", colnames(Miller2015))])
+cohorts = list()
+cohorts$mcc = diagnoses$id[which(diagnoses$diagnosis=="3-methylcrotonyl CoA carboxylase")]
+cohorts$arg = diagnoses$id[which(diagnoses$diagnosis=="Argininemia")]
+cohorts$cit = diagnoses$id[which(diagnoses$diagnosis=="Citrullinemia")]
+cohorts$cob = diagnoses$id[which(diagnoses$diagnosis=="Cobalamin biosynthesis")]
+cohorts$ga = diagnoses$id[which(diagnoses$diagnosis=="Glutaric Aciduria")]
+cohorts$gamt = diagnoses$id[which(diagnoses$diagnosis=="Guanidinoacetate methyltransferase")]
+cohorts$msud = diagnoses$id[which(diagnoses$diagnosis=="Maple syrup urine disease")]
+cohorts$mma = diagnoses$id[which(diagnoses$diagnosis=="Methylmalonic aciduria")]
+cohorts$otc = diagnoses$id[which(diagnoses$diagnosis=="Ornithine transcarbamoylase")]
+cohorts$pa = diagnoses$id[which(diagnoses$diagnosis=="Propionic aciduria")]
+cohorts$pku = diagnoses$id[which(diagnoses$diagnosis=="Phenylketonuria")]
+cohorts$tmhle = diagnoses$id[which(diagnoses$diagnosis=="Trimethyllysine hydroxylase epsilon")]
+cohorts$ref = diagnoses$id[which(diagnoses$diagnosis=="No biochemical genetic diagnosis")]
+for (model in c("pku", "pa", "mma", "msud", "cit")) {
   for (type in c("ind", "noLatent", "noPruning")) {
     print(sprintf("For model %s...", model))
     kmx=15
     df_all = data.frame(fold=numeric(), pt=numeric(), bits=numeric(), diag=character(), stringsAsFactors = FALSE)
     for (fold in 1:length(cohorts[[model]])) {
-      load(sprintf("Clinical_paper/loocv/loocv_%s_runCTD/model_%s_%s_fold%d_kmx%d.RData", type, model, type, fold, kmx))
+      load(sprintf("Methods_paper/loocv/loocv_%s_runCTD/model_%s_%s_fold%d_kmx%d.RData", type, model, type, fold, kmx))
       pts = unique(df$ptID)
       df = df[which(df$ptID %in% pts),]
       df_best = data.frame(pt=numeric(), ptID=character(), bits=numeric(), diag=character(), stringsAsFactors = FALSE)
@@ -584,9 +600,8 @@ for (model in c("gamt", "pku", "pa", "mma", "msud", "cit")) {
       df_all = rbind(df_all, df_best)
     }
     df_all = df_all[which(df_all$ptID %in% colnames(Miller2015)),]
-    df_all = df_all[which(df_all$diag %in% c("cit", "gamt", "mma", "pa", "pku", "msud", "reference")),]
     df_all$bits = -log2(p.adjust(2^-(df_all$bits), method="fdr"))
-
+    
     # Visualize LOOCV signal and compare to off-target diseased test patients
     dff = df_all
     dff$loocv = rep(0, nrow(dff))
@@ -594,14 +609,14 @@ for (model in c("gamt", "pku", "pa", "mma", "msud", "cit")) {
     dff = dff[-intersect(which(dff$loocv==0), which(dff$diag==model)), ]
     b_bits = cbind(unique(dff$ptID), sapply(unique(dff$ptID), function(i) mean(dff[which(dff$ptID==i),"bits"])))
     dff = dff[-which(duplicated(dff$ptID)),]
+    dff$diag[which(dff$diag=="ref")] = "z.ref"
     dff = dff[order(dff$ptID),]
     b_bits = b_bits[order(b_bits[,1]),]
     dff$bits = as.numeric(b_bits[,2])
-    dff = dff[which(dff$diag %in% c("gamt", "pku", "pa", "mma", "cit", "msud", "reference")),]
-    p3= ggplot(dff, aes(x=diag, y=bits, fill=diag)) + geom_boxplot(size=2) + geom_hline(yintercept=-log2(0.05)) +  
-      theme(text = element_text(size=20)) + ggtitle(sprintf("%s (%s)", model, type))
-    orca(p3, sprintf("Clinical_paper/loocv/loocv_%s_runCTD/sn_%s_bg_methods_%s_loocv.png", type, model, type), width = 1000, height = 500)
-
+    p2 = ggplot(dff, aes(x=diag, y=bits, fill=diag)) + geom_boxplot(size=2) + 
+      geom_hline(yintercept=-log2(0.05)) +  theme(text = element_text(size=20)) + ggtitle(sprintf("%s (%s)", model, type))
+    orca(p2, sprintf("Methods_paper/loocv/loocv_%s_runCTD/sn_%s_bg_clinical_%s_loocv.png", type, model, type), width = 1000, height = 500)
+    
     d = dff$diag
     d[which(d!=model)] = 0
     d[which(d==model)] = 1
@@ -611,12 +626,70 @@ for (model in c("gamt", "pku", "pa", "mma", "msud", "cit")) {
   }
 }
 
+
+# Patient module blowouts
+rm(list=ls())
+cohorts = lapply(cohorts, sort)
+cohorts = lapply(cohorts, function(i) i[which(i %in% colnames(Miller2015))])
+kmx=15
+p0=0.1
+p1=0.9
+thresholdDiff=0.01
+for (model in c("cit", "gamt", "mma", "msud", "pa", "pku")) {
+  for (fold in 1:length(cohorts[[model]])) {
+    load(sprintf("Methods_paper/loocv/loocv_nets/ind_foldNets/bg_%s_ind_fold%d.RData",model, fold)) 
+    adjacency_matrix = list(as.matrix(get.adjacency(ig_pruned, attr="weight")))
+    G = vector(mode="list", length=length(V(ig_pruned)$name))
+    names(G) = V(ig_pruned)$name
+    data_mx = data_mx[which(rownames(data_mx) %in% V(ig_pruned)$name), ]
+    data.pvals = apply(data_mx, c(1,2), function(i) 2*pnorm(abs(i), lower.tail = FALSE))
+    data.pvals = t(data.pvals)
+    p = which(colnames(data_mx)==cohorts[[model]][fold]) 
+    ptID = colnames(data_mx)[p]
+    S = data_mx[order(abs(data_mx[,p]), decreasing = TRUE),p][1:kmx]
+    # Single-node
+    print("Single-node ranking...")
+    ranks = list()
+    for (i in 1:length(S)) {
+      ind = which(names(G)==names(S)[i])
+      ranks[[i]] = singleNode.getNodeRanksN(ind, G, names(S), num.misses = log2(length(G)))
+    }
+    names(ranks) = names(S)
+    ptBSbyK = singleNode.getPtBSbyK(names(S), ranks)
+    res = mle.getEncodingLength(ptBSbyK, data.pvals, ptID, G)
+    print(res[which.max(res[,"d.score"]),])
+    print(S[names(which(ptBSbyK[[which.max(res[,"d.score"])]]==1))])
+    print(2^-res[which.max(res[,"d.score"]),"d.score"])
+    print(2^-(res[which.max(res[,"d.score"]),"d.score"]-log2(nrow(res))))
+    # This generates the module "blown out", which I then put into illustrator to make it look nice.
+    mets = unique(c(names(S), names(ptBSbyK[[which.max(res[,"d.score"])]])))
+    e = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% mets)])
+    reds = intersect(V(e)$name[which(V(e)$name %in% names(S))], names(S[which(S>0)]))
+    blues = intersect(V(e)$name[which(V(e)$name %in% names(S))], names(S[which(S<0)]))
+    V(e)$color[which(V(e)$name %in% reds)] = "red"
+    V(e)$color[which(V(e)$name %in% blues)] = "blue"
+    V(e)$color[-which(V(e)$name %in% names(S))] = "grey"
+    cc = cluster_walktrap(e)
+    communities(cc)
+    weights <- ifelse(crossing(cc, e), 1, 5)
+    layout <- layout_with_fr(e, weights=weights)
+    png(sprintf("Methods_paper/loocv/blowouts/sn_%s_%s_module.png", model, ptID))
+    plot.igraph(e, layout=layout, edge.width=50*abs(E(e)$weight))
+    dev.off()
+    svg(sprintf("Methods_paper/loocv/blowouts/sn_%s_%s_module.svg", model, ptID))
+    plot.igraph(e, layout=layout, edge.width=50*abs(E(e)$weight))
+    dev.off()
+  }
+}
+
 ```
 
 ## CTD vs. Partial Least Squares Regression
 Precision is more focused in the positive class than in the negative class, it actually measures the probability of correct detection of positive values, while FPR and TPR (ROC metrics) measure the ability to distinguish between the classes.
 ``` {r pls_feature_select_compare}
-setwd("/Users/lillian.rosa/OneDrive/MacFiles/9thCommitteeMeeting/Clinical_paper/")
+rm(list=ls())
+setwd("/Users/lillian.rosa/OneDrive/MacFiles/9thCommitteeMeeting/Methods_paper/")
+require(R.utils)
 require(CTD)
 data(Miller2015)
 data_mx = as.matrix(Miller2015[,grep("IEM_", colnames(Miller2015))])
@@ -714,7 +787,7 @@ infomap_module_select = list()
 gmo_module_select = list()
 walktrap_module_select = list()
 zscore_module_select = list()
-for (model in c("cit", "msud", "mma", "pa", "pku", "gamt", "otc")) {
+for (model in c("cit", "msud", "mma", "pa", "pku")) { # "gamt", "otc"
   df_mn = apply(data_mx[,which(colnames(data_mx) %in% cohorts[[model]])], 1, function(i) mean(na.omit(i)))
   zscore_module_select[[model]] = names(df_mn[which(abs(df_mn)>2)])
   
@@ -739,7 +812,7 @@ for (model in c("cit", "msud", "mma", "pa", "pku", "gamt", "otc")) {
     df_ctd[fold, "m"] = res[which.max(res[,"d.score"]), "d.score"]-log2(nrow(res))
     mdst = c(mdst, names(which(ptBSbyK[[which.max(res[,"d.score"])]]==1)))
   }
-  ctd_module_select[[model]] = names(table(mdst)[table(mdst)>(length(cohorts[[model]])/3)])
+  ctd_module_select[[model]] = names(table(mdst)[table(mdst)>(length(cohorts[[model]])/2)])
   
   diag_data = as.matrix(Miller2015[,grep("IEM_", colnames(Miller2015))])
   diag_data = diag_data[,which(colnames(diag_data) %in% c(cohorts[[model]], diagnoses$id[which(diagnoses$diagnosis=="No biochemical genetic diagnosis")]))]
@@ -769,23 +842,19 @@ for (model in c("cit", "msud", "mma", "pa", "pku", "gamt", "otc")) {
 
 
 # CTD Global discrimination: CTD disease specific models call "yes" or "no" based on significance of patient's top metabolite perturbations.
-setwd("/Users/lillian.rosa/OneDrive/MacFiles/9thCommitteeMeeting/Clinical_paper/")
+setwd("/Users/lillian.rosa/OneDrive/MacFiles/9thCommitteeMeeting/Methods_paper/")
 require(CTD)
 require(pls)
 require(pROC)
 require(caret) # for varImp function
 kmx=15
 data(Miller2015)
-#data_mx = as.matrix(Miller2015[,which(colnames(Miller2015) %in% diagnoses$id[which(diagnoses$diagnosis %in% c("Citrullinemia", "Guanidinoacetate methyltransferase", "Maple syrup urine disease", "Methylmalonic aciduria", "Propionic aciduria", "Phenylketonuria", "No biochemical genetic diagnosis"))])])
 data_mx = as.matrix(Miller2015[,grep("IEM_", colnames(Miller2015))])
 fill.rate = 1-(Miller2015$`Times identifed in all 200 samples`/200)
 data_mx = data_mx[which(fill.rate<0.20), ]
 data_mx = data_mx[-grep("x - ", rownames(data_mx)),]
-ref_data = data_mx[,which(colnames(data_mx) %in% diagnoses$id[which(diagnoses$diagnosis=="No biochemical genetic diagnosis")])]
-
-df_vis = list()
 for (model in c("cit", "msud", "mma", "pa", "pku")) {
-  # Get CTD LOOCV signal
+  # Get CTD LOOCV signal 
   df_all = data.frame(fold=numeric(), pt=numeric(), bits=numeric(), diag=character(), stringsAsFactors = FALSE)
   for (fold in 1:length(cohorts[[model]])) {
     load(sprintf("loocv/loocv_ind_runCTD/model_%s_ind_fold%d_kmx%d.RData", model, fold, kmx))
@@ -807,9 +876,7 @@ for (model in c("cit", "msud", "mma", "pa", "pku")) {
     df_all = rbind(df_all, df_best)
   }
   df_all = df_all[which(df_all$ptID %in% colnames(Miller2015)),]
-  #df_all = df_all[which(df_all$diag %in% c("cit", "mma", "pa", "pku", "msud", "reference")),]
   df_all$bits = -log2(p.adjust(2^-(df_all$bits), method="fdr"))
-  # Visualize LOOCV signal and compare to off-target diseased test patients
   df_all$loocv = rep(0, nrow(df_all))
   df_all$loocv[which(df_all$pt==df_all$fold)] = 1
   df_all = df_all[-intersect(which(df_all$loocv==0), which(df_all$diag==model)), ]
@@ -818,110 +885,45 @@ for (model in c("cit", "msud", "mma", "pa", "pku")) {
   df_all = df_all[order(df_all$ptID),]
   b_bits = b_bits[order(b_bits[,1]),]
   df_all$bits = as.numeric(b_bits[,2])
-  
-  # PLS model w/ top z-score based feature selection
-  df_mn = apply(data_mx[,which(colnames(data_mx) %in% cohorts[[model]])], 1, function(i) mean(na.omit(i)))
-  df_mn = df_mn[which(abs(df_mn)>2)]
-  df2 = as.data.frame(data_mx[which(rownames(data_mx) %in% names(df_mn)), which(colnames(data_mx) %in% df_all$ptID)])
+
+  data_mx = as.matrix(Miller2015[,grep("IEM_", colnames(Miller2015))])
+  fill.rate = 1-(Miller2015$`Times identifed in all 200 samples`/200)
+  data_mx = data_mx[which(fill.rate<0.20), ]
+  data_mx = data_mx[-grep("x - ", rownames(data_mx)),]
+  data_mx = data_mx[,which(colnames(data_mx) %in% df_all$ptID)]
+  data_mx = rbind(df_all$bits, data_mx)
+  rownames(data_mx)[1] = "CTD.covariate"
+  data_mx = t(apply(data_mx, 1, scale))
+  colnames(data_mx) = df_all$ptID
   # Get diagnostic labels
-  diags = colnames(df2)
+  diags = colnames(data_mx)
   diags[-which(diags %in% cohorts[[model]])] = 0
   diags[which(diags %in% cohorts[[model]])] = 1
-  df2 = rbind(df_all$bits, df2)
-  rownames(df2)[1] = "metabolomics_evidence"
-  df2 = rbind(diags, df2)
-  rownames(df2)[1] = "diag"
-  df2 = apply(df2, c(1,2), as.numeric)
-
+  data_mx = rbind(as.numeric(diags), data_mx)
+  rownames(data_mx)[1] = "diag"
+  data_mx = apply(data_mx, c(1,2), as.numeric)
+  
+  # PLS model w/ top z-score based feature selection
+  df2 = data_mx[which(rownames(data_mx) %in% c("CTD.covariate", "diag", zscore_module_select[[model]])),]
   # PLS model w/ CTD feature selection
-  df2_ctd = data_mx[which(rownames(data_mx) %in% ctd_module_select[[model]]), which(colnames(data_mx) %in% df_all$ptID)]
-  df2_ctd = rbind(df_all$bits, df2_ctd)
-  rownames(df2_ctd)[1] = "metabolomics_evidence"
-  df2_ctd = rbind(diags, df2_ctd)
-  rownames(df2_ctd)[1] = "diag"
-  df2_ctd = apply(df2_ctd, c(1,2), as.numeric)
-  
+  df2_ctd = data_mx[which(rownames(data_mx) %in% c("CTD.covariate", "diag", ctd_module_select[[model]])),]
   # PLS model w/ Infomap feature selection
-  df2_infomap = data_mx[which(rownames(data_mx) %in% infomap_module_select[[model]]), which(colnames(data_mx) %in% df_all$ptID)]
-  df2_infomap = rbind(df_all$bits, df2_infomap)
-  rownames(df2_infomap)[1] = "metabolomics_evidence"
-  df2_infomap = rbind(diags, df2_infomap)
-  rownames(df2_infomap)[1] = "diag"
-  df2_infomap = apply(df2_infomap, c(1,2), as.numeric)
-  
+  df2_infomap = data_mx[which(rownames(data_mx) %in% c("CTD.covariate", "diag", infomap_module_select[[model]])),]
   # PLS model w/ GMO feature selection
-  df2_gmo = data_mx[which(rownames(data_mx) %in% gmo_module_select[[model]]), which(colnames(data_mx) %in% df_all$ptID)]
-  df2_gmo = rbind(df_all$bits, df2_gmo)
-  rownames(df2_gmo)[1] = "metabolomics_evidence"
-  df2_gmo = rbind(diags, df2_gmo)
-  rownames(df2_gmo)[1] = "diag"
-  df2_gmo = apply(df2_gmo, c(1,2), as.numeric)
-  
+  df2_gmo = data_mx[which(rownames(data_mx) %in% c("CTD.covariate", "diag", gmo_module_select[[model]])),]
   # PLS model w/ Walktrap feature selection
-  df2_walktrap = data_mx[which(rownames(data_mx) %in% walktrap_module_select[[model]]), which(colnames(data_mx) %in% df_all$ptID)]
-  df2_walktrap = rbind(df_all$bits, df2_walktrap)
-  rownames(df2_walktrap)[1] = "metabolomics_evidence"
-  df2_walktrap = rbind(diags, df2_walktrap)
-  rownames(df2_walktrap)[1] = "diag"
-  df2_walktrap = apply(df2_walktrap, c(1,2), as.numeric)
+  df2_walktrap = data_mx[which(rownames(data_mx) %in% c("CTD.covariate", "diag", walktrap_module_select[[model]])),]
   
-  dff_model = data.frame(pls_var=numeric(), pls_ctd=numeric(), pls_infomap=numeric(), 
-                         pls_gmo=numeric(), pls_walktrap=numeric(),
-                         pls_var_ctd=numeric(), pls_ctd_ctd=numeric(), pls_infomap_ctd=numeric(), 
+  dff_model = data.frame(pls_var_ctd=numeric(), pls_ctd_ctd=numeric(), pls_infomap_ctd=numeric(), 
                          pls_gmo_ctd=numeric(), pls_walktrap_ctd=numeric(), stringsAsFactors = FALSE)
-  varImp_z = list()
-  varImp_z_ctd = list()
-  varImp_ctd = list()
-  varImp_ctd_ctd = list()
-  varImp_im = list()
-  varImp_im_ctd = list()
-  varImp_gmo = list()
-  varImp_gmo_ctd = list()
-  varImp_wt = list()
-  varImp_wt_ctd = list()
+  varImp_z_ctd = vector("list", length=ncol(df2))
+  varImp_ctd_ctd = vector("list", length=ncol(df2))
+  varImp_im_ctd = vector("list", length=ncol(df2))
+  varImp_gmo_ctd = vector("list", length=ncol(df2))
+  varImp_wt_ctd = vector("list", length=ncol(df2))
   for (it in 1:ncol(df2)) {
     print(it)
     isTrain = c(1:ncol(df2))[-it]
-    # Top Zscore-based feature selection: Train model
-    df2_2 = df2[-which(rownames(df2)=="metabolomics_evidence"), ]
-    model_res = plsr(diag~., data = as.data.frame(t(df2_2[,isTrain])))
-    tst_data = df2_2[-1,-isTrain]
-    model_tst =  predict(model_res, ncomp=model_res$ncomp, newdata=as.data.frame(t(tst_data)))
-    varImp_z[[it]] = varImp(model_res)
-    dff_model[it, "pls_var"] = model_tst
-  
-    # CTD feature selection: Train model
-    df2_ctd_2 = df2_ctd[-which(rownames(df2_ctd)=="metabolomics_evidence"), ]
-    ctd_res = plsr(diag~., data = as.data.frame(t(df2_ctd_2[,isTrain])))
-    varImp_ctd[[it]] = varImp(ctd_res)
-    tst_data = df2_ctd_2[-1,-isTrain]
-    ctd_tst = predict(ctd_res, ncomp=ctd_res$ncomp, newdata=as.data.frame(t(tst_data)))
-    dff_model[it, "pls_ctd"] = ctd_tst
-    
-    # InfoMap feature selection: Train model
-    df2_infomap_2 = df2_infomap[-which(rownames(df2_infomap)=="metabolomics_evidence"), ]
-    infomap_res = plsr(diag~., data = as.data.frame(t(df2_infomap_2[,isTrain])))
-    varImp_im[[it]] = varImp(infomap_res)
-    tst_data = df2_infomap_2[-1,-isTrain]
-    infomap_tst = predict(infomap_res, ncomp=infomap_res$ncomp, newdata=as.data.frame(t(tst_data)))
-    dff_model[it, "pls_infomap"] = infomap_tst
-    
-    # GMO feature selection: Train model
-    df2_gmo_2 = df2_gmo[-which(rownames(df2_gmo)=="metabolomics_evidence"), ]
-    gmo_res = plsr(diag~., data = as.data.frame(t(df2_gmo_2[,isTrain])))
-    varImp_gmo[[it]] = varImp(gmo_res)
-    tst_data = df2_gmo_2[-1,-isTrain]
-    gmo_tst = predict(gmo_res, ncomp=gmo_res$ncomp, newdata=as.data.frame(t(tst_data)))
-    dff_model[it, "pls_gmo"] = gmo_tst
-    
-    # WalkTrap feature selection: Train model
-    df2_walktrap_2 = df2_walktrap[-which(rownames(df2_walktrap)=="metabolomics_evidence"), ]
-    walktrap_res = plsr(diag~., data = as.data.frame(t(df2_walktrap_2[,isTrain])))
-    varImp_wt[[it]] = varImp(walktrap_res)
-    tst_data = df2_walktrap_2[-1,-isTrain]
-    walktrap_tst = predict(walktrap_res, ncomp=walktrap_res$ncomp, newdata=as.data.frame(t(tst_data)))
-    dff_model[it, "pls_walktrap"] = walktrap_tst
-    
     # Top Zscore-based feature selection, plus CTD as covariate
     model_res = plsr(diag~., data = as.data.frame(t(df2[,isTrain])))
     varImp_z_ctd[[it]] = varImp(model_res)
@@ -958,128 +960,78 @@ for (model in c("cit", "msud", "mma", "pa", "pku")) {
     dff_model[it, "pls_walktrap_ctd"] = walktrap_tst
   }
   
-  df_varImp = data.frame(varimp=c(apply(as.data.frame(varImp_z), 1, mean),
-                                   apply(as.data.frame(varImp_ctd), 1, mean),
-                                   apply(as.data.frame(varImp_im), 1, mean),
-                                   apply(as.data.frame(varImp_gmo), 1, mean),
-                                   apply(as.data.frame(varImp_wt), 1, mean)),
-                          metabolite=c(zscore_module_select[[model]], ctd_module_select[[model]], 
-                                       infomap_module_select[[model]], gmo_module_select[[model]],
-                                       walktrap_module_select[[model]]),
-                          model=c(rep("Zscore", length(zscore_module_select[[model]])),
-                                  rep("CTD", length(ctd_module_select[[model]])),
-                                  rep("FSFCN-InfoMap", length(infomap_module_select[[model]])),
-                                  rep("FSFCN-GMO", length(gmo_module_select[[model]])),
-                                  rep("FSFCN-WalkTrap", length(walktrap_module_select[[model]]))))
-  
+  mets2 = c()
+  tmp = as.data.frame(varImp_z_ctd)
+  mets2 = c(mets2, gsub("\\`", "", rownames(tmp)))
+  tmp = as.data.frame(varImp_ctd_ctd)
+  mets2 = c(mets2, gsub("\\`", "", rownames(tmp)))
+  tmp = as.data.frame(varImp_im_ctd)
+  mets2 = c(mets2, gsub("\\`", "", rownames(tmp)))
+  tmp = as.data.frame(varImp_gmo_ctd)
+  mets2 = c(mets2, gsub("\\`", "", rownames(tmp)))
+  tmp = as.data.frame(varImp_wt_ctd)
+  mets2 = c(mets2, gsub("\\`", "", rownames(tmp)))
   
   df_varImp2 = data.frame(varimp=c(apply(as.data.frame(varImp_z_ctd), 1, mean),
                                    apply(as.data.frame(varImp_ctd_ctd), 1, mean),
                                    apply(as.data.frame(varImp_im_ctd), 1, mean),
                                    apply(as.data.frame(varImp_gmo_ctd), 1, mean),
                                    apply(as.data.frame(varImp_wt_ctd), 1, mean)),
-                          metabolite=c("CTD.cov", zscore_module_select[[model]], "CTD.cov", ctd_module_select[[model]], 
-                                       "CTD.cov", infomap_module_select[[model]], "CTD.cov", gmo_module_select[[model]],
-                                       "CTD.cov", walktrap_module_select[[model]]),
+                          metabolite=mets2,
                           model=c(rep("Zscore", 1+length(zscore_module_select[[model]])),
                                   rep("CTD", 1+length(ctd_module_select[[model]])),
                                   rep("FSFCN-InfoMap", 1+length(infomap_module_select[[model]])),
                                   rep("FSFCN-GMO", 1+length(gmo_module_select[[model]])),
-                                  rep("FSFCN-WalkTrap", 1+length(walktrap_module_select[[model]]))))
+                                  rep("FSFCN-WalkTrap", 1+length(walktrap_module_select[[model]]))), stringsAsFactors = FALSE)
   
-  ggplot(df_varImp, aes(x=metabolite, y=varimp, group=model, colour=model)) + geom_line() 
+  for (mm in c("CTD", "FSFCN-GMO", "FSFCN-InfoMap", "FSFCN-WalkTrap", "Zscore")) {
+    dff = df_varImp2[which(df_varImp2$model==mm),]
+    rownames(dff) = dff$metabolite
+    percentile = 1 - length(which(dff[,"varimp"]>=dff["CTD.covariate", "varimp"]))/length(df_varImp2[which(df_varImp2$model=="Zscore"),"varimp"])
+    mets_who_beat = dff[which(dff[,"varimp"]>dff["CTD.covariate", "varimp"]),]
+    print(sprintf("Model %s placed CTD.covariate in %f-th percentile, rank was %d/%d. Mets who beat were %s", mm, percentile, nrow(mets_who_beat)+1, length(dff$metabolite), paste(mets_who_beat[,"metabolite"][-1], collapse=", ")))
+  }
+  png(sprintf("../Methods_paper/pls/pls-%s-varimp2.png", model), width=2500, height=2000, res=300)
+  ggplot(df_varImp2, aes(x=metabolite, y=varimp, group=model, colour=model)) + geom_line() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    ggtitle(sprintf("Variable Importance for %s", toupper(model)))
+  dev.off()
   
   print(sprintf("For %s model...", toupper(model)))
-  
-  
   # Calculate AUC using pROC, since you cannot calculate directly with TP, TN, FP, FN
-  plsvar_auc = roc(diags, dff_model[,"pls_var"])
-  plsctd_auc = roc(diags, dff_model[,"pls_ctd"])
-  plsinfomap_auc = roc(diags, dff_model[,"pls_infomap"])
-  plsgmo_auc = roc(diags, dff_model[,"pls_gmo"])
-  plswalktrap_auc = roc(diags, dff_model[,"pls_walktrap"])
   plsvar_ctd_auc = roc(diags, dff_model[,"pls_var_ctd"])
   plsctd_ctd_auc = roc(diags, dff_model[,"pls_ctd_ctd"])
   plsinfomap_ctd_auc = roc(diags, dff_model[,"pls_infomap_ctd"])
   plsgmo_ctd_auc = roc(diags, dff_model[,"pls_gmo_ctd"])
   plswalktrap_ctd_auc = roc(diags, dff_model[,"pls_walktrap_ctd"])
   ctd_auc = roc(diags, df_all$bits)
-
-  print(sprintf("PLS.var     AUC = %.3f", plsvar_auc$auc))
-  print(sprintf("PLS.ctd     AUC = %.3f", plsctd_auc$auc))
-  print(sprintf("PLS.infomap     AUC = %.3f", plsinfomap_auc$auc))
-  print(sprintf("PLS.gmo     AUC = %.3f", plsgmo_auc$auc))
-  print(sprintf("PLS.walktrap     AUC = %.3f", plswalktrap_auc$auc))
-
+  print(sprintf("CTD AUC = %.3f", ctd_auc$auc))
   print(sprintf("PLS.var+CTD AUC = %.3f", plsvar_ctd_auc$auc))
   print(sprintf("PLS.ctd+CTD AUC = %.3f", plsctd_ctd_auc$auc))
   print(sprintf("PLS.infomap+CTD AUC = %.3f", plsinfomap_ctd_auc$auc))
   print(sprintf("PLS.gmo+CTD AUC = %.3f", plsgmo_ctd_auc$auc))
   print(sprintf("PLS.walktrap+CTD AUC = %.3f", plswalktrap_ctd_auc$auc))
-  print(sprintf("CTD AUC = %.3f", ctd_auc$auc))
   
-  plsvar_auc2 = coords(plsvar_auc, "best", ret=c("threshold", "specificity", "accuracy", "precision", "recall"))
-  plsctd_auc2 = coords(plsctd_auc, "best", ret=c("threshold", "specificity", "accuracy", "precision", "recall"))
-  plsinfomap_auc2 = coords(plsinfomap_auc, "best", ret=c("threshold", "specificity", "accuracy", "precision", "recall"))
-  plsgmo_auc2 = coords(plsgmo_auc, "best", ret=c("threshold", "specificity", "accuracy", "precision", "recall"))
-  plswalktrap_auc2 = coords(plswalktrap_auc, "best", ret=c("threshold", "specificity", "accuracy", "precision", "recall"))
   plsvar_ctd_auc2 = coords(plsvar_ctd_auc, "best", ret=c("threshold", "specificity", "accuracy", "precision", "recall"))
   plsctd_ctd_auc2 = coords(plsctd_ctd_auc, "best", ret=c("threshold", "specificity", "accuracy", "precision", "recall"))
   plsinfomap_ctd_auc2 = coords(plsinfomap_ctd_auc, "best", ret=c("threshold", "specificity", "accuracy", "precision", "recall"))
   plsgmo_ctd_auc2 = coords(plsgmo_ctd_auc, "best", ret=c("threshold", "specificity", "accuracy", "precision", "recall"))
   plswalktrap_ctd_auc2 = coords(plswalktrap_ctd_auc, "best", ret=c("threshold", "specificity", "accuracy", "precision", "recall"))
   ctd_auc2 = coords(ctd_auc, "best", ret=c("threshold", "specificity", "accuracy", "precision", "recall"))
-
-  print(plsvar_auc2)
-  print(plsctd_auc2)
-  print(plsinfomap_auc2)
-  print(plsgmo_auc2)
-  print(plswalktrap_auc2)
   print(plsvar_ctd_auc2)
   print(plsctd_ctd_auc2)
   print(plsinfomap_ctd_auc2)
   print(plsgmo_ctd_auc2)
   print(plswalktrap_ctd_auc2)
   print(ctd_auc2)
-  
-  # Visualize ROCs
-  df_vis[[model]] = data.frame(specificity=c(1-plsvar_auc$specificities, 1-plsctd_auc$specificities, 
-                                             1-plsinfomap_auc$specificities, 1-plsgmo_auc$specificities, 
-                                             1-plswalktrap_auc$specificities, 
-                                             1-plsvar_ctd_auc$specificities, 1-plsctd_ctd_auc$specificities, 
-                                             1-plsinfomap_ctd_auc$specificities, 1-plsgmo_ctd_auc$specificities,
-                                             1-plswalktrap_ctd_auc$specificities, 1-ctd_auc$specificities),
-                      sensitivity=c(plsvar_auc$sensitivities, plsctd_auc$sensitivities, 
-                                             plsinfomap_auc$sensitivities, plsgmo_auc$sensitivities, 
-                                             plswalktrap_auc$sensitivities, 
-                                             plsvar_ctd_auc$sensitivities, plsctd_ctd_auc$sensitivities, 
-                                             plsinfomap_ctd_auc$sensitivities, plsgmo_ctd_auc$sensitivities,
-                                             plswalktrap_ctd_auc$sensitivities, ctd_auc$sensitivities),
-                      method=c(rep("PLSvar", length(plsvar_auc$specificities)), 
-                               rep("PLSctd", length(plsctd_auc$specificities)),
-                               rep("PLSinfomap", length(plsctd_auc$specificities)),
-                               rep("PLSgmo", length(plsctd_auc$specificities)),
-                               rep("PLSwalktrap", length(plsctd_auc$specificities)),
-                               rep("PLSvar-CTD", length(plsvar_ctd_auc$specificities)),
-                               rep("PLSctd-CTD", length(plsvar_ctd_auc$specificities)),
-                               rep("PLSinfomap-CTD", length(plsvar_ctd_auc$specificities)),
-                               rep("PLSgmo-CTD", length(plsvar_ctd_auc$specificities)),
-                               rep("PLSwalktrap-CTD", length(plsvar_ctd_auc$specificities)),
-                               rep("CTD", length(ctd_auc$specificities))))
 }
 
-cit_mets = c("1-stearoyl-gpi (18:0)", "2-hydroxybutyrate (ahb)", "2-stearoylglycerophosphoinositol", "3-methyl-2-oxovalerate", "3-ureidopropionate", "4-methyl-2-oxopentanoate", "betaine", "citrulline", "deoxycarnitine", "gamma-glutamylleucine", "leucine", "n-acetylalanine", "phenylacetylglutamine", "stearate, methyl ester", "stearidonate (18:4n3)", "tartarate", "tryptophan", "uridine")
-gamt_mets = c("3-(4-hydroxyphenyl)lactate (hpla)", "creatine", "erythritol", "linolenate (18:3n3 or 3n6)", "gamma-glutamylleucine", "glycocholenate sulfate", "n-acetyl-beta-alanine", "tartarate")
-msud_mets = c("1-linolenoylglycerophosphocholine (18:3n3)", "2-aminoheptanoate", "2-methylbutyroylcarnitine (c5)", "2-myristoyl-gpc (14:0)", "3-hydroxydecanoate", "3-hydroxyisobutyrate", "3-methyl-2-oxovalerate", "4-androsten-3beta,17beta-diol disulfate 1", "4-methyl-2-oxopentanoate", "allo-isoleucine", "alpha-hydroxyisovalerate", "homostachydrine", "hydroxyisovaleroylcarnitine (c5)", "isoleucine", "isovalerate (c5)", "isovalerylcarnitine (c5)", "pyroglutamine", "tartarate", "tiglyl carnitine (c5)")
-mma_mets = c("1-margaroylglycerophosphoethanolamine", "2-hydroxypalmitate", "2-methylbutyroylcarnitine (c5)", "2-methylmalonyl carnitine", "3-hydroxypropanoate", "carnitine", "deoxycarnitine", "gamma-glutamyl-2-aminobutyrate", "glycine", "homostachydrine", "hydroxyisovaleroylcarnitine (c5)", "imidazole lactate", "leucine", "margarate (17:0)", "n-acetylthreonine", "pentadecanoate (15:0)", "propionylcarnitine (c3)", "succinylcarnitine (c4)", "tiglyl carnitine (c5)", "uridine", "valerylcarnitine (c5)")
-pa_mets = c("1-margaroylglycerophosphoethanolamine", "1-pentadecanoylglycerophosphocholine (15:0)", "2-methylmalonyl carnitine", "3-hydroxypropanoate", "3-methylglutaroylcarnitine (c6)", "3-methyl-2-oxobutyrate", "5-dodecenoate (12:1n7)", "allo-isoleucine", "beta-hydroxyisovalerate", "carnitine", "cysteine", "deoxycarnitine", "ergothioneine", "fumarate", "gamma-glutamylisoleucine", "gamma-glutamylvaline", "glutaroylcarnitine (c5)", "glycine", "hydroxyisovaleroylcarnitine (c5)", "pentadecanoate (15:0)", "phenylcarnitine", "propionylcarnitine (c3)", "succinylcarnitine (c4)", "tiglyl carnitine (c5)", "uridine", "valerylcarnitine (c5)", "valine")
-pku_mets = c("1-eicosatrienoylglycerophosphoethanolamine", "3-hydroxyisobutyrate", "7-hoca", "bilirubin", "biliverdin", "gamma-glutamylphenylalanine", "glycolate (hydroxyacetate)", "n-acetylaspartate (naa)", "n-acetylphenylalanine", "nicotinamide", "phenylalanine", "phenylalanylisoleucine", "phenyllactate (pla)", "tryptophylphenylalanine")
-otc_mets = c("3-methyl-2-oxobutyrate", "3-methyl-2-oxovalerate", "4-methyl-2-oxopentanoate", "phenylacetylglutamine", "stearidonate (18:4n3)", "uridine", "glutamine", "isovalerate (c5)", "1-stearoyl-gpc (18:0)", "tryptophan")
-gamt_mets = c("gamma-glutamylleucine", "glycocholenate sulfate", "linolenate (18:3n3 or 3n6)", "n-acetyl-beta-alanine", "creatine", "tartarate", "3-(4-hydroxyphenyl)lactate (hpla)", "erythritol", "gamma-glutamylisoleucine", "gamma-glutamylleucine", "gamma-glutamyllysine", "gamma-glutamylphenylalanine", "gamma-glutamylthreonine", "gamma-glutamylvaline")
 
-pku_mets[!(pku_mets %in% rownames(data_mx))]
-sapply(pku_mets[!(pku_mets %in% rownames(data_mx))], function(i) rownames(data_mx)[grep(i, rownames(data_mx))])
-
+# Get single variable AUC's and effect sizes
+cit_mets = unique(c(ctd_module_select$cit, zscore_module_select$cit, infomap_module_select$cit, gmo_module_select$cit, walktrap_module_select$cit))
+msud_mets = unique(c(ctd_module_select$msud, zscore_module_select$msud, infomap_module_select$msud, gmo_module_select$msud, walktrap_module_select$msud))
+mma_mets = unique(c(ctd_module_select$mma, zscore_module_select$mma, infomap_module_select$mma, gmo_module_select$mma, walktrap_module_select$mma))
+pa_mets = unique(c(ctd_module_select$pa, zscore_module_select$pa, infomap_module_select$pa, gmo_module_select$pa, walktrap_module_select$pa))
+pku_mets = unique(c(ctd_module_select$pku, zscore_module_select$pku, infomap_module_select$pku, gmo_module_select$pku, walktrap_module_select$pku))
 
 require(effsize)
 data(Miller2015)
@@ -1099,9 +1051,10 @@ diags[which(diags %in% diagnoses$id[which(diagnoses$diagnosis=="Ornithine transc
 diags[which(diags %in% diagnoses$id[which(diagnoses$diagnosis %in% c("3-methylcrotonyl CoA carboxylase", "3-OH-3methylglutaryl (HMG) CoA lyase", "Argininemia", "Argininosuccinic acid lyase", "Cobalamin biosynthesis", "Glutaric Aciduria", "Holocarboxylase", "Homocystinuria", "Isovaleric aciduria", "Lysinuric protein intolerance", "Medium chain acyl-CoA dehydrogenase", "Thymidine Phosphorylase", "Trimethyllysine hydroxylase epsilon", "Very-long chain acyl-CoA dehydrogenase", "No biochemical genetic diagnosis"))])] = "other"
 cohens_d = list()
 discrimination = list()
+mn_zscore = list()
 for (model in c("cit", "msud", "mma", "pa", "pku")) {
-  i = which(c("cit", "gamt", "msud", "mma", "pa", "pku")==model)
-  select_mets = list(cit_mets, gamt_mets, msud_mets, mma_mets, pa_mets, pku_mets)[[i]]
+  i = which(c("cit", "msud", "mma", "pa", "pku")==model)
+  select_mets = list(cit_mets, msud_mets, mma_mets, pa_mets, pku_mets)[[i]]
   print(length(select_mets))
   cd = vector("numeric", length(select_mets))
   dis = vector("numeric", length(select_mets))
@@ -1120,15 +1073,11 @@ for (model in c("cit", "msud", "mma", "pa", "pku")) {
   }
   names(cd) = select_mets
   names(dis) = select_mets
+  df_mn = apply(data_mx[,which(colnames(data_mx) %in% cohorts[[model]])], 1, function(i) mean(na.omit(i)))
+  df_mn = df_mn[order(names(df_mn))]
   cohens_d[[model]] = cd
   discrimination[[model]] = dis
+  mn_zscore[[model]] = df_mn[sort(select_mets)]
 }
-
-dd = data.frame(zscore=as.numeric(Miller2015["3-(4-hydroxyphenyl)lactate (hpla)", grep("IEM_", colnames(Miller2015))]),
-                diags = diags, stringsAsFactors = FALSE)
-ggplot(dd) + geom_boxplot(aes(x=diags, y=zscore))
-
-
-  
 
 ```
