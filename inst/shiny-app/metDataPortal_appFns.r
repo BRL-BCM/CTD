@@ -1,17 +1,3 @@
-#load("sysdata.RData")
-
-graphs = list()
-# AADC
-graphs$aadc = new.env()
-load(system.file("networks/bg_aadc_maps_naive.RData", package="CTD"), envir = graphs$aadc)
-# ABAT
-graphs$abat = new.env()
-load(system.file("networks/bg_abat_maps_naive.RData", package="CTD"), envir = graphs$abat)
-# ADSL
-graphs$adsl = new.env()
-load(system.file("networks/bg_adsl_maps_naive.RData", package="CTD"), envir = graphs$adsl)
-
-
 
 comparePatientModPerts = function(input) {
   ig = graphs[[input$diagnosis]][["ig"]]
@@ -71,7 +57,7 @@ getMDS = function(input) {
 }
 
 extractModPerts = function(input) {
-  .GlobalEnv$data = data(Thistlethwaite2019)
+  .GlobalEnv$data = data(Miller2015)
   .GlobalEnv$ig = graphs[[input$diagnosis]][["ig_pruned"]]
   #.GlobalEnv$permutationByStartNode = graphs[[input$diagnosis]][["permutationByStartNode"]]
   #.GlobalEnv$diagnoses = graphs[[input$diagnosis]][["diagnoses"]]
@@ -153,9 +139,8 @@ getData = function(input) {
 
 getMetList = function(input) {
   # First, get rid of metabolites that have below fil rate
-  ref = data.matrix(.GlobalEnv$all_norm_data)
-  r.ids = unlist(sapply(ref.ids, function(i) sprintf("X%s", i)))
-  ref = ref[,which(colnames(ref) %in% r.ids)]
+  data = Miller2015[,grep("IEM_", colnames(Miller2015))]
+  ref = data[,which(diagnoses$diagnosis=="No biochemical genetic diagnosis")]
   ref.fil = apply(ref, 1, function(i) 1-(sum(is.na(i))/length(i)))
   ref = ref[which(ref.fil>0.66),]
   metClass = .GlobalEnv$metClass[which(ref.fil>0.66)]
@@ -186,8 +171,8 @@ neg = function(x) { return(-x) }
 # Get reference population statistics & plots
 getRefPop = function(input, norm.data) {
   print("getRefPop() called.")
-  r.ids = unlist(sapply(ref.ids, function(i) sprintf("X%s", i)))
-  ref = norm.data[, which(colnames(norm.data) %in% r.ids)]
+  data = Miller2015[,grep("IEM_", colnames(Miller2015))]
+  ref = data[,which(diagnoses$diagnosis=="No biochemical genetic diagnosis")]
   ref.fil = apply(ref, 1, function(i) 1-(sum(is.na(i))/length(i)))
   ref = ref[which(ref.fil>0.66),]
   print(dim(ref))
@@ -234,46 +219,23 @@ getRefPop = function(input, norm.data) {
   return (list(hst=hst, outliers=outlierSamples, qq=qq, ests=list(mean=mn.est, std=sd.est), rare=rare, per=per))
 }
 
-getPatientReport = function(input, raw.data, norm.data, zscore.data) {
-  raw.data = data.matrix(raw.data)
-  norm.data = data.matrix(norm.data)
-  zscore.data = data.matrix(zscore.data)
-
-  r.ids = unlist(sapply(ref.ids, function(i) sprintf("X%s", i)))
-  ref = norm.data[,which(colnames(norm.data) %in% r.ids)]
+getPatientReport = function(input) {
+  # Must display RAW, Anchor and Z-score values for all patients in input$ptIDs. 
+  # If in Miller2015 data, there are no raw and anchor values.
+  zscore.data = Miller2015[,grep("IEM_", colnames(Miller2015))]
+  ref = data[,which(diagnoses$diagnosis=="No biochemical genetic diagnosis")]
   ref.fil = apply(ref, 1, function(i) 1-(sum(is.na(i))/length(i)))
 
   # MetaboliteName  RawIonIntensity Anchor(CMTRX.5 median value)  Zscore
-  tmp = rownames(raw.data)
-  tmp.zscore = rownames(zscore.data)
-  ind = which(rownames(zscore.data) %in% rownames(norm.data))
-  if (length(input$ptIDs)>1) {
-    if (length(which(colnames(raw.data) %in% input$ptIDs))>1) {
-      raw.data = apply(raw.data[,which(colnames(raw.data) %in% input$ptIDs)], 1, function(i) mean(na.omit(i)))
-      norm.data = apply(norm.data[,which(colnames(norm.data) %in% input$ptIDs)], 1, function(i) mean(na.omit(i)))
-    } else {
-      raw.data = rep(NA, nrow(raw.data))
-      norm.data = rep(NA, nrow(norm.data))
-    }
-    zscore.data = apply(zscore.data[ind, which(colnames(zscore.data) %in% input$ptIDs)], 1, function(i) mean(na.omit(i)))
-  } else {
-    raw.data = rep(NA, nrow(raw.data))
-    norm.data = rep(NA, nrow(norm.data))
-    zscore.data = zscore.data[ind, which(colnames(zscore.data)==input$ptIDs)]
-  }
-  names(raw.data) = tmp
-  names(norm.data) = tmp
-  names(zscore.data) = tmp.zscore[ind]
-
   data = data.frame(Metabolite=character(), Raw=numeric(), Anchor=numeric(), Zscore=numeric(), stringsAsFactors = FALSE)
   for (row in 1:length(raw.data)) {
     data[row, "Metabolite"] = names(raw.data)[row]
-    data[row, "Raw"] = round(raw.data[row], 2)
-    if (length(which(names(norm.data)==names(raw.data)[row]))>0) {
-      data[row, "Anchor"] = round(norm.data[which(names(norm.data)==names(raw.data)[row])], 2)
-    } else {
-      data[row, "Anchor"] = NA
-    }
+    #data[row, "Raw"] = round(raw.data[row], 2)
+    #if (length(which(names(norm.data)==names(raw.data)[row]))>0) {
+    #  data[row, "Anchor"] = round(norm.data[which(names(norm.data)==names(raw.data)[row])], 2)
+    #} else {
+    #  data[row, "Anchor"] = NA
+    #}
     if (length(which(names(zscore.data)==names(raw.data)[row]))>0) {
       data[row, "Zscore"] = round(zscore.data[which(names(zscore.data)==names(raw.data)[row])], 2)
     } else {
@@ -286,49 +248,45 @@ getPatientReport = function(input, raw.data, norm.data, zscore.data) {
   # Note, these values were imputed and therefore should not be included in patient report, but should
   # be noted that these metabolites were normally found.
   # Last, remove mets that were NA in raw, but not in Zscore.
-  ind0 = intersect(intersect(which(is.na(data[,"Raw"])), which(is.na(data[,"Anchor"]))), which(is.na(data[,"Zscore"])))
-  ind1 = intersect(which(is.na(data[,"Raw"])), which(!is.na(data[,"Anchor"])))
+  #ind0 = intersect(intersect(which(is.na(data[,"Raw"])), which(is.na(data[,"Anchor"]))), which(is.na(data[,"Zscore"])))
+  #ind1 = intersect(which(is.na(data[,"Raw"])), which(!is.na(data[,"Anchor"])))
   #ind2 = intersect(which(is.na(data[,"Raw"])), which(!is.na(data[,"Zscore"])))
-  ind_all = data[,"Metabolite"][unique(c(ind0, ind1))] #ind2
-  tmp = ref.fil[ind_all]
-  report_these = tmp[which(tmp>0.80)]
+  #ind_all = data[,"Metabolite"][unique(c(ind0, ind1))] #ind2
+  #tmp = ref.fil[ind_all]
+  #report_these = tmp[which(tmp>0.80)]
   # Report these metabolites
-  missingMets = data.frame(Metabolite=character(), Reference.FillRate=numeric(), stringsAsFactors = FALSE)
-  if (length(report_these)>0) {
-    for (i in 1:length(report_these)) {
-      met = names(report_these)[i]
-      missingMets[i, "Metabolite"] = met
-      missingMets[i, "Reference.FillRate"] = ref.fil[which(names(ref.fil)==met)]
-    }
-    colnames(missingMets) = c("Compound", "Reference Fill Rate")
-  } else {
-    missingMets = NULL
-  }
+  #missingMets = data.frame(Metabolite=character(), Reference.FillRate=numeric(), stringsAsFactors = FALSE)
+  #if (length(report_these)>0) {
+  #  for (i in 1:length(report_these)) {
+  #    met = names(report_these)[i]
+  #    missingMets[i, "Metabolite"] = met
+  #    missingMets[i, "Reference.FillRate"] = ref.fil[which(names(ref.fil)==met)]
+  #  }
+  #  colnames(missingMets) = c("Compound", "Reference Fill Rate")
+  #} else {
+  #  missingMets = NULL
+  #}
+  #if (length(ind_all)>0) { data = data[-unique(c(ind0, ind1)),] }
+  #print(dim(data))
 
-  if (length(ind_all)>0) {
-    data = data[-unique(c(ind0, ind1)),]
-  }
-  print(dim(data))
+  # Order by Fill Rate, then by abs(Zscore)
+  #missingMets = missingMets[order(missingMets[,"Reference Fill Rate"], decreasing = TRUE),]
+  #class(data[,"Zscore"]) = "numeric"
+  #data = data[order(abs(data[,"Zscore"]), decreasing = TRUE), ]
+  #names(data) = c("Metabolite", "Raw Ion Intensity", "Anchor", "Z-score")
 
-  # Order by Fill Rate
-  missingMets = missingMets[order(missingMets[,"Reference Fill Rate"], decreasing = TRUE),]
-
-  # Order by abs(Zscore)
-  class(data[,"Zscore"]) = "numeric"
-  data = data[order(abs(data[,"Zscore"]), decreasing = TRUE), ]
-  names(data) = c("Metabolite", "Raw Ion Intensity", "Anchor", "Z-score")
-
-  return(list(patientReport=data, missingMets=missingMets))
+  return(list(patientReport=data, missingMets=NULL))
 }
 
-getPathwayMap = function(input, zscore.data) {
+getPathwayMap = function(input) {
   #' Generate pathway map with patient data superimposed.
   #' @param Pathway.Name - The name of the pathway map you want to plot patient data on.
   #' @param PatientID - An identifier string associated with the patient.
   #' @param patient.zscore - A named vector of metabolites with corresponding z-scores.
   #' @param scalingFactor - Integer associated with increase in node size.
   #' @param outputFilePath - The directory in which you want to store image files.
-
+  zscore.data = Miller2015[, grep("IEM_", colnames(Miller2015))]
+  
   if (length(input$ptIDs)==0) {
     return(list(pmap = list(src="", contentType = 'image/svg+xml'), colorbar = NULL))
   } else {
@@ -339,22 +297,20 @@ getPathwayMap = function(input, zscore.data) {
     patient.zscore = zscore.data[,which(colnames(zscore.data) %in% input$ptIDs)]
     patient.zscore = apply(patient.zscore, 1, function(i) mean(na.omit(i)))
     names(patient.zscore) = tmp
-    #print(patient.zscore)
 
-    pmap.path = "../../inst/extdata"
-    load(sprintf("%s/complexNodes.RData", pmap.path))
+    load(system.file(sprintf("extdata/complexNodes.RData"), package="CTD"))
     if (Pathway.Name=="All") {
-      load(sprintf("%s/RData/allPathways.RData", pmap.path))
+      load(system.file("extdata/RData/allPathways.RData", package="CTD"))
       V(template.ig)$label[which(V(template.ig)$label %in% c("DSGEGDFXAEGGGVR", "Dsgegdfxaegggvr"))] = ""
       scalingFactor=1
       Pathway.Name = "allPathways"
     } else {
-      load(sprintf("%s/RData/%s.RData", pmap.path, Pathway.Name))
+      load(system.file(sprintf("extdata/RData/%s.RData", Pathway.Name), package="CTD"))
       template.ig = ig
     }
 
     # Load id to display label mappings
-    nodeDisplayNames= read.table(sprintf("%s/%s/DisplayName-%s.txt", pmap.path, Pathway.Name, Pathway.Name),
+    nodeDisplayNames= read.table(system.file(sprintf("extdata/%s/Name-%s.txt", Pathway.Name, Pathway.Name), package="CTD"),
                                  header=TRUE, sep="\n", check.names = FALSE)
     tmp = apply(nodeDisplayNames, 1, function(i) unlist(strsplit(i, split= " = "))[2])
     tmp.nms = apply(nodeDisplayNames, 1, function(i) unlist(strsplit(i, split= " = "))[1])
@@ -366,7 +322,7 @@ getPathwayMap = function(input, zscore.data) {
     names(nodeDisplayNames) = tmp.nms
     nodeDisplayNames = gsub("\\+", " ", nodeDisplayNames)
     # Load id to node types mappings
-    nodeType = read.table(sprintf("%s/%s/CompoundType-%s.txt", pmap.path, Pathway.Name, Pathway.Name),
+    nodeType = read.table(system.file(sprintf("extdata/%s/Type-%s.txt", Pathway.Name, Pathway.Name), package="CTD"),
                           header=TRUE, sep="\n", check.names = FALSE)
     tmp = apply(nodeType, 1, function(i) unlist(strsplit(i, split= " = "))[2])
     tmp.nms = apply(nodeType, 1, function(i) unlist(strsplit(i, split= " = "))[1])
@@ -443,11 +399,11 @@ getPathwayMap = function(input, zscore.data) {
     V(template.ig)$label.cex = 0.75
     template.ig = delete.vertices(template.ig, v=grep(unlist(strsplit(Pathway.Name, split="-"))[1], V(template.ig)$label))
 
-    svg_filename = sprintf("%s/pmap-%s_%s.svg", getwd(), Pathway.Name, input$diagClass)
+    svg_filename = system.file(sprintf("vignette/shiny-app/pathwayMaps/pmap-%s_%s.svg", Pathway.Name, input$diagClass), package="CTD")
     svg(filename = svg_filename, width=10, height=10)
     par(mar=c(1,0.2,1,1))
     plot.igraph(template.ig, layout=cbind(V(template.ig)$x, V(template.ig)$y), edge.arrow.size = 0.01, edge.width = 1,
-                vertex.frame.color=V(template.ig)$color) #main = gsub("-", " ", Pathway.Name)
+                vertex.frame.color=V(template.ig)$color, main = gsub("-", " ", Pathway.Name))
     legend('bottom',legend=1:max(ceiling(V(template.ig)$size/scalingFactor)),
            pt.cex=seq(1, ceiling(max(V(template.ig)$size)), scalingFactor),
            col='black',pch=21, pt.bg='white', cex=1, horiz=TRUE)

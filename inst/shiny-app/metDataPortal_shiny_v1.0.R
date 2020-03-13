@@ -5,15 +5,28 @@ require(ggplot2)
 require(grid)
 require(Hmisc)
 require(plotly)
+require(grDevices)
 require(igraph)
 require(networkD3)
 require(R.utils)
 require(CTD)
-
-setwd("/Users/lillian.rosa/Downloads/MolPhenoMatch/R/R_shiny_app/")
-source("metDataPortal_appFns.r")
-
-kmx = 20
+kmx=15
+setwd("/Users/lillian.rosa/Downloads/CTD/vignette/")
+source("/Users/lillian.rosa/Downloads/CTD/vignette/shiny-app/metDataPortal_appFns.r")
+data("Miller2015")
+cohorts = list()
+cohorts$mcc = diagnoses$id[which(diagnoses$diagnosis=="3-methylcrotonyl CoA carboxylase")]
+cohorts$arg = diagnoses$id[which(diagnoses$diagnosis=="Argininemia")]
+cohorts$cit = diagnoses$id[which(diagnoses$diagnosis=="Citrullinemia")]
+cohorts$cob = diagnoses$id[which(diagnoses$diagnosis=="Cobalamin biosynthesis")]
+cohorts$ga = diagnoses$id[which(diagnoses$diagnosis=="Glutaric Aciduria")]
+cohorts$gamt = diagnoses$id[which(diagnoses$diagnosis=="Guanidinoacetate methyltransferase")]
+cohorts$msud = diagnoses$id[which(diagnoses$diagnosis=="Maple syrup urine disease")]
+cohorts$mma = diagnoses$id[which(diagnoses$diagnosis=="Methylmalonic aciduria")]
+cohorts$otc = diagnoses$id[which(diagnoses$diagnosis=="Ornithine transcarbamoylase")]
+cohorts$pa = diagnoses$id[which(diagnoses$diagnosis=="Propionic aciduria")]
+cohorts$pku = diagnoses$id[which(diagnoses$diagnosis=="Phenylketonuria")]
+cohorts$tmhle = diagnoses$id[which(diagnoses$diagnosis=="Trimethyllysine hydroxylase epsilon")]
 
 ui = dashboardPage(
   dashboardHeader(title = "Metabolomics Data Portal"),
@@ -98,7 +111,7 @@ server = function(input, output, session) {
         print(input$diagClass)
         updateCheckboxGroupInput(session, "ptIDs", choices = cohorts[[input$diagClass]], selected = cohorts[[input$diagClass]])
 
-        report = reactive(getPatientReport(input, .GlobalEnv$all_raw_data, .GlobalEnv$all_norm_data, .GlobalEnv$all_data))
+        report = reactive(getPatientReport(input))
         output$patientReport = DT::renderDataTable({
           d = report()$patientReport
           DT::datatable(d, rownames=FALSE, options=list(scrollX=TRUE))
@@ -126,7 +139,7 @@ server = function(input, output, session) {
                                         "Steroid-Hormone Biosynthesis", "TCA Cycle", "Thyroid Hormone Synthesis", "Tryptophan Metabolism"),
                             selected="Arginine Metabolism")
           observeEvent(input$scalingFactor, priority=-1, {
-            pmap = reactive(isolate(getPathwayMap(input, .GlobalEnv$all_data)))
+            pmap = reactive(isolate(getPathwayMap(input)))
             output$pathwayMap = renderImage({pmap()$pmap})
             output$colorbar = renderPlot({
               grid.newpage()
@@ -152,7 +165,7 @@ server = function(input, output, session) {
       output$refOutliers = renderDataTable(ref()$outliers)
 
       observeEvent(c(input$raworZscore, input$showThese), priority = -1, {
-        data = getData(input)
+        data = Miller2015[,grep("IEM_", colnames(Miller2015))]
         output$downloadButton = downloadHandler(
           filename = function() { paste(paste(input$showThese, collapse="_"), "-", input$raworZscore, ".txt", sep="") },
           content = function(file) { write.table(data, file, sep="\t", col.names = TRUE, row.names = FALSE) }

@@ -44,8 +44,8 @@ mle.getPtSim = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, ranks) {
   # Get optimal bitstring for encoding of patient1's union patient2's subsets
   dirSim = vector("numeric", length=length(p1.optBS))
   for (k in 1:length(p1.optBS)) {
-    p1.sig.nodes = rownames(data_mx)[order(abs(data_mx[,ptID]), decreasing = TRUE)][1:k]
-    p2.sig.nodes = rownames(data_mx)[order(abs(data_mx[,ptID2]), decreasing = TRUE)][1:k]
+    p1.sig.nodes = rownames(data_mx)[order(abs(data_mx[, ptID]), decreasing = TRUE)][1:k]
+    p2.sig.nodes = rownames(data_mx)[order(abs(data_mx[, ptID2]), decreasing = TRUE)][1:k]
     p1.dirs = data_mx[p1.sig.nodes, ptID]
     p1.dirs[which(!(p1.dirs>0))] = 0
     p1.dirs[which(p1.dirs>0)] = 1
@@ -58,11 +58,15 @@ mle.getPtSim = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, ranks) {
   }
 
   if (is.null(ranks)) {
-    # Using the "with memory" network walker, get optimal bitstring for encoding of patient1's union patient2's subsets
+    # Using the single-node network walker, get optimal bitstring for encoding of patient1's union patient2's subsets
     p1.sig.nodes = sapply(names(sort(abs(data_mx[,ptID]), decreasing = TRUE)[1:length(p1.optBS)]), trimws)
     p2.sig.nodes = sapply(names(sort(abs(data_mx[,ptID2]), decreasing = TRUE)[1:length(p2.optBS)]), trimws)
     p12.sig.nodes = as.character(sapply(unique(c(p1.sig.nodes, p2.sig.nodes)), trimws))
-    ranks = multiNode.getNodeRanks(p12.sig.nodes, G)
+    ranks = list()
+    for (i in 1:length(p12.sig.nodes)) {
+      ind = which(names(G)==p12.sig.nodes[i])
+      ranks[[i]] = singleNode.getNodeRanksN(n=ind, G=G, S=p12.sig.nodes, num.misses=log2(length(G)))
+    }
     p12.e = c()
     for (k in 1:length(p1.optBS)) {
       p1.sig.nodes_cpy = p1.sig.nodes
@@ -79,12 +83,12 @@ mle.getPtSim = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, ranks) {
         p2.sig.nodes_cpy = p2.sig.nodes_cpy[-1]
       }
       p12.sig.nodes_k = sapply(unique(c(p1.sig.nodes_k, p2.sig.nodes_k)), trimws)
-      p12.optBS = multiNode.getPtBSbyK(p12.sig.nodes_k, ranks)
+      p12.optBS = singleNode.getPtBSbyK(p12.sig.nodes_k, ranks)
       res = mle.getEncodingLength(p12.optBS, NULL, NULL, G)
       p12.e[k] = res[which.max(res[,"d.score"]), "IS.alt"] + log2(choose(length(G), 1))*(length(p12.sig.nodes_k)-which.max(res[,"d.score"]))
     }
   } else {
-    # Using the "memoryless" network walker, get optimal bitstring for encoding of patient1's union patient2's subsets.
+    # Using predefined node ranks, get optimal bitstring for encoding of patient1's union patient2's subsets.
     p1.sig.nodes = names(sort(abs(data_mx[,ptID]), decreasing = TRUE)[1:length(p1.optBS)])
     p2.sig.nodes = names(sort(abs(data_mx[,ptID2]), decreasing = TRUE)[1:length(p2.optBS)])
     p12.sig.nodes = unique(c(p1.sig.nodes, p2.sig.nodes))
