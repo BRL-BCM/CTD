@@ -64,5 +64,5 @@ plot.getPathwayIgraph = function(input, Pathway.Name) {
   V(template.ig)$shape[grep("Metabolite", V(template.ig)$shape)] = "circle"
   template.ig = delete.vertices(template.ig, v=V(template.ig)$name[-which(V(template.ig)$shape %in% c("rectangle", "circle"))])
 
-  return(template.ig)
+  return(list(template.ig=template.ig, nodeDisplayNames=node.labels, nodeType=node.types))
 }

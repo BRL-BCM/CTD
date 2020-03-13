@@ -290,56 +290,21 @@ getPathwayMap = function(input) {
   if (length(input$ptIDs)==0) {
     return(list(pmap = list(src="", contentType = 'image/svg+xml'), colorbar = NULL))
   } else {
-    Pathway.Name = gsub(" ", "-", input$pathwayMapId)
     PatientID = input$ptIDs
     scalingFactor = input$scalingFactor
     tmp = rownames(zscore.data)
     patient.zscore = zscore.data[,which(colnames(zscore.data) %in% input$ptIDs)]
     patient.zscore = apply(patient.zscore, 1, function(i) mean(na.omit(i)))
     names(patient.zscore) = tmp
-
-    load(system.file(sprintf("extdata/complexNodes.RData"), package="CTD"))
-    if (Pathway.Name=="All") {
-      load(system.file("extdata/RData/allPathways.RData", package="CTD"))
-      V(template.ig)$label[which(V(template.ig)$label %in% c("DSGEGDFXAEGGGVR", "Dsgegdfxaegggvr"))] = ""
-      scalingFactor=1
-      Pathway.Name = "allPathways"
-    } else {
-      load(system.file(sprintf("extdata/RData/%s.RData", Pathway.Name), package="CTD"))
-      template.ig = ig
-    }
-
-    # Load id to display label mappings
-    nodeDisplayNames= read.table(system.file(sprintf("extdata/%s/Name-%s.txt", Pathway.Name, Pathway.Name), package="CTD"),
-                                 header=TRUE, sep="\n", check.names = FALSE)
-    tmp = apply(nodeDisplayNames, 1, function(i) unlist(strsplit(i, split= " = "))[2])
-    tmp.nms = apply(nodeDisplayNames, 1, function(i) unlist(strsplit(i, split= " = "))[1])
-    ind = suppressWarnings(as.numeric(tmp.nms))
-    ind2 = as.logical(sapply(ind, function(i) is.na(i)))
-    tmp = tmp[-which(ind2)]
-    tmp.nms = tmp.nms[-which(ind2)]
-    nodeDisplayNames = as.character(tmp)
-    names(nodeDisplayNames) = tmp.nms
-    nodeDisplayNames = gsub("\\+", " ", nodeDisplayNames)
-    # Load id to node types mappings
-    nodeType = read.table(system.file(sprintf("extdata/%s/Type-%s.txt", Pathway.Name, Pathway.Name), package="CTD"),
-                          header=TRUE, sep="\n", check.names = FALSE)
-    tmp = apply(nodeType, 1, function(i) unlist(strsplit(i, split= " = "))[2])
-    tmp.nms = apply(nodeType, 1, function(i) unlist(strsplit(i, split= " = "))[1])
-    ind = suppressWarnings(as.numeric(tmp.nms))
-    ind2 = as.logical(sapply(ind, function(i) is.na(i)))
-    tmp = tmp[-which(ind2)]
-    tmp.nms = tmp.nms[-which(ind2)]
-    nodeType = as.character(tmp)
-    names(nodeType) = tmp.nms
-    nodeType = nodeType[which(names(nodeType) %in% names(nodeDisplayNames))]
-
-    node.labels = vector("character", length = length(V(template.ig)$name))
-    node.types = vector("character", length = length(V(template.ig)$name))
-    for (n in 1:length(V(template.ig)$name)) {
-      node.labels[n] = URLdecode(as.character(nodeDisplayNames[V(template.ig)$name[n]]))
-      node.types[n] = as.character(nodeType[V(template.ig)$name[n]])
-    }
+    
+    if (Pathway.Name=="All") { Pathway.Name = "allPathways" } else { Pathway.Name = gsub(" ", "-", input$pathwayMapId) } 
+    res = plot.getPathwayIgraph(input, Pathway.Name)
+    template.ig = res$template.ig
+    node.labels = res$nodeDisplayNames
+    node.types = res$nodeType
+    
+    # Super-impose patient-specific (or mean cohort-specific) profiles onto metabolite nodes.
+    # Ignore "complex nodes" (the squares)
     nms = node.labels[which(node.labels %in% names(patient.zscore))]
     patient.zscore = patient.zscore[which(names(patient.zscore) %in% nms)]
     granularity = 2
@@ -360,34 +325,6 @@ getPathwayMap = function(input) {
         V(template.ig)$color[i] = "#D3D3D3"
       }
     }
-
-    mapped=0
-    complexNodes = complexNodes[which(names(complexNodes) %in% node.labels)]
-    # Next do the complex nodes
-    if (length(which(names(complexNodes) %in% node.labels))>0) {
-      for (n in 1:length(complexNodes)) {
-        metsInComplex = complexNodes[[n]]
-        mapped.mets = metsInComplex[which(metsInComplex %in% names(patient.zscore))]
-        if (length(na.omit(patient.zscore[mapped.mets]))>0) {
-          print(sprintf("%s: %f", names(complexNodes)[n], length(mapped.mets)/length(metsInComplex)))
-          mapped = mapped + length(mapped.mets)
-          nodeSize = ceiling(max(abs(na.omit(patient.zscore[mapped.mets]))))
-          if (is.na(nodeSize)) {
-            V(template.ig)$size[which(node.labels==names(complexNodes[n]))] = 1
-            V(template.ig)$size2[which(node.labels==names(complexNodes[n]))] = 1
-            V(template.ig)$color[which(node.labels==names(complexNodes[n]))] = "#FFFFFF"
-          } else {
-            V(template.ig)$size[which(node.labels==names(complexNodes[n]))] = scalingFactor*nodeSize
-            V(template.ig)$size2[which(node.labels==names(complexNodes[n]))] = scalingFactor*nodeSize
-            V(template.ig)$color[which(node.labels==names(complexNodes[n]))] = redblue[1+granularity*(nodeSize-ceiling(min(na.omit(patient.zscore))))]
-          }
-        } else {
-          V(template.ig)$size[which(node.labels==names(complexNodes[n]))] = 1
-          V(template.ig)$size2[which(node.labels==names(complexNodes[n]))] = 1
-          V(template.ig)$color[which(node.labels==names(complexNodes[n]))] = "#FFFFFF"
-        }
-      }
-    }
     V(template.ig)$size[which(node.types=="Class")]
     V(template.ig)$label = capitalize(tolower(V(template.ig)$label))
     wrap_strings = function(vector_of_strings,width){
@@ -399,7 +336,9 @@ getPathwayMap = function(input) {
     V(template.ig)$label.cex = 0.75
     template.ig = delete.vertices(template.ig, v=grep(unlist(strsplit(Pathway.Name, split="-"))[1], V(template.ig)$label))
 
-    svg_filename = system.file(sprintf("vignette/shiny-app/pathwayMaps/pmap-%s_%s.svg", Pathway.Name, input$diagClass), package="CTD")
+    svg_filename = system.file("shiny-app/metDataPortal_appFns.r", package="CTD")
+    svg_filename = gsub("/metDataPortal_appFns.r", "", svg_filename)
+    svg_filename = sprintf("%s/pathwayMaps/pmap-%s_%s.svg", svg_filename, Pathway.Name, input$diagClass)
     svg(filename = svg_filename, width=10, height=10)
     par(mar=c(1,0.2,1,1))
     plot.igraph(template.ig, layout=cbind(V(template.ig)$x, V(template.ig)$y), edge.arrow.size = 0.01, edge.width = 1,
@@ -426,7 +365,7 @@ getPathwayMap = function(input) {
       legend = tmp$grobs[[leg]]
       return(legend)}
     leg = g_legend(cb);
-    return(list(pmap = list(src=svg_filename, contentType = 'image/svg+xml'), colorbar = leg))
+    #return(list(pmap = list(src=svg_filename, contentType = 'image/svg+xml'), colorbar = leg))
   }
 }
 

@@ -11,8 +11,8 @@ require(networkD3)
 require(R.utils)
 require(CTD)
 kmx=15
-setwd("/Users/lillian.rosa/Downloads/CTD/vignette/")
-source("/Users/lillian.rosa/Downloads/CTD/vignette/shiny-app/metDataPortal_appFns.r")
+setwd("/Users/lillian.rosa/Downloads/CTD/inst/shiny-app")
+source("/Users/lillian.rosa/Downloads/CTD/inst/shiny-app/metDataPortal_appFns.r")
 data("Miller2015")
 cohorts = list()
 cohorts$mcc = diagnoses$id[which(diagnoses$diagnosis=="3-methylcrotonyl CoA carboxylase")]
