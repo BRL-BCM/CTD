@@ -312,15 +312,16 @@ getPathwayMap = function(input) {
     reds = colorRampPalette(c("white", "red"))(granularity*ceiling(max(abs(na.omit(patient.zscore)))))
     redblue = c(blues, reds[2:length(reds)])
     for (i in 1:length(node.labels)) {
-      if ((node.labels[i] %in% nms) && (!is.na(patient.zscore[node.labels[i]]))) {
-        if (!is.na(1 + abs(patient.zscore[node.labels[i]]))) {
-          V(template.ig)$size[i] = scalingFactor*ceiling(abs(patient.zscore[node.labels[i]]))
-          V(template.ig)$color[i] = redblue[1+granularity*(ceiling(patient.zscore[node.labels[i]])-ceiling(min(na.omit(patient.zscore))))]
-        } else {
-          V(template.ig)$size[i] = 1
-          V(template.ig)$color[i] = "#D3D3D3"
-        }
+      if ((node.labels[i] %in% nms)) {
+        #if (!is.na(patient.zscore[node.labels[i]])) {
+          #V(template.ig)$size[i] = scalingFactor*ceiling(abs(patient.zscore[node.labels[i]]))
+          #V(template.ig)$color[i] = redblue[1+granularity*(ceiling(patient.zscore[node.labels[i]])-ceiling(min(na.omit(patient.zscore))))]
+        #} else {
+        #  V(template.ig)$size[i] = 1
+        #  V(template.ig)$color[i] = "#D3D3D3"
+        #}
       } else {
+        print(i)
         V(template.ig)$size[i] = 1
         V(template.ig)$color[i] = "#D3D3D3"
       }
@@ -338,7 +339,7 @@ getPathwayMap = function(input) {
 
     svg_filename = system.file("shiny-app/metDataPortal_appFns.r", package="CTD")
     svg_filename = gsub("/metDataPortal_appFns.r", "", svg_filename)
-    svg_filename = sprintf("%s/pathwayMaps/pmap-%s_%s.svg", svg_filename, Pathway.Name, input$diagClass)
+    svg_filename = sprintf("%s/pmap-%s_%s.svg", svg_filename, Pathway.Name, input$diagClass)
     svg(filename = svg_filename, width=10, height=5)
     par(mar=c(1,0.2,1,1))
     plot.igraph(template.ig, layout=cbind(V(template.ig)$x, V(template.ig)$y), edge.arrow.size = 0.01, edge.width = 1,
