@@ -1,10 +1,10 @@
-#' plot.getPathwayIgraph
+#' shiny.getPathwayIgraph
 #'
 #' @param input - A list object of parameters (esp. from R shiny app). Required parameters are ptIDs, diagClass and pathwayMapId.
 #' @param Pathway.Name - The name of the pathway map for which you want the topological information.
 #' @return template.ig - Igraph object of selected pathway map.
-#' @export plot.getPathwayIgraph
-#' @usage plot.getPathwayIgraph(input, Pathway.Name)
+#' @export shiny.getPathwayIgraph
+#' @usage shiny.getPathwayIgraph(input, Pathway.Name)
 #' @import igraph
 #' @examples
 #' data(Miller2015)
@@ -13,10 +13,9 @@
 #' input$ptIDs = colnames(Miller2015)[4]
 #' input$diagClass = "paa"
 #' input$pathwayMapId = "All"
-#' ig = plot.getPathwayIgraph(input, Miller2015)
-#' # Returns a blank template for selected pathway.
-#' plot.igraph(ig, edge.arrow.size = 0.01)
-plot.getPathwayIgraph = function(input, Pathway.Name) {
+#' res = shiny.getPathwayIgraph(input, Miller2015)
+#' # Returns a blank template for selected pathway, node labels and node types.
+shiny.getPathwayIgraph = function(input, Pathway.Name) {
   if (is.null( Pathway.Name)) Pathway.Name = gsub(" ", "-", input$pathwayMapId)
 
   if (Pathway.Name=="All") {

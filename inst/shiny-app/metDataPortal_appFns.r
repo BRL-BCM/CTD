@@ -298,7 +298,7 @@ getPathwayMap = function(input) {
     names(patient.zscore) = tmp
     
     if (input$pathwayMapId=="All") { Pathway.Name = "allPathways" } else { Pathway.Name = gsub(" ", "-", input$pathwayMapId) } 
-    res = plot.getPathwayIgraph(input, Pathway.Name)
+    res = shiny.getPathwayIgraph(input, Pathway.Name)
     template.ig = res$template.ig
     node.labels = res$nodeDisplayNames
     node.types = res$nodeType
