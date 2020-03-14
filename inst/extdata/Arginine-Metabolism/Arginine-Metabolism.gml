@@ -1617,7 +1617,7 @@ graph	[
 			Line	[
 			]
 			source_arrow	0
-			target_arrow	3
+			_arrow	3
 		]
 		label	"Product"
 	]

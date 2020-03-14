@@ -43,13 +43,16 @@ ui = dashboardPage(
                                        selectInput(inputId = "diagClass", label = "Select diagnosis.", 
                                                    choices = names(cohorts), selected = names(cohorts)[1], selectize=FALSE),
                                        selectInput(inputId = "ptIDs", label = "Select patients.", choices = "", selectize=TRUE, multiple=TRUE)), width=12),
-                          box(title="Top Perturbed Pathways", status="info", solidHeader=TRUE, tableOutput("pathwayEnrichment"), width=6, collapsible=TRUE),
+                          box(title="Top Perturbed Pathways", status="info", solidHeader=TRUE, 
+                              tabsetPanel(type="tabs", 
+                                          tabPanel("Over-representation Analysis", tableOutput("oraEnrichment")),
+                                          tabPanel("Metabolite Set Enrichment Analysis", tableOutput("mseaEnrichment"))), width=6, collapsible=TRUE),
                           box(title="Inspect Genetic Variants", status="info", solidHeader=TRUE, dataTableOutput("geneticVars"), width=6, collapsible=TRUE), 
                           box(title="Pathway Map", status="primary", solidHeader = TRUE,
                               fluidRow(style="padding:10px; height:80px;", 
                                        splitLayout(cellWidths=c("33%", "33%", "33%"),
                                                    selectInput(inputId = "pathwayMapId", label = "Pathway Map", choices = ""),
-                                                   sliderInput(inputId = "scalingFactor", label="Node Scaling Factor", min=1, max=5, step=1, value=1),
+                                                   sliderInput(inputId = "scalingFactor", label="Node Scaling Factor", min=1, max=5, step=1, value=3),
                                                    plotOutput("colorbar"))),
                               imageOutput("pathwayMap", height="100%", width="100%"), width=12, collapsible=TRUE),
                           box(title = "Patient Report", status="info", solidHeader = TRUE,
@@ -121,7 +124,8 @@ server = function(input, output, session) {
           filename = function() { paste(input$biofluid, "-", input$patientID, ".txt", sep="") },
           content = function(file) { write.table(report()$patientReport, file, sep="\t", col.names = TRUE, row.names = FALSE) }
         )
-        output$pathwayEnrichment = renderTable(shiny.getORA_Metabolon(input))
+        output$oraEnrichment = renderTable(shiny.getORA_Metabolon(input))
+        output$mseaEnrichment = renderTable(shiny.getMSEA_Metabolon(input))
         #output$geneticVars = DT::renderDataTable(getGeneticVariants(input), rownames = FALSE)
 
         observeEvent(input$pathwayMapId, priority=0, {

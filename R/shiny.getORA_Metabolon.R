@@ -6,7 +6,9 @@
 #' pathway.data = shiny.getORA_Metabolon(met.profile, threhold=3, "z-score", NULL)
 shiny.getORA_Metabolon = function(input) {
   data = Miller2015[,grep("IEM_", colnames(Miller2015))]
-  met.profile = data[,which(colnames(data) %in% input$ptIDs)]
+  tmp = rownames(data)
+  met.profile = apply(as.matrix(data[,which(colnames(data) %in% input$ptIDs)]), 1, mean)
+  names(met.profile) = tmp
   met.profile = met.profile[which(!(is.na(met.profile)))]
   # TODO: add an input parameter "threshold" to modulate z-score cutoff value.
   perturbed.mets = met.profile[which(abs(met.profile) > 2)]

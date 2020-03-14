@@ -312,21 +312,19 @@ getPathwayMap = function(input) {
     reds = colorRampPalette(c("white", "red"))(granularity*ceiling(max(abs(na.omit(patient.zscore)))))
     redblue = c(blues, reds[2:length(reds)])
     for (i in 1:length(node.labels)) {
-      if ((node.labels[i] %in% nms)) {
-        #if (!is.na(patient.zscore[node.labels[i]])) {
-          #V(template.ig)$size[i] = scalingFactor*ceiling(abs(patient.zscore[node.labels[i]]))
-          #V(template.ig)$color[i] = redblue[1+granularity*(ceiling(patient.zscore[node.labels[i]])-ceiling(min(na.omit(patient.zscore))))]
-        #} else {
-        #  V(template.ig)$size[i] = 1
-        #  V(template.ig)$color[i] = "#D3D3D3"
-        #}
+      if (node.labels[i] %in% nms) {
+        if (!is.na(patient.zscore[node.labels[i]])) {
+          V(template.ig)$size[i] = scalingFactor*ceiling(abs(patient.zscore[node.labels[i]]))
+          V(template.ig)$color[i] = redblue[1+granularity*(ceiling(patient.zscore[node.labels[i]])-ceiling(min(na.omit(patient.zscore))))]
+        } else {
+          V(template.ig)$size[i] = 1
+          V(template.ig)$color[i] = "#D3D3D3"
+        }
       } else {
-        print(i)
         V(template.ig)$size[i] = 1
         V(template.ig)$color[i] = "#D3D3D3"
       }
     }
-    V(template.ig)$size[which(node.types=="Class")]
     V(template.ig)$label = capitalize(tolower(V(template.ig)$label))
     wrap_strings = function(vector_of_strings,width){
       as.character(sapply(vector_of_strings, FUN=function(x){
@@ -335,17 +333,17 @@ getPathwayMap = function(input) {
     }
     V(template.ig)$label = wrap_strings(V(template.ig)$label, 15)
     V(template.ig)$label.cex = 0.75
-    template.ig = delete.vertices(template.ig, v=grep(unlist(strsplit(Pathway.Name, split="-"))[1], V(template.ig)$label))
+    template.ig = delete.vertices(template.ig, v=V(template.ig)$name[which(V(template.ig)$shape %in% c("Label", "FinalPathway"))])
 
     svg_filename = system.file("shiny-app/metDataPortal_appFns.r", package="CTD")
     svg_filename = gsub("/metDataPortal_appFns.r", "", svg_filename)
     svg_filename = sprintf("%s/pmap-%s_%s.svg", svg_filename, Pathway.Name, input$diagClass)
     svg(filename = svg_filename, width=10, height=5)
     par(mar=c(1,0.2,1,1))
-    plot.igraph(template.ig, layout=cbind(V(template.ig)$x, V(template.ig)$y), edge.arrow.size = 0.01, edge.width = 1,
+    plot.igraph(template.ig, layout=cbind(V(template.ig)$x, V(template.ig)$y), edge.arrow.size = 0.1, edge.width = 1,
                 vertex.frame.color=V(template.ig)$color, main = gsub("-", " ", Pathway.Name))
     legend('bottom',legend=1:max(ceiling(V(template.ig)$size/scalingFactor)),
-           pt.cex=seq(1, ceiling(max(V(template.ig)$size)), scalingFactor),
+           pt.cex=seq(1, ceiling(max(V(template.ig)$size/scalingFactor)), 1),
            col='black',pch=21, pt.bg='white', cex=1, horiz=TRUE)
     dev.off()
 
