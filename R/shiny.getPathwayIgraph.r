@@ -60,8 +60,8 @@ shiny.getPathwayIgraph = function(input, Pathway.Name) {
   V(template.ig)$label = node.labels
   V(template.ig)$shape = node.types
   V(template.ig)$shape[grep("Enzyme", V(template.ig)$shape)] = "rectangle"
-  V(template.ig)$shape[grep("Metabolite", V(template.ig)$shape)] = "circle"
-  template.ig = delete.vertices(template.ig, v=V(template.ig)$name[-which(V(template.ig)$shape %in% c("rectangle", "circle"))])
+  V(template.ig)$shape[grep("Metabolite|Cofactor", V(template.ig)$shape)] = "circle"
+  template.ig = delete.vertices(template.ig, v=V(template.ig)$name[which(V(template.ig)$shape %in% c("Label", "Unknown", "FinalPathway"))])
 
   return(list(template.ig=template.ig, nodeDisplayNames=node.labels, nodeType=node.types))
 }
