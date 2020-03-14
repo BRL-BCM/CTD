@@ -1,356 +1,294 @@
 #' Metabolite set enrichment analysis (MSEA) using pathway knowledge curated by Metabolon
 #'
 #' A function that returns the pathway enrichment score for all perturbed metabolites in a patient's full metabolomic profile.
+#' # Main MSEA Analysis Function that implements the entire methodology
+#' This is a methodology for the analysis of global molecular profiles called Metabolite Set Enrichment Analysis (MSEA). It determines
+#' whether an a priori defined set of metabolites shows statistically significant, concordant differences between two biological
+#' states (e.g. phenotypes). MSEA operates on all metabolites from an experiment, rank ordered by the signal to noise ratio and
+#' determines whether members of an a priori defined metabolite set are nonrandomly distributed towards the top or bottom of the
+#' list and thus may correspond to an important biological process. To assess significance the program uses an empirical
+#' permutation procedure to test deviation from random that preserves correlations between metabolites. For details see 
+#' Subramanian et al 2005.
+#' 
+#' @param ds: Input metabolite expression dataset
+#' @param cls:  Input class vector (phenotype)
+#' @param met.db: Metabolite set database in GMT format
+#' @param nperm: Number of random permutations (default: 1000)
+#' @param weighted.score.type: Enrichment correlation-based weighting: 0=no weight (KS), 1=standard weigth, 2 = over-weigth (default: 1)
+#' @param adjust.FDR.q.val: Adjust the FDR q-vals (default: F)
+#' @param met.size.threshold.min: Minimum size (in metabolites) for database metabolite sets to be considered (default: 25)
+#' @param met.size.threshold.max: Maximum size (in metabolites) for database metabolite sets to be considered (default: 500)
+#' @param random.seed: Random number metaboliterator seed. (default: 123456)
+#' @return report: Global output report, sorted by NES in decreasing order.
 #' @export shiny.getMSEA_Metabolon
 #' @examples
+#' # If the .GMT file isn't already created, create it.
+#' data(Miller2015)
+#' population = rownames(Miller2015)
+#' paths.hsa = list.dirs(path=system.file("extdata", package="CTD"), full.names = FALSE)
+#' paths.hsa = paths.hsa[-which(paths.hsa %in% c("", "RData", "allPathways", "MSEA_Datasets"))]
+#' sink(sprintf("%s/Metabolon.gmt", system.file("extdata/MSEA_Datasets", package="CTD")))
+#' for (p in 1:length(paths.hsa)) {
+#'   load(system.file(sprintf("/extdata/RData/%s.RData", paths.hsa[p]), package="CTD"))
+#'   pathway.compounds = V(ig)$label[which(V(ig)$shape=="circle")]
+#'   pathCompIDs = unique(tolower(pathway.compounds[which(pathway.compounds %in% population)]))
+#'   print(sprintf("%s         %s", paths.hsa[p], paste(pathCompIDs, collapse="    ")), quote=FALSE)
+#' }
+#' sink()
 #' res = shiny.getMSEA_Metabolon(input)
-shiny.getMSEA_Metabolon = function(input) {
+#'     # The format (columns) for the global result files is as follows.
+#'     MS : Metabolite set name.
+#'     SIZE : Size of the set in metabolites.
+#'     SOURCE : Set definition or source.
+#'     ES : Enrichment score.
+#'     NES : Normalized (multiplicative rescaling) normalized enrichment score.
+#'     NOM p-val : Nominal p-value (from the null distribution of the metabolite set).
+#'     FDR q-val: False discovery rate q-values
+#'     FWER p-val: Family wise error rate p-values.
+#'     Tag %: Percent of metabolite set before running enrichment peak.
+#'     Metabolite %: Percent of metabolite list before running enrichment peak.
+#'     Signal : enrichment signal strength.
+#'     FDR (median): FDR q-values from the median of the null distributions.
+#'     glob.p.val: P-value using a global statistic (number of sets above the set's NES).
+shiny.getMSEA_Metabolon = function(input, cohorts) {
   data = Miller2015[,grep("IEM", colnames(Miller2015))]
-  
-  # First, make the .cls file
-  diag.ind = diagnoses$id
-  diag.ind[which(!(diag.ind %in% cohorts[[input$diagClass]]))] = 0
-  diag.ind[which(diag.ind %in% cohorts[[input$diagClass]])] = 1
-  diag.ind = as.numeric(diag.ind)
-  # Manually add the following text to 1st line of .cls, where num_samples is the length of diag.ind: #num_samples 1 2
-  # Manually add the following text to 2nd line of .cls: #disease control
-  #sink(sprintf("%s/Miller2015_%s.cls", system.file("extdata/MSEA_Datasets", package="CTD"), input$diagClass))
-  #print(sprintf("%d 1 2", length(diag.ind)))
-  #print("#disease control")
-  #print(diag.ind)
-  #sink()
-  
-  # Second, create a .gct file.
-  data = data[, order(diag.ind)]
-  diag.ind = diag.ind[order(diag.ind)]
-  #write.table(data, file=system.file("extdata/MSEA_Datasets/Miller2015.gct", package="CTD"),
-  #             sep="\t", quote=FALSE, row.names = TRUE)
-  
-  # Third, make the .gmt file
-  #population = names(met.profile)
-  #paths.hsa = list.dirs(path=system.file("extdata", package="CTD"), full.names = FALSE)
-  #paths.hsa = paths.hsa[-which(paths.hsa %in% c("", "RData", "allPathways", "MSEA_Datasets"))]
-  #sink(sprintf("%s/Metabolon.gmt", system.file("extdata/MSEA_Datasets", package="CTD")))
-  #for (p in 1:length(paths.hsa)) {
-  #  load(system.file(sprintf("/extdata/RData/%s.RData", paths.hsa[p]), package="CTD"))
-  #  pathway.compounds = V(ig)$label[which(V(ig)$shape=="circle")]
-  #  pathCompIDs = unique(tolower(pathway.compounds[which(pathway.compounds %in% population)]))
-  #  print(sprintf("%s         %s", paths.hsa[p], paste(pathCompIDs, collapse="    ")), quote=FALSE)
-  #}
-  #sink()
-
-  #abs_filename_dataset = system.file("extdata/MSEA_Datasets/Miller2015.gct", package="CTD")
-  #abs_filename_classes = system.file(sprintf("extdata/MSEA_Datasets/Miller2015_%s.cls", input$diagClass), package="CTD")
+  # First, get the class labels
+  class.labels = diagnoses$id
+  class.labels[which(!(class.labels %in% cohorts[[input$diagClass]]))] = 0
+  class.labels[which(class.labels %in% cohorts[[input$diagClass]])] = 1
+  class.labels = as.numeric(class.labels)
+  class.labels = class.labels[order(class.labels)]
+  phen1 = 0
+  phen2 = 1
+  # Second, get the metabolomics profiling data, with metabolites as rows, and samples as columns.
+  data = data[, order(class.labels)]
+  # Third, provide the file extension local to the installation of the CTD package for the 
+  # desired pathway knowledgebase .GMT.
   met.db = system.file("extdata/MSEA_Datasets/Metabolon.gmt", package="CTD")
 
-  res = MSEA(input.ds = data, input.cls = diag.ind, met.db = met.db,
-             reshuffling.type="sample.labels", nperm=1000, weighted.score.type=1,
-             adjust.FDR.q.val = F, met.size.threshold.min = 5, met.size.threshold.max = 500, preproc.type = 0,
-             random.seed = 760435)
-
-  return(res)
-}
-
-# M S E A -- Metabolite Set Enrichment Analysis from the Broad Institute's GSEA-P implementation.
-MSEA.MetaboliteRanking = function(A, class.labels, metabolite.labels, nperm, sigma.correction = "MetaboliteCluster", replace=F) {
-  A = A + 0.00000001
-  N = length(A[,1])
-  Ns = length(A[1,])
-
-  subset.mask = matrix(0, nrow=Ns, ncol=nperm)
-  reshuffled.class.labels1 = matrix(0, nrow=Ns, ncol=nperm)
-  reshuffled.class.labels2 = matrix(0, nrow=Ns, ncol=nperm)
-  class.labels1 = matrix(0, nrow=Ns, ncol=nperm)
-  class.labels2 = matrix(0, nrow=Ns, ncol=nperm)
-
-  order.matrix = matrix(0, nrow = N, ncol = nperm)
-  obs.order.matrix = matrix(0, nrow = N, ncol = nperm)
-  s2n.matrix = matrix(0, nrow = N, ncol = nperm)
-  obs.s2n.matrix = matrix(0, nrow = N, ncol = nperm)
-
-  obs.metabolite.labels = vector(length = N, mode="character")
-  obs.metabolite.descs = vector(length = N, mode="character")
-  obs.metabolite.symbols = vector(length = N, mode="character")
-
-  M1 = matrix(0, nrow = N, ncol = nperm)
-  M2 = matrix(0, nrow = N, ncol = nperm)
-  S1 = matrix(0, nrow = N, ncol = nperm)
-  S2 = matrix(0, nrow = N, ncol = nperm)
-
-  C = split(class.labels, class.labels)
-  class1.size = length(C[[1]])
-  class2.size = length(C[[2]])
-  class1.index = seq(1, class1.size, 1)
-  class2.index = seq(class1.size + 1, class1.size + class2.size, 1)
-  for (r in 1:nperm) {
-    class1.subset = sample(class1.index, size = ceiling(class1.size), replace = replace)
-    class2.subset = sample(class2.index, size = ceiling(class2.size), replace = replace)
-    class1.subset.size = length(class1.subset)
-    class2.subset.size = length(class2.subset)
-    subset.class1 = rep(0, class1.size)
-    for (i in 1:class1.size) {
-      if (is.element(class1.index[i], class1.subset)) {
-        subset.class1[i] = 1
+  MSEA.MetaboliteRanking = function(A, class.labels, metabolite.labels, nperm, sigma.correction = "MetaboliteCluster", replace=F) {
+    A = A + 0.00000001
+    N = length(A[,1])
+    Ns = length(A[1,])
+    
+    subset.mask = matrix(0, nrow=Ns, ncol=nperm)
+    reshuffled.class.labels1 = matrix(0, nrow=Ns, ncol=nperm)
+    reshuffled.class.labels2 = matrix(0, nrow=Ns, ncol=nperm)
+    class.labels1 = matrix(0, nrow=Ns, ncol=nperm)
+    class.labels2 = matrix(0, nrow=Ns, ncol=nperm)
+    
+    order.matrix = matrix(0, nrow = N, ncol = nperm)
+    obs.order.matrix = matrix(0, nrow = N, ncol = nperm)
+    s2n.matrix = matrix(0, nrow = N, ncol = nperm)
+    obs.s2n.matrix = matrix(0, nrow = N, ncol = nperm)
+    
+    obs.metabolite.labels = vector(length = N, mode="character")
+    obs.metabolite.descs = vector(length = N, mode="character")
+    obs.metabolite.symbols = vector(length = N, mode="character")
+    
+    M1 = matrix(0, nrow = N, ncol = nperm)
+    M2 = matrix(0, nrow = N, ncol = nperm)
+    S1 = matrix(0, nrow = N, ncol = nperm)
+    S2 = matrix(0, nrow = N, ncol = nperm)
+    
+    C = split(class.labels, class.labels)
+    class1.size = length(C[[1]])
+    class2.size = length(C[[2]])
+    class1.index = seq(1, class1.size, 1)
+    class2.index = seq(class1.size + 1, class1.size + class2.size, 1)
+    for (r in 1:nperm) {
+      class1.subset = sample(class1.index, size = ceiling(class1.size), replace = replace)
+      class2.subset = sample(class2.index, size = ceiling(class2.size), replace = replace)
+      class1.subset.size = length(class1.subset)
+      class2.subset.size = length(class2.subset)
+      subset.class1 = rep(0, class1.size)
+      for (i in 1:class1.size) {
+        if (is.element(class1.index[i], class1.subset)) {
+          subset.class1[i] = 1
+        }
+      }
+      subset.class2 = rep(0, class2.size)
+      for (i in 1:class2.size) {
+        if (is.element(class2.index[i], class2.subset)) {
+          subset.class2[i] = 1
+        }
+      }
+      subset.mask[, r] = as.numeric(c(subset.class1, subset.class2))
+      fraction.class1 = class1.size/Ns
+      fraction.class2 = class2.size/Ns
+      # Random (unbalanced permutation)
+      full.subset = c(class1.subset, class2.subset)
+      label1.subset = sample(full.subset, size = Ns * fraction.class1)
+      reshuffled.class.labels1[, r] = rep(0, Ns)
+      reshuffled.class.labels2[, r] = rep(0, Ns)
+      class.labels1[, r] = rep(0, Ns)
+      class.labels2[, r] = rep(0, Ns)
+      for (i in 1:Ns) {
+        m1 = sum(!is.na(match(label1.subset, i)))
+        m2 = sum(!is.na(match(full.subset, i)))
+        reshuffled.class.labels1[i, r] = m1
+        reshuffled.class.labels2[i, r] = m2 - m1
+        if (i <= class1.size) {
+          class.labels1[i, r] = m2
+          class.labels2[i, r] = 0
+        } else {
+          class.labels1[i, r] = 0
+          class.labels2[i, r] = m2
+        }
       }
     }
-    subset.class2 = rep(0, class2.size)
-    for (i in 1:class2.size) {
-      if (is.element(class2.index[i], class2.subset)) {
-        subset.class2[i] = 1
-      }
-    }
-    subset.mask[, r] = as.numeric(c(subset.class1, subset.class2))
-    fraction.class1 = class1.size/Ns
-    fraction.class2 = class2.size/Ns
-    # Random (unbalanced permutation)
-    full.subset = c(class1.subset, class2.subset)
-    label1.subset = sample(full.subset, size = Ns * fraction.class1)
-    reshuffled.class.labels1[, r] = rep(0, Ns)
-    reshuffled.class.labels2[, r] = rep(0, Ns)
-    class.labels1[, r] = rep(0, Ns)
-    class.labels2[, r] = rep(0, Ns)
-    for (i in 1:Ns) {
-      m1 = sum(!is.na(match(label1.subset, i)))
-      m2 = sum(!is.na(match(full.subset, i)))
-      reshuffled.class.labels1[i, r] = m1
-      reshuffled.class.labels2[i, r] = m2 - m1
-      if (i <= class1.size) {
-        class.labels1[i, r] = m2
-        class.labels2[i, r] = 0
-      } else {
-        class.labels1[i, r] = 0
-        class.labels2[i, r] = m2
-      }
-    }
-  }
-  # compute S2N for the random permutation matrix
-  P = reshuffled.class.labels1 * subset.mask
-  n1 = sum(P[,1])
-  M1 = A %*% P
-  M1 = M1/n1
-  A2 = A*A
-  S1 = A2 %*% P
-  S1 = S1/n1 - M1*M1
-  if (n1>1) {
-    S1 = sqrt(abs((n1/(n1-1)) * S1))
-  }
-  P = reshuffled.class.labels2 * subset.mask
-  n2 = sum(P[,1])
-  M2 = A %*% P
-  M2 = M2/n2
-  A2 = A*A
-  S2 = A2 %*% P
-  S2 = S2/n2 - M2*M2
-  if (n2>1) {
-    S2 = sqrt(abs((n2/(n2-1)) * S2))
-  }
-  if (sigma.correction == "MetaboliteCluster") {  # small sigma "fix" as used in MetaboliteCluster
-    S2 = ifelse(0.2*abs(M2) < S2, S2, 0.2*abs(M2))
-    S2 = ifelse(S2 == 0, 0.2, S2)
-    S1 = ifelse(0.2*abs(M1) < S1, S1, 0.2*abs(M1))
-    S1 = ifelse(S1 == 0, 0.2, S1)
-  }
-  M1 = M1 - M2
-  S1 = S1 + S2
-  s2n.matrix = M1/S1
-  for (r in 1:nperm) {order.matrix[, r] = order(s2n.matrix[, r], decreasing=T)}
-  # compute S2N for the "observed" permutation matrix
-  P = class.labels1 * subset.mask
-  n1 = sum(P[,1])
-  if (n1>1) {
+    # compute S2N for the random permutation matrix
+    P = reshuffled.class.labels1 * subset.mask
+    n1 = sum(P[,1])
     M1 = A %*% P
     M1 = M1/n1
     A2 = A*A
     S1 = A2 %*% P
     S1 = S1/n1 - M1*M1
-    S1 = sqrt(abs((n1/(n1-1)) * S1))
-  } else {
-    M1 = A %*% P
-    A2 = A*A
-    S1 = A2 %*% P
-    S1 = S1 - M1*M1
-    S1 = sqrt(abs(S1))
-  }
-  P = class.labels2 * subset.mask
-  n2 = sum(P[,1])
-  if (n2>1) {
+    if (n1>1) {
+      S1 = sqrt(abs((n1/(n1-1)) * S1))
+    }
+    P = reshuffled.class.labels2 * subset.mask
+    n2 = sum(P[,1])
     M2 = A %*% P
     M2 = M2/n2
     A2 = A*A
     S2 = A2 %*% P
     S2 = S2/n2 - M2*M2
-    S2 = sqrt(abs((n2/(n2-1)) * S2))
-  } else {
-    M2 = A %*% P
-    A2 = A*A
-    S2 = A2 %*% P
-    S2 = S2 - M2*M2
-    S2 = sqrt(abs(S2))
+    if (n2>1) {
+      S2 = sqrt(abs((n2/(n2-1)) * S2))
+    }
+    if (sigma.correction == "MetaboliteCluster") {  # small sigma "fix" as used in MetaboliteCluster
+      S2 = ifelse(0.2*abs(M2) < S2, S2, 0.2*abs(M2))
+      S2 = ifelse(S2 == 0, 0.2, S2)
+      S1 = ifelse(0.2*abs(M1) < S1, S1, 0.2*abs(M1))
+      S1 = ifelse(S1 == 0, 0.2, S1)
+    }
+    M1 = M1 - M2
+    S1 = S1 + S2
+    s2n.matrix = M1/S1
+    for (r in 1:nperm) {order.matrix[, r] = order(s2n.matrix[, r], decreasing=T)}
+    # compute S2N for the "observed" permutation matrix
+    P = class.labels1 * subset.mask
+    n1 = sum(P[,1])
+    if (n1>1) {
+      M1 = A %*% P
+      M1 = M1/n1
+      A2 = A*A
+      S1 = A2 %*% P
+      S1 = S1/n1 - M1*M1
+      S1 = sqrt(abs((n1/(n1-1)) * S1))
+    } else {
+      M1 = A %*% P
+      A2 = A*A
+      S1 = A2 %*% P
+      S1 = S1 - M1*M1
+      S1 = sqrt(abs(S1))
+    }
+    P = class.labels2 * subset.mask
+    n2 = sum(P[,1])
+    if (n2>1) {
+      M2 = A %*% P
+      M2 = M2/n2
+      A2 = A*A
+      S2 = A2 %*% P
+      S2 = S2/n2 - M2*M2
+      S2 = sqrt(abs((n2/(n2-1)) * S2))
+    } else {
+      M2 = A %*% P
+      A2 = A*A
+      S2 = A2 %*% P
+      S2 = S2 - M2*M2
+      S2 = sqrt(abs(S2))
+    }
+    if (sigma.correction == "MetaboliteCluster") {  # small sigma "fix" as used in MetaboliteCluster
+      S2 = ifelse(0.2*abs(M2) < S2, S2, 0.2*abs(M2))
+      S2 = ifelse(S2 == 0, 0.2, S2)
+      S1 = ifelse(0.2*abs(M1) < S1, S1, 0.2*abs(M1))
+      S1 = ifelse(S1 == 0, 0.2, S1)
+    }
+    M1 = M1 - M2
+    S1 = S1 + S2
+    obs.s2n.matrix = M1/S1
+    for (r in 1:nperm) {obs.order.matrix[,r] = order(obs.s2n.matrix[,r], decreasing=T)            }
+    
+    return(list(s2n.matrix = s2n.matrix, obs.s2n.matrix = obs.s2n.matrix, order.matrix = order.matrix, obs.order.matrix = obs.order.matrix))
   }
-  if (sigma.correction == "MetaboliteCluster") {  # small sigma "fix" as used in MetaboliteCluster
-    S2 = ifelse(0.2*abs(M2) < S2, S2, 0.2*abs(M2))
-    S2 = ifelse(S2 == 0, 0.2, S2)
-    S1 = ifelse(0.2*abs(M1) < S1, S1, 0.2*abs(M1))
-    S1 = ifelse(S1 == 0, 0.2, S1)
+  
+  MSEA.EnrichmentScore2 = function(metabolite.list, metabolite.set, weighted.score.type = 1, correl.vector = NULL) {
+    # Computes the weighted MSEA score of metabolite.set in metabolite.list. It is the same calculation as in
+    # MSEA.EnrichmentScore but faster (x8) without producing the RES, arg.RES and tag.indicator outputs.
+    # This call is intended to be used to asses the enrichment of random permutations rather than the
+    # observed one.
+    N = length(metabolite.list)
+    Nh = length(metabolite.set)
+    Nm =  N - Nh
+    
+    loc.vector = vector(length=N, mode="numeric")
+    peak.res.vector = vector(length=Nh, mode="numeric")
+    valley.res.vector = vector(length=Nh, mode="numeric")
+    tag.correl.vector = vector(length=Nh, mode="numeric")
+    tag.loc.vector = vector(length=Nh, mode="numeric")
+    tag.diff.vector = vector(length=Nh, mode="numeric")
+    
+    loc.vector[metabolite.list] = seq(1, N)
+    tag.loc.vector = loc.vector[metabolite.set]
+    tag.loc.vector = sort(tag.loc.vector, decreasing = F)
+    
+    if (weighted.score.type == 0) {
+      tag.correl.vector = rep(1, Nh)
+    } else if (weighted.score.type == 1) {
+      tag.correl.vector = correl.vector[tag.loc.vector]
+      tag.correl.vector = abs(tag.correl.vector)
+    } else if (weighted.score.type == 2) {
+      tag.correl.vector = correl.vector[tag.loc.vector]*correl.vector[tag.loc.vector]
+      tag.correl.vector = abs(tag.correl.vector)
+    } else {
+      tag.correl.vector = correl.vector[tag.loc.vector]**weighted.score.type
+      tag.correl.vector = abs(tag.correl.vector)
+    }
+    tag.correl.vector[is.na(tag.correl.vector)] = 1
+    
+    norm.tag = 1.0/sum(tag.correl.vector)
+    tag.correl.vector = tag.correl.vector * norm.tag
+    norm.no.tag = 1.0/Nm
+    
+    tag.diff.vector[1] = (tag.loc.vector[1] - 1)
+    tag.diff.vector[2:Nh] = tag.loc.vector[2:Nh] - tag.loc.vector[1:(Nh - 1)] - 1
+    tag.diff.vector = tag.diff.vector * norm.no.tag
+    peak.res.vector = cumsum(tag.correl.vector - tag.diff.vector)
+    valley.res.vector = peak.res.vector - tag.correl.vector
+    max.ES = max(peak.res.vector)
+    min.ES = min(valley.res.vector)
+    ES = signif(ifelse(max.ES > - min.ES, max.ES, min.ES), digits=5)
+    
+    return(list(ES = ES))
   }
-  M1 = M1 - M2
-  S1 = S1 + S2
-  obs.s2n.matrix = M1/S1
-  for (r in 1:nperm) {obs.order.matrix[,r] = order(obs.s2n.matrix[,r], decreasing=T)            }
-
-  return(list(s2n.matrix = s2n.matrix, obs.s2n.matrix = obs.s2n.matrix, order.matrix = order.matrix, obs.order.matrix = obs.order.matrix))
-}
-
-MSEA.EnrichmentScore = function(metabolite.list, metabolite.set, weighted.score.type = 1, correl.vector = NULL) {
-  tag.indicator = sign(match(metabolite.list, metabolite.set, nomatch=0))    # notice that the sign is 0 (no tag) or 1 (tag)
-  no.tag.indicator = 1 - tag.indicator
-  N = length(metabolite.list)
-  Nh = length(metabolite.set)
-  Nm =  N - Nh
-  if (weighted.score.type == 0) {
-    correl.vector = rep(1, N)
-  }
-  alpha = weighted.score.type
-  correl.vector[which(is.na(correl.vector))] = 0
-  correl.vector = abs(correl.vector**alpha)
-  sum.correl.tag    = sum(na.omit(correl.vector[tag.indicator == 1]))
-  norm.tag    = 1.0/sum.correl.tag
-  norm.no.tag = 1.0/Nm
-  RES = cumsum(tag.indicator * correl.vector * norm.tag - no.tag.indicator * norm.no.tag)
-  max.ES = max(RES)
-  min.ES = min(RES)
-  if (max.ES > - min.ES) {
-    ES = signif(max.ES, digits = 5)
-    arg.ES = which.max(RES)
-  } else {
-    ES = signif(min.ES, digits=5)
-    arg.ES = which.min(RES)
-  }
-  return(list(ES = ES, arg.ES = arg.ES, RES = RES, indicator = tag.indicator))
-}
-
-MSEA.EnrichmentScore2 = function(metabolite.list, metabolite.set, weighted.score.type = 1, correl.vector = NULL) {
-  # Computes the weighted MSEA score of metabolite.set in metabolite.list. It is the same calculation as in
-  # MSEA.EnrichmentScore but faster (x8) without producing the RES, arg.RES and tag.indicator outputs.
-  # This call is intended to be used to asses the enrichment of random permutations rather than the
-  # observed one.
-  N = length(metabolite.list)
-  Nh = length(metabolite.set)
-  Nm =  N - Nh
-
-  loc.vector = vector(length=N, mode="numeric")
-  peak.res.vector = vector(length=Nh, mode="numeric")
-  valley.res.vector = vector(length=Nh, mode="numeric")
-  tag.correl.vector = vector(length=Nh, mode="numeric")
-  tag.loc.vector = vector(length=Nh, mode="numeric")
-  tag.diff.vector = vector(length=Nh, mode="numeric")
-
-  loc.vector[metabolite.list] = seq(1, N)
-  tag.loc.vector = loc.vector[metabolite.set]
-  tag.loc.vector = sort(tag.loc.vector, decreasing = F)
-
-  if (weighted.score.type == 0) {
-    tag.correl.vector = rep(1, Nh)
-  } else if (weighted.score.type == 1) {
-    tag.correl.vector = correl.vector[tag.loc.vector]
-    tag.correl.vector = abs(tag.correl.vector)
-  } else if (weighted.score.type == 2) {
-    tag.correl.vector = correl.vector[tag.loc.vector]*correl.vector[tag.loc.vector]
-    tag.correl.vector = abs(tag.correl.vector)
-  } else {
-    tag.correl.vector = correl.vector[tag.loc.vector]**weighted.score.type
-    tag.correl.vector = abs(tag.correl.vector)
-  }
-  tag.correl.vector[is.na(tag.correl.vector)] = 1
-
-  norm.tag = 1.0/sum(tag.correl.vector)
-  tag.correl.vector = tag.correl.vector * norm.tag
-  norm.no.tag = 1.0/Nm
-
-  tag.diff.vector[1] = (tag.loc.vector[1] - 1)
-  tag.diff.vector[2:Nh] = tag.loc.vector[2:Nh] - tag.loc.vector[1:(Nh - 1)] - 1
-  tag.diff.vector = tag.diff.vector * norm.no.tag
-  peak.res.vector = cumsum(tag.correl.vector - tag.diff.vector)
-  valley.res.vector = peak.res.vector - tag.correl.vector
-  max.ES = max(peak.res.vector)
-  min.ES = min(valley.res.vector)
-  ES = signif(ifelse(max.ES > - min.ES, max.ES, min.ES), digits=5)
-
-  return(list(ES = ES))
-}
-
-# ----------------------------------------------------------------------------------------
-# Main MSEA Analysis Function that implements the entire methodology
-# This is a methodology for the analysis of global molecular profiles called Metabolite Set Enrichment Analysis (MSEA). It determines
-# whether an a priori defined set of metabolites shows statistically significant, concordant differences between two biological
-# states (e.g. phenotypes). MSEA operates on all metabolites from an experiment, rank ordered by the signal to noise ratio and
-# determines whether members of an a priori defined metabolite set are nonrandomly distributed towards the top or bottom of the
-# list and thus may correspond to an important biological process. To assess significance the program uses an empirical
-# permutation procedure to test deviation from random that preserves correlations between metabolites.
-#
-# For details see Subramanian et al 2005
-MSEA = function(input.ds, input.cls, met.db, nperm = 1000, weighted.score.type = 1,
-                adjust.FDR.q.val = F, met.size.threshold.min = 5, met.size.threshold.max = 100,
-                random.seed = 123456) {
+  
+  print(" *** Running MSEA Analysis...")
+  nperm=1000
+  weighted.score.type=1
+  adjust.FDR.q.val = F
+  met.size.threshold.min = 5
+  met.size.threshold.max = 500
+  random.seed = 760435
   nom.p.val.threshold = -1
   fwer.p.val.threshold = -1
   fdr.q.val.threshold = -1
-  # Inputs:
-  #   input.ds: Input metabolite expression dataset
-  #   input.cls:  Input class vector (phenotype)
-  #   met.file: Metabolite set database in GMT format
-  #   nperm: Number of random permutations (default: 1000)
-  #   weighted.score.type: Enrichment correlation-based weighting: 0=no weight (KS), 1=standard weigth, 2 = over-weigth (default: 1)
-  #   nom.p.val.threshold: Significance threshold for nominal p-vals for metabolite sets (default: -1, no thres)
-  #   fwer.p.val.threshold: Significance threshold for FWER p-vals for metabolite sets (default: -1, no thres)
-  #   fdr.q.val.threshold: Significance threshold for FDR q-vals for metabolite sets (default: 0.25)
-  #   adjust.FDR.q.val: Adjust the FDR q-vals (default: F)
-  #   met.size.threshold.min: Minimum size (in metabolites) for database metabolite sets to be considered (default: 25)
-  #   met.size.threshold.max: Maximum size (in metabolites) for database metabolite sets to be considered (default: 500)
-  #   random.seed: Random number metaboliterator seed. (default: 123456)
-  #
-  #   Output:
-  #      The results files are:
-  #    - Two data.frames containing global results (one for each phenotype). 
-  #
-  #The format (columns) for the global result files is as follows.
-  # MS : Metabolite set name.
-  # SIZE : Size of the set in metabolites.
-  # SOURCE : Set definition or source.
-  # ES : Enrichment score.
-  # NES : Normalized (multiplicative rescaling) normalized enrichment score.
-  # NOM p-val : Nominal p-value (from the null distribution of the metabolite set).
-  # FDR q-val: False discovery rate q-values
-  # FWER p-val: Family wise error rate p-values.
-  # Tag %: Percent of metabolite set before running enrichment peak.
-  # Metabolite %: Percent of metabolite list before running enrichment peak.
-  # Signal : enrichment signal strength.
-  # FDR (median): FDR q-values from the median of the null distributions.
-  # glob.p.val: P-value using a global statistic (number of sets above the set's NES).
-  # The function call to MSEA returns a  two element list containing the two global result reports as data frames ($report1, $report2).
-  #
-  # results1: Global output report for first phenotype
-  # result2:  Global putput report for second phenotype
-  print(" *** Running MSEA Analysis...")
   set.seed(seed=random.seed, kind = NULL)
   adjust.param = 0.5
-  metabolite.labels = rownames(input.ds)
-  sample.names = colnames(input.ds)
-  A = data.matrix(input.ds)
-  dim(A)
-  cols = length(A[1,])
-  rows = length(A[,1])
-  # Read input class vector
-  class.labels = input.cls
-  phen1 = 0
-  phen2 = 1
+  metabolite.labels = rownames(data)
+  sample.names = colnames(data)
+  A = data.matrix(data)
+  cols = ncol(A)
+  rows = nrow(A)
 
   # Read input metabolite set database
   temp = readLines(met.db)
   max.Ng = length(temp)
   temp.size.G = vector(length = max.Ng, mode = "numeric")
   for (i in 1:max.Ng) { temp.size.G[i] = length(unlist(strsplit(temp[[i]], "    "))) - 2 }
-
+  
   max.size.G = max(temp.size.G)
   gs = matrix(rep("null", max.Ng*max.size.G), nrow=max.Ng, ncol= max.size.G)
   temp.names = vector(length = max.Ng, mode = "character")
@@ -381,7 +319,7 @@ MSEA = function(input.ds, input.cls, met.db, nperm = 1000, weighted.score.type =
   met.names = temp.names[1:Ng]
   met.desc = temp.desc[1:Ng]
   size.G = temp.size.G[1:Ng]
-
+  
   N = length(A[,1])
   Ns = length(A[1,])
   print(c("Number of metabolites in dataset:", N))
@@ -389,24 +327,20 @@ MSEA = function(input.ds, input.cls, met.db, nperm = 1000, weighted.score.type =
   print(c("Number of samples:", Ns))
   print(c("Original number of Metabolite Pathway Sets:", max.Ng))
   print(c("Maximum metabolite pathway set size:", max.size.G))
-
+  
   # Read metabolite and metabolite set annotations if metabolite annotation file was provided
   all.metabolite.descs = vector(length = N, mode ="character")
   all.metabolite.symbols = vector(length = N, mode ="character")
-  all.met.descs = vector(length = Ng, mode ="character")
   for (i in 1:N) {
     all.metabolite.descs[i] = metabolite.labels[i]
     all.metabolite.symbols[i] = metabolite.labels[i]
-  }
-  for (i in 1:Ng) {
-    all.met.descs[i] = met.desc[i]
   }
   Obs.indicator = matrix(nrow= Ng, ncol=N)
   Obs.RES = matrix(nrow= Ng, ncol=N)
   Obs.ES = vector(length = Ng, mode = "numeric")
   Obs.arg.ES = vector(length = Ng, mode = "numeric")
   Obs.ES.norm = vector(length = Ng, mode = "numeric")
-
+  
   # MSEA methodology
   # Compute observed and random permutation metabolite rankings
   obs.s2n = vector(length=N, mode="numeric")
@@ -419,7 +353,7 @@ MSEA = function(input.ds, input.cls, met.db, nperm = 1000, weighted.score.type =
   obs.correl.matrix = matrix(nrow = N, ncol = nperm)
   order.matrix = matrix(nrow = N, ncol = nperm)
   obs.order.matrix = matrix(nrow = N, ncol = nperm)
-
+  
   nperm.per.call = 100
   n.groups = nperm %/% nperm.per.call
   n.rem = nperm %% nperm.per.call
@@ -427,7 +361,7 @@ MSEA = function(input.ds, input.cls, met.db, nperm = 1000, weighted.score.type =
   n.ends = cumsum(n.perms)
   n.starts = n.ends - n.perms + 1
   if (n.rem == 0) {n.tot = n.groups} else {n.tot = n.groups + 1}
-
+  
   for (nk in 1:n.tot) {
     call.nperm = n.perms[nk]
     print(paste("Computing ranked list for actual and permuted phenotypes.......permutations: ", 
@@ -443,7 +377,7 @@ MSEA = function(input.ds, input.cls, met.db, nperm = 1000, weighted.score.type =
   obs.s2n = apply(obs.correl.matrix, 1, function(i) median(na.omit(i)))  # using median to assign enrichment scores
   obs.index = order(obs.s2n, decreasing=T)
   obs.s2n   = sort(obs.s2n, decreasing=T, na.last = TRUE)
-
+  
   obs.metabolite.labels = metabolite.labels[obs.index]
   obs.metabolite.descs = all.metabolite.descs[obs.index]
   obs.metabolite.symbols = all.metabolite.symbols[obs.index]
@@ -455,11 +389,9 @@ MSEA = function(input.ds, input.cls, met.db, nperm = 1000, weighted.score.type =
     metabolite.set = gs[i,gs[i,] != "null"]
     metabolite.set2 = vector(length=length(metabolite.set), mode = "numeric")
     metabolite.set2 = match(metabolite.set, metabolite.labels)
-    MSEA.results = MSEA.EnrichmentScore(metabolite.list=metabolite.list2, metabolite.set=metabolite.set2, weighted.score.type=weighted.score.type, correl.vector = obs.s2n)
+    MSEA.results = MSEA.EnrichmentScore2(metabolite.list=metabolite.list2, metabolite.set=metabolite.set2, 
+                                         weighted.score.type=weighted.score.type, correl.vector = obs.s2n)
     Obs.ES[i] = MSEA.results$ES
-    Obs.arg.ES[i] = MSEA.results$arg.ES
-    Obs.RES[i,] = MSEA.results$RES
-    Obs.indicator[i,] = MSEA.results$indicator
     if (Obs.ES[i] >= 0) {  # compute signal strength
       tag.frac[i] = sum(Obs.indicator[i,1:Obs.arg.ES[i]])/size.G[i]
       metabolite.frac[i] = Obs.arg.ES[i]/N
@@ -469,7 +401,7 @@ MSEA = function(input.ds, input.cls, met.db, nperm = 1000, weighted.score.type =
     }
     signal.strength[i] = tag.frac[i] * (1 - metabolite.frac[i]) * (N / (N - size.G[i]))
   }
-
+  
   # Compute enrichment for random permutations, using sample-label permutation
   phi = matrix(nrow = Ng, ncol = nperm)
   phi.norm = matrix(nrow = Ng, ncol = nperm)
@@ -516,7 +448,7 @@ MSEA = function(input.ds, input.cls, met.db, nperm = 1000, weighted.score.type =
       p.vals[i, 1] = signif(sum(neg.phi <= ES.value)/length(neg.phi), digits=5)
     }
   }
-
+  
   # Find effective size
   erf = function (x) {2 * pnorm(sqrt(2) * x)}
   KS.mean = function(N) { # KS mean as a function of set size N
@@ -541,7 +473,7 @@ MSEA = function(input.ds, input.cls, met.db, nperm = 1000, weighted.score.type =
     }
     pos.m = mean(pos.phi)
     neg.m = mean(abs(as.numeric(neg.phi)))
-
+    
     pos.phi = pos.phi/pos.m
     neg.phi = neg.phi/neg.m
     for (j in 1:nperm) {
@@ -564,7 +496,7 @@ MSEA = function(input.ds, input.cls, met.db, nperm = 1000, weighted.score.type =
       Obs.ES.norm[i] = Obs.ES[i]/neg.m
     }
   }
-
+  
   # Compute FWER p-vals
   print("Computing FWER p-values...")
   max.ES.vals.p = NULL
@@ -594,7 +526,7 @@ MSEA = function(input.ds, input.cls, met.db, nperm = 1000, weighted.score.type =
       p.vals[i, 2] = signif(sum(max.ES.vals.n <= ES.value)/length(max.ES.vals.n), digits=5)
     }
   }
-
+  
   # Compute FDRs
   print("Computing FDR q-values...")
   NES = vector(length=Ng, mode="numeric")
@@ -605,17 +537,16 @@ MSEA = function(input.ds, input.cls, met.db, nperm = 1000, weighted.score.type =
   phi.norm.mean  = vector(length=Ng, mode="numeric")
   obs.phi.mean  = vector(length=Ng, mode="numeric")
   FDR.mean = vector(length=Ng, mode="numeric")
-  FDR.median = vector(length=Ng, mode="numeric")
   phi.norm.median.d = vector(length=Ng, mode="numeric")
   obs.phi.norm.median.d = vector(length=Ng, mode="numeric")
-
+  
   Obs.ES.index = order(Obs.ES.norm, decreasing=T)
   Orig.index = seq(1, Ng)
   Orig.index = Orig.index[Obs.ES.index]
   Orig.index = order(Orig.index, decreasing=F)
   Obs.ES.norm.sorted = Obs.ES.norm[Obs.ES.index]
   met.names.sorted = met.names[Obs.ES.index]
-
+  
   for (k in 1:Ng) {
     NES[k] = Obs.ES.norm.sorted[k]
     ES.value = NES[k]
@@ -645,7 +576,7 @@ MSEA = function(input.ds, input.cls, met.db, nperm = 1000, weighted.score.type =
   }
   FDR.mean[which(is.na(FDR.mean))] = 1
   FDR.median[which(is.na(FDR.median))] = 1
-
+  
   # adjust q-values
   if (adjust.FDR.q.val == T) {
     pos.nes = length(NES[NES >= 0])
@@ -667,12 +598,12 @@ MSEA = function(input.ds, input.cls, met.db, nperm = 1000, weighted.score.type =
   phi.norm.mean.sorted = phi.norm.mean[Orig.index]
   FDR.mean.sorted = FDR.mean[Orig.index]
   FDR.median.sorted = FDR.median[Orig.index]
-
+  
   # Compute global statistic
   glob.p.vals = vector(length=Ng, mode="numeric")
   NULL.pass = vector(length=nperm, mode="numeric")
   OBS.pass = vector(length=nperm, mode="numeric")
-
+  
   for (k in 1:Ng) {
     NES[k] = Obs.ES.norm.sorted[k]
     if (NES[k] >= 0) {
@@ -693,33 +624,20 @@ MSEA = function(input.ds, input.cls, met.db, nperm = 1000, weighted.score.type =
     glob.p.vals[k] = sum(NULL.pass >= mean(OBS.pass))/nperm
   }
   glob.p.vals.sorted = glob.p.vals[Orig.index]
-
+  
   # Produce results report
-  print("Producing result tables and plots...")
-  Obs.ES = signif(Obs.ES, digits=5)
-  Obs.ES.norm = signif(Obs.ES.norm, digits=5)
-  p.vals = signif(p.vals, digits=4)
-  signal.strength = signif(signal.strength, digits=3)
-  tag.frac = signif(tag.frac, digits=3)
-  metabolite.frac = signif(metabolite.frac, digits=3)
-  FDR.mean.sorted = signif(FDR.mean.sorted, digits=5)
-  FDR.median.sorted =  signif(FDR.median.sorted, digits=5)
-  glob.p.vals.sorted = signif(glob.p.vals.sorted, digits=5)
-
-  report = data.frame(cbind(met.names, size.G, all.met.descs, Obs.ES, Obs.ES.norm, p.vals[,1], FDR.mean.sorted, p.vals[,2], tag.frac, metabolite.frac, signal.strength, FDR.median.sorted, glob.p.vals.sorted))
-  names(report) = c("MS", "SIZE", "SOURCE", "ES", "NES", "NOM p-val", "FDR q-val", "FWER p-val", "Tag %", "Metabolite %", "Signal", "FDR (median)", "glob.p.val")
-  report2 = report
-  report.index2 = order(Obs.ES.norm, decreasing=T)
-  for (i in 1:Ng) {report2[i,] = report[report.index2[i],]}
-  report3 = report
-  report.index3 = order(Obs.ES.norm, decreasing=F)
-  for (i in 1:Ng) {report3[i,] = report[report.index3[i],]}
-  report.phen1 = report2
-  report.phen2 = report3
-
-  return(list(report1 = report.phen1, report2 = report.phen2))
-}  # end of definition of MSEA.analysis
-
-
-
+  Obs.ES.norm = signif(Obs.ES.norm, digits=4)
+  p.vals = signif(p.vals, digits=3)
+  FDR.mean.sorted = signif(FDR.mean.sorted, digits=3)
+  glob.p.vals.sorted = signif(glob.p.vals.sorted, digits=3)
+  met.names = as.character(sapply(met.names, function(i) gsub("\\[1\\] ", "", i)))
+  
+  report = data.frame(Pathway=met.names, Size=size.G, NES=Obs.ES.norm, NOM.pval=p.vals[,1], FDR.qval=FDR.mean.sorted, FWER.pval=p.vals[,2], 
+                      Global.pval=glob.p.vals.sorted)
+  report = report[order(report$NES, decreasing=T),]
+  report = report[which(report$NOM.pval<0.25),]
+  colnames(report) = c("Pathway", "Size", "NES", "NOM\npval", "FDR\nqval", "FWER\npval", "Global\npval")
+  
+  return(report)
+}
 

@@ -1,4 +1,3 @@
-
 comparePatientModPerts = function(input) {
   ig = graphs[[input$diagnosis]][["ig"]]
   igraphObjectG = vector(mode="list", length=length(V(ig)$name))
@@ -113,19 +112,14 @@ extractModPerts = function(input) {
   return(list(sim=simTbl, pt_ig=pt_ig))
 }
 
-
-
-
-
-
 getData = function(input) {
   print("called getData()...")
   if (input$raworZscore == "Raw") {
-    data = .GlobalEnv$all_raw_data
+    data = Miller2015[,grep("IEM_", colnames(Miller2015))]
   } else if (input$raworZscore == "Normalized") {
-    data = .GlobalEnv$all_norm_data
+    data = Miller2015[,grep("IEM_", colnames(Miller2015))]
   } else if (input$raworZscore == "Zscored") {
-    data = .GlobalEnv$all_data
+    data = Miller2015[,grep("IEM_", colnames(Miller2015))]
   }
   pts = as.character(unlist(sapply(input$showThese, function(i) cohorts[[i]])))
   ind = which(colnames(data) %in% pts)
@@ -134,6 +128,9 @@ getData = function(input) {
   res = cbind(rownames(data), data)
   colnames(res) = c("Metabolite", colnames(data))
   res = as.matrix(res)
+  
+  print(sprintf("getData() outputted res dim = %d x %d", dim(res)[1], dim(res)[2]))
+  
   return(res)
 }
 
@@ -141,9 +138,9 @@ getMetList = function(input) {
   # First, get rid of metabolites that have below fil rate
   data = Miller2015[,grep("IEM_", colnames(Miller2015))]
   ref = data[,which(diagnoses$diagnosis=="No biochemical genetic diagnosis")]
-  ref.fil = apply(ref, 1, function(i) 1-(sum(is.na(i))/length(i)))
+  ref.fil = Miller2015$`Times identifed in all 200 samples`/200
   ref = ref[which(ref.fil>0.66),]
-  metClass = .GlobalEnv$metClass[which(ref.fil>0.66)]
+  metClass = Miller2015$SUPER_PATHWAY[which(ref.fil>0.66)]
 
   if (input$metClass=="Lipid") {
     return(rownames(ref)[which(metClass=="Lipid")])
@@ -169,18 +166,18 @@ getMetList = function(input) {
 neg = function(x) { return(-x) }
 
 # Get reference population statistics & plots
-getRefPop = function(input, norm.data) {
+getRefPop = function(input) {
   print("getRefPop() called.")
   data = Miller2015[,grep("IEM_", colnames(Miller2015))]
   ref = data[,which(diagnoses$diagnosis=="No biochemical genetic diagnosis")]
-  ref.fil = apply(ref, 1, function(i) 1-(sum(is.na(i))/length(i)))
+  ref.fil = Miller2015$`Times identifed in all 200 samples`/200
   ref = ref[which(ref.fil>0.66),]
   print(dim(ref))
   print(input$metSelect)
   print(input$metSelect %in% rownames(ref))
 
   # Histogram plot of metabolite, with outliers that were removed during z-score calculation highlighted in red
-  outlierSamples = which(ref[input$metSelect,] %in% boxplot.stats(ref[input$metSelect,])$out)
+  outlierSamples = which(as.numeric(ref[input$metSelect,]) %in% boxplot.stats(as.numeric(ref[input$metSelect,]))$out)
   print(sprintf("Length outlier samples = %d", length(outlierSamples)))
   if (length(outlierSamples)>0) {
     df = data.frame(x=as.numeric(ref[input$metSelect, -outlierSamples]))
@@ -196,9 +193,9 @@ getRefPop = function(input, norm.data) {
   qq = ggplot(data=df, aes(sample=x)) + stat_qq() + ggtitle(sprintf("Normal QQ-Plot for %s (%s)", input$metSelect, input$metClass)) +
     geom_abline(slope = slope, intercept = int)
 
-  per = list(up=length(which(.GlobalEnv$all_data[input$metSelect,]>2))/nrow(.GlobalEnv$all_data),
-             down=length(which(neg(.GlobalEnv$all_data[input$metSelect,]) > 2))/nrow(.GlobalEnv$all_data))
-  df = data.frame(Sample=1:ncol(.GlobalEnv$all_data), Zscore=.GlobalEnv$all_data[input$metSelect,])
+  per = list(up=length(which(data[input$metSelect,]>2))/ncol(data),
+             down=length(which(neg(data[input$metSelect,]) > 2))/ncol(data))
+  df = data.frame(Sample=1:ncol(data), Zscore=as.numeric(data[input$metSelect,]))
   rare = ggplot(data=df, aes(x=Sample, y=Zscore)) + geom_point(size=1) +
     ggtitle(sprintf("Percentage with zscore >2 = %.2f.\nPercentage with zscore <-2 = %.2f.", per$up, per$down)) +
     geom_hline(yintercept=2, color="red") + geom_hline(yintercept=-2, color="red")
@@ -211,8 +208,8 @@ getRefPop = function(input, norm.data) {
   mn.est = as.numeric(t$coefficients[1])
   sd.est = as.numeric(t$coefficients[2])
 
-  samples = colnames(ref)[which(ref[input$metSelect,] %in% boxplot.stats(ref[input$metSelect,])$out)]
-  values = ref[input$metSelect, which(ref[input$metSelect,] %in% boxplot.stats(ref[input$metSelect,])$out)]
+  samples = colnames(ref)[which(as.numeric(ref[input$metSelect,]) %in% boxplot.stats(as.numeric(ref[input$metSelect,]))$out)]
+  values = ref[input$metSelect, which(as.numeric(ref[input$metSelect,]) %in% boxplot.stats(as.numeric(ref[input$metSelect,]))$out)]
   outlierSamples = cbind(samples, round(as.numeric(values),2))
   colnames(outlierSamples) = c("Samples Outliers", "Sample Value")
 
@@ -223,25 +220,30 @@ getPatientReport = function(input) {
   # Must display RAW, Anchor and Z-score values for all patients in input$ptIDs. 
   # If in Miller2015 data, there are no raw and anchor values.
   zscore.data = Miller2015[,grep("IEM_", colnames(Miller2015))]
-  ref = data[,which(diagnoses$diagnosis=="No biochemical genetic diagnosis")]
-  ref.fil = apply(ref, 1, function(i) 1-(sum(is.na(i))/length(i)))
+  tmp = rownames(Miller2015)
+  zscore.data = apply(as.matrix(zscore.data[,which(colnames(zscore.data) %in% input$ptIDs)]), 1, mean)
+  names(zscore.data) = tmp
+  #ref = data[,which(diagnoses$diagnosis=="No biochemical genetic diagnosis")]
+  #ref.fil = Miller2015$`Times identifed in all 200 samples`/200
 
   # MetaboliteName  RawIonIntensity Anchor(CMTRX.5 median value)  Zscore
   data = data.frame(Metabolite=character(), Raw=numeric(), Anchor=numeric(), Zscore=numeric(), stringsAsFactors = FALSE)
-  for (row in 1:length(raw.data)) {
-    data[row, "Metabolite"] = names(raw.data)[row]
+  for (row in 1:length(zscore.data)) {
+    data[row, "Metabolite"] = names(zscore.data)[row]
     #data[row, "Raw"] = round(raw.data[row], 2)
     #if (length(which(names(norm.data)==names(raw.data)[row]))>0) {
     #  data[row, "Anchor"] = round(norm.data[which(names(norm.data)==names(raw.data)[row])], 2)
     #} else {
     #  data[row, "Anchor"] = NA
     #}
-    if (length(which(names(zscore.data)==names(raw.data)[row]))>0) {
-      data[row, "Zscore"] = round(zscore.data[which(names(zscore.data)==names(raw.data)[row])], 2)
-    } else {
-      data[row, "Zscore"] = NA
-    }
+    data[row, "Zscore"] = zscore.data[row]
+    #if (length(which(names(zscore.data)==names(raw.data)[row]))>0) {
+    #  data[row, "Zscore"] = round(zscore.data[which(names(zscore.data)==names(raw.data)[row])], 2)
+    #} else {
+    #  data[row, "Zscore"] = NA
+    #}
   }
+  data = data[order(abs(data$Zscore), decreasing = TRUE),]
 
   # Remove mets that were NA in raw, norm and zscore AND
   # Next, Remove mets that were NA in raw, but not in Anchor. These will be displayed in separate table.
@@ -333,7 +335,7 @@ getPathwayMap = function(input) {
     }
     V(template.ig)$label = wrap_strings(V(template.ig)$label, 15)
     V(template.ig)$label.cex = 0.75
-    template.ig = delete.vertices(template.ig, v=V(template.ig)$name[which(V(template.ig)$shape %in% c("Label", "FinalPathway"))])
+    template.ig = delete.vertices(template.ig, v=V(template.ig)$name[which(V(template.ig)$shape %in% c("Label", "Class", "FinalPathway"))])
 
     svg_filename = system.file("shiny-app/metDataPortal_appFns.r", package="CTD")
     svg_filename = gsub("/metDataPortal_appFns.r", "", svg_filename)

@@ -1,0 +1,49 @@
+[1] Arginine-Metabolism         fumarate    aspartate    citrulline    glutamate    arginine    urea    ornithine
+[1] Ascorbate-Metabolism         threonate    glucuronate    myo-inositol    pyruvate
+[1] Asp-Glu-Metabolism         glutamine    succinate    2-hydroxyglutarate    glutamate    carnitine    alpha-ketoglutarate    aspartate
+[1] BCAA-Metabolism         glycine    3-methyl-2-oxovalerate    isoleucine    carnitine    alpha-hydroxyisovalerate    3-methyl-2-oxobutyrate    glutamate    valine    isovalerylglycine    3-hydroxyisobutyrate    tigloylglycine    3-aminoisobutyrate    leucine    acetoacetate    succinate    alpha-hydroxyisocaproate    2-hydroxy-3-methylvalerate    3-methylcrotonylglycine
+[1] Benzoate-Metabolism         hippurate    glycine    benzoate    catechol sulfate
+[1] Beta-Oxidation         carnitine    glycine
+[1] Bile-Acid-Metabolism         cholesterol    cholate    7-alpha-hydroxycholesterol    taurine    glycine    glycocholate    glycocholenate sulfate    deoxycholate    taurocholate    glycolithocholate    taurocholenate sulfate    glycodeoxycholate    taurodeoxycholate    glycolithocholate sulfate    taurolithocholate 3-sulfate
+[1] Carbamoylphosphate-Pathway         glutamate    ornithine    urea    arginine    citrulline    fumarate    cytidine    orotate    uracil    uridine    aspartate    pseudouridine    glutamine    beta-alanine
+[1] Carnitine-Biosynthesis         glycine    carnitine    3-dehydrocarnitine    deoxycarnitine    succinate
+[1] Cholesterol-Synthesis         lathosterol    cholesterol
+[1] Creatine-Metabolism         glycine    ornithine    creatine    creatinine    arginine
+[1] DicarboxylicAcid-Metabolism         succinate    adipate
+[1] Eicosanoids         palmitate (16:0)    oleate (18:1n9)    linoleate (18:2n6)    glycine    glutamate    arachidonate (20:4n6)
+[1] Endocannabinoid-Synthesis         
+[1] FattyAcid-Metabolism         oleate (18:1n9)    stearate (18:0)    palmitate (16:0)    arachidate (20:0)    arachidonate (20:4n6)    erucate (22:1n9)    myristoleate (14:1n5)    myristate (14:0)    palmitoleate (16:1n7)
+[1] Fibrinogen-Cleavage-Peptides         
+[1] GABA-Shunt         succinate    glutamate    alpha-ketoglutarate
+[1] Galactose-Metabolism         xylulose    glucose
+[1] Glutathione-Metabolism         glutamate    2-aminobutyrate    alanine    glycine    cysteine    5-oxoproline    cystine    lactate    pyruvate    cysteine-glutathione disulfide    taurine
+[1] Gly-Ser-Thr-Metabolism         threonine    pyruvate    serine    choline    dimethylglycine    betaine    methionine    glycerate    glycolate (hydroxyacetate)    glycine    alpha-ketobutyrate    glutamate    hippurate    benzoate    beta-hydroxypyruvate    2-aminobutyrate    1,2-propanediol    alanine
+[1] Glycogen-Metabolism         glucose    maltotriose
+[1] Glycolysis         alanine    pyruvate    lactate    glycine    glucose
+[1] Glycosylation         mannitol    fructose    mannose    fucose    glutamate    glutamine
+[1] Hemoglobin-Porphyrin-Metabolism         biliverdin    glucuronate    glycine    heme
+[1] Histidine-Metabolism         imidazole lactate    beta-alanine    imidazole propionate    pyruvate    histidine    glutamate    1-methylhistidine    trans-urocanate    carnosine
+[1] Inositol-Metabolism         myo-inositol    glucuronate    scyllo-inositol    1,2-dipalmitoylglycerol
+[1] Ketone-Bodies         1,2-propanediol    acetoacetate
+[1] Lysine-Catabolism         carnitine    pipecolate    2-aminoadipate    glutamate    lysine    glutarate (pentanedioate)    succinate
+[1] Met-Cys-Metabolism         methionine    alpha-ketobutyrate    cysteine    serine    pyruvate    dimethylglycine    betaine
+[1] Mevalonate-Metabolism         
+[1] Nicotinate-Nicotinamide-Metabolism         glutamine    glutamate    nicotinamide    1-methylnicotinamide    quinolinate    glycine
+[1] Pantothenate-Metabolism         cysteine
+[1] Pentose-Phosphate-Metabolism         xylulose    glucose    ribulose    ribitol    erythritol
+[1] Phe-Tyr-Metabolism         glycine    phenylacetylglycine    fumarate    glutamate    phenol sulfate    phenylacetate    phenylalanine    tyrosine    phenylpyruvate    acetoacetate    pyruvate    4-hydroxyphenylacetate    4-hydroxyphenylpyruvate    phenylacetylglutamine    glutamine
+[1] Phospholipid-Metabolism         linoleate (18:2n6)    arachidonate (20:4n6)    choline    glycerol    serine    myo-inositol
+[1] Polyamine-Metabolism         urea    arginine    4-acetamidobutanoate    ornithine
+[1] Proline-Metabolism         ornithine    glutamate    proline
+[1] Protein-Degradation         
+[1] Purine-Metabolism         ribose    guanosine    allantoin    fumarate    aspartate    glutamine    glutamate    xanthine    hypoxanthine    urea    glycine    xanthosine    urate    inosine    adenine
+[1] Pyridoxal-Metabolism         pyridoxate    pyridoxal
+[1] Pyrimidine-Metabolism         cytidine    orotate    uracil    uridine    aspartate    beta-alanine    pseudouridine    glutamine    glutamate
+[1] Riboflavin-Metabolism         
+[1] Secondary-Bile-Acids         taurine    taurodeoxycholate    deoxycholate    glycine    glycolithocholate    taurolithocholate 3-sulfate    glycolithocholate sulfate    taurocholate    cholate    glycocholate    glycocholenate sulfate    glycodeoxycholate    taurocholenate sulfate
+[1] Sorbitol-Glycerol-Metabolism         sorbitol    glucose    glycerate    glycerol    fructose
+[1] Sphingolipid-Metabolism         sphingosine    sphinganine    serine
+[1] Steroid-Hormone-Biosynthesis         7-alpha-hydroxycholesterol    cortisol    corticosterone    pregn steroid monosulfate    cortisone    cholesterol
+[1] TCA-Cycle         alpha-ketoglutarate    citrate    aspartate    pyruvate    malate    succinate    fumarate    2-hydroxyglutarate    cis-aconitate    glutamate
+[1] Thyroid-Hormone-Synthesis         tyrosine
+[1] Tryptophan-Metabolism         indoleacetate    5-hydroxyindoleacetate    indolelactate    indolepropionate    3-indoxyl sulfate    kynurenine    glutamate    kynurenate    tryptophan    quinolinate    alanine    xanthurenate

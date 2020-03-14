@@ -12,7 +12,6 @@ require(R.utils)
 require(CTD)
 kmx=15
 setwd("/Users/lillian.rosa/Downloads/CTD/inst/shiny-app")
-source("/Users/lillian.rosa/Downloads/CTD/inst/shiny-app/metDataPortal_appFns.r")
 data("Miller2015")
 cohorts = list()
 cohorts$mcc = diagnoses$id[which(diagnoses$diagnosis=="3-methylcrotonyl CoA carboxylase")]
@@ -27,13 +26,14 @@ cohorts$otc = diagnoses$id[which(diagnoses$diagnosis=="Ornithine transcarbamoyla
 cohorts$pa = diagnoses$id[which(diagnoses$diagnosis=="Propionic aciduria")]
 cohorts$pku = diagnoses$id[which(diagnoses$diagnosis=="Phenylketonuria")]
 cohorts$tmhle = diagnoses$id[which(diagnoses$diagnosis=="Trimethyllysine hydroxylase epsilon")]
+source("/Users/lillian.rosa/Downloads/CTD/inst/shiny-app/metDataPortal_appFns.r")
 
 ui = dashboardPage(
   dashboardHeader(title = "Metabolomics Data Portal"),
   dashboardSidebar(sidebarMenu(id = "tab",
                                menuItem("View Patient Report", tabName = "ptReport", icon = icon("user-circle-o")),
                                menuItem("Inspect Reference Population", tabName = "refPop", icon = icon("bar-chart")),
-                               menuItem("Examine Patient Similarity", tabName="similarity", icon= icon("search")))),
+                               menuItem("Network-Assisted Diagnostics", tabName = "ctd", icon=icon("project-diagram")))),
   dashboardBody(height="100%",
                 tabItems(
                   tabItem(tabName="ptReport",
@@ -45,13 +45,25 @@ ui = dashboardPage(
                                        selectInput(inputId = "ptIDs", label = "Select patients.", choices = "", selectize=TRUE, multiple=TRUE)), width=12),
                           box(title="Top Perturbed Pathways", status="info", solidHeader=TRUE, 
                               tabsetPanel(type="tabs", 
-                                          tabPanel("Over-representation Analysis", tableOutput("oraEnrichment")),
-                                          tabPanel("Metabolite Set Enrichment Analysis", tableOutput("mseaEnrichment"))), width=6, collapsible=TRUE),
+                                          tabPanel("Over-representation Analysis", dataTableOutput("oraEnrichment")),
+                                          tabPanel("Metabolite Set Enrichment Analysis", dataTableOutput("mseaEnrichment"))), width=6, collapsible=TRUE),
                           box(title="Inspect Genetic Variants", status="info", solidHeader=TRUE, dataTableOutput("geneticVars"), width=6, collapsible=TRUE), 
                           box(title="Pathway Map", status="primary", solidHeader = TRUE,
                               fluidRow(style="padding:10px; height:80px;", 
                                        splitLayout(cellWidths=c("33%", "33%", "33%"),
-                                                   selectInput(inputId = "pathwayMapId", label = "Pathway Map", choices = ""),
+                                                   selectInput(inputId = "pathwayMapId", label = "Pathway Map", 
+                                                               choices = c("Choose", "Arginine Metabolism", "Ascorbate Metabolism", "Asp-Glu Metabolism", "BCAA Metabolism", 
+                                                                           "Benzoate Metabolism", "Beta-Oxidation", "Bile-Acid Metabolism", "Carnitine Biosynthesis", 
+                                                                           "Cholesterol Synthesis", "Creatine Metabolism", "Dicoarboxylic Acid Metabolism", "Eicosanoids", 
+                                                                           "Endocannabinoid Synthesis", "Fatty Acid Metabolism", "Fibrinogen Cleavage Peptides", "GABA Shunt", 
+                                                                           "Galactose Metabolism", "Glutathione Metabolism", "Gly-Ser-Thr Metabaolism", "Glycogen Metabolism",
+                                                                           "Glycolysis", "Glycosylation", "Hemoglobin-Porphyrin Metabolism", "Histidine Metabolism", "Inositol Metabolism",
+                                                                           "Ketone Bodies", "Lysine Catabolism", "Met-Cys Metabolism", "Mevalonate Metabolism", "Nicotinate-Nicotinamide Metabolism",
+                                                                           "Pantothenate Metabolism", "Pentose-Phosphate Metabolism", "Phe-Tyr Metabolism", "Phospholipid Metabolism", 
+                                                                           "Polyamine Metabolism", "Proline Metabolism", "Protein Degradation", "Purine Metabolism", "Pyridoxal Metabolism",
+                                                                           "Pyrimidine Metabolism", "Riboflavin Metabolism", "Secondary-Bile-Acids", "Sorbitol-Glycerol Metabolism", 
+                                                                           "Sphingolipid-Metabolism","Steroid-Hormone Biosynthesis", "TCA Cycle", "Thyroid Hormone Synthesis", 
+                                                                           "Tryptophan Metabolism")),
                                                    sliderInput(inputId = "scalingFactor", label="Node Scaling Factor", min=1, max=5, step=1, value=3),
                                                    plotOutput("colorbar"))),
                               imageOutput("pathwayMap", height="100%", width="100%"), width=12, collapsible=TRUE),
@@ -65,7 +77,7 @@ ui = dashboardPage(
                           fluidRow(box(title = "Inspect the Distribution", status="primary", solidHeader = TRUE,
                                        splitLayout(cellWidths=c("50%", "50%"),
                                           selectInput(inputId = "metClass", label = "Which metabolite class do you want to select from?",
-                                                      choices = sort(unique(.GlobalEnv$metClass)), selected="Amino Acid"),
+                                                      choices = unique(Miller2015$SUPER_PATHWAY), selected="Amino Acid"),
                                           selectInput(inputId = "metSelect", label = "Select a metabolite from the chosen class to inspect.", choices = "")),
                                        textOutput("estimates"),
                                        splitLayout(cellWidths=c("50%", "50%"), plotOutput("referenceReport"), plotOutput("qqplot")),
@@ -124,23 +136,12 @@ server = function(input, output, session) {
           filename = function() { paste(input$biofluid, "-", input$patientID, ".txt", sep="") },
           content = function(file) { write.table(report()$patientReport, file, sep="\t", col.names = TRUE, row.names = FALSE) }
         )
-        output$oraEnrichment = renderTable(shiny.getORA_Metabolon(input))
-        output$mseaEnrichment = renderTable(shiny.getMSEA_Metabolon(input))
+        output$oraEnrichment = renderDataTable(shiny.getORA_Metabolon(input))
+        output$mseaEnrichment = renderDataTable(shiny.getMSEA_Metabolon(input, cohorts))
         #output$geneticVars = DT::renderDataTable(getGeneticVariants(input), rownames = FALSE)
 
         observeEvent(input$pathwayMapId, priority=0, {
           print(input$pathwayMapId)
-          updateSelectInput(session, "pathwayMapId", choices = c("Arginine Metabolism", "Ascorbate Metabolism", "Asp-Glu Metabolism",
-                                        "BCAA Metabolism", "Benzoate Metabolism", "Beta-Oxidation", "Bile-Acid Metabolism",
-                                        "Carnitine Biosynthesis", "Cholesterol Synthesis", "Creatine Metabolism", "Dicoarboxylic Acid Metabolism",
-                                        "Eicosanoids", "Endocannabinoid Synthesis", "Fatty Acid Metabolism", "Fibrinogen Cleavage Peptides",
-                                        "GABA Shunt", "Galactose Metabolism", "Glutathione Metabolism", "Gly-Ser-Thr Metabaolism", "Glycogen Metabolism",
-                                        "Glycolysis", "Glycosylation", "Hemoglobin-Porphyrin Metabolism", "Histidine Metabolism", "Inositol Metabolism",
-                                        "Ketone Bodies", "Lysine Catabolism", "Met-Cys Metabolism", "Mevalonate Metabolism", "Nicotinate-Nicotinamide Metabolism",
-                                        "Pantothenate Metabolism", "Pentose-Phosphate Metabolism", "Phe-Tyr Metabolism", "Phospholipid Metabolism", "Polyamine Metabolism",
-                                        "Proline Metabolism", "Protein Degradation", "Purine Metabolism", "Pyridoxal Metabolism", "Pyrimidine Metabolism",
-                                        "Riboflavin Metabolism", "Secondary-Bile-Acids", "Sorbitol-Glycerol Metabolism", "Sphingolipid-Metabolism",
-                                        "Steroid-Hormone Biosynthesis", "TCA Cycle", "Thyroid Hormone Synthesis", "Tryptophan Metabolism"))
           observeEvent(input$scalingFactor, priority=-1, {
             pmap = reactive(isolate(getPathwayMap(input)))
             output$pathwayMap = renderImage({pmap()$pmap})
@@ -158,26 +159,27 @@ server = function(input, output, session) {
         ch = getMetList(input)
         updateSelectInput(session, "metSelect", choices = ch, selected=ch[1])
         print("metSelect dropdown should be updated now.")
-
       })
-      ref = reactive(getRefPop(input, .GlobalEnv$all_norm_data))
+      ref = reactive(getRefPop(input))
       output$estimates = renderText({sprintf("Mean Estimate = %.2f\nStandard Deviation Estimate = %.2f", ref()$ests$mean, ref()$ests$std)})
       output$referenceReport = renderPlot(ref()$hst)
       output$qqplot = renderPlot(ref()$qq)
       output$howRare = renderPlot(ref()$rare)
       output$refOutliers = renderDataTable(ref()$outliers)
 
-      observeEvent(c(input$raworZscore, input$showThese), priority = -1, {
-        data = Miller2015[,grep("IEM_", colnames(Miller2015))]
-        output$downloadButton = downloadHandler(
-          filename = function() { paste(paste(input$showThese, collapse="_"), "-", input$raworZscore, ".txt", sep="") },
-          content = function(file) { write.table(data, file, sep="\t", col.names = TRUE, row.names = FALSE) }
-        )
-        output$selectedData = DT::renderDataTable({DT::datatable(data, rownames=FALSE, options=list(scrollX=TRUE))})
+      observeEvent(input$showThese, priority = 0, { 
+        observeEvent(input$raworZscore, priority = -1, {
+          dd = getData(input)
+          output$downloadButton = downloadHandler(
+            filename = function() { paste(paste(input$showThese, collapse="_"), "-", input$raworZscore, ".txt", sep="") },
+            content = function(file) { write.table(dd, file, sep="\t", col.names = TRUE, row.names = FALSE) }
+          )
+          output$selectedData = DT::renderDataTable({DT::datatable(dd, rownames=FALSE, options=list(scrollX=TRUE))})
+        })
       })
       output$st = renderText({input$showThese})
       output$rz = renderText({input$raworZscore})
-    } else if (input$tab == "similarity") {
+    } else if (input$tab == "ctd") {
       data = eval(parse(text=sprintf("graphs$%s$data", input$diagnosis)))
       updateSelectInput(session, "ptID", label="Select a patient to diagnose", choices = colnames(data), selected=colnames(data)[1])
       updateSelectInput(session, "ptID2", label="Select a patient to diagnose", choices = colnames(data), selected=colnames(data)[2])
