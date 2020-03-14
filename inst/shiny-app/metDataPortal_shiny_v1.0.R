@@ -38,24 +38,24 @@ ui = dashboardPage(
                 tabItems(
                   tabItem(tabName="ptReport",
                           h2("Patient Report"),
-                          fluidRow(box(title="Select Patient(s)", status="warning", solidHeader = TRUE,
-                                       selectInput(inputId = "diagClass", label = "Select diagnosis.", choices = names(cohorts), selected = names(cohorts)[1]),
-                                       checkboxGroupInput(inputId = "ptIDs", label = "Select patients.", choices = ""),
-                                       align="left", width=2),
-                                   box(title="Pathway Map", status="primary", solidHeader = TRUE,
+                          box(title="Select Patient(s)", status="warning", solidHeader = TRUE,
+                              splitLayout(cellWidths=c("25%", "75%"),
+                                       selectInput(inputId = "diagClass", label = "Select diagnosis.", 
+                                                   choices = names(cohorts), selected = names(cohorts)[1], selectize=FALSE),
+                                       selectInput(inputId = "ptIDs", label = "Select patients.", choices = "", selectize=TRUE, multiple=TRUE)), width=12),
+                          box(title="Top Perturbed Pathways", status="info", solidHeader=TRUE, tableOutput("pathwayEnrichment"), width=6, collapsible=TRUE),
+                          box(title="Inspect Genetic Variants", status="info", solidHeader=TRUE, dataTableOutput("geneticVars"), width=6, collapsible=TRUE), 
+                          box(title="Pathway Map", status="primary", solidHeader = TRUE,
+                              fluidRow(style="padding:10px; height:80px;", 
                                        splitLayout(cellWidths=c("33%", "33%", "33%"),
                                                    selectInput(inputId = "pathwayMapId", label = "Pathway Map", choices = ""),
                                                    sliderInput(inputId = "scalingFactor", label="Node Scaling Factor", min=1, max=5, step=1, value=1),
-                                                   plotOutput("colorbar")),
-                                       imageOutput("pathwayMap"),
-                                       align="left", width=10, collapsible=TRUE)
-                                   ),
+                                                   plotOutput("colorbar"))),
+                              imageOutput("pathwayMap", height="100%", width="100%"), width=12, collapsible=TRUE),
                           box(title = "Patient Report", status="info", solidHeader = TRUE,
                               downloadButton("downloadPatientReport", "Download Patient Report"),
                               splitLayout(cellWidths=c("60%", "40%"), dataTableOutput("patientReport"), dataTableOutput("missingMets")),
-                              align="left", width=12, collapsible=TRUE),
-                          fluidRow(box(title="Top Perturbed Pathways", status="info", solidHeader=TRUE, width=4, collapsible=TRUE), #tableOutput("pathwayEnrichment")
-                                   box(title="Inspect Genetic Variants", status="info", solidHeader=TRUE, width=8, collapsible=TRUE)) #dataTableOutput("geneticVars")
+                              align="left", width=12, collapsible=TRUE)
                           ),
                   tabItem(tabName="refPop",
                           h2("Inspect Reference Population"),
@@ -106,10 +106,10 @@ server = function(input, output, session) {
 
   observeEvent(input$tab, {
     if (input$tab == "ptReport") {
-      # Pathway Analysis code
+      # Pathway Map Visualization code
       observeEvent(input$diagClass, priority=1, {
         print(input$diagClass)
-        updateCheckboxGroupInput(session, "ptIDs", choices = cohorts[[input$diagClass]], selected = cohorts[[input$diagClass]])
+        updateSelectInput(session, "ptIDs", choices = cohorts[[input$diagClass]], selected=cohorts[[input$diagClass]][1])
 
         report = reactive(getPatientReport(input))
         output$patientReport = DT::renderDataTable({
@@ -121,12 +121,12 @@ server = function(input, output, session) {
           filename = function() { paste(input$biofluid, "-", input$patientID, ".txt", sep="") },
           content = function(file) { write.table(report()$patientReport, file, sep="\t", col.names = TRUE, row.names = FALSE) }
         )
-        #output$pathwayEnrichment = renderTable(getPathwayEnrichment2(input))
+        output$pathwayEnrichment = renderTable(shiny.getORA_Metabolon(input))
         #output$geneticVars = DT::renderDataTable(getGeneticVariants(input), rownames = FALSE)
 
         observeEvent(input$pathwayMapId, priority=0, {
           print(input$pathwayMapId)
-          updateSelectInput(session, "pathwayMapId", choices = c("All", "Arginine Metabolism", "Ascorbate Metabolism", "Asp-Glu Metabolism",
+          updateSelectInput(session, "pathwayMapId", choices = c("Arginine Metabolism", "Ascorbate Metabolism", "Asp-Glu Metabolism",
                                         "BCAA Metabolism", "Benzoate Metabolism", "Beta-Oxidation", "Bile-Acid Metabolism",
                                         "Carnitine Biosynthesis", "Cholesterol Synthesis", "Creatine Metabolism", "Dicoarboxylic Acid Metabolism",
                                         "Eicosanoids", "Endocannabinoid Synthesis", "Fatty Acid Metabolism", "Fibrinogen Cleavage Peptides",
@@ -136,8 +136,7 @@ server = function(input, output, session) {
                                         "Pantothenate Metabolism", "Pentose-Phosphate Metabolism", "Phe-Tyr Metabolism", "Phospholipid Metabolism", "Polyamine Metabolism",
                                         "Proline Metabolism", "Protein Degradation", "Purine Metabolism", "Pyridoxal Metabolism", "Pyrimidine Metabolism",
                                         "Riboflavin Metabolism", "Secondary-Bile-Acids", "Sorbitol-Glycerol Metabolism", "Sphingolipid-Metabolism",
-                                        "Steroid-Hormone Biosynthesis", "TCA Cycle", "Thyroid Hormone Synthesis", "Tryptophan Metabolism"),
-                            selected="Arginine Metabolism")
+                                        "Steroid-Hormone Biosynthesis", "TCA Cycle", "Thyroid Hormone Synthesis", "Tryptophan Metabolism"))
           observeEvent(input$scalingFactor, priority=-1, {
             pmap = reactive(isolate(getPathwayMap(input)))
             output$pathwayMap = renderImage({pmap()$pmap})

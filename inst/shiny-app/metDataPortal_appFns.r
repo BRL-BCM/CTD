@@ -293,11 +293,11 @@ getPathwayMap = function(input) {
     PatientID = input$ptIDs
     scalingFactor = input$scalingFactor
     tmp = rownames(zscore.data)
-    patient.zscore = zscore.data[,which(colnames(zscore.data) %in% input$ptIDs)]
+    patient.zscore = as.matrix(zscore.data[,which(colnames(zscore.data) %in% input$ptIDs)])
     patient.zscore = apply(patient.zscore, 1, function(i) mean(na.omit(i)))
     names(patient.zscore) = tmp
     
-    if (Pathway.Name=="All") { Pathway.Name = "allPathways" } else { Pathway.Name = gsub(" ", "-", input$pathwayMapId) } 
+    if (input$pathwayMapId=="All") { Pathway.Name = "allPathways" } else { Pathway.Name = gsub(" ", "-", input$pathwayMapId) } 
     res = plot.getPathwayIgraph(input, Pathway.Name)
     template.ig = res$template.ig
     node.labels = res$nodeDisplayNames
@@ -339,7 +339,7 @@ getPathwayMap = function(input) {
     svg_filename = system.file("shiny-app/metDataPortal_appFns.r", package="CTD")
     svg_filename = gsub("/metDataPortal_appFns.r", "", svg_filename)
     svg_filename = sprintf("%s/pathwayMaps/pmap-%s_%s.svg", svg_filename, Pathway.Name, input$diagClass)
-    svg(filename = svg_filename, width=10, height=10)
+    svg(filename = svg_filename, width=10, height=5)
     par(mar=c(1,0.2,1,1))
     plot.igraph(template.ig, layout=cbind(V(template.ig)$x, V(template.ig)$y), edge.arrow.size = 0.01, edge.width = 1,
                 vertex.frame.color=V(template.ig)$color, main = gsub("-", " ", Pathway.Name))
@@ -365,7 +365,7 @@ getPathwayMap = function(input) {
       legend = tmp$grobs[[leg]]
       return(legend)}
     leg = g_legend(cb);
-    #return(list(pmap = list(src=svg_filename, contentType = 'image/svg+xml'), colorbar = leg))
+    return(list(pmap = list(src=svg_filename, contentType = 'image/svg+xml'), colorbar = leg))
   }
 }
 
