@@ -47,7 +47,10 @@ ui = dashboardPage(
                               tabsetPanel(type="tabs", 
                                           tabPanel("Over-representation Analysis", dataTableOutput("oraEnrichment")),
                                           tabPanel("Metabolite Set Enrichment Analysis", dataTableOutput("mseaEnrichment"))), width=6, collapsible=TRUE),
-                          box(title="Inspect Genetic Variants", status="info", solidHeader=TRUE, dataTableOutput("geneticVars"), width=6, collapsible=TRUE), 
+                          box(title = "Patient Report", status="info", solidHeader = TRUE,
+                              downloadButton("downloadPatientReport", "Download Patient Report"),
+                              splitLayout(cellWidths=c("60%", "40%"), dataTableOutput("patientReport"), dataTableOutput("missingMets")),
+                              align="left", width=6, collapsible=TRUE),
                           box(title="Pathway Map", status="primary", solidHeader = TRUE,
                               fluidRow(style="padding:10px; height:80px;", 
                                        splitLayout(cellWidths=c("33%", "33%", "33%"),
@@ -66,11 +69,7 @@ ui = dashboardPage(
                                                                            "Tryptophan Metabolism")),
                                                    sliderInput(inputId = "scalingFactor", label="Node Scaling Factor", min=1, max=5, step=1, value=3),
                                                    plotOutput("colorbar"))),
-                              imageOutput("pathwayMap", height="100%", width="100%"), width=12, collapsible=TRUE),
-                          box(title = "Patient Report", status="info", solidHeader = TRUE,
-                              downloadButton("downloadPatientReport", "Download Patient Report"),
-                              splitLayout(cellWidths=c("60%", "40%"), dataTableOutput("patientReport"), dataTableOutput("missingMets")),
-                              align="left", width=12, collapsible=TRUE)
+                              imageOutput("pathwayMap", height="100%", width="100%"), width=12, collapsible=TRUE)
                           ),
                   tabItem(tabName="refPop",
                           h2("Inspect Reference Population"),
@@ -136,8 +135,8 @@ server = function(input, output, session) {
           filename = function() { paste(input$biofluid, "-", input$patientID, ".txt", sep="") },
           content = function(file) { write.table(report()$patientReport, file, sep="\t", col.names = TRUE, row.names = FALSE) }
         )
-        output$oraEnrichment = renderDataTable(shiny.getORA_Metabolon(input))
-        output$mseaEnrichment = renderDataTable(shiny.getMSEA_Metabolon(input, cohorts))
+        output$oraEnrichment = renderDataTable(shiny.getORA_Metabolon(input), rownames=FALSE)
+        output$mseaEnrichment = renderDataTable(shiny.getMSEA_Metabolon(input, cohorts), rownames=FALSE)
         #output$geneticVars = DT::renderDataTable(getGeneticVariants(input), rownames = FALSE)
 
         observeEvent(input$pathwayMapId, priority=0, {

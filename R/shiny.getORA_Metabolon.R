@@ -18,9 +18,9 @@ shiny.getORA_Metabolon = function(input) {
   population = names(met.profile)
   print(sprintf("Total number of metabolites in profile. = %d.", length(population)))
   paths.hsa = list.dirs(path=system.file("extdata", package="CTD"), full.names = FALSE)
-  paths.hsa = paths.hsa[-which(paths.hsa %in% c("", "RData", "allPathways", "MSEA_Datasets", "Pathway_GMTs"))]
+  paths.hsa = paths.hsa[-which(paths.hsa %in% c("", "RData", "allPathways", "MSEA_Datasets"))]
   row = 1
-  pathway.data = data.frame(Pathway=character(), FDR=numeric(), Pvalue=numeric(), Hits=integer(), Size=integer(), stringsAsFactors = FALSE)
+  pathway.data = data.frame(Pathway=character(), Size=integer(), Hits=integer(), FDR=numeric(), Pvalue=numeric(), stringsAsFactors = FALSE)
   for (pathway in 1:length(paths.hsa)) {
     load(system.file(sprintf("extdata/RData/%s.RData", paths.hsa[pathway]), package="CTD"))
 
@@ -48,7 +48,10 @@ shiny.getORA_Metabolon = function(input) {
 
   # Then, only return rows that have Pvalue < 0.25
   pathway.data = pathway.data[which(pathway.data[,"Pvalue"]<0.25),]
-
+  
+  pathway.data$FDR = signif(pathway.data$FDR, digits=3)
+  pathway.data$Pvalue = signif(pathway.data$Pvalue, digits=3)
+  
   return(pathway.data)
 }
 

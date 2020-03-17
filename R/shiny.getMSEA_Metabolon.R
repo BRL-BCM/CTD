@@ -35,33 +35,29 @@
 #'   print(sprintf("%s         %s", paths.hsa[p], paste(pathCompIDs, collapse="    ")), quote=FALSE)
 #' }
 #' sink()
-#' res = shiny.getMSEA_Metabolon(input)
+#' res = shiny.getMSEA_Metabolon(input, cohorts)
 #'     # The format (columns) for the global result files is as follows.
-#'     MS : Metabolite set name.
+#'     Pathway : Pathway name.
 #'     SIZE : Size of the set in metabolites.
-#'     SOURCE : Set definition or source.
-#'     ES : Enrichment score.
 #'     NES : Normalized (multiplicative rescaling) normalized enrichment score.
 #'     NOM p-val : Nominal p-value (from the null distribution of the metabolite set).
 #'     FDR q-val: False discovery rate q-values
 #'     FWER p-val: Family wise error rate p-values.
-#'     Tag %: Percent of metabolite set before running enrichment peak.
-#'     Metabolite %: Percent of metabolite list before running enrichment peak.
-#'     Signal : enrichment signal strength.
-#'     FDR (median): FDR q-values from the median of the null distributions.
 #'     glob.p.val: P-value using a global statistic (number of sets above the set's NES).
 shiny.getMSEA_Metabolon = function(input, cohorts) {
-  data = Miller2015[,grep("IEM", colnames(Miller2015))]
   # First, get the class labels
   class.labels = diagnoses$id
   class.labels[which(!(class.labels %in% cohorts[[input$diagClass]]))] = 0
   class.labels[which(class.labels %in% cohorts[[input$diagClass]])] = 1
   class.labels = as.numeric(class.labels)
-  class.labels = class.labels[order(class.labels)]
   phen1 = 0
   phen2 = 1
   # Second, get the metabolomics profiling data, with metabolites as rows, and samples as columns.
-  data = data[, order(class.labels)]
+  data = Miller2015[,grep("IEM", colnames(Miller2015))]
+  
+  # Reorder both data columns and class labels so diseased are first, then controls
+  data = data[, order(class.labels, decreasing = TRUE)]
+  class.labels = class.labels[order(class.labels, decreasing = TRUE)]
   # Third, provide the file extension local to the installation of the CTD package for the 
   # desired pathway knowledgebase .GMT.
   met.db = system.file("extdata/MSEA_Datasets/Metabolon.gmt", package="CTD")
@@ -532,13 +528,9 @@ shiny.getMSEA_Metabolon = function(input, cohorts) {
   NES = vector(length=Ng, mode="numeric")
   phi.norm.mean  = vector(length=Ng, mode="numeric")
   obs.phi.norm.mean  = vector(length=Ng, mode="numeric")
-  phi.norm.median  = vector(length=Ng, mode="numeric")
-  obs.phi.norm.median  = vector(length=Ng, mode="numeric")
   phi.norm.mean  = vector(length=Ng, mode="numeric")
   obs.phi.mean  = vector(length=Ng, mode="numeric")
   FDR.mean = vector(length=Ng, mode="numeric")
-  phi.norm.median.d = vector(length=Ng, mode="numeric")
-  obs.phi.norm.median.d = vector(length=Ng, mode="numeric")
   
   Obs.ES.index = order(Obs.ES.norm, decreasing=T)
   Orig.index = seq(1, Ng)
@@ -569,26 +561,20 @@ shiny.getMSEA_Metabolon = function(input, cohorts) {
     }
     phi.norm.mean[k] = mean(count.col)
     obs.phi.norm.mean[k] = mean(obs.count.col)
-    phi.norm.median[k] = median(count.col)
-    obs.phi.norm.median[k] = median(obs.count.col)
     FDR.mean[k] = ifelse(phi.norm.mean[k]/obs.phi.norm.mean[k] < 1, phi.norm.mean[k]/obs.phi.norm.mean[k], 1)
-    FDR.median[k] = ifelse(phi.norm.median[k]/obs.phi.norm.median[k] < 1, phi.norm.median[k]/obs.phi.norm.median[k], 1)
   }
   FDR.mean[which(is.na(FDR.mean))] = 1
-  FDR.median[which(is.na(FDR.median))] = 1
-  
+
   # adjust q-values
   if (adjust.FDR.q.val == T) {
     pos.nes = length(NES[NES >= 0])
     min.FDR.mean = FDR.mean[pos.nes]
-    min.FDR.median = FDR.median[pos.nes]
     for (k in seq(pos.nes - 1, 1, -1)) {
       if (FDR.mean[k] < min.FDR.mean) {min.FDR.mean = FDR.mean[k]}
       if (min.FDR.mean < FDR.mean[k]) {FDR.mean[k] = min.FDR.mean}
     }
     neg.nes = pos.nes + 1
     min.FDR.mean = FDR.mean[neg.nes]
-    min.FDR.median = FDR.median[neg.nes]
     for (k in seq(neg.nes + 1, Ng)) {
       if (FDR.mean[k] < min.FDR.mean) {min.FDR.mean = FDR.mean[k]}
       if (min.FDR.mean < FDR.mean[k]) {FDR.mean[k] = min.FDR.mean}
@@ -597,8 +583,7 @@ shiny.getMSEA_Metabolon = function(input, cohorts) {
   obs.phi.norm.mean.sorted = obs.phi.norm.mean[Orig.index]
   phi.norm.mean.sorted = phi.norm.mean[Orig.index]
   FDR.mean.sorted = FDR.mean[Orig.index]
-  FDR.median.sorted = FDR.median[Orig.index]
-  
+
   # Compute global statistic
   glob.p.vals = vector(length=Ng, mode="numeric")
   NULL.pass = vector(length=nperm, mode="numeric")
