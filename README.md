@@ -1,4 +1,4 @@
-# CTD:: a method which interprets multivariate perturbations identified in molecular profiles by identifying highly connected nodes in disease-specific co-perturbation networks
+# CTD: an information-theoretic method to interpret multivariate perturbations in the context of graphical models with applications in metabolomics and transcriptomics
 Our novel network-based approach, CTD, “connects the dots” between metabolite perturbations observed in individual metabolomics profiles and a given disease state by calculating how connected those metabolites are in the context of a disease-specific network.
 
 ## Using CTD in R.
@@ -13,15 +13,13 @@ Located in /vignette/CTD_Lab-Exercise.Rmd. It will take you across all the stage
 3. Calculate the probability of a node subset based on the encoding length.
 4. Calculate similarity between two node subsets, using a metric based on mutual information.
 
-Now we can run the analyses to reproduce results from Thistlethwaite et al. (2019).
-
 ## Using CTD in Google Colab.
 ### Click through the Google Colab Notebook, even before installing CTD.
-Open /Colab_CTD_PLOSCB.ipynb in Google Colab to reproduce some results from Thistlethwaite et al. (2019) step by step. This does not require CTD local installation. You will:
+Open /Colab_CTD_PLOSCB.ipynb in Google Colab to reproduce some results from Thistlethwaite et al. (2020) step by step. This does not require CTD local installation. You will:
 
 1. Visualize individual or average cohort metabolomics profiles on comprehensive or individual pathway maps from MetaboLync, curated by Metabolon.
 2. Estimate the probability and significance of a metabolite set against different disease-specific network contexts using CTD.
 3. Use CTD as feature selection method and a covariate in Partial Least Square (PLS) regression.
 
 ## References
-Thistlethwaite, L.R. et al. (2019). CTD: a method which interprets multivariate perturbations observed in molecular profiles by identifying highly connected nodes in disease-specific co-perturbation networks. Manuscript submitted.
+Thistlethwaite, L.R. et al. (2020). CTD: an information-theoretic method to interpret multivariate perturbations in the context of graphical models with applications in metabolomics and transcriptomics. Manuscript submitted.
