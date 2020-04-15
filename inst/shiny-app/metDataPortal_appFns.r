@@ -9,7 +9,7 @@ getData = function(input) {
   } else if (input$raworZscore == "Zscored") {
     data = .GlobalEnv$data_zscore
   }
-  pts = as.character(unlist(sapply(input$showThese, function(i) cohorts[[i]])))
+  pts = as.character(unlist(sapply(input$showThese, function(i) cohorts_coded[[i]])))
   ind = which(colnames(data) %in% pts)
   data = data[,ind]
   data = apply(data, c(1,2), function(i) round(i, 2))
@@ -246,7 +246,7 @@ getRefPop = function(input) {
     df = data.frame(x=as.numeric(ref[input$metSelect,]))
   }
   hst = ggplot(data=df, aes(x=x)) + geom_histogram() +
-    ggtitle(sprintf("%s (%s)", input$metSelect, input$metClass)) + labs(x="log(NormScaledImputed)", y="Count")
+    ggtitle(sprintf("%s (%s)", input$metSelect, input$metClass)) + labs(x="Z-score", y="Count")
   y = quantile(df$x[!is.na(df$x)], c(0.05, 0.95))
   x = qnorm(c(0.05, 0.95))
   slope = diff(y)/diff(x)
@@ -289,7 +289,7 @@ getPrankDf=function(input){
   r=1
   S.pt = data_mx[order(abs(data_mx[,ptID]), decreasing = TRUE),ptID]
   for(model in names(cohorts_coded)){
-    ig=loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%s.RData',model,1), package='CTD'))[['ig_pruned']]
+    ig=loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,1), package='CTD'))[['ig_pruned']]
     G = vector(mode="list", length=length(V(ig)$name))
     names(G) = V(ig)$name
     adjacency_matrix = list(as.matrix(get.adjacency(ig, attr="weight")))
@@ -318,15 +318,15 @@ getPtResult=function(input){
   if(model==names(getDiag[sapply(getDiag,length)>0])){
     fold=getDiag[sapply(getDiag,length)>0] 
     # load latent-embedding, pruned network that is learnt from the rest of the patients diagnosed with the same disease.
-    ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%s.RData',model,fold), package='CTD'))[['ig_pruned']]
+    ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,fold), package='CTD'))[['ig_pruned']]
   }else{
-    ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%s.RData',model,1), package='CTD'))[['ig_pruned']]
+    ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,1), package='CTD'))[['ig_pruned']]
   }
   # get "ig" derived adjacency matrix
   G = vector(mode="list", length=length(V(ig)$name))
   names(G) = V(ig)$name
   adjacency_matrix <<- list(as.matrix(get.adjacency(ig, attr="weight")))
-  data_mx = data_mx.og[which(rownames(data_mx.og) %in% V(ig)$name), ]
+  data_mx = data_mx[which(rownames(data_mx) %in% V(ig)$name), ]
   # using single-node diffusion
   kmx = 30
   S = data_mx[order(abs(data_mx[,ptID]), decreasing = TRUE),ptID][1:kmx] # top kmx perturbed metabolites in ptID's profile

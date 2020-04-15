@@ -90,7 +90,7 @@ ui = dashboardPage(
                                           selectInput(inputId = "diag_nw_Class", label = "Select diagnosis.", 
                                                       choices = names(cohorts_coded), selected = names(cohorts_coded)[1], selectize=FALSE),
                                           selectInput(inputId = "pt_nw_ID", label = "Select patient.", choices = cohorts_coded[[1]], selected=cohorts_coded[[1]][1], selectize=FALSE, multiple=FALSE),
-                                          selectInput(inputId="kmx", label="Top K Metabolites", choices=seq(5,50), selected=30)
+                                          selectInput(inputId="kmx", label="Top K Metabolites", choices=seq(5,50), selected=30, selectize=FALSE)
                               ), width=12),
                           fluidRow(
                             column(width = 4,
