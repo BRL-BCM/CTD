@@ -283,32 +283,25 @@ getRefPop = function(input) {
 #### TAB 3 (NETWORK-ASSISTED DIAGNOSTICS) FUNCTIONS ####
 getPrankDf=function(input){
   ptID=input$pt_nw_ID
+  data_mx = .GlobalEnv$data_zscore[,-c(1:8)]
   
   df.pranks = data.frame(Disease_Model=character(),P_Value=character(),stringsAsFactors = FALSE)
   r=1
-  S.og <<- data_mx.og[order(abs(data_mx.og[,ptID]), decreasing = TRUE),ptID]
+  S.pt = data_mx[order(abs(data_mx[,ptID]), decreasing = TRUE),ptID]
   for(model in names(cohorts_coded)){
     ig=loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%s.RData',model,1), package='CTD'))[['ig_pruned']]
     G = vector(mode="list", length=length(V(ig)$name))
     names(G) = V(ig)$name
     adjacency_matrix = list(as.matrix(get.adjacency(ig, attr="weight")))
-    data_mx = data_mx.og[which(rownames(data_mx.og) %in% V(ig)$name), ]
-    # p.value derived from z-score
-    data.pvals = sapply(data_mx[,ptID], function(i) 2*pnorm(abs(i), lower.tail = FALSE))
-    data.pvals = t(data.pvals)
-    rownames(data.pvals)=ptID
+    data_mx = data_mx[which(rownames(data_mx) %in% V(ig)$name), ]
     # load node ranks
-    
     ranks = loadToEnv(system.file(sprintf('ranks/ind_ranks/%s%d-ranks.RData',toupper(model), 1), package='CTD'))[["permutationByStartNode"]]
     ranks = lapply(ranks, tolower)
-    
     diag = input$diag_nw_Class
-    S = S.og[which(abs(S.og)>2)]
+    S = S.pt[1:input$kmx]
     S = S[which(names(S) %in% names(G))]
-    
     ptBSbyK = singleNode.getPtBSbyK(names(S), ranks, num.misses = log2(length(G)))
-    res = mle.getEncodingLength(ptBSbyK, data.pvals, ptID, G)
-    
+    res = mle.getEncodingLength(ptBSbyK, NULL, ptID, G)
     df.pranks[r,"Disease_Model"] = model
     df.pranks[r,"P_Value"] = sprintf("%.3e",2^-(res[which.max(res[,"d.score"]),"d.score"]-log2(nrow(res))))
     r=r+1
@@ -334,24 +327,13 @@ getPtResult=function(input){
   names(G) = V(ig)$name
   adjacency_matrix <<- list(as.matrix(get.adjacency(ig, attr="weight")))
   data_mx = data_mx.og[which(rownames(data_mx.og) %in% V(ig)$name), ]
-  # p.value derived from z-score
-  data.pvals = sapply(data_mx[,ptID], function(i) 2*pnorm(abs(i), lower.tail = FALSE))
-  data.pvals = t(data.pvals)
-  rownames(data.pvals)=ptID
-  
   # using single-node diffusion
   kmx = 30
   S = data_mx[order(abs(data_mx[,ptID]), decreasing = TRUE),ptID][1:kmx] # top kmx perturbed metabolites in ptID's profile
-  print(sprintf("%s: Single-node ranking...",ptID))
-  ranks = list()
-  for (i in 1:length(S)) {
-    ind = which(names(G)==names(S)[i])
-    ranks[[i]] = singleNode.getNodeRanksN(ind, G, names(S), num.misses = log2(length(G))) # get node ranks
-  }
-  
-  names(ranks) = names(S)
+  ranks = loadToEnv(system.file(sprintf('ranks/ind_ranks/%s%d-ranks.RData',toupper(model), 1), package='CTD'))[["permutationByStartNode"]]
+  ranks = lapply(ranks, tolower)
   ptBSbyK = singleNode.getPtBSbyK(names(S), ranks) # encode nodes
-  res = mle.getEncodingLength(ptBSbyK, data.pvals, ptID, G) # get encoding length
+  res = mle.getEncodingLength(ptBSbyK, NULL, ptID, G) # get encoding length
   mets = unique(c(names(S), names(ptBSbyK[[which.max(res[,"d.score"])]]))) # best co-perturbed metabolite set is the most compressed subset of nodes
   p.mets=2^-(res[which.max(res[,"d.score"]),"d.score"]-log2(nrow(res))) # p value of this "modular perturbation"
   print(mets)
@@ -362,9 +344,8 @@ getPtResult=function(input){
   zmets.red=names(zmets[zmets>2])
   zmets.blue=names(zmets[zmets<(-2)])
   zmets=names(zmets[abs(zmets)>2])
-  
-  e = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% zmets)])
-  e = delete.vertices(e, V(e)[degree(e) == 0] )
+  #e = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% zmets)])
+  #e = delete.vertices(e, V(e)[degree(e) == 0] )
   #e = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% mets)])
   reds = intersect(V(e)$name[which(V(e)$name %in% names(S))], names(S[which(S>0)]))
   blues = intersect(V(e)$name[which(V(e)$name %in% names(S))], names(S[which(S<0)]))
@@ -379,13 +360,9 @@ getPtResult=function(input){
   net_p$nodes$group=sapply(as.character(net_p$nodes$name),function(x) group[x])
   ColourScale <- 'd3.scaleOrdinal().domain(["pos_sig", "neg_sig","pos_nonsig","neg_nonsig"]).range(["#990000", "#000066","pink","#CCCCFF"]);'
   net_p$nodes$nodesize=sapply(as.character(net_p$nodes$name),function(x) abs(data_mx[x,ptID])^2)
-  
-  
   net_p$links$value=abs(net_p$links$value)*100
-  
   linkColor=net_p$nodes$name[net_p$links$source+1] %in% mets & net_p$nodes$name[net_p$links$target+1] %in% mets
   net_p$links$color=ifelse(linkColor,"red","lightgrey")
-  
   
   ptNetwork=forceNetwork(Nodes = net_p$nodes, charge = -90, fontSize = 20, colourScale = JS(ColourScale), 
                          Links = net_p$links,
@@ -396,10 +373,7 @@ getPtResult=function(input){
                          opacity = 0.9,
                          legend = T)
   
-  ptResult=list(mets=mets,p.mets=p.mets,ptNetwork=ptNetwork)
-  
-  return(ptResult)
-  
+  return(list(mets=mets,p.mets=p.mets,ptNetwork=ptNetwork))
 }
 
 
