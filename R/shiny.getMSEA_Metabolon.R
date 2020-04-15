@@ -46,14 +46,24 @@
 #'     glob.p.val: P-value using a global statistic (number of sets above the set's NES).
 shiny.getMSEA_Metabolon = function(input, cohorts) {
   # First, get the class labels
-  class.labels = diagnoses$id
+  class.labels = colnames(.GlobalEnv$data_zscore[,-c(1:8)])
   class.labels[which(!(class.labels %in% cohorts[[input$diagClass]]))] = 0
   class.labels[which(class.labels %in% cohorts[[input$diagClass]])] = 1
   class.labels = as.numeric(class.labels)
   phen1 = 0
   phen2 = 1
   # Second, get the metabolomics profiling data, with metabolites as rows, and samples as columns.
-  data = Miller2015[,grep("IEM", colnames(Miller2015))]
+  data = .GlobalEnv$data_zscore[,-c(1:8)]
+  fill.rate = apply(data, 1, function(i) sum(is.na(i))/length(i))
+  data = data[which(fill.rate<0.33), ]
+  for (r in 1:nrow(data)) {
+    data[r, which(is.na(data[r, ]))] = min(na.omit(as.numeric(data[r,])))
+  }
+  any(is.na(data))
+  any(is.infinite(unlist(data)))
+  rownames(data) = tolower(rownames(data))
+  data = apply(data, c(1, 2), as.numeric)
+  dim(data)
   
   # Reorder both data columns and class labels so diseased are first, then controls
   data = data[, order(class.labels, decreasing = TRUE)]
@@ -362,8 +372,7 @@ shiny.getMSEA_Metabolon = function(input, cohorts) {
     call.nperm = n.perms[nk]
     print(paste("Computing ranked list for actual and permuted phenotypes.......permutations: ", 
                 n.starts[nk], "--", n.ends[nk], sep=" "))
-    O = MSEA.MetaboliteRanking(A, class.labels, metabolite.labels, call.nperm, sigma.correction = "MetaboliteCluster", 
-                               replace=FALSE)
+    O = MSEA.MetaboliteRanking(A, class.labels, metabolite.labels, call.nperm, sigma.correction = "MetaboliteCluster", replace=FALSE)
     order.matrix[,n.starts[nk]:n.ends[nk]] = O$order.matrix
     obs.order.matrix[,n.starts[nk]:n.ends[nk]] = O$obs.order.matrix
     correl.matrix[,n.starts[nk]:n.ends[nk]] = O$s2n.matrix

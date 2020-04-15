@@ -5,7 +5,7 @@
 #' @examples
 #' pathway.data = shiny.getORA_Metabolon(met.profile, threhold=3, "z-score", NULL)
 shiny.getORA_Metabolon = function(input) {
-  data = Miller2015[,grep("IEM_", colnames(Miller2015))]
+  data = .GlobalEnv$data_zscore
   tmp = rownames(data)
   met.profile = apply(as.matrix(data[,which(colnames(data) %in% input$ptIDs)]), 1, mean)
   names(met.profile) = tmp
