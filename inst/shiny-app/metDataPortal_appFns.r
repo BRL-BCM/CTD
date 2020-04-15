@@ -177,7 +177,7 @@ getPatientReport = function(input) {
   } else {
     missingMets = NULL
   }
-  if (length(ind_all)>0) { data = data[-ind0,] }
+  if (length(ind0)>0) { data = data[-ind0,] }
   print(dim(data))
   
   # Order by Fill Rate, then by abs(Zscore)

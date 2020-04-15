@@ -12,8 +12,6 @@ require(R.utils)
 require(CTD)
 setwd("/Users/lillian.rosa/Downloads/CTD/inst/shiny-app")
 source("/Users/lillian.rosa/Downloads/CTD/inst/shiny-app/metDataPortal_appFns.r")
-source("/Users/lillian.rosa/Downloads/CTD/R/shiny.getMSEA_Metabolon.R")
-source("/Users/lillian.rosa/Downloads/CTD/R/shiny.getORA_Metabolon.R")
 
 ui = dashboardPage(
   dashboardHeader(title = "Metabolomics Data Portal"),
@@ -21,7 +19,7 @@ ui = dashboardPage(
                                menuItem("View Patient Report", tabName = "ptReport", icon = icon("user-circle-o")),
                                menuItem("Inspect Reference Population", tabName = "refPop", icon = icon("bar-chart")),
                                menuItem("Network-Assisted Diagnostics", tabName = "ctd", icon=icon("project-diagram")))),
-  dashboardBody(height="5000px",
+  dashboardBody(
                 tabItems(
                   tabItem(tabName="ptReport",
                           fluidRow(h2("Patient Report", align="center"),
