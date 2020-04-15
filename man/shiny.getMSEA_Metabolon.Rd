@@ -4,11 +4,38 @@
 \alias{shiny.getMSEA_Metabolon}
 \title{Metabolite set enrichment analysis (MSEA) using pathway knowledge curated by Metabolon}
 \usage{
-shiny.getMSEA_Metabolon(input)
+shiny.getMSEA_Metabolon(input, cohorts)
+}
+\arguments{
+\item{ds:}{Input metabolite expression dataset}
+
+\item{cls:}{Input class vector (phenotype)}
+
+\item{met.db:}{Metabolite set database in GMT format}
+
+\item{nperm:}{Number of random permutations (default: 1000)}
+
+\item{weighted.score.type:}{Enrichment correlation-based weighting: 0=no weight (KS), 1=standard weigth, 2 = over-weigth (default: 1)}
+
+\item{adjust.FDR.q.val:}{Adjust the FDR q-vals (default: F)}
+
+\item{met.size.threshold.min:}{Minimum size (in metabolites) for database metabolite sets to be considered (default: 25)}
+
+\item{met.size.threshold.max:}{Maximum size (in metabolites) for database metabolite sets to be considered (default: 500)}
+
+\item{random.seed:}{Random number metaboliterator seed. (default: 123456)}
+}
+\value{
+report: Global output report, sorted by NES in decreasing order.
 }
 \description{
 A function that returns the pathway enrichment score for all perturbed metabolites in a patient's full metabolomic profile.
-}
-\examples{
-pathway.data = shiny.getMSEA_Metabolon(input)
+# Main MSEA Analysis Function that implements the entire methodology
+This is a methodology for the analysis of global molecular profiles called Metabolite Set Enrichment Analysis (MSEA). It determines
+whether an a priori defined set of metabolites shows statistically significant, concordant differences between two biological
+states (e.g. phenotypes). MSEA operates on all metabolites from an experiment, rank ordered by the signal to noise ratio and
+determines whether members of an a priori defined metabolite set are nonrandomly distributed towards the top or bottom of the
+list and thus may correspond to an important biological process. To assess significance the program uses an empirical
+permutation procedure to test deviation from random that preserves correlations between metabolites. For details see 
+Subramanian et al 2005.
 }

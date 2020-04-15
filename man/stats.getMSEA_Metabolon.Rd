@@ -4,21 +4,13 @@
 \alias{stats.getMSEA_Metabolon}
 \title{Metabolite set enrichment analysis (MSEA) using pathway knowledge curated by Metabolon}
 \usage{
-stats.getMSEA_Metabolon(abs_filename_dataset, abs_filename_classes,
-  pathway_knowledgebase = "Metabolon", output_dir = getwd(),
-  expt_name = "msea_results")
+stats.getMSEA_Metabolon(data, class.labels,
+  pathway_knowledgebase = "Metabolon")
 }
 \arguments{
-\item{abs_filename_dataset}{- Relative or absolute path to relevant .gct file.
-A .gct file contains profiling data, rows are compounds and columns are sample IDs.}
+\item{data}{- A data matrix, where rows are metabolites and columns are sample IDs.}
 
-\item{abs_filename_classes}{- Relative or absolute path to relevant .cls file.
-A .cls file contains a mapping of class labels to columns in the .gct file.}
-
-\item{output_dir}{- The path associated with the folder in which MSEA results will be saved.}
-
-\item{expt_name}{- A name to be associated with the experiment you are analyzing. This name will be used in filestems
-of results rendered in output_dir.}
+\item{class.labels}{- A vector of binary indicators, where 1 is phenotype1 and 0 is phenotype2.}
 
 \item{pathway.knowledgebase}{- The filename of the .gmt file associated with the pathway knowledge desired.
 Currently only "Metabolon" is offered, though "KEGG", "WikiPathways", "SMPDB"
@@ -29,26 +21,16 @@ A function that returns the pathway enrichment score for all perturbed metabolit
 }
 \examples{
 data(Miller2015)
-Miller2015 = Miller2015[,grep("IEM", colnames(Miller2015))]
-# Generate a .cls file for your data.
-diagnoses = gsub("[[:digit:]]", "", colnames(Miller2015))
-diag.ind = diagnoses
-diag.ind[which(diag.ind!="Argininemia")] = 0
-diag.ind[which(diag.ind=="Argininemia")] = 1
-diag.ind = as.numeric(diag.ind)
-# Manually add the following text to 1st line of .cls,
-  where num_samples is the length of diag.ind: #num_samples 1 2
-# Manually add the following text to 2nd line of .cls: #disease control
-write.table(diag.ind, file=system.file("extdata/MSEA_Datasets/Miller2015_arg.cls", package="CTD"),
-            sep=" ", quote=FALSE, row.names = FALSE, col.names = FALSE)
+# Get class labels for diagnostic class "diagClass"
+diagClass = [insert diagnosis here]
+class.labels = diagnoses$id
+class.labels[which(!(class.labels \%in\% cohorts[[diagClass]]))] = 0
+class.labels[which(class.labels \%in\% cohorts[[diagClass]])] = 1
+class.labels = as.numeric(class.labels)
 
-# Create a .gct file.
-data_mx = Miller2015
-data_mx = data_mx[, order(diags.ind)]
-data_mx = cbind(rep(NA, nrow(data_mx)), data_mx)
-colnames(data_mx)[1] = "DESCRIPTION"
-write.table(data_mx, file=system.file("extdata/MSEA_Datasets/Miller2015.gct", package="CTD"),
-            sep="\\t", quote=FALSE, row.names = TRUE)
+# Create the data matrix 
+data_mx = Miller2015[,grep("IEM", colnames(Miller2015))]
+data_mx = data_mx[, order(class.labels)]
 
 # Generate a .gmt file.
 population = names(met.profile)
@@ -63,8 +45,5 @@ for (p in 1:length(paths.hsa)) {
 }
 sink()
 print("test")
-abs_filename_dataset = system.file("extdata/MSEA_Datasets/Miller2015.gct", package="CTD")
-abs_filename_classes = system.file("extdata/MSEA_Datasets/Miller2015_arg.cls", package="CTD")
-pathway.data = stats.getMSEA_Metabolon(abs_filename_dataset, abs_filename_classes, pathway_knowledgebase = "Metabolon",
-                                       output_dir = getwd(), expt_name="msea_results")
+pathway.data = stats.getMSEA_Metabolon(data_mx, class.labels, pathway_knowledgebase = "Metabolon")
 }
