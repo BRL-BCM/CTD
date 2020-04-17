@@ -1,4 +1,5 @@
 load("/Users/lillian.rosa/OneDrive/MacFiles/9thCommitteeMeeting/Clinical_paper/data/sysdata.rda")
+load("/Users/lillian.rosa/Downloads/CTD/inst/shiny-app/disMod.RData")
 
 getData = function(input) {
   print("called getData()...")
@@ -283,40 +284,20 @@ getRefPop = function(input) {
 #### TAB 3 (NETWORK-ASSISTED DIAGNOSTICS) FUNCTIONS ####
 getPrankDf=function(input){
   ptID=input$pt_nw_ID
-  data_mx = .GlobalEnv$data_zscore[,-c(1:8)]
-  
-  df.pranks = data.frame(Disease_Model=character(),P_Value=character(),stringsAsFactors = FALSE)
-  r=1
-  S.pt = data_mx[order(abs(data_mx[,ptID]), decreasing = TRUE),ptID]
-  for(model in names(cohorts_coded)){
-    ig=loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,1), package='CTD'))[['ig_pruned']]
-    G = vector(mode="list", length=length(V(ig)$name))
-    names(G) = V(ig)$name
-    adjacency_matrix = list(as.matrix(get.adjacency(ig, attr="weight")))
-    data_mx = data_mx[which(rownames(data_mx) %in% V(ig)$name), ]
-    # load node ranks
-    ranks = loadToEnv(system.file(sprintf('ranks/ind_ranks/%s%d-ranks.RData',toupper(model), 1), package='CTD'))[["permutationByStartNode"]]
-    ranks = lapply(ranks, tolower)
-    diag = input$diag_nw_Class
-    S = S.pt[1:input$kmx]
-    S = S[which(names(S) %in% names(G))]
-    ptBSbyK = singleNode.getPtBSbyK(names(S), ranks, num.misses = log2(length(G)))
-    res = mle.getEncodingLength(ptBSbyK, NULL, ptID, G)
-    df.pranks[r,"Disease_Model"] = model
-    df.pranks[r,"P_Value"] = sprintf("%.3e",2^-(res[which.max(res[,"d.score"]),"d.score"]-log2(nrow(res))))
-    r=r+1
-  }
-  df.pranks=df.pranks[order(as.numeric(df.pranks[,"P_Value"])),]
+  #load(system.file(sprintf("shiny-app/model/ptRanks_kmx%s.RData", input$kmx), package = "CTD"))
+  load(sprintf("/Users/lillian.rosa/Downloads/CTD/inst/shiny-app/model/ptRanks_kmx%s.RData", input$kmx))
+  df.pranks = pt_ranks[[ptID]]
+  df.pranks = df.pranks[order(as.numeric(df.pranks[,"avg.comb"])),]
   return(df.pranks)
 }
 
 getPtResult=function(input){
   ptID=input$pt_nw_ID
   print(ptID)
-  getDiag=sapply(cohorts_coded,function(x) which(x==ptID))
+  getDiag=names(cohorts_coded)[unlist(sapply(cohorts_coded,function(x) which(ptID %in% x)))]
   model=input$bgModel
-  if(model==names(getDiag[sapply(getDiag,length)>0])){
-    fold=getDiag[sapply(getDiag,length)>0] 
+  if(model==getDiag){
+    fold=which(cohorts_coded[[getDiag]]==ptID)
     # load latent-embedding, pruned network that is learnt from the rest of the patients diagnosed with the same disease.
     ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,fold), package='CTD'))[['ig_pruned']]
   }else{
@@ -325,10 +306,11 @@ getPtResult=function(input){
   # get "ig" derived adjacency matrix
   G = vector(mode="list", length=length(V(ig)$name))
   names(G) = V(ig)$name
-  adjacency_matrix <<- list(as.matrix(get.adjacency(ig, attr="weight")))
-  data_mx = data_mx[which(rownames(data_mx) %in% V(ig)$name), ]
+  adjacency_matrix = list(as.matrix(get.adjacency(ig, attr="weight")))
+  data_mx = as.matrix(.GlobalEnv$data_zscore[which(rownames(.GlobalEnv$data_zscore) %in% V(ig)$name), ])
+  data_mx = apply(data_mx, c(1,2), as.numeric)
   # using single-node diffusion
-  kmx = 30
+  kmx = input$kmx
   S = data_mx[order(abs(data_mx[,ptID]), decreasing = TRUE),ptID][1:kmx] # top kmx perturbed metabolites in ptID's profile
   ranks = loadToEnv(system.file(sprintf('ranks/ind_ranks/%s%d-ranks.RData',toupper(model), 1), package='CTD'))[["permutationByStartNode"]]
   ranks = lapply(ranks, tolower)
@@ -344,25 +326,39 @@ getPtResult=function(input){
   zmets.red=names(zmets[zmets>2])
   zmets.blue=names(zmets[zmets<(-2)])
   zmets=names(zmets[abs(zmets)>2])
+  e = ig
   #e = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% zmets)])
   #e = delete.vertices(e, V(e)[degree(e) == 0] )
   #e = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% mets)])
   reds = intersect(V(e)$name[which(V(e)$name %in% names(S))], names(S[which(S>0)]))
   blues = intersect(V(e)$name[which(V(e)$name %in% names(S))], names(S[which(S<0)]))
-  zmets.red=zmets.red[!zmets.red %in% reds]
-  zmets.blue=zmets.blue[!zmets.blue %in% blues]
+  #zmets.red=zmets.red[!zmets.red %in% reds]
+  #zmets.blue=zmets.blue[!zmets.blue %in% blues]
+  
   #generate networkd3
-  group=c(sapply(reds,function(x) x="pos_sig"),
-          sapply(blues,function(x) x="neg_sig"),
-          sapply(zmets.red,function(x) x="pos_nonsig"),
-          sapply(zmets.blue,function(x) x="neg_nonsig"))
+  group=c(sapply(zmets.red,function(x) x="Zscore(>2.0)"),
+          sapply(zmets.blue,function(x) x="Zscore(<-2.0)"))
   net_p=igraph_to_networkD3(e)
   net_p$nodes$group=sapply(as.character(net_p$nodes$name),function(x) group[x])
-  ColourScale <- 'd3.scaleOrdinal().domain(["pos_sig", "neg_sig","pos_nonsig","neg_nonsig"]).range(["#990000", "#000066","pink","#CCCCFF"]);'
+  ColourScale <- 'd3.scaleOrdinal().domain(["Zscore(>2.0)", "Zscore(<-2.0)"]).range(["#990000", "#000066"]);'
   net_p$nodes$nodesize=sapply(as.character(net_p$nodes$name),function(x) abs(data_mx[x,ptID])^2)
   net_p$links$value=abs(net_p$links$value)*100
-  linkColor=net_p$nodes$name[net_p$links$source+1] %in% mets & net_p$nodes$name[net_p$links$target+1] %in% mets
-  net_p$links$color=ifelse(linkColor,"red","lightgrey")
+  linkColor_ptMod=net_p$nodes$name[net_p$links$source+1] %in% mets & net_p$nodes$name[net_p$links$target+1] %in% mets
+  linkColor_disMod=net_p$nodes$name[net_p$links$source+1] %in% disMod[[model]] & net_p$nodes$name[net_p$links$target+1] %in% disMod[[model]]
+  linkColor_both = linkColor_ptMod & linkColor_disMod
+  linkColor = rep("lightgrey", length(linkColor_ptMod))
+  for (l in 1:length(linkColor)) {
+    if (linkColor_ptMod[l] & linkColor_disMod[l]) {
+      linkColor[l] = "yellow"
+    } else if (linkColor_ptMod[l]) {
+      linkColor[l] = "purple"
+    } else if (linkColor_disMod[l]) {
+      linkColor[l] = "green"
+    } else {
+      linkColor[l] = "lightgrey"
+    }
+  }
+  net_p$links$color=linkColor
   
   ptNetwork=forceNetwork(Nodes = net_p$nodes, charge = -90, fontSize = 20, colourScale = JS(ColourScale), 
                          Links = net_p$links,

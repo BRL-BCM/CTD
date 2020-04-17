@@ -84,18 +84,18 @@ ui = dashboardPage(
                                    )
                           ),
                   tabItem(tabName="ctd",
-                          h2("Network-Assisted Diagnostics"),
+                          h2("Network-Assisted Diagnostics", align="center"),
                           box(title="Select Patient", status="warning", solidHeader = TRUE,
                               splitLayout(cellWidths=c("25%", "50%"),
                                           selectInput(inputId = "diag_nw_Class", label = "Select diagnosis.", 
                                                       choices = names(cohorts_coded), selected = names(cohorts_coded)[1], selectize=FALSE),
                                           selectInput(inputId = "pt_nw_ID", label = "Select patient.", choices = cohorts_coded[[1]], selected=cohorts_coded[[1]][1], selectize=FALSE, multiple=FALSE),
-                                          selectInput(inputId="kmx", label="Top K Metabolites", choices=seq(5,50), selected=30, selectize=FALSE)
+                                          selectInput(inputId="kmx", label="Top K Metabolites", choices=seq(5,30), selected=30, selectize=FALSE)
                               ), width=12),
                           fluidRow(
                             column(width = 4,
                                    #box(title = "genotype", width=NULL, status = "info", solidHeader = TRUE, height = 200),
-                                   box(title = "P-value Rankings",width=NULL,status = "info", solidHeader = TRUE, height = 700,
+                                   box(title = "Disease Rankings",width=NULL,status = "info", solidHeader = TRUE, height = 700,
                                        align = "left",
                                        tableOutput("pvalRank"))
                             ),
