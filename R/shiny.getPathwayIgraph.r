@@ -15,9 +15,10 @@
 #' input$pathwayMapId = "All"
 #' res = shiny.getPathwayIgraph(input, Miller2015)
 #' # Returns a blank template for selected pathway, node labels and node types.
+
 shiny.getPathwayIgraph = function(input, Pathway.Name) {
   if (is.null( Pathway.Name)) Pathway.Name = gsub(" ", "-", input$pathwayMapId)
-
+  
   if (Pathway.Name=="All") {
     load(system.file("extdata/RData/allPathways.RData", package="CTD"))
     V(ig)$label[which(V(ig)$label %in% c("DSGEGDFXAEGGGVR", "Dsgegdfxaegggvr"))] = ""
@@ -26,18 +27,7 @@ shiny.getPathwayIgraph = function(input, Pathway.Name) {
     load(system.file(sprintf("extdata/RData/%s.RData", Pathway.Name), package="CTD"))
   }
   template.ig = ig
-
-  # Load id to display label mappings
-  nodeDisplayNames= read.table(system.file(sprintf("extdata/%s/Name-%s.txt", Pathway.Name, Pathway.Name), package="CTD"), header=TRUE, sep="\n", check.names = FALSE)
-  tmp = apply(nodeDisplayNames, 1, function(i) unlist(strsplit(i, split= " = "))[2])
-  tmp.nms = apply(nodeDisplayNames, 1, function(i) unlist(strsplit(i, split= " = "))[1])
-  ind = suppressWarnings(as.numeric(tmp.nms))
-  ind2 = as.logical(sapply(ind, function(i) is.na(i)))
-  tmp = tmp[-which(ind2)]
-  tmp.nms = tmp.nms[-which(ind2)]
-  nodeDisplayNames = as.character(tmp)
-  names(nodeDisplayNames) = tmp.nms
-  nodeDisplayNames = gsub("\\+", " ", nodeDisplayNames)
+  
   # Load id to node types mappings
   nodeType = read.table(system.file(sprintf("extdata/%s/Type-%s.txt", Pathway.Name, Pathway.Name), package="CTD"), header=TRUE, sep="\n", check.names = FALSE)
   tmp = apply(nodeType, 1, function(i) unlist(strsplit(i, split= " = "))[2])
@@ -48,19 +38,15 @@ shiny.getPathwayIgraph = function(input, Pathway.Name) {
   tmp.nms = tmp.nms[-which(ind2)]
   nodeType = as.character(tmp)
   names(nodeType) = tmp.nms
-  nodeType = nodeType[which(names(nodeType) %in% names(nodeDisplayNames))]
-
-  node.labels = vector("character", length = length(V(template.ig)$name))
+  nodeType = nodeType[which(names(nodeType) %in% V(template.ig)$name)]
+  
+  # node.labels = vector("character", length = length(V(template.ig)$name))
+  node.labels=V(template.ig)$label
   node.types = vector("character", length = length(V(template.ig)$name))
   for (n in 1:length(V(template.ig)$name)) {
-    node.labels[n] = URLdecode(as.character(nodeDisplayNames[V(template.ig)$name[n]]))
+    # node.labels[n] = URLdecode(as.character(nodeDisplayNames[V(template.ig)$name[n]]))
     node.types[n] = as.character(nodeType[V(template.ig)$name[n]])
   }
 
-  V(template.ig)$label = node.labels
-  V(template.ig)$shape = node.types
-  V(template.ig)$shape[grep("Enzyme|Unknown", V(template.ig)$shape)] = "rectangle"
-  V(template.ig)$shape[grep("Metabolite|Cofactor", V(template.ig)$shape)] = "circle"
-  
   return(list(template.ig=template.ig, nodeDisplayNames=node.labels, nodeType=node.types))
 }
