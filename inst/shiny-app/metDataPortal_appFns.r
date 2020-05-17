@@ -17,9 +17,9 @@ getData = function(input) {
   res = cbind(rownames(data), data)
   colnames(res) = c("Metabolite", colnames(data))
   res = as.matrix(res)
-  
+
   print(sprintf("getData() outputted res dim = %d x %d", dim(res)[1], dim(res)[2]))
-  
+
   return(res)
 }
 
@@ -32,7 +32,7 @@ getPathwayMap = function(input) {
   #' @param scalingFactor - Integer associated with increase in node size.
   #' @param outputFilePath - The directory in which you want to store image files.
   zscore.data = .GlobalEnv$data_zscore[,-c(1:8)]
-  
+
   if (length(input$ptIDs)==0) {
     return(list(pmap = list(src="", contentType = 'image/svg+xml'), colorbar = NULL))
   } else {
@@ -42,13 +42,13 @@ getPathwayMap = function(input) {
     patient.zscore = as.matrix(zscore.data[,which(colnames(zscore.data) %in% input$ptIDs)])
     patient.zscore = apply(patient.zscore, 1, function(i) mean(na.omit(i)))
     names(patient.zscore) = tmp
-    
-    if (input$pathwayMapId=="All") { Pathway.Name = "allPathways" } else { Pathway.Name = gsub(" ", "-", input$pathwayMapId) } 
+
+    if (input$pathwayMapId=="All") { Pathway.Name = "allPathways" } else { Pathway.Name = gsub(" ", "-", input$pathwayMapId) }
     res = shiny.getPathwayIgraph(input, Pathway.Name)
     template.ig = res$template.ig
     node.labels = res$nodeDisplayNames
     node.types = res$nodeType
-    
+
     # Super-impose patient-specific (or mean cohort-specific) profiles onto metabolite nodes.
     # Ignore "complex nodes" (the squares)
     nms = node.labels[which(node.labels %in% names(patient.zscore))]
@@ -79,8 +79,8 @@ getPathwayMap = function(input) {
     }
     V(template.ig)$label = wrap_strings(V(template.ig)$label, 15)
     V(template.ig)$label.cex = 0.75
-    template.ig = delete.vertices(template.ig, v=V(template.ig)$name[which(V(template.ig)$shape %in% c("Label", "Class", "FinalPathway"))])
-    
+    template.ig = delete.vertices(template.ig, v=V(template.ig)$name[which(node.types %in% c("Label", "Class", "FinalPathway"))])
+
     svg_filename = system.file("shiny-app/metDataPortal_appFns.r", package="CTD")
     svg_filename = gsub("/metDataPortal_appFns.r", "", svg_filename)
     svg_filename = sprintf("%s/pmap-%s_%s.svg", svg_filename, Pathway.Name, input$diagClass)
@@ -92,7 +92,7 @@ getPathwayMap = function(input) {
            pt.cex=seq(1, ceiling(max(V(template.ig)$size/scalingFactor)), 1),
            col='black',pch=21, pt.bg='white', cex=1, horiz=TRUE)
     dev.off()
-    
+
     # Get colorbar
     z = seq(floor(min(na.omit(patient.zscore))), ceiling(max(na.omit(patient.zscore))), 1/granularity)
     df = data.frame(Zscores = z[1:length(redblue)],
@@ -115,23 +115,23 @@ getPathwayMap = function(input) {
 }
 
 getPatientReport = function(input) {
-  # Must display RAW, Anchor and Z-score values for all patients in input$ptIDs. 
+  # Must display RAW, Anchor and Z-score values for all patients in input$ptIDs.
   # If in Miller2015 data, there are no raw and anchor values.
   zscore.data = .GlobalEnv$data_zscore
   tmp = rownames(zscore.data)
   zscore.data = apply(as.matrix(zscore.data[,which(colnames(zscore.data) %in% input$ptIDs)]), 1, function(i) mean(na.omit(i)))
   names(zscore.data) = tmp
-  
+
   norm.data = .GlobalEnv$data_norm
   tmp = rownames(norm.data)
   norm.data = apply(as.matrix(norm.data[,which(colnames(norm.data) %in% input$ptIDs)]), 1, function(i) mean(na.omit(i)))
   names(norm.data) = tmp
-  
+
   raw.data = .GlobalEnv$data_raw
   tmp = rownames(raw.data)
   raw.data = apply(as.matrix(raw.data[,which(colnames(raw.data) %in% input$ptIDs)]), 1, function(i) mean(na.omit(i)))
   names(raw.data) = tmp
-  
+
   # MetaboliteName  RawIonIntensity Anchor(CMTRX.5 median value)  Zscore
   data = data.frame(Metabolite=character(), Raw=numeric(), Anchor=numeric(), Zscore=numeric(), stringsAsFactors = FALSE)
   for (row in 1:length(zscore.data)) {
@@ -149,7 +149,7 @@ getPatientReport = function(input) {
     data[row, "Zscore"] = round(zscore.data[row], 2)
   }
   data = data[order(abs(data$Zscore), decreasing = TRUE),]
-  
+
   # Remove mets that were NA in raw, norm and zscore
   ind0 = intersect(intersect(which(is.na(data[,"Raw"])), which(is.na(data[,"Anchor"]))), which(is.na(data[,"Zscore"])))
   # Next, Remove mets that were NA in raw, but not in Anchor. These will be displayed in separate table.
@@ -180,13 +180,13 @@ getPatientReport = function(input) {
   }
   if (length(ind0)>0) { data = data[-ind0,] }
   print(dim(data))
-  
+
   # Order by Fill Rate, then by abs(Zscore)
   missingMets = missingMets[order(missingMets[,"Reference Fill Rate"], decreasing = TRUE),]
   class(data[,"Zscore"]) = "numeric"
   data = data[order(abs(data[,"Zscore"]), decreasing = TRUE), ]
   names(data) = c("Metabolite", "Raw Ion Intensity", "Anchor", "Z-score")
-  
+
   return(list(patientReport=data, missingMets=missingMets))
 }
 
@@ -320,7 +320,7 @@ getPtResult=function(input){
   p.mets=2^-(res[which.max(res[,"d.score"]),"d.score"]-log2(nrow(res))) # p value of this "modular perturbation"
   print(mets)
   print(p.mets)
-  
+
   # generate igraph for disease-relevant metabolites of the selected patient
   zmets=data_mx[order(abs(data_mx[,ptID]), decreasing = TRUE),ptID]
   zmets.red=names(zmets[zmets>2])
@@ -334,7 +334,7 @@ getPtResult=function(input){
   blues = intersect(V(e)$name[which(V(e)$name %in% names(S))], names(S[which(S<0)]))
   #zmets.red=zmets.red[!zmets.red %in% reds]
   #zmets.blue=zmets.blue[!zmets.blue %in% blues]
-  
+
   #generate networkd3
   group=c(sapply(zmets.red,function(x) x="Zscore(>2.0)"),
           sapply(zmets.blue,function(x) x="Zscore(<-2.0)"))
@@ -359,8 +359,8 @@ getPtResult=function(input){
     }
   }
   net_p$links$color=linkColor
-  
-  ptNetwork=forceNetwork(Nodes = net_p$nodes, charge = -90, fontSize = 20, colourScale = JS(ColourScale), 
+
+  ptNetwork=forceNetwork(Nodes = net_p$nodes, charge = -90, fontSize = 20, colourScale = JS(ColourScale),
                          Links = net_p$links,
                          linkColour = net_p$links$color,
                          #linkDistance = 100,
@@ -368,7 +368,7 @@ getPtResult=function(input){
                          Source = 'source', Target = 'target',NodeID = 'name',Group = 'group',Value = "value",zoom = T,
                          opacity = 0.9,
                          legend = T)
-  
+
   return(list(mets=mets,p.mets=p.mets,ptNetwork=ptNetwork))
 }
 

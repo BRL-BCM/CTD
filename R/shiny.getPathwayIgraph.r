@@ -18,7 +18,7 @@
 
 shiny.getPathwayIgraph = function(input, Pathway.Name) {
   if (is.null( Pathway.Name)) Pathway.Name = gsub(" ", "-", input$pathwayMapId)
-  
+
   if (Pathway.Name=="All") {
     load(system.file("extdata/RData/allPathways.RData", package="CTD"))
     V(ig)$label[which(V(ig)$label %in% c("DSGEGDFXAEGGGVR", "Dsgegdfxaegggvr"))] = ""
@@ -27,7 +27,7 @@ shiny.getPathwayIgraph = function(input, Pathway.Name) {
     load(system.file(sprintf("extdata/RData/%s.RData", Pathway.Name), package="CTD"))
   }
   template.ig = ig
-  
+
   # Load id to node types mappings
   nodeType = read.table(system.file(sprintf("extdata/%s/Type-%s.txt", Pathway.Name, Pathway.Name), package="CTD"), header=TRUE, sep="\n", check.names = FALSE)
   tmp = apply(nodeType, 1, function(i) unlist(strsplit(i, split= " = "))[2])
@@ -39,7 +39,7 @@ shiny.getPathwayIgraph = function(input, Pathway.Name) {
   nodeType = as.character(tmp)
   names(nodeType) = tmp.nms
   nodeType = nodeType[which(names(nodeType) %in% V(template.ig)$name)]
-  
+
   # node.labels = vector("character", length = length(V(template.ig)$name))
   node.labels=V(template.ig)$label
   node.types = vector("character", length = length(V(template.ig)$name))
