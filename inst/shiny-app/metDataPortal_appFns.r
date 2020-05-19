@@ -37,7 +37,8 @@ getPathwayMap = function(input) {
     return(list(pmap = list(src="", contentType = 'image/svg+xml'), colorbar = NULL))
   } else {
     PatientID = input$ptIDs
-    scalingFactor = input$scalingFactor
+    scalingFactor <<- input$scalingFactor
+    print(scalingFactor)
     tmp = rownames(zscore.data)
     patient.zscore = as.matrix(zscore.data[,which(colnames(zscore.data) %in% input$ptIDs)])
     patient.zscore = apply(patient.zscore, 1, function(i) mean(na.omit(i)))
@@ -57,17 +58,19 @@ getPathwayMap = function(input) {
     blues = colorRampPalette(c("blue", "white"))(granularity*ceiling(abs(min(na.omit(patient.zscore))))+1)
     reds = colorRampPalette(c("white", "red"))(granularity*ceiling(max(abs(na.omit(patient.zscore)))))
     redblue = c(blues, reds[2:length(reds)])
+    V(template.ig)$title = V(template.ig)$label
     for (i in 1:length(node.labels)) {
       if (node.labels[i] %in% nms) {
         if (!is.na(patient.zscore[node.labels[i]])) {
-          V(template.ig)$size[i] = scalingFactor*ceiling(abs(patient.zscore[node.labels[i]]))
+          V(template.ig)$size[i] = 10*scalingFactor*ceiling(abs(patient.zscore[node.labels[i]]))
+          V(template.ig)$title[i] = sprintf("%s\nz-score = %.2f",node.labels[i],patient.zscore[node.labels[i]])
           V(template.ig)$color[i] = redblue[1+granularity*(ceiling(patient.zscore[node.labels[i]])-ceiling(min(na.omit(patient.zscore))))]
         } else {
-          V(template.ig)$size[i] = 1
+          V(template.ig)$size[i] = 10
           V(template.ig)$color[i] = "#D3D3D3"
         }
       } else {
-        V(template.ig)$size[i] = 1
+        V(template.ig)$size[i] = 10
         V(template.ig)$color[i] = "#D3D3D3"
       }
     }
@@ -77,42 +80,48 @@ getPathwayMap = function(input) {
         paste(strwrap(x, width=width), collapse="\n")
       }))
     }
-    V(template.ig)$label = wrap_strings(V(template.ig)$label, 15)
-    V(template.ig)$label.cex = 0.75
+    V(template.ig)$label = wrap_strings(V(template.ig)$label, 10)
+    V(template.ig)$label.cex = 1
+    V(template.ig)$label.family = "sans"
     template.ig = delete.vertices(template.ig, v=V(template.ig)$name[which(node.types %in% c("Label", "Class", "FinalPathway"))])
-
-    svg_filename = system.file("shiny-app/metDataPortal_appFns.r", package="CTD")
-    svg_filename = gsub("/metDataPortal_appFns.r", "", svg_filename)
-    svg_filename = sprintf("%s/pmap-%s_%s.svg", svg_filename, Pathway.Name, input$diagClass)
-    svg(filename = svg_filename, width=14, height=10)
-    par(mar=c(1,0.2,1,1))
-    plot.igraph(template.ig, layout=cbind(V(template.ig)$x, V(template.ig)$y), edge.arrow.size = 0.1, edge.width = 1,
-                vertex.frame.color=V(template.ig)$color, main = gsub("-", " ", Pathway.Name))
-    legend('bottom',legend=1:max(ceiling(V(template.ig)$size/scalingFactor)),
-           pt.cex=seq(1, ceiling(max(V(template.ig)$size/scalingFactor)), 1),
-           col='black',pch=21, pt.bg='white', cex=1, horiz=TRUE)
-    dev.off()
-
-    # Get colorbar
-    z = seq(floor(min(na.omit(patient.zscore))), ceiling(max(na.omit(patient.zscore))), 1/granularity)
-    df = data.frame(Zscores = z[1:length(redblue)],
-                    Colors = redblue)
-    if (length(which(apply(df, 1, function(i) any(is.na(i)))))>0) {
-      df = df[-which(apply(df, 1, function(i) any(is.na(i)))),]
-    }
-    cb = ggplot(df, aes(x=1:nrow(df), y=Zscores, colour=Zscores)) + geom_point() + #ggtitle(input$diagClass) +
-      scale_colour_gradient2(guide = "colourbar", low = "blue", mid="white", high="red") +
-      guides(colour = guide_colourbar(draw.llim = min(df$Zscores), draw.ulim = max(df$Zscores),
-                                      direction="horizontal", title.position = "top", barwidth = 10, barheight = 2, reverse = FALSE))
-    g_legend=function(a.gplot){
-      tmp = ggplot_gtable(ggplot_build(a.gplot))
-      leg = which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
-      legend = tmp$grobs[[leg]]
-      return(legend)}
-    leg = g_legend(cb);
-    return(list(pmap = list(src=svg_filename, contentType = 'image/svg+xml'), colorbar = leg))
+    #visualize via visNetwork
+    vis.ig=template.ig
+    names(vertex_attr(vis.ig))[1] = "igraph_id"
+    vertex_attr(vis.ig,"id") = V(vis.ig)$name
+    vertex_attr(vis.ig)[['shape']] = replace(vertex_attr(vis.ig)[['shape']], vertex_attr(vis.ig)[['shape']] == "circle", "dot")
+    vertex_attr(vis.ig)[['shape']] = replace(vertex_attr(vis.ig)[['shape']], vertex_attr(vis.ig)[['shape']] == "rectangle", "square")
+    #V(vis.ig)$value = vertex_attr(vis.ig)[['size']]
+    V(vis.ig)$label.cex = 1.5
+    if(input$pathwayMapId == "All"){vis.ig=delete_vertex_attr(vis.ig,"label")}
+    pmap=visIgraph(vis.ig,idToLabel=F,physics = F) %>%
+      visOptions(height = 800, autoResize = F, highlightNearest = list(enabled = T, degree = 2, hover = T)) %>%
+      visNodes(size=V(vis.ig)$size) %>%
+      visEdges(color = "lightgrey") %>%
+      visInteraction(tooltipDelay = 0,hover=T)
+    # visEvents(hoverNode = "function(n){this.body.data.nodes.update({id: n.node, font: {size : 14}});}") %>%
+    # visEvents(blurNode = "function(n){this.body.data.nodes.update({id: n.node, font: {size : 0}});}")
   }
+  # Get colorbar
+  z = seq(floor(min(na.omit(patient.zscore))), ceiling(max(na.omit(patient.zscore))), 1/granularity)
+  df = data.frame(Zscores = z[1:length(redblue)],
+                  Colors = redblue)
+  if (length(which(apply(df, 1, function(i) any(is.na(i)))))>0) {
+    df = df[-which(apply(df, 1, function(i) any(is.na(i)))),]
+  }
+  cb = ggplot(df, aes(x=1:nrow(df), y=Zscores, colour=Zscores)) + geom_point() + #ggtitle(input$diagClass) +
+    scale_colour_gradient2(guide = "colourbar", low = "blue", mid="white", high="red") +
+    guides(colour = guide_colourbar(draw.llim = min(df$Zscores), draw.ulim = max(df$Zscores),
+                                    direction="horizontal", title.position = "top", barwidth = 10, barheight = 2, reverse = FALSE))
+  g_legend=function(a.gplot){
+    tmp = ggplot_gtable(ggplot_build(a.gplot))
+    leg = which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+    legend = tmp$grobs[[leg]]
+    return(legend)}
+  leg = g_legend(cb);
+  # return(list(pmap = list(src=svg_filename, contentType = 'image/svg+xml'), colorbar = leg))
+  return(list(pmap=pmap,colorbar = leg))
 }
+
 
 getPatientReport = function(input) {
   # Must display RAW, Anchor and Z-score values for all patients in input$ptIDs.
@@ -371,6 +380,3 @@ getPtResult=function(input){
 
   return(list(mets=mets,p.mets=p.mets,ptNetwork=ptNetwork))
 }
-
-
-
