@@ -1,5 +1,6 @@
 load("/Users/lillian.rosa/OneDrive/MacFiles/9thCommitteeMeeting/Clinical_paper/data/sysdata.rda")
-load("/Users/lillian.rosa/Downloads/CTD/inst/shiny-app/disMod.RData")
+load(system.file(sprintf("shiny-app/disMod.RData"), package = "CTD"))
+modelChoices <<- tolower(unique(sapply(list.files(system.file("ranks/ind_ranks",package = "CTD")),function(x) sub("[0-9]+-ranks.RData","",x))))
 
 getData = function(input) {
   print("called getData()...")
@@ -23,7 +24,24 @@ getData = function(input) {
   return(res)
 }
 
+
 #### TAB 1 FUNCTIONS:  ####
+justify <- function(x, hjust="center", vjust="center", draw=TRUE){
+  w <- sum(x$widths)
+  h <- sum(x$heights)
+  xj <- switch(hjust,
+               center = 0.5,
+               left = 0.5*w,
+               right=unit(1,"npc") - 0.5*w)
+  yj <- switch(vjust,
+               center = 0.5,
+               bottom = 0.5*h,
+               top=unit(1,"npc") - 0.5*h)
+  x$vp <- viewport(x=xj, y=yj)
+  if(draw) grid.draw(x)
+  return(x)
+}
+
 getPathwayMap = function(input) {
   #' Generate pathway map with patient data superimposed.
   #' @param Pathway.Name - The name of the pathway map you want to plot patient data on.
@@ -34,7 +52,7 @@ getPathwayMap = function(input) {
   zscore.data = .GlobalEnv$data_zscore[,-c(1:8)]
 
   if (length(input$ptIDs)==0) {
-    return(list(pmap = list(src="", contentType = 'image/svg+xml'), colorbar = NULL))
+    return(list(pmap = NULL, colorbar = NULL))
   } else {
     PatientID = input$ptIDs
     scalingFactor <<- input$scalingFactor
@@ -53,74 +71,123 @@ getPathwayMap = function(input) {
     # Super-impose patient-specific (or mean cohort-specific) profiles onto metabolite nodes.
     # Ignore "complex nodes" (the squares)
     nms = node.labels[which(node.labels %in% names(patient.zscore))]
-    patient.zscore = patient.zscore[which(names(patient.zscore) %in% nms)]
-    granularity = 2
-    blues = colorRampPalette(c("blue", "white"))(granularity*ceiling(abs(min(na.omit(patient.zscore))))+1)
-    reds = colorRampPalette(c("white", "red"))(granularity*ceiling(max(abs(na.omit(patient.zscore)))))
-    redblue = c(blues, reds[2:length(reds)])
     V(template.ig)$title = V(template.ig)$label
-    for (i in 1:length(node.labels)) {
-      if (node.labels[i] %in% nms) {
-        if (!is.na(patient.zscore[node.labels[i]])) {
-          V(template.ig)$size[i] = 10*scalingFactor*ceiling(abs(patient.zscore[node.labels[i]]))
-          V(template.ig)$title[i] = sprintf("%s\nz-score = %.2f",node.labels[i],patient.zscore[node.labels[i]])
-          V(template.ig)$color[i] = redblue[1+granularity*(ceiling(patient.zscore[node.labels[i]])-ceiling(min(na.omit(patient.zscore))))]
+    if(length(nms) != 0){
+      patient.zscore = patient.zscore[which(names(patient.zscore) %in% nms)]
+      granularity = 2
+      blues = colorRampPalette(c("blue", "white"))(granularity*ceiling(abs(min(na.omit(patient.zscore))))+1)
+      reds = colorRampPalette(c("white", "red"))(granularity*ceiling(max(abs(na.omit(patient.zscore)))))
+      redblue = c(blues, reds[2:length(reds)])
+
+      for (i in 1:length(node.labels)) {
+        if (node.labels[i] %in% nms) {
+          if (!is.na(patient.zscore[node.labels[i]])) {
+            V(template.ig)$size[i] = 10*scalingFactor*ceiling(abs(patient.zscore[node.labels[i]]))
+            V(template.ig)$title[i] = sprintf("%s\nz-score = %.2f",node.labels[i],patient.zscore[node.labels[i]])
+            V(template.ig)$color[i] = redblue[1+granularity*(ceiling(patient.zscore[node.labels[i]])-ceiling(min(na.omit(patient.zscore))))]
+          } else {
+            V(template.ig)$size[i] = 10
+            V(template.ig)$color[i] = "#D3D3D3"
+          }
         } else {
           V(template.ig)$size[i] = 10
           V(template.ig)$color[i] = "#D3D3D3"
         }
-      } else {
-        V(template.ig)$size[i] = 10
-        V(template.ig)$color[i] = "#D3D3D3"
       }
     }
-    V(template.ig)$label = capitalize(tolower(V(template.ig)$label))
+
+    # V(template.ig)$label = capitalize(tolower(V(template.ig)$label))
     wrap_strings = function(vector_of_strings,width){
       as.character(sapply(vector_of_strings, FUN=function(x){
         paste(strwrap(x, width=width), collapse="\n")
       }))
     }
-    V(template.ig)$label = wrap_strings(V(template.ig)$label, 10)
-    V(template.ig)$label.cex = 1
-    V(template.ig)$label.family = "sans"
-    template.ig = delete.vertices(template.ig, v=V(template.ig)$name[which(node.types %in% c("Label", "Class", "FinalPathway"))])
+    V(template.ig)$label = wrap_strings(V(template.ig)$label, 15)
+
+
     #visualize via visNetwork
     vis.ig=template.ig
     names(vertex_attr(vis.ig))[1] = "igraph_id"
     vertex_attr(vis.ig,"id") = V(vis.ig)$name
-    vertex_attr(vis.ig)[['shape']] = replace(vertex_attr(vis.ig)[['shape']], vertex_attr(vis.ig)[['shape']] == "circle", "dot")
-    vertex_attr(vis.ig)[['shape']] = replace(vertex_attr(vis.ig)[['shape']], vertex_attr(vis.ig)[['shape']] == "rectangle", "square")
-    V(vis.ig)$label.cex = 1.5
-    if(input$pathwayMapId == "All"){vis.ig=delete_vertex_attr(vis.ig,"label")}
-    pmap=visIgraph(vis.ig,idToLabel=F,physics = F) %>%
-      visOptions(height = 800, autoResize = F, highlightNearest = list(enabled = T, degree = 2, hover = T)) %>%
-      visNodes(size=V(vis.ig)$size) %>%
-      visEdges(color = "lightgrey") %>%
-      visInteraction(tooltipDelay = 0,hover=T)
-    # visEvents(hoverNode = "function(n){this.body.data.nodes.update({id: n.node, font: {size : 14}});}") %>%
-    # visEvents(blurNode = "function(n){this.body.data.nodes.update({id: n.node, font: {size : 0}});}")
-  }
-  # Get colorbar
-  z = seq(floor(min(na.omit(patient.zscore))), ceiling(max(na.omit(patient.zscore))), 1/granularity)
-  df = data.frame(Zscores = z[1:length(redblue)],
-                  Colors = redblue)
-  if (length(which(apply(df, 1, function(i) any(is.na(i)))))>0) {
-    df = df[-which(apply(df, 1, function(i) any(is.na(i)))),]
-  }
-  cb = ggplot(df, aes(x=1:nrow(df), y=Zscores, colour=Zscores)) + geom_point() + #ggtitle(input$diagClass) +
-    scale_colour_gradient2(guide = "colourbar", low = "blue", mid="white", high="red") +
-    guides(colour = guide_colourbar(draw.llim = min(df$Zscores), draw.ulim = max(df$Zscores),
-                                    direction="horizontal", title.position = "top", barwidth = 10, barheight = 2, reverse = FALSE))
-  g_legend=function(a.gplot){
-    tmp = ggplot_gtable(ggplot_build(a.gplot))
-    leg = which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
-    legend = tmp$grobs[[leg]]
-    return(legend)}
-  leg = g_legend(cb);
-  # return(list(pmap = list(src=svg_filename, contentType = 'image/svg+xml'), colorbar = leg))
-  return(list(pmap=pmap,colorbar = leg))
-}
+    vertex_attr(vis.ig)[['shape']] = replace(vertex_attr(vis.ig)[['shape']], which(node.types %in% c("Enzyme","Unknown")), "square")
+    vertex_attr(vis.ig)[['shape']] = replace(vertex_attr(vis.ig)[['shape']], which(node.types %in% c("Metabolite","Minor+Metabolite","Intermediate")), "dot")
+    vertex_attr(vis.ig)[['shape']] = replace(vertex_attr(vis.ig)[['shape']], which(node.types %in% c("Cofactor")), "triangle")
+    vertex_attr(vis.ig)[['shape']] = replace(vertex_attr(vis.ig)[['shape']], which(node.types %in% c("Label")), "box")
 
+    scaler= diff(range(V(vis.ig)$y))/800
+    V(vis.ig)$x=(V(vis.ig)$x-range(V(vis.ig)$x)[1])/scaler
+    V(vis.ig)$y=(V(vis.ig)$y-range(V(vis.ig)$y)[1])/scaler
+
+    V(vis.ig)$label.family = "sans"
+    #V(vis.ig)$label.cex = diff(range(V(vis.ig)$y))*700/diff(range(V(vis.ig)$y))*1.34/800
+    V(vis.ig)$label.cex = 1.5
+    E(vis.ig)$width = 5
+    E(vis.ig)$color = "lightgrey"
+    #V(vis.ig)$value = vertex_attr(vis.ig)[['size']]
+
+    if(input$pathwayMapId == "All"){
+      V(vis.ig)$label[node.types!="Label"]=" "
+      vis.ig = delete.vertices(vis.ig, v=V(vis.ig)$name[which(node.types %in% c("Class","FinalPathway"))])
+    }else{
+      vis.ig = delete.vertices(vis.ig, v=V(vis.ig)$name[which(node.types %in% c("Class","Label","FinalPathway"))])
+    }
+
+
+    lnodes <- data.frame(label = c("Enzyme\nor Unknown",
+                                   "Metabolite or\nMinor Metabolite\n or Intermediate",
+                                   "Cofactor"),
+                         font.size = 15,
+                         shape = c( "square","dot","triangle"),
+                         color = list(background="lightgrey",border = "grey"))
+
+    df=data.frame(Node.Types=c("Enzyme or\nUnknown","Metabolite or\nMinor Metabolite or\nIntermediate","Cofactor"),
+                  x=c(1,2,3),
+                  y=c(1,2,3))
+
+    pmap=visIgraph(vis.ig,idToLabel=F,physics = F) %>%
+      visOptions( autoResize = F,
+                  height = "800px",
+                  highlightNearest = list(enabled = T, degree = 2, hover = F)) %>%
+      visNodes(size=V(vis.ig)$size) %>%
+      # visLegend(addNodes = lnodes, useGroups = FALSE, position = "left",width = 0.1, zoom = TRUE) %>%
+      visInteraction(tooltipDelay = 0, hover=T)
+
+    lvis = ggplot(df, aes(x=x, y=y, shape=Node.Types)) +
+      geom_point(fill="lightgrey", color="darkgrey", size=12) +
+      scale_shape_manual(values=c(24, 22, 21)) +
+      theme(legend.position="bottom",
+            legend.background = element_blank(),
+            legend.key=element_blank(),
+
+            #legend.key.size = unit(4, "shape"),
+            legend.text=element_text(size=13),
+            legend.title=element_blank())
+    lvis <- cowplot::get_legend(lvis)
+    lvis=justify(lvis,hjust = "right", vjust = "center",draw = FALSE)
+
+  }
+
+  # Get colorbar
+  if(length(nms) != 0){
+    z = seq(floor(min(na.omit(patient.zscore))), ceiling(max(na.omit(patient.zscore))), 1/granularity)
+    df = data.frame(Zscores = z[1:length(redblue)],
+                    Colors = redblue)
+    if (length(which(apply(df, 1, function(i) any(is.na(i)))))>0) {
+      df = df[-which(apply(df, 1, function(i) any(is.na(i)))),]
+    }
+    cb = ggplot(df, aes(x=1:nrow(df), y=Zscores, colour=Zscores)) + geom_point() + #ggtitle(input$diagClass) +
+      scale_colour_gradient2(guide = "colourbar", low = "blue", mid="white", high="red") +
+      guides(colour = guide_colourbar(draw.llim = min(df$Zscores), draw.ulim = max(df$Zscores),
+                                      direction="horizontal", title.position = "top", barwidth = 10, barheight = 2, reverse = FALSE))
+    leg=cowplot::get_legend(cb)
+  }else{
+    leg = textGrob("No metabolites (|Zscore|>2) found.\nShowing template pathway map.",gp=gpar(col="black", fontsize=14))
+  }
+  leg=justify(leg,hjust = "left", vjust = "center",draw = FALSE)
+
+  # return(list(pmap = list(src=svg_filename, contentType = 'image/svg+xml'), colorbar = leg))
+  return(list(pmap=pmap,colorbar = leg,shapeleg = lvis))
+}
 
 getPatientReport = function(input) {
   # Must display RAW, Anchor and Z-score values for all patients in input$ptIDs.
@@ -197,8 +264,6 @@ getPatientReport = function(input) {
 
   return(list(patientReport=data, missingMets=missingMets))
 }
-
-
 
 #### TAB 2 (INSPECT REFERENCE POPULATION) FUNCTIONS ####
 getMetList = function(input) {
@@ -290,20 +355,42 @@ getRefPop = function(input) {
 
 
 #### TAB 3 (NETWORK-ASSISTED DIAGNOSTICS) FUNCTIONS ####
+
+getColumn <<- function(df,colname,rown="rowname"){
+  vcol=df[,colname]
+  if(rown == "rowname"){
+    names(vcol) = rownames(df)
+  }else{
+    names(vcol) = df[,rown]
+  }
+  return(vcol)
+}
+
 getPrankDf=function(input){
-  ptID=input$pt_nw_ID
-  #load(system.file(sprintf("shiny-app/model/ptRanks_kmx%s.RData", input$kmx), package = "CTD"))
-  load(sprintf("/Users/lillian.rosa/Downloads/CTD/inst/shiny-app/model/ptRanks_kmx%s.RData", input$kmx))
-  df.pranks = pt_ranks[[ptID]]
-  df.pranks = df.pranks[order(as.numeric(df.pranks[,"avg.comb"])),]
-  return(df.pranks)
+  # get disease cohort p-value ranking dataframe
+  pts = cohorts_coded[[input$diag_nw_Class]]
+  load(system.file(sprintf("shiny-app/model/ptRanks_kmx%s.RData", input$kmx), package = "CTD"))
+  #load(sprintf("/Users/lillian.rosa/Downloads/CTD/inst/shiny-app/model/ptRanks_kmx%s.RData", input$kmx))
+  df.pranks = sapply(match(pts,names(pt_ranks)), function(x) getColumn(pt_ranks[[x]],"ctd","model"))
+  colnames(df.pranks)=pts
+  df.pranks = apply(df.pranks,c(1,2), function(x) as.numeric(sprintf("%.3e",x)))
+  model.ind = match(input$diag_nw_Class,rownames(df.pranks))
+  if (is.na(model.ind)) {model.ind = 1}
+  #get patient p-value rankings dataframe
+  ptID = input$pt_nw_ID
+  pt.df.pranks = pt_ranks[[ptID]]
+  rownames(pt.df.pranks)=pt.df.pranks[,"model"]
+  pt.df.pranks = pt.df.pranks[,-which("model" %in% colnames(pt.df.pranks))]
+  pt.df.pranks = apply(pt.df.pranks,c(1,2), function(x) as.numeric(sprintf("%.3e",x)))
+  return(list(df.pranks=df.pranks,pt.df.pranks=pt.df.pranks,model.ind=model.ind,np=length(pts)))
 }
 
 getPtResult=function(input){
   ptID=input$pt_nw_ID
   print(ptID)
-  getDiag=names(cohorts_coded)[unlist(sapply(cohorts_coded,function(x) which(ptID %in% x)))]
+  getDiag=names(unlist(sapply(cohorts_coded,function(x) which(ptID %in% x))))
   model=input$bgModel
+  kmx=input$kmx
   if(model==getDiag){
     fold=which(cohorts_coded[[getDiag]]==ptID)
     # load latent-embedding, pruned network that is learnt from the rest of the patients diagnosed with the same disease.
@@ -314,9 +401,10 @@ getPtResult=function(input){
   # get "ig" derived adjacency matrix
   G = vector(mode="list", length=length(V(ig)$name))
   names(G) = V(ig)$name
-  adjacency_matrix = list(as.matrix(get.adjacency(ig, attr="weight")))
+  #adjacency_matrix = list(as.matrix(get.adjacency(ig, attr="weight")))
   data_mx = as.matrix(.GlobalEnv$data_zscore[which(rownames(.GlobalEnv$data_zscore) %in% V(ig)$name), ])
-  data_mx = apply(data_mx, c(1,2), as.numeric)
+  data_mx = suppressWarnings(apply(data_mx, c(1,2), as.numeric))
+
   # using single-node diffusion
   kmx = input$kmx
   S = data_mx[order(abs(data_mx[,ptID]), decreasing = TRUE),ptID][1:kmx] # top kmx perturbed metabolites in ptID's profile
@@ -326,42 +414,81 @@ getPtResult=function(input){
   res = mle.getEncodingLength(ptBSbyK, NULL, ptID, G) # get encoding length
   mets = unique(c(names(S), names(ptBSbyK[[which.max(res[,"d.score"])]]))) # best co-perturbed metabolite set is the most compressed subset of nodes
   p.mets=2^-(res[which.max(res[,"d.score"]),"d.score"]-log2(nrow(res))) # p value of this "modular perturbation"
-  print(mets)
-  print(p.mets)
+  #print(mets)
+  sprintf("p.mets = %.3e",p.mets)
 
   # generate igraph for disease-relevant metabolites of the selected patient
   zmets=data_mx[order(abs(data_mx[,ptID]), decreasing = TRUE),ptID]
   zmets.red=names(zmets[zmets>2])
   zmets.blue=names(zmets[zmets<(-2)])
   zmets=names(zmets[abs(zmets)>2])
-  e = ig
-  #e = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% zmets)])
-  #e = delete.vertices(e, V(e)[degree(e) == 0] )
-  #e = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% mets)])
-  reds = intersect(V(e)$name[which(V(e)$name %in% names(S))], names(S[which(S>0)]))
-  blues = intersect(V(e)$name[which(V(e)$name %in% names(S))], names(S[which(S<0)]))
+
+  if ( input$RangeChoice == "Top K perturbed metabolites only"){
+    e = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% mets)])
+    e = delete.vertices(e, V(e)[degree(e) == 0] )
+  }else if(input$RangeChoice == "Abnormal Z-scored metabolites only"){
+    e = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% zmets)])
+    e = delete.vertices(e, V(e)[degree(e) == 0] )
+  }else if(input$RangeChoice == "All Detected Metabolites"){
+    e = ig
+  }else{
+    print("No Range Selected")
+  }
+
+  # assign groups and make ColourScale
+
+  # group=c(sapply(zmets.red,function(x) x="Zscore(>2.0)"),
+  #         sapply(zmets.blue,function(x) x="Zscore(<-2.0)"),
+  #         sapply(setdiff(V(ig)$name,c(zmets.red,zmets.blue)), function(x) x="-2.0 < Zscore < 2.0"))
+  #
+  # ColourScale <- 'd3.scaleOrdinal().domain(["Zscore(>2.0)", "Zscore(<-2.0)", "-2.0 < Zscore < 2.0"]).range(["#990000", "#000066", "#d3d3d3"]);'
+
+  node_ptMod = V(e)$name  %in% mets
+  node_disMod = V(e)$name  %in% disMod[[model]]
+  node_both = node_ptMod & node_disMod
+
+  group=rep("Metabolites in Neither Modules",length(V(e)$name))
+  for (l in 1:length(V(e)$name)) {
+    if (node_both[l]) {
+      group[l] = "Metabolites in Both Modules"
+    } else if (node_ptMod[l]) {
+      group[l] = "Metabolites only in Patient Module" #"55185D"
+    } else if (node_disMod[l]) {
+      group[l] = "Metabolites only in Disease Module"
+    } else {
+      group[l] = "Metabolites in Neither Modules"
+    }
+  }
+  names(group)=V(e)$name
+
+  ColourScale <- 'd3.scaleOrdinal().domain(["Metabolites only in Patient Module", "Metabolites only in Disease Module", "Metabolites in Both Modules","Metabolites in Neither Modules"]).range(["7554A3", "96C93C", "ECB602","#d3d3d3"]);'
+  borderColor = rep("#d3d3d3",length(V(e)$name))
+  borderColor[V(e)$name %in% zmets.blue] = "lightblue"
+  borderColor[V(e)$name %in% zmets.red] = "red"
+  # reds = intersect(V(e)$name[which(V(e)$name %in% names(S))], names(S[which(S>0)]))
+  # blues = intersect(V(e)$name[which(V(e)$name %in% names(S))], names(S[which(S<0)]))
   #zmets.red=zmets.red[!zmets.red %in% reds]
   #zmets.blue=zmets.blue[!zmets.blue %in% blues]
 
   #generate networkd3
-  group=c(sapply(zmets.red,function(x) x="Zscore(>2.0)"),
-          sapply(zmets.blue,function(x) x="Zscore(<-2.0)"))
+
   net_p=igraph_to_networkD3(e)
   net_p$nodes$group=sapply(as.character(net_p$nodes$name),function(x) group[x])
-  ColourScale <- 'd3.scaleOrdinal().domain(["Zscore(>2.0)", "Zscore(<-2.0)"]).range(["#990000", "#000066"]);'
-  net_p$nodes$nodesize=sapply(as.character(net_p$nodes$name),function(x) abs(data_mx[x,ptID])^2)
-  net_p$links$value=abs(net_p$links$value)*100
+
+  net_p$nodes$nodesize=sapply(as.character(net_p$nodes$name),function(x) abs(data_mx[x,ptID])^1.5)
+
+  net_p$links$value=abs(net_p$links$value)*150
   linkColor_ptMod=net_p$nodes$name[net_p$links$source+1] %in% mets & net_p$nodes$name[net_p$links$target+1] %in% mets
   linkColor_disMod=net_p$nodes$name[net_p$links$source+1] %in% disMod[[model]] & net_p$nodes$name[net_p$links$target+1] %in% disMod[[model]]
   linkColor_both = linkColor_ptMod & linkColor_disMod
   linkColor = rep("lightgrey", length(linkColor_ptMod))
   for (l in 1:length(linkColor)) {
-    if (linkColor_ptMod[l] & linkColor_disMod[l]) {
-      linkColor[l] = "yellow"
+    if (linkColor_both[l]) {
+      linkColor[l] = "ECB602"
     } else if (linkColor_ptMod[l]) {
-      linkColor[l] = "purple"
+      linkColor[l] = "7554A3"#"55185D"
     } else if (linkColor_disMod[l]) {
-      linkColor[l] = "green"
+      linkColor[l] = "96C93C"
     } else {
       linkColor[l] = "lightgrey"
     }
@@ -377,5 +504,9 @@ getPtResult=function(input){
                          opacity = 0.9,
                          legend = T)
 
+  ptNetwork$x$nodes$border = borderColor
+
+  ptNetwork <- htmlwidgets::onRender(ptNetwork, 'function(el, x) { d3.selectAll("circle").style("stroke", d => d.border); }')
+  ptNetwork
   return(list(mets=mets,p.mets=p.mets,ptNetwork=ptNetwork))
 }
