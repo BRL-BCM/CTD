@@ -1,7 +1,6 @@
 load("/Users/lillian.rosa/OneDrive/MacFiles/9thCommitteeMeeting/Clinical_paper/data/sysdata.rda")
 load(system.file(sprintf("shiny-app/disMod.RData"), package = "CTD"))
 modelChoices <<- tolower(unique(sapply(list.files(system.file("ranks/ind_ranks",package = "CTD")),function(x) sub("[0-9]+-ranks.RData","",x))))
-
 getData = function(input) {
   print("called getData()...")
   if (input$raworZscore == "Raw") {
@@ -183,7 +182,7 @@ getPathwayMap = function(input) {
   }else{
     leg = textGrob("No metabolites (|Zscore|>2) found.\nShowing template pathway map.",gp=gpar(col="black", fontsize=14))
   }
-  leg=justify(leg,hjust = "left", vjust = "center",draw = FALSE)
+  leg=justify(leg,hjust = "center", vjust = "center",draw = FALSE)
 
   # return(list(pmap = list(src=svg_filename, contentType = 'image/svg+xml'), colorbar = leg))
   return(list(pmap=pmap,colorbar = leg,shapeleg = lvis))
@@ -351,9 +350,6 @@ getRefPop = function(input) {
   return (list(hst=hst, outliers=outlierSamples, qq=qq, ests=list(mean=mn.est, std=sd.est), rare=rare, per=per))
 }
 
-
-
-
 #### TAB 3 (NETWORK-ASSISTED DIAGNOSTICS) FUNCTIONS ####
 
 getColumn <<- function(df,colname,rown="rowname"){
@@ -366,6 +362,14 @@ getColumn <<- function(df,colname,rown="rowname"){
   return(vcol)
 }
 
+rampred <<- function(numdata){
+  #brks = quantile(numdata, probs = seq(.05, .95, .05), na.rm = TRUE)
+  brks = quantile(seq(min(numdata),max(numdata),diff(range(numdata))/20), probs = seq(.00, 1, .05), na.rm = TRUE)
+  clrs = round(seq(255, 40, length.out = length(brks) + 1), 0) %>% {paste0("rgb(255,", ., ",", ., ")")}
+  clrs = rev(clrs)
+  return(list(brks=brks,clrs=clrs))
+}
+
 getPrankDf=function(input){
   # get disease cohort p-value ranking dataframe
   pts = cohorts_coded[[input$diag_nw_Class]]
@@ -376,25 +380,99 @@ getPrankDf=function(input){
   df.pranks = apply(df.pranks,c(1,2), function(x) as.numeric(sprintf("%.3e",x)))
   model.ind = match(input$diag_nw_Class,rownames(df.pranks))
   if (is.na(model.ind)) {model.ind = 1}
-  #get patient p-value rankings dataframe
+  return(list(df.pranks=df.pranks,
+              model.ind=model.ind,
+              np=length(pts)))
+}
+
+getPtPrankDf=function(input){
+  load(system.file(sprintf("shiny-app/model/ptRanks_kmx%s.RData", input$kmx), package = "CTD"))
   ptID = input$pt_nw_ID
   pt.df.pranks = pt_ranks[[ptID]]
   rownames(pt.df.pranks)=pt.df.pranks[,"model"]
   pt.df.pranks = pt.df.pranks[,-which("model" %in% colnames(pt.df.pranks))]
   pt.df.pranks = apply(pt.df.pranks,c(1,2), function(x) as.numeric(sprintf("%.3e",x)))
-  return(list(df.pranks=df.pranks,pt.df.pranks=pt.df.pranks,model.ind=model.ind,np=length(pts)))
+  diag.ind = match(input$diag_nw_Class,rownames(pt.df.pranks))
+  if(input$sigOnly) {
+    brks=rampred(pt.df.pranks[pt.df.pranks<0.05])[["brks"]]
+    clrs=rampred(pt.df.pranks[pt.df.pranks<0.05])[["clrs"]]
+  }else{
+    brks=rampred(pt.df.pranks)[["brks"]]
+    clrs=rampred(pt.df.pranks)[["clrs"]]
+  }
+
+  # temp=datatable(pt.df.pranks,
+  #                options = list(scrollX = TRUE,fixedColumns = TRUE, #dom = 't',
+  #                               pageLength = 20,
+  #                               lengthMenu = c(10, 15, 20)))
+  #
+  # for (n in 1:ncol(pt.df.pranks)) {
+  #   temp=formatStyle(temp,colnames(pt.df.pranks)[n],
+  #                    backgroundColor = styleInterval(rampred(pt.df.pranks[,n])[["brks"]],rampred(pt.df.pranks[,n])[["clrs"]]))
+  # }
+  # pt.df.pranks=temp
+  pt.df.pranks=datatable(pt.df.pranks,
+                         options = list(scrollX = TRUE,fixedColumns = TRUE, #dom = 't',
+                                        pageLength = 20,
+                                        lengthMenu = c(10, 15, 20))) %>%
+    formatStyle(colnames(pt.df.pranks),
+                backgroundColor = styleInterval(brks,clrs))
+  return(pt.df.pranks)
 }
 
-getPtResult=function(input){
+getVlength <<- function(input){
   ptID=input$pt_nw_ID
-  print(ptID)
   getDiag=names(unlist(sapply(cohorts_coded,function(x) which(ptID %in% x))))
   model=input$bgModel
   kmx=input$kmx
   if(model==getDiag){
     fold=which(cohorts_coded[[getDiag]]==ptID)
     # load latent-embedding, pruned network that is learnt from the rest of the patients diagnosed with the same disease.
-    ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,fold), package='CTD'))[['ig_pruned']]
+    if (system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,fold), package='CTD') != ""){
+      ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,fold), package='CTD'))[['ig_pruned']]
+    }else{
+      ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,1), package='CTD'))[['ig_pruned']]
+    }
+  }else{
+    ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,1), package='CTD'))[['ig_pruned']]
+  }
+  G = vector(mode="list", length=length(V(ig)$name))
+  names(G) = V(ig)$name
+
+  data_mx = as.matrix(.GlobalEnv$data_zscore[which(rownames(.GlobalEnv$data_zscore) %in% V(ig)$name), ])
+  data_mx = suppressWarnings(apply(data_mx, c(1,2), as.numeric))
+
+  zmets=data_mx[order(abs(data_mx[,ptID]), decreasing = TRUE),ptID]
+  zmets=names(zmets[abs(zmets)>2])
+
+  if ( input$RangeChoice == "Top K perturbed metabolites only"){
+    e = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% names(data_mx[order(abs(data_mx[,ptID]), decreasing = TRUE),ptID][1:kmx]))])
+    e = delete.vertices(e, V(e)[degree(e) == 0] )
+  }else if(input$RangeChoice == "Abnormal Z-scored metabolites only, regardless of K"){
+    e = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% zmets)])
+    e = delete.vertices(e, V(e)[degree(e) == 0] )
+  }else if(input$RangeChoice == "All Detected Metabolites"){
+    e = ig
+  }else{
+    print("No Range Selected")
+  }
+  return(length(V(e)$name))
+}
+
+getPtResult=function(input){
+  ptID=input$pt_nw_ID
+  sprintf("network visualization selected patient: %s",ptID)
+  getDiag=names(unlist(sapply(cohorts_coded,function(x) which(ptID %in% x))))
+  model=input$bgModel
+  kmx=input$kmx
+  if(model==getDiag){
+    fold=which(cohorts_coded[[getDiag]]==ptID)
+    # load latent-embedding, pruned network that is learnt from the rest of the patients diagnosed with the same disease.
+    if (system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,fold), package='CTD') != ""){
+      ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,fold), package='CTD'))[['ig_pruned']]
+    }else{
+      ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,1), package='CTD'))[['ig_pruned']]
+    }
   }else{
     ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,1), package='CTD'))[['ig_pruned']]
   }
@@ -426,7 +504,7 @@ getPtResult=function(input){
   if ( input$RangeChoice == "Top K perturbed metabolites only"){
     e = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% mets)])
     e = delete.vertices(e, V(e)[degree(e) == 0] )
-  }else if(input$RangeChoice == "Abnormal Z-scored metabolites only"){
+  }else if(input$RangeChoice == "Abnormal Z-scored metabolites only, regardless of K"){
     e = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% zmets)])
     e = delete.vertices(e, V(e)[degree(e) == 0] )
   }else if(input$RangeChoice == "All Detected Metabolites"){
@@ -507,6 +585,5 @@ getPtResult=function(input){
   ptNetwork$x$nodes$border = borderColor
 
   ptNetwork <- htmlwidgets::onRender(ptNetwork, 'function(el, x) { d3.selectAll("circle").style("stroke", d => d.border); }')
-  ptNetwork
   return(list(mets=mets,p.mets=p.mets,ptNetwork=ptNetwork))
 }
