@@ -14,9 +14,10 @@ require(visNetwork)
 require(R.utils)
 require(CTD)
 require(cowplot)
+require(gridExtra)
 
-setwd("/Users/lillian.rosa/Downloads/CTD/inst/shiny-app")
-source("/Users/lillian.rosa/Downloads/CTD/inst/shiny-app/metDataPortal_appFns.r")
+setwd("/Users/lillian.rosa/Downloads/CTD/inst/shiny-app/")
+source("metDataPortal_appFns.r")
 
 ui = dashboardPage(
   dashboardHeader(title = "Metabolomics Data Portal"),

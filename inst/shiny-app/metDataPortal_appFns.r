@@ -196,36 +196,38 @@ getPatientReport = function(input) {
   zscore.data = apply(as.matrix(zscore.data[,which(colnames(zscore.data) %in% input$ptIDs)]), 1, function(i) mean(na.omit(i)))
   names(zscore.data) = tmp
 
-  norm.data = .GlobalEnv$data_norm
-  tmp = rownames(norm.data)
-  norm.data = apply(as.matrix(norm.data[,which(colnames(norm.data) %in% input$ptIDs)]), 1, function(i) mean(na.omit(i)))
-  names(norm.data) = tmp
+  #norm.data = .GlobalEnv$data_norm
+  #tmp = rownames(norm.data)
+  #norm.data = apply(as.matrix(norm.data[,which(colnames(norm.data) %in% input$ptIDs)]), 1, function(i) mean(na.omit(i)))
+  #names(norm.data) = tmp
 
-  raw.data = .GlobalEnv$data_raw
-  tmp = rownames(raw.data)
-  raw.data = apply(as.matrix(raw.data[,which(colnames(raw.data) %in% input$ptIDs)]), 1, function(i) mean(na.omit(i)))
-  names(raw.data) = tmp
+  #raw.data = .GlobalEnv$data_raw
+  #tmp = rownames(raw.data)
+  #raw.data = apply(as.matrix(raw.data[,which(colnames(raw.data) %in% input$ptIDs)]), 1, function(i) mean(na.omit(i)))
+  #names(raw.data) = tmp
 
   # MetaboliteName  RawIonIntensity Anchor(CMTRX.5 median value)  Zscore
-  data = data.frame(Metabolite=character(), Raw=numeric(), Anchor=numeric(), Zscore=numeric(), stringsAsFactors = FALSE)
+  #data = data.frame(Metabolite=character(), Raw=numeric(), Anchor=numeric(), Zscore=numeric(), stringsAsFactors = FALSE)
+  data = data.frame(Metabolite=character(), Zscore=numeric(), stringsAsFactors = FALSE)
   for (row in 1:length(zscore.data)) {
     data[row, "Metabolite"] = names(zscore.data)[row]
-    if (names(zscore.data)[row] %in% names(norm.data)) {
-      data[row, "Anchor"] = round(norm.data[which(names(norm.data)==names(zscore.data)[row])], 2)
-    } else {
-      data[row, "Anchor"] = NA
-    }
-    if (names(zscore.data)[row] %in% names(raw.data)) {
-      data[row, "Raw"] = round(raw.data[which(names(raw.data)==names(zscore.data)[row])], 2)
-    } else {
-      data[row, "Raw"] = NA
-    }
+   # if (names(zscore.data)[row] %in% names(norm.data)) {
+   #  data[row, "Anchor"] = round(norm.data[which(names(norm.data)==names(zscore.data)[row])], 2)
+   #} else {
+   #   data[row, "Anchor"] = NA
+   #}
+   #if (names(zscore.data)[row] %in% names(raw.data)) {
+   #   data[row, "Raw"] = round(raw.data[which(names(raw.data)==names(zscore.data)[row])], 2)
+   #} else {
+   #   data[row, "Raw"] = NA
+   #}
     data[row, "Zscore"] = round(zscore.data[row], 2)
   }
   data = data[order(abs(data$Zscore), decreasing = TRUE),]
 
   # Remove mets that were NA in raw, norm and zscore
-  ind0 = intersect(intersect(which(is.na(data[,"Raw"])), which(is.na(data[,"Anchor"]))), which(is.na(data[,"Zscore"])))
+  #ind0 = intersect(intersect(which(is.na(data[,"Raw"])), which(is.na(data[,"Anchor"]))), which(is.na(data[,"Zscore"])))
+  ind0 = which(is.na(data[,"Zscore"]))
   # Next, Remove mets that were NA in raw, but not in Anchor. These will be displayed in separate table.
   # Note, these values were imputed and therefore should not be included in patient report, but should
   # be noted that these metabolites were normally found.
