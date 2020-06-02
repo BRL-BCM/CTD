@@ -15,6 +15,7 @@ require(R.utils)
 require(CTD)
 require(cowplot)
 require(gridExtra)
+data("Miller2015")
 
 setwd("/Users/lillian.rosa/Downloads/CTD/inst/shiny-app/")
 source("metDataPortal_appFns.r")

@@ -228,19 +228,21 @@ getPatientReport = function(input) {
   # Remove mets that were NA in raw, norm and zscore
   #ind0 = intersect(intersect(which(is.na(data[,"Raw"])), which(is.na(data[,"Anchor"]))), which(is.na(data[,"Zscore"])))
   ind0 = which(is.na(data[,"Zscore"]))
+  ind1 = grep("x - ", rownames(data))
   # Next, Remove mets that were NA in raw, but not in Anchor. These will be displayed in separate table.
   # Note, these values were imputed and therefore should not be included in patient report, but should
   # be noted that these metabolites were normally found.
 
-  # Find metabolites that were not detected but are normally detected
-  ind1 = intersect(which(is.na(data[,"Anchor"])), which(!is.na(data[,"Zscore"])))
-  if (any(grep("IEM_", input$ptIDs))) {
-    refs = .GlobalEnv$data_zscore[, grep("HEP-REF", colnames(.GlobalEnv$data_zscore))]
+  # Find metabolites that were not detected but are normally detected:
+  #      Metabolites with higher fill rate (>80%) should be detected.
+  if (any(grep("^HEP", input$ptIDs))) {
+    refs = .GlobalEnv$data_zscore[-grep("x - ", rownames(data_zscore)), grep("HEP-REF", colnames(.GlobalEnv$data_zscore))]
+    ref.fil = Miller2015$`Times identifed in all 200 samples`/200
   } else {
-    refs = .GlobalEnv$data_zscore[, grep("EDTA-REF", colnames(.GlobalEnv$data_zscore))]
+    refs = .GlobalEnv$data_zscore[-grep("x - ", rownames(data_zscore)), grep("EDTA-REF", colnames(.GlobalEnv$data_zscore))]
+    ref.fil = apply(refs, 1, function(i) sum(is.na(i))/length(i))
   }
-  ref.fil = apply(refs, 1, function(i) sum(is.na(i))/length(i))
-  tmp = ref.fil[ind1]
+  tmp = ref.fil[ind0]
   report_these = tmp[which(tmp>0.80)]
   # Report these metabolites
   missingMets = data.frame(Metabolite=character(), Reference.FillRate=numeric(), stringsAsFactors = FALSE)
@@ -254,14 +256,14 @@ getPatientReport = function(input) {
   } else {
     missingMets = NULL
   }
-  if (length(ind0)>0) { data = data[-ind0,] }
+  if (length(ind0)>0) { data = data[-c(ind0, ind1),] }
   print(dim(data))
 
   # Order by Fill Rate, then by abs(Zscore)
   missingMets = missingMets[order(missingMets[,"Reference Fill Rate"], decreasing = TRUE),]
   class(data[,"Zscore"]) = "numeric"
   data = data[order(abs(data[,"Zscore"]), decreasing = TRUE), ]
-  names(data) = c("Metabolite", "Raw Ion Intensity", "Anchor", "Z-score")
+  names(data) = c("Metabolite", "Z-score")
 
   return(list(patientReport=data, missingMets=missingMets))
 }
