@@ -60,7 +60,8 @@ getPathwayMap = function(input) {
     patient.zscore = as.matrix(zscore.data[,which(colnames(zscore.data) %in% input$ptIDs)])
     patient.zscore = apply(patient.zscore, 1, function(i) mean(na.omit(i)))
     names(patient.zscore) = tmp
-
+    if (length(which(is.na(patient.zscore)))>0) { patient.zscore = patient.zscore[-which(is.na(patient.zscore))] }
+    
     if (input$pathwayMapId=="All") { Pathway.Name = "allPathways" } else { Pathway.Name = gsub(" ", "-", input$pathwayMapId) }
     res = shiny.getPathwayIgraph(input, Pathway.Name)
     template.ig = res$template.ig
@@ -71,19 +72,32 @@ getPathwayMap = function(input) {
     # Ignore "complex nodes" (the squares)
     nms = node.labels[which(node.labels %in% names(patient.zscore))]
     V(template.ig)$title = V(template.ig)$label
-    if(length(nms) != 0){
+    if(length(nms) > 0){
       patient.zscore = patient.zscore[which(names(patient.zscore) %in% nms)]
       granularity = 2
-      blues = colorRampPalette(c("blue", "white"))(granularity*ceiling(abs(min(na.omit(patient.zscore))))+1)
-      reds = colorRampPalette(c("white", "red"))(granularity*ceiling(max(abs(na.omit(patient.zscore)))))
-      redblue = c(blues, reds[2:length(reds)])
+      if (min(na.omit(patient.zscore)) < 0) {
+        blues = colorRampPalette(c("blue", "white"))(ceiling(granularity*abs(min(na.omit(patient.zscore))))+1) # +1 for white
+      } else {
+        blues = "#FFFFFF"
+      }
+      reds = colorRampPalette(c("white", "red"))(ceiling(granularity*abs(max(na.omit(patient.zscore))))+1) # +1 for white
+      redblue = c(blues, reds[2:length(reds)]) # remove white from reds so you don't have 2 whites
 
       for (i in 1:length(node.labels)) {
         if (node.labels[i] %in% nms) {
           if (!is.na(patient.zscore[node.labels[i]])) {
-            V(template.ig)$size[i] = 10*scalingFactor*ceiling(abs(patient.zscore[node.labels[i]]))
+            V(template.ig)$size[i] = 10*scalingFactor*abs(patient.zscore[node.labels[i]])
             V(template.ig)$title[i] = sprintf("%s\nz-score = %.2f",node.labels[i],patient.zscore[node.labels[i]])
-            V(template.ig)$color[i] = redblue[1+granularity*(ceiling(patient.zscore[node.labels[i]])-ceiling(min(na.omit(patient.zscore))))]
+            whichWhite = which(redblue=="#FFFFFF")
+            if (patient.zscore[node.labels[i]] < 0) {
+              # blue zone: +1 for every 0.5 in blue zone.
+              point5s = ceiling(abs(patient.zscore[node.labels[i]]) / 0.5)
+              V(template.ig)$color[i] = redblue[whichWhite-point5s]
+            } else {
+              # red zone: +1 for white, +1 for each blues, then +1 for every 0.5 in red zone.
+              point5s = ceiling(patient.zscore[node.labels[i]] / 0.5)
+              V(template.ig)$color[i] = redblue[whichWhite+point5s]
+            }
           } else {
             V(template.ig)$size[i] = 10
             V(template.ig)$color[i] = "#D3D3D3"
@@ -119,16 +133,16 @@ getPathwayMap = function(input) {
 
     V(vis.ig)$label.family = "sans"
     #V(vis.ig)$label.cex = diff(range(V(vis.ig)$y))*700/diff(range(V(vis.ig)$y))*1.34/800
-    V(vis.ig)$label.cex = 1.5
+    V(vis.ig)$label.cex = V(vis.ig)$label.cex*scalingFactor
     E(vis.ig)$width = 5
     E(vis.ig)$color = "lightgrey"
     #V(vis.ig)$value = vertex_attr(vis.ig)[['size']]
 
     if(input$pathwayMapId == "All"){
       V(vis.ig)$label[node.types!="Label"]=" "
-      vis.ig = delete.vertices(vis.ig, v=V(vis.ig)$name[which(node.types %in% c("Class","FinalPathway"))])
+      #vis.ig = delete.vertices(vis.ig, v=V(vis.ig)$name[which(node.types %in% c("Class","FinalPathway"))])
     }else{
-      vis.ig = delete.vertices(vis.ig, v=V(vis.ig)$name[which(node.types %in% c("Class","Label","FinalPathway"))])
+      vis.ig = delete.vertices(vis.ig, v=V(vis.ig)$name[which(node.types %in% c("Label"))])
     }
 
 
@@ -157,20 +171,22 @@ getPathwayMap = function(input) {
       theme(legend.position="bottom",
             legend.background = element_blank(),
             legend.key=element_blank(),
-
             #legend.key.size = unit(4, "shape"),
             legend.text=element_text(size=13),
             legend.title=element_blank())
     lvis <- cowplot::get_legend(lvis)
     lvis=justify(lvis,hjust = "right", vjust = "center",draw = FALSE)
-
   }
 
   # Get colorbar
-  if(length(nms) != 0){
-    z = seq(floor(min(na.omit(patient.zscore))), ceiling(max(na.omit(patient.zscore))), 1/granularity)
-    df = data.frame(Zscores = z[1:length(redblue)],
-                    Colors = redblue)
+  if(length(nms) > 0){
+    # get closest 0.5 to min and max
+    tmp = abs(floor(min(na.omit(patient.zscore)))-min(na.omit(patient.zscore)))
+    minPoint5 = ifelse(tmp>0.5, 0.5+floor(min(na.omit(patient.zscore))), floor(min(na.omit(patient.zscore))))
+    tmp = abs(ceiling(max(na.omit(patient.zscore)))-max(na.omit(patient.zscore)))
+    maxPoint5 = ifelse(tmp>0.5, ceiling(max(na.omit(patient.zscore)))-0.5, ceiling(max(na.omit(patient.zscore))))
+    z = seq(minPoint5, maxPoint5, 1/granularity)
+    df = data.frame(Zscores = z[1:length(redblue)], Colors = redblue)
     if (length(which(apply(df, 1, function(i) any(is.na(i)))))>0) {
       df = df[-which(apply(df, 1, function(i) any(is.na(i)))),]
     }
@@ -228,7 +244,6 @@ getPatientReport = function(input) {
   # Remove mets that were NA in raw, norm and zscore
   #ind0 = intersect(intersect(which(is.na(data[,"Raw"])), which(is.na(data[,"Anchor"]))), which(is.na(data[,"Zscore"])))
   ind0 = which(is.na(data[,"Zscore"]))
-  ind1 = grep("x - ", rownames(data))
   # Next, Remove mets that were NA in raw, but not in Anchor. These will be displayed in separate table.
   # Note, these values were imputed and therefore should not be included in patient report, but should
   # be noted that these metabolites were normally found.
@@ -236,11 +251,11 @@ getPatientReport = function(input) {
   # Find metabolites that were not detected but are normally detected:
   #      Metabolites with higher fill rate (>80%) should be detected.
   if (any(grep("^HEP", input$ptIDs))) {
-    refs = .GlobalEnv$data_zscore[-grep("x - ", rownames(data_zscore)), grep("HEP-REF", colnames(.GlobalEnv$data_zscore))]
+    refs = .GlobalEnv$data_zscore[, grep("HEP-REF", colnames(.GlobalEnv$data_zscore))]
     ref.fil = Miller2015$`Times identifed in all 200 samples`/200
   } else {
-    refs = .GlobalEnv$data_zscore[-grep("x - ", rownames(data_zscore)), grep("EDTA-REF", colnames(.GlobalEnv$data_zscore))]
-    ref.fil = apply(refs, 1, function(i) sum(is.na(i))/length(i))
+    refs = .GlobalEnv$data_zscore[, grep("EDTA-REF", colnames(.GlobalEnv$data_zscore))]
+    ref.fil = 1-apply(refs, 1, function(i) sum(is.na(i))/length(i))
   }
   tmp = ref.fil[ind0]
   report_these = tmp[which(tmp>0.80)]
@@ -250,13 +265,13 @@ getPatientReport = function(input) {
     for (i in 1:length(report_these)) {
       met = names(report_these)[i]
       missingMets[i, "Metabolite"] = met
-      missingMets[i, "Reference.FillRate"] = ref.fil[which(names(ref.fil)==met)]
+      missingMets[i, "Reference.FillRate"] = round(ref.fil[which(names(ref.fil)==met)], 3)
     }
     colnames(missingMets) = c("Compound", "Reference Fill Rate")
   } else {
     missingMets = NULL
   }
-  if (length(ind0)>0) { data = data[-c(ind0, ind1),] }
+  if (length(ind0)>0) { data = data[-ind0,] }
   print(dim(data))
 
   # Order by Fill Rate, then by abs(Zscore)
@@ -452,10 +467,10 @@ getVlength <<- function(input){
   if ( input$RangeChoice == "Top K perturbed metabolites only"){
     e = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% names(data_mx[order(abs(data_mx[,ptID]), decreasing = TRUE),ptID][1:kmx]))])
     e = delete.vertices(e, V(e)[degree(e) == 0] )
-  }else if(input$RangeChoice == "Abnormal Z-scored metabolites only, regardless of K"){
+  }else if(input$RangeChoice == "Abnormal metabolites only"){
     e = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% zmets)])
     e = delete.vertices(e, V(e)[degree(e) == 0] )
-  }else if(input$RangeChoice == "All Detected Metabolites"){
+  }else if(input$RangeChoice == "All Metabolites"){
     e = ig
   }else{
     print("No Range Selected")
@@ -508,10 +523,10 @@ getPtResult=function(input){
   if ( input$RangeChoice == "Top K perturbed metabolites only"){
     e = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% mets)])
     e = delete.vertices(e, V(e)[degree(e) == 0] )
-  }else if(input$RangeChoice == "Abnormal Z-scored metabolites only, regardless of K"){
+  }else if(input$RangeChoice == "Abnormal metabolites only"){
     e = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% zmets)])
     e = delete.vertices(e, V(e)[degree(e) == 0] )
-  }else if(input$RangeChoice == "All Detected Metabolites"){
+  }else if(input$RangeChoice == "All Metabolites"){
     e = ig
   }else{
     print("No Range Selected")
@@ -590,4 +605,37 @@ getPtResult=function(input){
 
   ptNetwork <- htmlwidgets::onRender(ptNetwork, 'function(el, x) { d3.selectAll("circle").style("stroke", d => d.border); }')
   return(list(mets=mets,p.mets=p.mets,ptNetwork=ptNetwork))
+}
+
+
+
+
+# MSEA precomputed tables
+#hep_modelChoices = c("cit", "cob", "ga", "gamt", "mma", "msud", "pa", "pku")
+#edta_modelChoices = c("aadc", "abat", "adsl", "arg", "asld", "otc", "rcdp", "zsd")
+#msea = list()
+#for (model in edta_modelChoices) {
+#  data(Thistlethwaite2020)
+#  cohorts_coded2 = cohorts_coded[-which(names(cohorts_coded) %in% c(hep_modelChoices, "hep_refs", "unk"))]
+#  data_zscore = data_zscore[,c(1:8, which(colnames(data_zscore) %in% unlist(cohorts_coded2[c(model, "edta_refs")])))]
+#  input=list()
+#  input[['diagClass']] = model
+#  msea_result = shiny.getMSEA_Metabolon(input, cohorts_coded2)
+#  msea[[model]] = msea_result
+#  rm(msea_result)
+#}
+#for (model in hep_modelChoices) {
+#  data(Thistlethwaite2020)
+#  cohorts_coded2 = cohorts_coded[-which(names(cohorts_coded) %in% c(edta_modelChoices, "edta_refs", "unk"))]
+#  data_zscore = data_zscore[,c(1:8, which(colnames(data_zscore) %in% unlist(cohorts_coded2[c(model, "hep_refs")])))]
+#  input=list()
+#  input[['diagClass']] = model
+#  msea_result = shiny.getMSEA_Metabolon(input, cohorts_coded2)
+#  msea[[model]] = msea_result
+#  rm(msea_result)
+#}
+#save(msea, file="/Users/lillian.rosa/Downloads/CTD/inst/shiny-app/shiny_msea.RData")
+load("shiny_msea.RData")
+getMSEA = function(input, cohorts_coded) {
+  return(msea[[input$diagClass]])
 }
