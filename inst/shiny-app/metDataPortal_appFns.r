@@ -3,13 +3,7 @@ load(system.file(sprintf("shiny-app/disMod.RData"), package = "CTD"))
 modelChoices <<- tolower(unique(sapply(list.files(system.file("ranks/ind_ranks",package = "CTD")),function(x) sub("[0-9]+-ranks.RData","",x))))
 getData = function(input) {
   print("called getData()...")
-  if (input$raworZscore == "Raw") {
-    data = .GlobalEnv$data_raw
-  } else if (input$raworZscore == "Normalized") {
-    data = .GlobalEnv$data_norm
-  } else if (input$raworZscore == "Zscored") {
-    data = .GlobalEnv$data_zscore
-  }
+  data = .GlobalEnv$data_zscore[,-c(1:8)]
   pts = as.character(unlist(sapply(input$showThese, function(i) cohorts_coded[[i]])))
   ind = which(colnames(data) %in% pts)
   data = data[,ind]
@@ -283,13 +277,57 @@ getPatientReport = function(input) {
   return(list(patientReport=data, missingMets=missingMets))
 }
 
+# MSEA precomputed tables
+#hep_modelChoices = c("cit", "cob", "ga", "gamt", "mma", "msud", "pa", "pku")
+#edta_modelChoices = c("aadc", "abat", "adsl", "arg", "asld", "otc", "rcdp", "zsd")
+#msea = list()
+#for (model in edta_modelChoices) {
+#  data(Thistlethwaite2020)
+#  cohorts_coded2 = cohorts_coded[-which(names(cohorts_coded) %in% c(hep_modelChoices, "hep_refs", "unk"))]
+#  data_zscore = data_zscore[,c(1:8, which(colnames(data_zscore) %in% unlist(cohorts_coded2[c(model, "edta_refs")])))]
+#  input=list()
+#  input[['diagClass']] = model
+#  msea_result = shiny.getMSEA_Metabolon(input, cohorts_coded2)
+#  msea[[model]] = msea_result
+#  rm(msea_result)
+#}
+#for (model in hep_modelChoices) {
+#  data(Thistlethwaite2020)
+#  cohorts_coded2 = cohorts_coded[-which(names(cohorts_coded) %in% c(edta_modelChoices, "edta_refs", "unk"))]
+#  data_zscore = data_zscore[,c(1:8, which(colnames(data_zscore) %in% unlist(cohorts_coded2[c(model, "hep_refs")])))]
+#  input=list()
+#  input[['diagClass']] = model
+#  msea_result = shiny.getMSEA_Metabolon(input, cohorts_coded2)
+#  msea[[model]] = msea_result
+#  rm(msea_result)
+#}
+#save(msea, file="/Users/lillian.rosa/Downloads/CTD/inst/shiny-app/shiny_msea.RData")
+load("shiny_msea.RData")
+getMSEA = function(input, cohorts_coded) {
+  return(msea[[input$diagClass]])
+}
+
+
+
 #### TAB 2 (INSPECT REFERENCE POPULATION) FUNCTIONS ####
 getMetList = function(input) {
   # First, get rid of metabolites that have below fil rate
-  ref.fil = 1-apply(.GlobalEnv$data_zscore[,-c(1:8)], 1, function(i) sum(is.na(i))/length(i))
-  ref = data_zscore[which(ref.fil>0.66),]
-  metClass = data_zscore[which(ref.fil>0.66), "SUPER_PATHWAY"]
-  metClass[which(metClass=="")] = "Unknown"
+  ref = .GlobalEnv$data_zscore[,-c(1:8)]
+  if (input$anticoagulant=="EDTA") {
+    ref = ref[,grep("EDTA-REF", colnames(ref))]
+    ref.fil = 1-apply(ref, 1, function(i) sum(is.na(i))/length(i))
+  } else {
+    ref = ref[,grep("HEP-REF", colnames(ref))]
+    ref = ref[which(rownames(ref) %in% rownames(Miller2015)),]
+    ref.fil = Miller2015$`Times identifed in all 200 samples`/200
+    names(ref.fil) = rownames(Miller2015)
+    ref.fil = ref.fil[which(names(ref.fil) %in% rownames(ref))]
+  }
+  ref = ref[which(ref.fil>0.66),]
+  ref.fil = ref.fil[which(ref.fil>0.66)]
+  print(dim(ref))
+  metClass = data_zscore[which(rownames(data_zscore) %in% names(ref.fil)), "SUPER_PATHWAY"]
+  metClass[which(metClass %in% c("?", ""))] = "Unknown"
 
   if (input$metClass=="Lipid") {
     return(rownames(ref)[which(metClass=="Lipid")])
@@ -320,11 +358,16 @@ getRefPop = function(input) {
   ref = .GlobalEnv$data_zscore[,-c(1:8)]
   if (input$anticoagulant=="EDTA") {
     ref = ref[,grep("EDTA-REF", colnames(ref))]
+    ref.fil = 1-apply(ref, 1, function(i) sum(is.na(i))/length(i))
   } else {
     ref = ref[,grep("HEP-REF", colnames(ref))]
+    ref = ref[which(rownames(ref) %in% rownames(Miller2015)),]
+    ref.fil = Miller2015$`Times identifed in all 200 samples`/200
+    names(ref.fil) = rownames(Miller2015)
+    ref.fil = ref.fil[which(names(ref.fil) %in% rownames(ref))]
   }
-  ref.fil = 1-apply(ref, 1, function(i) sum(is.na(i))/length(i))
   ref = ref[which(ref.fil>0.66),]
+  ref.fil = ref.fil[which(ref.fil>0.66)]
   print(dim(ref))
   print(input$metSelect)
   print(input$metSelect %in% rownames(ref))
@@ -370,7 +413,6 @@ getRefPop = function(input) {
 }
 
 #### TAB 3 (NETWORK-ASSISTED DIAGNOSTICS) FUNCTIONS ####
-
 getColumn <<- function(df,colname,rown="rowname"){
   vcol=df[,colname]
   if(rown == "rowname"){
@@ -392,9 +434,14 @@ rampred <<- function(numdata){
 getPrankDf=function(input){
   # get disease cohort p-value ranking dataframe
   pts = cohorts_coded[[input$diag_nw_Class]]
-  load(system.file(sprintf("shiny-app/model/ptRanks_kmx%s.RData", input$kmx), package = "CTD"))
-  #load(sprintf("/Users/lillian.rosa/Downloads/CTD/inst/shiny-app/model/ptRanks_kmx%s.RData", input$kmx))
-  df.pranks = sapply(match(pts,names(pt_ranks)), function(x) getColumn(pt_ranks[[x]],"ctd","model"))
+  load(system.file(sprintf("shiny-app/model/ptRanks_kmx30.RData"), package = "CTD")) 
+  if (input$pvalueType=="CTD") {
+    df.pranks = sapply(match(pts,names(pt_ranks)), function(x) getColumn(pt_ranks[[x]],"ctd","model"))
+  } else if (input$pvalueType=="CTDdisMod") {
+    df.pranks = sapply(match(pts,names(pt_ranks)), function(x) getColumn(pt_ranks[[x]],"ctdDisMod","model"))
+  } else {
+    df.pranks = sapply(match(pts,names(pt_ranks)), function(x) getColumn(pt_ranks[[x]],"brown.comb","model"))
+  }
   colnames(df.pranks)=pts
   df.pranks = apply(df.pranks,c(1,2), function(x) as.numeric(sprintf("%.3e",x)))
   model.ind = match(input$diag_nw_Class,rownames(df.pranks))
@@ -404,55 +451,20 @@ getPrankDf=function(input){
               np=length(pts)))
 }
 
-getPtPrankDf=function(input){
-  load(system.file(sprintf("shiny-app/model/ptRanks_kmx%s.RData", input$kmx), package = "CTD"))
-  ptID = input$pt_nw_ID
-  pt.df.pranks = pt_ranks[[ptID]]
-  rownames(pt.df.pranks)=pt.df.pranks[,"model"]
-  pt.df.pranks = pt.df.pranks[,-which("model" %in% colnames(pt.df.pranks))]
-  pt.df.pranks = apply(pt.df.pranks,c(1,2), function(x) as.numeric(sprintf("%.3e",x)))
-  diag.ind = match(input$diag_nw_Class,rownames(pt.df.pranks))
-  if(input$sigOnly) {
-    brks=rampred(pt.df.pranks[pt.df.pranks<0.05])[["brks"]]
-    clrs=rampred(pt.df.pranks[pt.df.pranks<0.05])[["clrs"]]
-  }else{
-    brks=rampred(pt.df.pranks)[["brks"]]
-    clrs=rampred(pt.df.pranks)[["clrs"]]
-  }
-
-  # temp=datatable(pt.df.pranks,
-  #                options = list(scrollX = TRUE,fixedColumns = TRUE, #dom = 't',
-  #                               pageLength = 20,
-  #                               lengthMenu = c(10, 15, 20)))
-  #
-  # for (n in 1:ncol(pt.df.pranks)) {
-  #   temp=formatStyle(temp,colnames(pt.df.pranks)[n],
-  #                    backgroundColor = styleInterval(rampred(pt.df.pranks[,n])[["brks"]],rampred(pt.df.pranks[,n])[["clrs"]]))
-  # }
-  # pt.df.pranks=temp
-  pt.df.pranks=datatable(pt.df.pranks,
-                         options = list(scrollX = TRUE,fixedColumns = TRUE, #dom = 't',
-                                        pageLength = 20,
-                                        lengthMenu = c(10, 15, 20))) %>%
-    formatStyle(colnames(pt.df.pranks),
-                backgroundColor = styleInterval(brks,clrs))
-  return(pt.df.pranks)
-}
-
 getVlength <<- function(input){
   ptID=input$pt_nw_ID
   getDiag=names(unlist(sapply(cohorts_coded,function(x) which(ptID %in% x))))
   model=input$bgModel
-  kmx=input$kmx
-  if(model==getDiag){
+  kmx=30
+  if (model==getDiag){
     fold=which(cohorts_coded[[getDiag]]==ptID)
     # load latent-embedding, pruned network that is learnt from the rest of the patients diagnosed with the same disease.
     if (system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,fold), package='CTD') != ""){
       ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,fold), package='CTD'))[['ig_pruned']]
-    }else{
+    } else{
       ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,1), package='CTD'))[['ig_pruned']]
     }
-  }else{
+  } else{
     ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,1), package='CTD'))[['ig_pruned']]
   }
   G = vector(mode="list", length=length(V(ig)$name))
@@ -464,15 +476,15 @@ getVlength <<- function(input){
   zmets=data_mx[order(abs(data_mx[,ptID]), decreasing = TRUE),ptID]
   zmets=names(zmets[abs(zmets)>2])
 
-  if ( input$RangeChoice == "Top K perturbed metabolites only"){
+  if (input$RangeChoice == "Top K perturbed metabolites only"){
     e = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% names(data_mx[order(abs(data_mx[,ptID]), decreasing = TRUE),ptID][1:kmx]))])
     e = delete.vertices(e, V(e)[degree(e) == 0] )
-  }else if(input$RangeChoice == "Abnormal metabolites only"){
+  } else if(input$RangeChoice == "Abnormal metabolites only"){
     e = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% zmets)])
     e = delete.vertices(e, V(e)[degree(e) == 0] )
-  }else if(input$RangeChoice == "All Metabolites"){
+  } else if(input$RangeChoice == "All Metabolites"){
     e = ig
-  }else{
+  } else{
     print("No Range Selected")
   }
   return(length(V(e)$name))
@@ -483,16 +495,16 @@ getPtResult=function(input){
   sprintf("network visualization selected patient: %s",ptID)
   getDiag=names(unlist(sapply(cohorts_coded,function(x) which(ptID %in% x))))
   model=input$bgModel
-  kmx=input$kmx
-  if(model==getDiag){
+  kmx=30
+  if (model==getDiag){
     fold=which(cohorts_coded[[getDiag]]==ptID)
     # load latent-embedding, pruned network that is learnt from the rest of the patients diagnosed with the same disease.
     if (system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,fold), package='CTD') != ""){
       ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,fold), package='CTD'))[['ig_pruned']]
-    }else{
+    } else{
       ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,1), package='CTD'))[['ig_pruned']]
     }
-  }else{
+  } else{
     ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,1), package='CTD'))[['ig_pruned']]
   }
   # get "ig" derived adjacency matrix
@@ -503,7 +515,7 @@ getPtResult=function(input){
   data_mx = suppressWarnings(apply(data_mx, c(1,2), as.numeric))
 
   # using single-node diffusion
-  kmx = input$kmx
+  kmx = 30
   S = data_mx[order(abs(data_mx[,ptID]), decreasing = TRUE),ptID][1:kmx] # top kmx perturbed metabolites in ptID's profile
   ranks = loadToEnv(system.file(sprintf('ranks/ind_ranks/%s%d-ranks.RData',toupper(model), 1), package='CTD'))[["permutationByStartNode"]]
   ranks = lapply(ranks, tolower)
@@ -605,37 +617,4 @@ getPtResult=function(input){
 
   ptNetwork <- htmlwidgets::onRender(ptNetwork, 'function(el, x) { d3.selectAll("circle").style("stroke", d => d.border); }')
   return(list(mets=mets,p.mets=p.mets,ptNetwork=ptNetwork))
-}
-
-
-
-
-# MSEA precomputed tables
-#hep_modelChoices = c("cit", "cob", "ga", "gamt", "mma", "msud", "pa", "pku")
-#edta_modelChoices = c("aadc", "abat", "adsl", "arg", "asld", "otc", "rcdp", "zsd")
-#msea = list()
-#for (model in edta_modelChoices) {
-#  data(Thistlethwaite2020)
-#  cohorts_coded2 = cohorts_coded[-which(names(cohorts_coded) %in% c(hep_modelChoices, "hep_refs", "unk"))]
-#  data_zscore = data_zscore[,c(1:8, which(colnames(data_zscore) %in% unlist(cohorts_coded2[c(model, "edta_refs")])))]
-#  input=list()
-#  input[['diagClass']] = model
-#  msea_result = shiny.getMSEA_Metabolon(input, cohorts_coded2)
-#  msea[[model]] = msea_result
-#  rm(msea_result)
-#}
-#for (model in hep_modelChoices) {
-#  data(Thistlethwaite2020)
-#  cohorts_coded2 = cohorts_coded[-which(names(cohorts_coded) %in% c(edta_modelChoices, "edta_refs", "unk"))]
-#  data_zscore = data_zscore[,c(1:8, which(colnames(data_zscore) %in% unlist(cohorts_coded2[c(model, "hep_refs")])))]
-#  input=list()
-#  input[['diagClass']] = model
-#  msea_result = shiny.getMSEA_Metabolon(input, cohorts_coded2)
-#  msea[[model]] = msea_result
-#  rm(msea_result)
-#}
-#save(msea, file="/Users/lillian.rosa/Downloads/CTD/inst/shiny-app/shiny_msea.RData")
-load("shiny_msea.RData")
-getMSEA = function(input, cohorts_coded) {
-  return(msea[[input$diagClass]])
 }

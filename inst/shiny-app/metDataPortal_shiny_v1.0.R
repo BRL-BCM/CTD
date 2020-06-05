@@ -38,7 +38,8 @@ ui = dashboardPage(
   dashboardSidebar(sidebarMenu(id = "tab",style = "position:fixed;",
                                menuItem("View Patient Report", tabName = "ptReport", icon = icon("user-circle-o")),
                                menuItem("Network-Assisted Diagnostics", tabName = "ctd", icon=icon("project-diagram")),
-                               menuItem("Inspect Reference Population", tabName = "refPop", icon = icon("bar-chart"))
+                               menuItem("Inspect Reference Population", tabName = "refPop", icon = icon("bar-chart")),
+                               menuItem("Download Data", tabName = "download", icon = icon("download"))
   )),
   dashboardBody(
     tags$script(HTML("$('body').addClass('fixed');")),
@@ -60,50 +61,46 @@ ui = dashboardPage(
                        box(title="Top Perturbed Pathways", status="info", solidHeader=TRUE,  width = 12, collapsible=TRUE,
                            tabsetPanel(type="tabs",tabPanel("Over-representation Analysis", dataTableOutput("oraEnrichment") %>% withSpinner(color="#0dc5c1")),
                                                    tabPanel("Metabolite Set Enrichment Analysis", dataTableOutput("mseaEnrichment")))))), # tabItem ptReport
+      tabItem(tabName="ctd", width=12,
+              h2("Network-Assisted Diagnostics", align="center"),
+              fluidRow(
+                box(title="Select Patient", status="warning", solidHeader = TRUE, splitLayout(cellWidths=c("25%", "50%"),
+                                                                                              selectInput(inputId = "diag_nw_Class", label = "Select diagnosis.",choices = names(cohorts_coded), selected = names(cohorts_coded)[1], selectize=FALSE),
+                                                                                              selectInput(inputId = "pt_nw_ID", label = "Select patient.", choices = cohorts_coded[[1]], selected=cohorts_coded[[1]][1], selectize=FALSE, multiple=FALSE),
+                                                                                              selectInput(inputId="pvalueType", label="Select method", choices=c("CTD", "CTDdisMod", "Combined"), selected="Combined", selectize=FALSE)),
+                    h4('Click on the cells below to select disease model to interpret patient profile.'),
+                    DTOutput('Cohort_pvalRank') %>% withSpinner(color="#0dc5c1")), # box Select Patient
+                box(width = 12 ,title = "Network Display", status="info", solidHeader = TRUE, align="left",height="930px", collapsible=TRUE,
+                    selectInput(inputId = "bgModel", label = "Select Disease-Specific Background Network.",choices = .GlobalEnv$modelChoices,selected = names(cohorts_coded)[1],selectize = TRUE),
+                    div(prettyRadioButtons(inputId = "RangeChoice",label = "Choose range of nodes:",choices = c("Top K perturbed metabolites only", "Abnormal metabolites only", "All Metabolites"),selected = "Top K perturbed metabolites only"),style="display:center-align"),
+                    h4(htmlOutput(outputId="selectedPtModel", container = div)),
+                    forceNetworkOutput(outputId = "ptNetwork",height = "600px") %>% withSpinner(color="#0dc5c1")) # box Network Display
+                #box(title = "genotype", width=NULL, status = "info", solidHeader = TRUE, height = 200)
+              ) # fluidRow
+      ), # tabItem ctd
       tabItem(tabName="refPop",
               h2("Inspect Reference Population", align="center"),
-              fluidRow(box(title = "Inspect the Distribution", status="primary", solidHeader = TRUE, align="left", width=12, collapsible=TRUE,
+              fluidRow(box(title = "Inspect the Distribution", status="primary", solidHeader = TRUE, align="left", width=12, collapsible=FALSE,
                            splitLayout(cellWidths=c("33%", "33%", "33%"),
                                        selectInput(inputId="anticoagulant", label="EDTA or Heparin reference population?", choices=c("EDTA", "Heparin"), selected="EDTA", selectize=FALSE),
                                        selectInput(inputId = "metClass", label = "Which metabolite class do you want to select from?",choices = unique(Miller2015$SUPER_PATHWAY), selected="Amino Acid", selectize=FALSE),
                                        selectInput(inputId = "metSelect", label = "Select a metabolite from the chosen class to inspect.", choices = "", selectize=FALSE)),
                            textOutput("estimates"),
                            splitLayout(cellWidths=c("50%", "50%"), plotOutput("referenceReport"), plotOutput("qqplot")),
-                           splitLayout(cellWidths=c("50%", "50%"), plotOutput("howRare"), dataTableOutput("refOutliers")))),
-              fluidRow(box(title="Download Data", status="info", solidHeader=TRUE,
-                           fluidRow(column(width = 12,pickerInput(inputId = "showThese", label = "Diagnoses",choices = names(cohorts_coded)[-which(names(cohorts_coded) %in% c("hep_refs", "edta_refs"))],selected = names(cohorts_coded)[1],options = list(`actions-box` = TRUE),inline=FALSE,multiple = TRUE)))),
-                           h4(textOutput("st")), h4(textOutput("rz")), downloadButton("downloadButton", "Download"), h6(" "), dataTableOutput("selectedData"),
-                           align="left", width=12, collapsible=TRUE)), # tabItem refPop
-      tabItem(tabName="ctd",
-              h2("Network-Assisted Diagnostics", align="center"),
-              fluidRow(
-                box(title="Select Patient", status="warning", solidHeader = TRUE, splitLayout(cellWidths=c("25%", "50%"),
-                    selectInput(inputId = "diag_nw_Class", label = "Select diagnosis.",choices = names(cohorts_coded), selected = names(cohorts_coded)[1], selectize=FALSE),
-                    selectInput(inputId = "pt_nw_ID", label = "Select patient.", choices = cohorts_coded[[1]], selected=cohorts_coded[[1]][1], selectize=FALSE, multiple=FALSE),
-                    selectInput(inputId="kmx", label="Top K Metabolites", choices=seq(5,30,5), selected=30, selectize=FALSE)),
-                    h4('Click on the cells below to select disease model to interpret patient profile.'),
-                    DTOutput('Cohort_pvalRank') %>% withSpinner(color="#0dc5c1"), width=12), # box Select Patient
-                box(width = 12 ,title = "Network Display", status="info", solidHeader = TRUE,
-                    selectInput(inputId = "bgModel", label = "Select Disease-Specific Background Network.",choices = .GlobalEnv$modelChoices,selected = names(cohorts_coded)[1],selectize = TRUE),
-                    div(prettyRadioButtons(inputId = "RangeChoice",label = "Choose range of nodes:",choices = c("Top K perturbed metabolites only", "Abnormal metabolites only", "All Metabolites"),selected = "Top K perturbed metabolites only"),style="display:center-align"),
-                    h4(htmlOutput(outputId="selectedPtModel", container = div)),
-                    forceNetworkOutput(outputId = "ptNetwork",height = "600px") %>% withSpinner(color="#0dc5c1"), align="left",height="930px", collapsible=TRUE), # box Network Display
-                #box(title = "genotype", width=NULL, status = "info", solidHeader = TRUE, height = 200),
-                box(width = 12, title = "Disease Rankings", status = "info", solidHeader = TRUE, align = "left", collapsible=TRUE,splitLayout(cellWidths = c("75%","25%"),
-                    h4(htmlOutput(outputId="selectedPtRank", container = div)),
-                    switchInput(inputId = "sigOnly",label = "Highlight p<0.05 Only",value = TRUE,labelWidth = "160px")),
-                    DTOutput("pvalRank")) %>% withSpinner(color="#0dc5c1")) # fluidRow
-              ) # tabItem ctd
+                           splitLayout(cellWidths=c("50%", "50%"), plotOutput("howRare"), dataTableOutput("refOutliers"))))), # tabItem refPop
+      tabItem(tabName="download",
+              h2("Download Data", align="center"),
+              fluidRow(box(title="Download Data", status="info", solidHeader=TRUE, align="left", width=12, collapsible=FALSE,
+                           pickerInput(inputId = "showThese", label = "Diagnoses",choices = names(cohorts_coded)[-which(names(cohorts_coded) %in% c("hep_refs", "edta_refs"))],
+                                       selected = names(cohorts_coded)[1],options = list(`actions-box` = TRUE),inline=FALSE,multiple = TRUE),
+                           h4(textOutput("st")), downloadButton("downloadButton", "Download"), dataTableOutput("selectedData")))) # tabItem download
     ) # tabItems
   ) # dashboardBody
 ) # dashboardPage
 
 server = function(input, output, session) {
-  observe({
-    print(sprintf("%s tab is selected.", input$tab))
-  })
-
   observeEvent(input$tab, {
+    print(sprintf("%s tab is selected.", input$tab))
     if (input$tab == "ptReport") {
       observeEvent(input$diagClass, priority=1, {
         updatePickerInput(session, "ptIDs", choices = cohorts_coded[[input$diagClass]], selected=cohorts_coded[[input$diagClass]][1])
@@ -132,12 +129,10 @@ server = function(input, output, session) {
           datatable(mseaDf(),rownames=FALSE, options=list(scrollX=TRUE)) %>%
             formatStyle(colnames(mseaDf)[grepl("val",colnames(mseaDf))],color = styleInterval(c(0.05),c("red","black")))
         })
-        #output$geneticVars = DT::renderDataTable(getGeneticVariants(input), rownames = FALSE)
       })
       updateSelectInput(session,"pathwayMapId", selected="Arginine Metabolism")
       observeEvent(input$pathwayMapId, priority=1, {
         observeEvent(input$scalingFactor, priority=2, {
-          #pmap = reactive(isolate(getPathwayMap(input)))
           pmap = eventReactive({
             input$diagClass
             input$ptIDs
@@ -146,36 +141,10 @@ server = function(input, output, session) {
           output$pmapleg = renderPlot({
             grid.newpage()
             grid.arrange(pmap()$colorbar,pmap()$shapeleg,ncol=2)
-          }#height = "100px"
+          }
           )
         })
       })
-
-    } else if (input$tab == "refPop") {
-      observeEvent(input$metClass, priority = 1, {
-        ch = getMetList(input)
-        updateSelectInput(session, "metSelect", choices = ch, selected=ch[1])
-        print("metSelect dropdown should be updated now.")
-      })
-      ref = reactive(getRefPop(input))
-      output$estimates = renderText({sprintf("Mean Estimate = %.2f\nStandard Deviation Estimate = %.2f", ref()$ests$mean, ref()$ests$std)})
-      output$referenceReport = renderPlot(ref()$hst)
-      output$qqplot = renderPlot(ref()$qq)
-      output$howRare = renderPlot(ref()$rare)
-      output$refOutliers = renderDataTable(ref()$outliers)
-
-      observeEvent(input$showThese, priority = 0, {
-        observeEvent(input$raworZscore, priority = -1, {
-          dd = getData(input)
-          output$downloadButton = downloadHandler(
-            filename = function() { paste(paste(input$showThese, collapse="_"), "-", input$raworZscore, ".txt", sep="") },
-            content = function(file) { write.table(dd, file, sep="\t", col.names = TRUE, row.names = FALSE) }
-          )
-          output$selectedData = DT::renderDataTable({DT::datatable(dd, rownames=FALSE, options=list(scrollX=TRUE))})
-        })
-      })
-      output$st = renderText({sprintf("Selected Cohort: %s",paste(input$showThese,collapse = ", "))})
-      output$rz = renderText({sprintf("Selected Processing Level: %s",input$raworZscore)})
     } else if (input$tab == "ctd") {
       observeEvent(input$diag_nw_Class, {
         print(sprintf("nw_Class selected Diagnosis: %s",input$diag_nw_Class))
@@ -184,57 +153,76 @@ server = function(input, output, session) {
         updateSelectInput(session, "pt_nw_ID", choices = cohorts_coded[[input$diag_nw_Class]], selected=cohorts_coded[[input$diag_nw_Class]][1])
         updateSelectInput(session, "bgModel", selected=input$diag_nw_Class)
       })
-
-      PrankDf=eventReactive({
-        input$diag_nw_Class
-        input$kmx},
+      
+      PrankDf=eventReactive({input$diag_nw_Class
+        input$pvalueType},
         getPrankDf(input))
-
-      ptPrankDf=eventReactive({
-        input$diag_nw_Class
-        input$pt_nw_ID
-        input$kmx
-        input$sigOnly},
-        getPtPrankDf(input))
       
       print(sprintf(" PrankDf selected patient: %s", input$pt_nw_ID))
       print(sprintf(" Df selected background graph: %s", input$bgModel))
-
+      
       # get ranking table and update cell selection input
-      # adjusted=apply(PrankDf()$df.pranks,c(1,2),function(x) p.adjust(x,"bonferroni",ncol(PrankDf()$df.pranks)))
       brks = quantile(PrankDf()$df.pranks[PrankDf()$df.pranks<0.05], probs = seq(.05, .95, .05), na.rm = TRUE)
       clrs = round(seq(255, 40, length.out = length(brks) + 1), 0) %>% {paste0("rgb(255,", ., ",", ., ")")}
       clrs = rev(clrs)
-
-      output$Cohort_pvalRank = renderDT(datatable(PrankDf()$df.pranks,extensions = 'FixedColumns',
-                                                  options = list(scrollX = TRUE,fixedColumns = TRUE, pageLength = 20, lengthMenu = c(10, 15, 20)), #dom = 't',
-                                                  selection=list(target = 'cell', selected = matrix(c(PrankDf()$model.ind,1),ncol=2), mode = 'single')
-      ) %>% formatStyle(colnames(PrankDf()$df.pranks), backgroundColor = styleInterval(brks,clrs)))
-
+      
+      output$Cohort_pvalRank = renderDT(datatable(PrankDf()$df.pranks,
+                                                  extensions = 'FixedColumns',
+                                                  options = list(scrollX = TRUE,fixedColumns = TRUE, #dom = 't',
+                                                                 pageLength = 20,
+                                                                 lengthMenu = c(10, 15, 20)),
+                                                  selection=list(target = 'cell',
+                                                                 selected = matrix(c(PrankDf()$model.ind,1),ncol=2),
+                                                                 mode = 'single')) %>% 
+                                          formatStyle(colnames(PrankDf()$df.pranks),
+                                                      backgroundColor = styleInterval(brks,clrs)))
+      
       # get patient disease ranking table
-      output$selectedPtRank=renderText({ paste("Currently viewing", "<font color=\"#FF0000\"><b>",input$diag_nw_Class,"</b></font>",
-                                               "patient ","<font color=\"#FF0000\"><b>", input$pt_nw_ID, "</b></font>",".") })
-      output$pvalRank = renderDT(ptPrankDf())
-
       observeEvent(input$Cohort_pvalRank_cells_selected,{
         updateSelectInput(session, "pt_nw_ID", choices = cohorts_coded[[input$diag_nw_Class]], selected = cohorts_coded[[input$diag_nw_Class]][input$Cohort_pvalRank_cells_selected[,2]])
         updateSelectInput(session, "bgModel", choices =.GlobalEnv$modelChoices, selected= rownames(PrankDf()$df.pranks)[input$Cohort_pvalRank_cells_selected[,1]])
+        
         print(sprintf("Tb seleted Diagnosis: %s",input$diag_nw_Class))
         print(sprintf("Tb selected patient: %s", input$pt_nw_ID))
         print(sprintf("Tb selected background graph: %s", input$bgModel))
       })
-
+      
       # draw network
       PtResult = reactive({
         shiny::validate(need(try(getVlength(input) != 0), "There are not enough nodes to build network."))
         getPtResult(input)
       })
       output$selectedPtModel=renderText({ paste("Currently viewing", "<font color=\"#FF0000\"><b>",input$diag_nw_Class,"</b></font>",
-                                                "patient ","<font color=\"#FF0000\"><b>", input$pt_nw_ID, "</b></font>",
+                                                "patient ","<font color=\"#FF0000\"><b>", input$pt_nw_ID, "</b></font>", 
                                                 "in disease model ","<font color=\"#FF0000\"><b>",input$bgModel, "</b></font>",".") })
       output$ptNetwork=renderForceNetwork(PtResult()$ptNetwork)
-      print(sprintf("seleted patient: %s", input$pt_nw_ID))
+      
+      print(sprintf("selected patient: %s", input$pt_nw_ID))
       print(sprintf("seleted background graph: %s", input$bgModel))
+    } else if (input$tab == "refPop") {
+      observeEvent(input$metClass, priority=1, {
+        observeEvent(input$anticoagulant, priority=0, {
+          ch = getMetList(input)
+          updateSelectInput(session, "metSelect", choices = ch, selected=ch[1])
+          print("metSelect dropdown should be updated now.")
+        })
+      })
+      ref = reactive(getRefPop(input))
+      output$estimates = renderText({sprintf("Mean Estimate = %.2f\nStandard Deviation Estimate = %.2f", ref()$ests$mean, ref()$ests$std)})
+      output$referenceReport = renderPlot(ref()$hst)
+      output$qqplot = renderPlot(ref()$qq)
+      output$howRare = renderPlot(ref()$rare)
+      output$refOutliers = renderDataTable(ref()$outliers)
+    } else if (input$tab == "download") {
+      observeEvent(input$showThese, priority = 0, {
+        dd = getData(input)
+        output$downloadButton = downloadHandler(
+          filename = function() { paste(paste(input$showThese, collapse="_"), ".txt", sep="") },
+          content = function(file) { write.table(dd, file, sep="\t", col.names = TRUE, row.names = FALSE) }
+        )
+        output$selectedData = DT::renderDataTable({DT::datatable(dd, rownames=FALSE, options=list(scrollX=TRUE))})
+      })
+      output$st = renderText({sprintf("Selected Cohort: %s",paste(input$showThese,collapse = ", "))})
     } else {
       print("No tab selected")
     }
