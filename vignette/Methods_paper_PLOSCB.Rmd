@@ -264,7 +264,7 @@ ref_fill = ref_fill[-ind]
 refs2 = refs[which(ref_fill>0.8),]
 cohorts = lapply(cohorts, function(i) i[which(i %in% colnames(Miller2015))])
 for (type in c("ind", "noLatent")) {
-  for (model in c("cit", "msud", "mma", "pa", "pku")) { 
+  for (model in c("cob", "ga", "gamt")) { # "cit", "msud", "mma", "pa", "pku"
     for (fold in 1:length(cohorts[[model]])) {
       print(sprintf("Learning graphs for diag %s, fold %d...", model, fold))
       diag_pts = cohorts[[model]][-fold]

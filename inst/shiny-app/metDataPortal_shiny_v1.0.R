@@ -64,13 +64,13 @@ ui = dashboardPage(
       tabItem(tabName="ctd", width=12,
               h2("Network-Assisted Diagnostics", align="center"),
               fluidRow(
-                box(title="Select Patient", status="warning", solidHeader = TRUE, splitLayout(cellWidths=c("25%", "50%"),
+                box(width=12, title="Select Patient", status="warning", solidHeader = TRUE, splitLayout(cellWidths=c("33%", "33%", "33%"),
                                                                                               selectInput(inputId = "diag_nw_Class", label = "Select diagnosis.",choices = names(cohorts_coded), selected = names(cohorts_coded)[1], selectize=FALSE),
                                                                                               selectInput(inputId = "pt_nw_ID", label = "Select patient.", choices = cohorts_coded[[1]], selected=cohorts_coded[[1]][1], selectize=FALSE, multiple=FALSE),
                                                                                               selectInput(inputId="pvalueType", label="Select method", choices=c("CTD", "CTDdisMod", "Combined"), selected="Combined", selectize=FALSE)),
                     h4('Click on the cells below to select disease model to interpret patient profile.'),
                     DTOutput('Cohort_pvalRank') %>% withSpinner(color="#0dc5c1")), # box Select Patient
-                box(width = 12 ,title = "Network Display", status="info", solidHeader = TRUE, align="left",height="930px", collapsible=TRUE,
+                box(width = 12 ,title = "Network Display", status="info", solidHeader = TRUE, align="left",height="930px", collapsible=FALSE,
                     selectInput(inputId = "bgModel", label = "Select Disease-Specific Background Network.",choices = .GlobalEnv$modelChoices,selected = names(cohorts_coded)[1],selectize = TRUE),
                     div(prettyRadioButtons(inputId = "RangeChoice",label = "Choose range of nodes:",choices = c("Top K perturbed metabolites only", "Abnormal metabolites only", "All Metabolites"),selected = "Top K perturbed metabolites only"),style="display:center-align"),
                     h4(htmlOutput(outputId="selectedPtModel", container = div)),
