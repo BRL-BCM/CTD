@@ -442,6 +442,13 @@ getPrankDf=function(input){
   } else {
     df.pranks = sapply(match(pts,names(pt_ranks)), function(x) getColumn(pt_ranks[[x]],"brown.comb","model"))
   }
+  if(class(df.pranks)=="list"){
+    for (i in which(sapply(df.pranks,length)==0)){
+      df.pranks[[i]]=rep(as.numeric(NA),max(sapply(df.pranks,length)))
+      names(df.pranks[[i]])=names(df.pranks[[which.max(sapply(df.pranks,length))]])
+    }
+    df.pranks = sapply(df.pranks, function(x) x)
+  }
   colnames(df.pranks)=pts
   df.pranks = apply(df.pranks,c(1,2), function(x) as.numeric(sprintf("%.3e",x)))
   model.ind = match(input$diag_nw_Class,rownames(df.pranks))
