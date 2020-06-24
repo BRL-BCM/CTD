@@ -309,7 +309,7 @@ getMSEA = function(input, cohorts_coded) {
 
 
 
-#### TAB 2 (INSPECT REFERENCE POPULATION) FUNCTIONS ####
+#### TAB 3 (INSPECT REFERENCE POPULATION) FUNCTIONS ####
 getMetList = function(input) {
   # First, get rid of metabolites that have below fil rate
   ref = .GlobalEnv$data_zscore[,-c(1:8)]
@@ -412,7 +412,7 @@ getRefPop = function(input) {
   return (list(hst=hst, outliers=outlierSamples, qq=qq, ests=list(mean=mn.est, std=sd.est), rare=rare, per=per))
 }
 
-#### TAB 3 (NETWORK-ASSISTED DIAGNOSTICS) FUNCTIONS ####
+#### TAB 2 (NETWORK-ASSISTED DIAGNOSTICS) FUNCTIONS ####
 getColumn <<- function(df,colname,rown="rowname"){
   vcol=df[,colname]
   if(rown == "rowname"){
@@ -442,13 +442,13 @@ getPrankDf=function(input){
   } else {
     df.pranks = sapply(match(pts,names(pt_ranks)), function(x) getColumn(pt_ranks[[x]],"brown.comb","model"))
   }
-  if(class(df.pranks)=="list"){
-    for (i in which(sapply(df.pranks,length)==0)){
-      df.pranks[[i]]=rep(as.numeric(NA),max(sapply(df.pranks,length)))
-      names(df.pranks[[i]])=names(df.pranks[[which.max(sapply(df.pranks,length))]])
-    }
-    df.pranks = sapply(df.pranks, function(x) x)
-  }
+  #if(class(df.pranks)=="list"){
+  #  for (i in which(sapply(df.pranks,length)==0)){
+  #    df.pranks[[i]]=rep(as.numeric(NA),max(sapply(df.pranks,length)))
+  #    names(df.pranks[[i]])=names(df.pranks[[which.max(sapply(df.pranks,length))]])
+  #  }
+  #  df.pranks = sapply(df.pranks, function(x) x)
+  #}
   colnames(df.pranks)=pts
   df.pranks = apply(df.pranks,c(1,2), function(x) as.numeric(sprintf("%.3e",x)))
   model.ind = match(input$diag_nw_Class,rownames(df.pranks))
