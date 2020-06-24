@@ -18,8 +18,9 @@ require(gridExtra)
 require(gtools)
 data("Thistlethwaite2020")
 cohorts_coded = lapply(cohorts_coded, mixedsort, decreasing=TRUE)
+load(system.file(sprintf("shiny-app/disMod.RData"), package = "CTD"))
+modelChoices <<- tolower(unique(sapply(list.files(system.file("ranks/ind_ranks",package = "CTD")),function(x) sub("[0-9]+-ranks.RData","",x))))
 
-setwd("/Users/lillian.rosa/Downloads/CTD/inst/shiny-app/")
 source("metDataPortal_appFns.r")
 
 pwy_choices = c("Choose", "Arginine Metabolism", "Ascorbate Metabolism", "Asp-Glu Metabolism", "BCAA Metabolism",
@@ -69,7 +70,7 @@ ui = dashboardPage(
                 box(width=12, title="Select Patient", status="warning", solidHeader = TRUE, splitLayout(cellWidths=c("33%", "33%", "33%"),
                                                                                               selectInput(inputId = "diag_nw_Class", label = "Select diagnosis.",choices = names(cohorts_coded), selected = names(cohorts_coded)[1], selectize=FALSE),
                                                                                               selectInput(inputId = "pt_nw_ID", label = "Select patient.", choices = cohorts_coded[[1]], selected=cohorts_coded[[1]][1], selectize=FALSE, multiple=FALSE),
-                                                                                              selectInput(inputId="pvalueType", label="Select method", choices=c("CTD", "CTDdisMod", "Combined"), selected="Combined", selectize=FALSE)),
+                                                                                              selectInput(inputId="pvalueType", label="Select method", choices=c("CTD", "CTDdm", "Combined"), selected="Combined", selectize=FALSE)),
                     h4('Click on the cells below to select disease model to interpret patient profile.'),
                     DTOutput('Cohort_pvalRank') %>% withSpinner(color="#0dc5c1")), # box Select Patient
                 box(width = 12 ,title = "Network Display", status="info", solidHeader = TRUE, align="left",height="930px", collapsible=FALSE,
@@ -171,8 +172,8 @@ server = function(input, output, session) {
       output$Cohort_pvalRank = renderDT(datatable(PrankDf()$df.pranks,
                                                   extensions = 'FixedColumns',
                                                   options = list(scrollX = TRUE,fixedColumns = TRUE, #dom = 't',
-                                                                 pageLength = 20,
-                                                                 lengthMenu = c(10, 15, 20)),
+                                                                 pageLength = 50,
+                                                                 lengthMenu = c(10, 25, 50)),
                                                   selection=list(target = 'cell',
                                                                  selected = matrix(c(PrankDf()$model.ind,1),ncol=2),
                                                                  mode = 'single')) %>% 

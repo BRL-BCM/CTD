@@ -1,6 +1,3 @@
-load("/Users/lillian.rosa/OneDrive/MacFiles/9thCommitteeMeeting/Clinical_paper/data/sysdata.rda")
-load(system.file(sprintf("shiny-app/disMod.RData"), package = "CTD"))
-modelChoices <<- tolower(unique(sapply(list.files(system.file("ranks/ind_ranks",package = "CTD")),function(x) sub("[0-9]+-ranks.RData","",x))))
 getData = function(input) {
   print("called getData()...")
   data = .GlobalEnv$data_zscore[,-c(1:8)]
@@ -16,7 +13,6 @@ getData = function(input) {
 
   return(res)
 }
-
 
 #### TAB 1 FUNCTIONS:  ####
 justify <- function(x, hjust="center", vjust="center", draw=TRUE){
@@ -437,7 +433,7 @@ getPrankDf=function(input){
   load(system.file(sprintf("shiny-app/model/ptRanks_kmx30.RData"), package = "CTD")) 
   if (input$pvalueType=="CTD") {
     df.pranks = sapply(match(pts,names(pt_ranks)), function(x) getColumn(pt_ranks[[x]],"ctd","model"))
-  } else if (input$pvalueType=="CTDdisMod") {
+  } else if (input$pvalueType=="CTDdm") {
     df.pranks = sapply(match(pts,names(pt_ranks)), function(x) getColumn(pt_ranks[[x]],"ctdDisMod","model"))
   } else {
     df.pranks = sapply(match(pts,names(pt_ranks)), function(x) getColumn(pt_ranks[[x]],"brown.comb","model"))
