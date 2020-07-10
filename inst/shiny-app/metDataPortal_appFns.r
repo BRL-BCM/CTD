@@ -298,7 +298,7 @@ getPatientReport = function(input) {
 #  rm(msea_result)
 #}
 #save(msea, file="/Users/lillian.rosa/Downloads/CTD/inst/shiny-app/shiny_msea.RData")
-load("shiny_msea.RData")
+load(system.file("shiny-app/shiny_msea.RData",package = "CTD"))
 getMSEA = function(input, cohorts_coded) {
   return(msea[[input$diagClass]])
 }

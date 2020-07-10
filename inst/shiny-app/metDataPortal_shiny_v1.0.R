@@ -17,11 +17,11 @@ require(cowplot)
 require(gridExtra)
 require(gtools)
 data("Thistlethwaite2020")
-cohorts_coded = lapply(cohorts_coded, mixedsort, decreasing=TRUE)
+cohorts_coded <<- lapply(cohorts_coded, mixedsort, decreasing=TRUE)
 load(system.file(sprintf("shiny-app/disMod.RData"), package = "CTD"))
 modelChoices <<- tolower(unique(sapply(list.files(system.file("ranks/ind_ranks",package = "CTD")),function(x) sub("[0-9]+-ranks.RData","",x))))
 
-source("metDataPortal_appFns.r")
+source(system.file("shiny-app/metDataPortal_appFns.r",package = "CTD"))
 
 pwy_choices = c("Choose", "Arginine Metabolism", "Ascorbate Metabolism", "Asp-Glu Metabolism", "BCAA Metabolism",
                 "Benzoate Metabolism", "Beta-Oxidation", "Bile-Acid Metabolism", "Carnitine Biosynthesis",
