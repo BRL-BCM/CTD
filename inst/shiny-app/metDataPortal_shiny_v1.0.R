@@ -58,7 +58,7 @@ ui = dashboardPage(
                                                    tabPanel("Metabolites not Detected", dataTableOutput("missingMets") %>% withSpinner(color="#0dc5c1")))),
                        box(title="Pathway Map", status="primary", solidHeader = TRUE,width = 12,
                            fluidRow(style="padding:20px; height:100px", splitLayout(cellWidths=c("40%", "60%"), align = "left",
-                                    selectInput(inputId = "pathwayMapId", label = "Pathway Map",choices = pwy_choices, selected="choose", selectize=FALSE),
+                                    selectInput(inputId = "pathwayMapId", label = "Pathway Map",choices = pwy_choices, selected="Arginine Metabolism", selectize=FALSE),
                                     sliderInput(inputId = "scalingFactor", label="Node Scaling Factor", min=1, max=5, step=1, value=2))),
                            fluidRow(style="padding:15px; height:110px; ",plotOutput("pmapleg", width = "100%", height = "100px")),
                            fluidRow(width=12, style="padding:10px; height:820px;",visNetworkOutput("pathwayMap")) %>% withSpinner(color="#0dc5c1"), collapsible=TRUE),
