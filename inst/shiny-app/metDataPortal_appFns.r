@@ -233,7 +233,7 @@ getPatientReport = function(input) {
 
   # Remove mets that were NA in raw, norm and zscore
   #ind0 = intersect(intersect(which(is.na(data[,"Raw"])), which(is.na(data[,"Anchor"]))), which(is.na(data[,"Zscore"])))
-  ind0 = which(is.na(data[,"Zscore"]))
+  ind0 = data$Metabolite[which(is.na(data[,"Zscore"]))]
   # Next, Remove mets that were NA in raw, but not in Anchor. These will be displayed in separate table.
   # Note, these values were imputed and therefore should not be included in patient report, but should
   # be noted that these metabolites were normally found.
@@ -248,7 +248,7 @@ getPatientReport = function(input) {
     refs = .GlobalEnv$data_zscore[, grep("EDTA-REF", colnames(.GlobalEnv$data_zscore))]
     ref.fil = 1-apply(refs, 1, function(i) sum(is.na(i))/length(i))
   }
-  tmp = ref.fil[ind0]
+  tmp = ref.fil[which(names(ref.fil) %in% ind0)]
   report_these = tmp[which(tmp>0.80)]
   # Report these metabolites
   missingMets = data.frame(Metabolite=character(), Reference.FillRate=numeric(), stringsAsFactors = FALSE)
@@ -262,7 +262,7 @@ getPatientReport = function(input) {
   } else {
     missingMets = NULL
   }
-  if (length(ind0)>0) { data = data[-ind0,] }
+  if (length(ind0)>0) { data = data[-which(data$Metabolite %in% ind0),] }
   print(dim(data))
 
   # Order by Fill Rate, then by abs(Zscore)
@@ -280,7 +280,7 @@ getPatientReport = function(input) {
 #msea = list()
 #for (model in edta_modelChoices) {
 #  data(Thistlethwaite2020)
-#  cohorts_coded2 = cohorts_coded[-which(names(cohorts_coded) %in% c(hep_modelChoices, "hep_refs", "unk"))]
+#  cohorts_coded2 = cohorts_coded[-which(names(cohorts_coded) %in% c(hep_modelChoices, "hep_refs", "alaimo"))]
 #  data_zscore = data_zscore[,c(1:8, which(colnames(data_zscore) %in% unlist(cohorts_coded2[c(model, "edta_refs")])))]
 #  input=list()
 #  input[['diagClass']] = model
@@ -290,7 +290,7 @@ getPatientReport = function(input) {
 #}
 #for (model in hep_modelChoices) {
 #  data(Thistlethwaite2020)
-#  cohorts_coded2 = cohorts_coded[-which(names(cohorts_coded) %in% c(edta_modelChoices, "edta_refs", "unk"))]
+#  cohorts_coded2 = cohorts_coded[-which(names(cohorts_coded) %in% c(edta_modelChoices, "edta_refs", "alaimo"))]
 #  data_zscore = data_zscore[,c(1:8, which(colnames(data_zscore) %in% unlist(cohorts_coded2[c(model, "hep_refs")])))]
 #  input=list()
 #  input[['diagClass']] = model

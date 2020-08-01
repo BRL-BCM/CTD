@@ -629,7 +629,7 @@ shiny.getMSEA_Metabolon = function(input, cohorts) {
   report = data.frame(Pathway=met.names, Size=size.G, NES=Obs.ES.norm, NOM.pval=p.vals[,1], FDR.qval=FDR.mean.sorted, FWER.pval=p.vals[,2], 
                       Global.pval=glob.p.vals.sorted)
   report = report[order(report$NES, decreasing=T),]
-  report = report[which(report$NOM.pval<0.25),]
+  #report = report[which(report$NOM.pval<0.25),]
   colnames(report) = c("Pathway", "Size", "NES", "NOM\npval", "FDR\nqval", "FWER\npval", "Global\npval")
   
   return(report)
