@@ -18,7 +18,7 @@ require(gridExtra)
 require(gtools)
 data("Thistlethwaite2020")
 
-disMod <<- loadToEnv(system.file(sprintf("shiny-app/disMod.RData"), package = "CTD"))[["disMod"]]
+disMod <<- loadToEnv(system.file(sprintf("shiny-app/disMod_July2020.RData"), package = "CTD"))[["disMod"]]
 modelChoices <<- tolower(unique(sapply(list.files(system.file("ranks/ind_ranks",package = "CTD")),function(x) sub("[0-9]+-ranks.RData","",x))))
 
 source(system.file("shiny-app/metDataPortal_appFns.r",package = "CTD"))
