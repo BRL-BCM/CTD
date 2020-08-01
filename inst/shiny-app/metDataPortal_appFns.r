@@ -462,13 +462,13 @@ getVlength <<- function(input){
   if (model==getDiag){
     fold=which(cohorts_coded[[getDiag]]==ptID)
     # load latent-embedding, pruned network that is learnt from the rest of the patients diagnosed with the same disease.
-    if (system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,fold), package='CTD') != ""){
-      ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,fold), package='CTD'))[['ig_pruned']]
+    if (system.file(sprintf('networks/ind_foldNets/bg_%s_fold%d.RData',model,fold), package='CTD') != ""){
+      ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_fold%d.RData',model,fold), package='CTD'))[['ig_pruned']]
     } else{
-      ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,1), package='CTD'))[['ig_pruned']]
+      ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_fold%d.RData',model,1), package='CTD'))[['ig_pruned']]
     }
   } else{
-    ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,1), package='CTD'))[['ig_pruned']]
+    ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_fold%d.RData',model,1), package='CTD'))[['ig_pruned']]
   }
   G = vector(mode="list", length=length(V(ig)$name))
   names(G) = V(ig)$name
@@ -502,13 +502,13 @@ getPtResult=function(input){
   if (model==getDiag){
     fold=which(cohorts_coded[[getDiag]]==ptID)
     # load latent-embedding, pruned network that is learnt from the rest of the patients diagnosed with the same disease.
-    if (system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,fold), package='CTD') != ""){
-      ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,fold), package='CTD'))[['ig_pruned']]
+    if (system.file(sprintf('networks/ind_foldNets/bg_%s_fold%d.RData',model,fold), package='CTD') != ""){
+      ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_fold%d.RData',model,fold), package='CTD'))[['ig_pruned']]
     } else{
-      ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,1), package='CTD'))[['ig_pruned']]
+      ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_fold%d.RData',model,1), package='CTD'))[['ig_pruned']]
     }
   } else{
-    ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_ind_fold%d.RData',model,1), package='CTD'))[['ig_pruned']]
+    ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_fold%d.RData',model,1), package='CTD'))[['ig_pruned']]
   }
   # get "ig" derived adjacency matrix
   G = vector(mode="list", length=length(V(ig)$name))
