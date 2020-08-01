@@ -243,6 +243,7 @@ getPatientReport = function(input) {
   if (any(grep("^HEP", input$ptIDs))) {
     refs = .GlobalEnv$data_zscore[, grep("HEP-REF", colnames(.GlobalEnv$data_zscore))]
     ref.fil = Miller2015$`Times identifed in all 200 samples`/200
+    names(ref.fil)=rownames(Miller2015)
   } else {
     refs = .GlobalEnv$data_zscore[, grep("EDTA-REF", colnames(.GlobalEnv$data_zscore))]
     ref.fil = 1-apply(refs, 1, function(i) sum(is.na(i))/length(i))
@@ -270,7 +271,7 @@ getPatientReport = function(input) {
   data = data[order(abs(data[,"Zscore"]), decreasing = TRUE), ]
   names(data) = c("Metabolite", "Z-score")
 
-  return(list(patientReport=data, missingMets=missingMets))
+  return(ptReport=list(patientReport=data, missingMets=missingMets))
 }
 
 # MSEA precomputed tables
@@ -298,7 +299,7 @@ getPatientReport = function(input) {
 #  rm(msea_result)
 #}
 #save(msea, file="/Users/lillian.rosa/Downloads/CTD/inst/shiny-app/shiny_msea.RData")
-load("shiny_msea.RData")
+load(system.file("shiny-app/shiny_msea.RData",package = "CTD"))
 getMSEA = function(input, cohorts_coded) {
   return(msea[[input$diagClass]])
 }
