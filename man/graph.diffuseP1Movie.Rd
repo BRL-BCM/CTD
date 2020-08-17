@@ -8,7 +8,8 @@ graph.diffuseP1Movie(p1, startNode, G, visitedNodes, ig,
   recursion_level = 1, output_dir = getwd())
 }
 \arguments{
-\item{p1}{- The probability being dispersed from the starting node, startNode.}
+\item{p1}{- The probability being dispersed from the starting node, startNode, which is preferentially distributed 
+between network nodes by the probability diffusion algorithm based solely on network connectivity.}
 
 \item{startNode}{- The first variable drawn in the node ranking, from which p1 gets dispersed.}
 
@@ -16,7 +17,10 @@ graph.diffuseP1Movie(p1, startNode, G, visitedNodes, ig,
 
 \item{visitedNodes}{- A character vector of node names, storing the history of previous draws in the node ranking.}
 
-\item{graphNumber}{- If testing against multiple background knowledge graphs, this is the index associated with the adjacency matrix that codes for G. Default value is 1.}
+\item{thresholdDiff}{- When the probability diffusion algorithm exchanges this amount (thresholdDiff)
+or less between nodes, the algorithm returns up the call stack.}
+
+\item{adj_mat}{- The adjacency matrix that encodes the edge weights for the network, G.}
 }
 \value{
 G - A list of returned probabilities after the diffusion of probability has truncated, with names of the list being the node names in the background knowledge graph.
@@ -27,7 +31,7 @@ likelihood that a variable will be most influenced by a perturbation in the star
 }
 \examples{
 # 7 node example graph illustrating diffusion of probability based on network connectivity
-# from Thistlethwaite et al., 2019.
+# from Thistlethwaite et al., 2020.
 adj_mat = rbind(c(0,2,1,0,0,0,0), # A
                 c(2,0,1,0,0,0,0), # B
                 c(1,0,0,1,0,0,0), # C
@@ -38,23 +42,18 @@ adj_mat = rbind(c(0,2,1,0,0,0,0), # A
                 )
 rownames(adj_mat) = c("A", "B", "C", "D", "E", "F", "G")
 colnames(adj_mat) = c("A", "B", "C", "D", "E", "F", "G")
-adjacency_matrix = list(adj_mat)
 ig = graph.adjacency(as.matrix(adj_mat), mode="undirected", weighted=TRUE)
 G=vector(mode="list", length=7)
 G[1:length(G)] = 0
 names(G) = c("A", "B", "C", "D", "E", "F", "G")
 startNode = "A"
 visitedNodes = startNode
-# Diffuse 100\% of probability from startNode "A"
-p1 = 1.0
-# Probability diffusion truncates at
-thresholdDiff=0.01
 coords = layout.fruchterman.reingold(ig)
 V(ig)$x = coords[,1]
 V(ig)$y = coords[,2]
 # Global variable imgNum
 imgNum=1
-G_new = graph.diffuseP1Movie(p1, startNode, G, visitedNodes, ig, 1, getwd())
+G_new = graph.diffuseP1Movie(p1=1.0, startNode, G, visitedNodes, ig, thresholdDiff=0.01, adj_mat, getwd())
 }
 \keyword{diffusion}
 \keyword{event}

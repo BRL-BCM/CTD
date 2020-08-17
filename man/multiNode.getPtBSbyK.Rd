@@ -9,7 +9,7 @@ multiNode.getPtBSbyK(S, ranks)
 \arguments{
 \item{S}{- A character vector of node names describing the node subset to be encoded.}
 
-\item{ranks}{- The list of node ranks calculated over all possible nodes, starting with each node in subset of interest.}
+\item{ranks}{- The list of node ranks calculated over all possible nodes in S, starting with each node in subset of interest.}
 }
 \value{
 pt.byK - a list of bitstrings, with the names of the list elements the node names of the encoded nodes

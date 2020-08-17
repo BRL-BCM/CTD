@@ -12,7 +12,7 @@
 #'              the minimum encoding length IS.alt; and IS.null-IS.alt, the d.score.
 #' @export mle.getEncodingLength
 #' @keywords minimum length encoding
-#' @import gmp
+#' @importFrom gmp chooseZ
 #' @examples
 #' # Identify the most significant subset per patient, given the background graph
 #' data_mx.pvals = t(apply(data_mx, c(1,2), function(i) 2*pnorm(abs(i), lower.tail = FALSE)))

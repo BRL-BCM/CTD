@@ -4,7 +4,8 @@
 \alias{multiNode.getNodeRanks}
 \title{Generate the "adaptive walk" node rankings, starting from a given perturbed variable}
 \usage{
-multiNode.getNodeRanks(S, G, num.misses = NULL, verbose = FALSE)
+multiNode.getNodeRanks(S, G, num.misses = NULL, p1, thresholdDiff,
+  adj_mat, verbose = FALSE)
 }
 \arguments{
 \item{S}{- A character vector of the node names for the subset of nodes you want to encode.}
@@ -12,6 +13,15 @@ multiNode.getNodeRanks(S, G, num.misses = NULL, verbose = FALSE)
 \item{G}{- A list of probabilities with list names being the node names of the background graph.}
 
 \item{num.misses}{- The number of "misses" the network walker will tolerate before switching to fixed length codes for remaining nodes to be found.}
+
+\item{p1}{- The probability that is preferentially distributed between network nodes by the 
+probability diffusion algorithm based solely on network connectivity. The remaining probability
+(i.e., "p0") is uniformally distributed between network nodes, regardless of connectivity.}
+
+\item{thresholdDiff}{- When the probability diffusion algorithm exchanges this amount (thresholdDiff)
+or less between nodes, the algorithm returns up the call stack.}
+
+\item{adj_mat}{- The adjacency matrix that encodes the edge weights for the network, G.}
 
 \item{verbose}{- If TRUE, print statements will execute as progress is made. Default is FALSE.}
 }
@@ -24,20 +34,13 @@ This function calculates the node rankings starting from a given perturbed varia
 }
 \examples{
 # Read in any network via its adjacency matrix
-tmp = matrix(1, nrow=100, ncol=100)
-for (i in 1:100) {
-  for (j in 1:100) {
-    tmp[i, j] = rnorm(1, mean=0, sd=1)
-  }
-}
-colnames(tmp) = sprintf("Compound\%d", 1:100)
-ig = graph.adjacency(tmp, mode="undirected", weighted=TRUE, add.colnames="name")
-V(ig)$name = tolower(V(ig)$name)
-# Get node rankings for graph
-G = vector(mode="list", length=length(V(ig)$name))
-names(G) = V(ig)$name
+adj_mat = matrix(1, nrow=100, ncol=100)
+for (i in 1:100) {for (j in 1:100) {adj_mat[i, j] = rnorm(1, mean=0, sd=1)}}
+colnames(adj_mat) = sprintf("Compound\%d", 1:100)
+G = vector(mode="list", length=colnames(adj_mat))
+names(G) = colnames(adj_mat)
 S = names(G)[1:3]
-ranks = multiNode.getNodeRanks(S, G)
+ranks = multiNode.getNodeRanks(S, G, p1=0.9, thresholdDiff=0.01, adj_mat)
 }
 \keyword{algorithm}
 \keyword{diffusion}

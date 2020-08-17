@@ -4,19 +4,23 @@
 \alias{graph.diffuseP1}
 \title{Diffuse Probability P1 from a starting node.}
 \usage{
-graph.diffuseP1(p1, startNode, G, visitedNodes, graphNumber = 1,
+graph.diffuseP1(p1, startNode, G, visitedNodes, thresholdDiff, adj_mat,
   verbose = FALSE)
 }
 \arguments{
-\item{p1}{- The probability being dispersed from the starting node, startNode.}
+\item{p1}{- The probability being dispersed from the starting node, startNode, which is preferentially distributed 
+between network nodes by the probability diffusion algorithm based solely on network connectivity.}
 
-\item{startNode}{- The first variable drawn in the node ranking, from which p1 gets dispersed.}
+\item{startNode}{- The node most recently visited by the network walker, from which p1 gets dispersed.}
 
 \item{G}{- A list of probabilities, with names of the list being the node names in the background knowledge graph.}
 
 \item{visitedNodes}{- The history of previous draws in the node ranking sequence.}
 
-\item{graphNumber}{- If testing against multiple background knowledge graphs, this is the index associated with the adjacency matrix that codes for G. Default value is 1.}
+\item{thresholdDiff}{- When the probability diffusion algorithm exchanges this amount (thresholdDiff)
+or less between nodes, the algorithm returns up the call stack.}
+
+\item{adj_mat}{- The adjacency matrix that encodes the edge weights for the network, G.}
 
 \item{verbose}{- If debugging or tracking a diffusion event, verbose=TRUE will activate print statements. Default is FALSE.}
 }
@@ -29,26 +33,13 @@ Recursively diffuse probability from a starting node based on the connectivity o
 }
 \examples{
 # Read in any network via its adjacency matrix
-tmp=matrix(1, nrow=100, ncol=100)
-for (i in 1:100) {
-  for (j in 1:100) {
-    tmp[i, j]=rnorm(1, mean=0, sd=1)
-  }
-}
-colnames(tmp)=sprintf("MolPheno\%d", 1:100)
-ig=graph.adjacency(tmp, mode="undirected", weighted=TRUE, add.colnames="name")
-V(ig)$name=tolower(V(ig)$name)
-adjacency_matrix=list(as.matrix(get.adjacency(ig, attr="weight")))  # Must have this declared as a GLOBAL variable!!!!!
-# Set other tuning parameters
-p0=0.1  # 10\% of probability distributed uniformly
-p1=0.9  # 90\% of probability diffused based on edge weights in networks
-thresholdDiff=0.01
-G=vector(mode="list", length=length(V(ig)$name))
-names(G)=V(ig)$name
+adj_mat=matrix(1, nrow=100, ncol=100)
+for (i in 1:100) {for (j in 1:100) {adj_mat[i, j]=rnorm(1, mean=0, sd=1)}}
+colnames(tmp)=sprintf("Metabolite\%d", 1:100)
+G=vector(mode="list", length=colnames(adj_mat))
+names(G)=colnames(adj_mat)
 G=lapply(G, function(i) i[[1]]=0)
-startNode=names(G)[1]
-visitedNodes=G[1]
-probs_afterCurrDraw=graph.diffuseP1(p1, startNode, G, visitedNodes, 1, TRUE)
+probs_afterCurrDraw=graph.diffuseP1(p1=1.0, startNode=names(G)[1], G=G[1], visitedNodes=names(G)[1], thresholdDiff=0.01, adj_mat, TRUE)
 }
 \keyword{diffusion}
 \keyword{event}

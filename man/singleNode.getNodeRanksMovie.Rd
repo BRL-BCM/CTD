@@ -4,21 +4,26 @@
 \alias{singleNode.getNodeRanksMovie}
 \title{Capture the movement of the fixed, single-node walk of the diffusion probability method.}
 \usage{
-singleNode.getNodeRanksMovie(subset.nodes, ig, output_filepath,
+singleNode.getNodeRanksMovie(S, ig, output_filepath, p1, thresholdDiff,
   num.misses = NULL, zoomIn = FALSE)
 }
 \arguments{
-\item{subset.nodes}{- The subset of variables, S, in a background graph, G.}
+\item{S}{- The subset of variables, S, in a background graph, G.}
 
 \item{ig}{- The igraph object associated with the background knowledge graph.}
 
 \item{output_filepath}{- The local directory at which you want still images to be saved.}
 
-\item{zoomIn}{- Boolean. Delete nodes outside of node subset's order 1 neighborhood?. Default is FALSE.}
+\item{p1}{- The probability that is preferentially distributed between network nodes by the 
+probability diffusion algorithm based solely on network connectivity. The remaining probability
+(i.e., "p0") is uniformally distributed between network nodes, regardless of connectivity.}
 
-\item{movie}{- If you want to make a movie, set to TRUE. This will produce a set of still images that you can stream together
-to make a movie. Default is TRUE. Alternatively (movie=FALSE), you could use this function to get the node
-labels returned for each node ranking starting with a perturbed variable.}
+\item{thresholdDiff}{- When the probability diffusion algorithm exchanges this amount (thresholdDiff)
+or less between nodes, the algorithm returns up the call stack.}
+
+\item{num.misses}{- The number of missteps allowed before a network walker truncates its walk.}
+
+\item{zoomIn}{- Boolean. Delete nodes outside of node subset's order 1 neighborhood?. Default is FALSE.}
 }
 \value{
 ranksByStartNode - a list object of node rankings Each element is based on a different startNode.
@@ -29,22 +34,13 @@ Make a movie of the fixed, single-node walk the diffusion probability method mak
 }
 \examples{
 # Read in any network via its adjacency matrix
-tmp = matrix(1, nrow=100, ncol=100)
-for (i in 1:100) {
-  for (j in 1:100) {
-    tmp[i, j] = rnorm(1, mean=0, sd=1)
-  }
-}
-colnames(tmp) = sprintf("Compound\%d", 1:100)
-ig = graph.adjacency(tmp, mode="undirected", weighted=TRUE, add.colnames="name")
+adj_mat = matrix(1, nrow=100, ncol=100)
+for (i in 1:100) {for (j in 1:100) { adj_mat[i, j] = rnorm(1, mean=0, sd=1)} }
+colnames(adj_mat) = sprintf("Compound\%d", 1:100)
+ig = graph.adjacency(adj_mat, mode="undirected", weighted=TRUE, add.colnames="name")
 V(ig)$name = tolower(V(ig)$name)
-adjacency_matrix = list(tmp) # MUST BE GLOBAL VARIABLE
-# Set other tuning parameters
-p0=0.1  # 10\% of probability distributed uniformly
-p1=0.9  # 90\% of probability diffused based on edge weights in networks
-thresholdDiff=0.01
 G = vector(mode="list", length=length(V(ig)$name))
 names(G) = V(ig)$name
-subset.nodes = names(G)[sample(1:length(G), 3)]
-singleNode.getNodeRanksMovie(subset.nodes, ig, output_filepath = getwd())
+S = names(G)[sample(1:length(G), 3)]
+singleNode.getNodeRanksMovie(S, ig, output_filepath = getwd(), p1=0.9, thresholdDiff=0.01)
 }

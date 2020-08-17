@@ -4,13 +4,22 @@
 \alias{singleNode.getNodeRanksN}
 \title{Generate the fixed , single-node diffusion node rankings, starting from a given perturbed variable.}
 \usage{
-singleNode.getNodeRanksN(n, G, S = NULL, num.misses = NULL,
-  verbose = FALSE)
+singleNode.getNodeRanksN(n, G, p1, thresholdDiff, adj_mat, S = NULL,
+  num.misses = NULL, verbose = FALSE)
 }
 \arguments{
 \item{n}{- The index (out of a vector of node names) of the node ranking you want to calculate.}
 
 \item{G}{- A list of probabilities with list names being the node names of the background graph.}
+
+\item{p1}{- The probability that is preferentially distributed between network nodes by the 
+probability diffusion algorithm based solely on network connectivity. The remaining probability
+(i.e., "p0") is uniformally distributed between network nodes, regardless of connectivity.}
+
+\item{thresholdDiff}{- When the probability diffusion algorithm exchanges this amount (thresholdDiff)
+or less between nodes, the algorithm returns up the call stack.}
+
+\item{adj_mat}{- The adjacency matrix that encodes the edge weights for the network, G.}
 
 \item{S}{- A character vector of node names in the subset you want the network walker to find.}
 
@@ -25,11 +34,15 @@ current_node_set - A character vector of node names in the order they were drawn
 This function calculates the node rankings starting from a given perturbed variable in a subset of variables in the background knowledge graph.
 }
 \examples{
+# Get the adjacency matrix for network G
+adj_mat = matrix(1, nrow=100, ncol=100)
+for (i in 1:100) {for (j in 1:100) { adj_mat[i, j] = rnorm(1, mean=0, sd=1)} }
+colnames(adj_mat) = sprintf("Compound\%d", 1:100)
 # Get node rankings for graph
 ranks = list()
 for (n in 1:length(G)) {
   print(sprintf("Generating node rankings starting with node \%s", names(G)[n]))
-  ranks[[n]] = singleNode.getNodeRanksN(n, G)
+  ranks[[n]] = singleNode.getNodeRanksN(n, G, p1, thresholdDiff, adj_mat)
 }
 names(ranks) = names(G)
 }

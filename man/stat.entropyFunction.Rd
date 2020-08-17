@@ -7,7 +7,7 @@
 stat.entropyFunction(bitString)
 }
 \arguments{
-\item{x}{- A vector of 0's and 1's.}
+\item{bitString}{- A vector of 0's and 1's.}
 }
 \value{
 e - a floating point percentage, between 0 and 1.
@@ -16,10 +16,7 @@ e - a floating point percentage, between 0 and 1.
 The entropy of a bitstring (ex: 1010111000) is calculated.
 }
 \examples{
-stat.entropyFunction(c(1,0,0,0,1,0,0,0,0,0,0,0,0))
-> 0.6193822
-stat.entropyFunction(c(1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0))
-> 1
-stat.entropyFunction(c(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1))
-> 0
+stat.entropyFunction(c(1,0,0,0,1,0,0,0,0,0,0,0,0))       # Output: 0.6193822
+stat.entropyFunction(c(1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0)) # Output: 1
+stat.entropyFunction(c(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1)) # Output: 0
 }
