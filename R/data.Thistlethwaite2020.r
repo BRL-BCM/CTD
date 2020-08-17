@@ -6,8 +6,8 @@
 #' @name Thistlethwaite2020
 #' @aliases Thistlethwaite2020
 #' @docType data
-#' @format cohorts_coded - A list object where elements contain all patient IDs associated with a given diagnosis.
-#' @format data_zscore - The data matrix (metabolite features are rows, patient observations are columns) for 545 untargeted metabolomics 
+#' @return cohorts_coded - A list object where elements contain all patient IDs associated with a given diagnosis.
+#' @return data_zscore - The data matrix (metabolite features are rows, patient observations are columns) for 545 untargeted metabolomics 
 #'                       patient samples, alongside metabolite annotations.
 #' @usage data(Thistlethwaite2020)
 #' @keywords datasets

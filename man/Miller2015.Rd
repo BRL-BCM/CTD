@@ -5,13 +5,17 @@
 \alias{Miller2015}
 \title{Untargeted metabolomic analysis for the clinical screening of inborn errors
 of metabolism}
-\format{Miller2015 - The data matrix (metabolite features are rows, patient observations are columns) for 186 untargeted metabolomics 
-                      patient samples, alongside metabolite annotations.}
 \source{
 \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4626538/bin/10545_2015_9843_MOESM1_ESM.xls}{Dataset}
 }
 \usage{
 data(Miller2015)
+}
+\value{
+Miller2015 - The data matrix (metabolite features are rows, patient observations are columns) for 186 untargeted metabolomics 
+                      patient samples, alongside metabolite annotations.
+
+diagnoses - A data.frame where all patient IDs are mapped to their given biochemical diagnosis.
 }
 \description{
 Global metabolic profiling obtained by untargeted mass spectrometry-based

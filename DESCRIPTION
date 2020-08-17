@@ -6,7 +6,7 @@ Author: Lillian Thistlethwaite [aut, cre]
 Maintainer: Lillian Thistlethwaite <lillian.thistlethwaite@bcm.edu>
 Description: An R package for pattern discovery in weighted graphs. Two use cases are achieved: 1) Given a weighted graph and a subset of its nodes, do the nodes show significant connectedness? 2) Given a weighted graph and two subsets of its nodes, are the subsets close neighbors or distant?
 Depends: R (>= 3.3.0), gmp, igraph, stats, grDevices, graphics
-License: MIT
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.0.9000

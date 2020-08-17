@@ -14,9 +14,9 @@
 #' @aliases Miller2015
 #' @docType data
 #' @usage data(Miller2015)
-#' @format Miller2015 - The data matrix (metabolite features are rows, patient observations are columns) for 186 untargeted metabolomics 
+#' @return Miller2015 - The data matrix (metabolite features are rows, patient observations are columns) for 186 untargeted metabolomics 
 #'                       patient samples, alongside metabolite annotations.
-#' @format diagnoses - A data.frame where all patient IDs are mapped to their given biochemical diagnosis.
+#' @return diagnoses - A data.frame where all patient IDs are mapped to their given biochemical diagnosis.
 #' @keywords datasets
 #' @references Miller et al. (2015) J Inherit Metab Dis. 2015; 38: 1029–1039
 #' (\href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4626538/}{PubMed})

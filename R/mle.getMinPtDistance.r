@@ -1,6 +1,5 @@
-#' Metabolite set enrichment analysis (MSEA) using pathway knowledge curated by Metabolon
+#' Get minimum patient distances between all pairwise comparisons made.
 #'
-#' A function that returns the pathway enrichment score for all perturbed metabolites in a patient's full metabolomic profile.
 #' @param allSimMatrices - A list of all similarity matrices, across all k for a given graph, or across many graphs.
 #' @export mle.getMinPtDistance
 #' @examples
