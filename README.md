@@ -15,7 +15,7 @@ Located in /vignette/CTD_Lab-Exercise.Rmd. It will take you across all the stage
 
 ## Using CTD in Google Colab.
 ### Click through the Google Colab Notebook, even before installing CTD.
-Open /Colab_CTD_PLOSCB.ipynb in Google Colab to reproduce some results from Thistlethwaite et al. (2020) step by step. This does not require CTD local installation. You will:
+Open /vignette/Colab_CTD_PLOSCB.ipynb in Google Colab to reproduce some results from Thistlethwaite et al. (2020) step by step. This does not require CTD local installation. You will:
 
 1. Visualize individual or average cohort metabolomics profiles on comprehensive or individual pathway maps from MetaboLync, curated by Metabolon.
 2. Estimate the probability and significance of a metabolite set against different disease-specific network contexts using CTD.
