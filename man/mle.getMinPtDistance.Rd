@@ -63,5 +63,5 @@ for (pt in 1:ncol(data_mx)) {
   }
 }
 res_ncd = lapply(res, function(i) i$ncd)
-minPtDist = mle.getMinPtDistance(res)
+minPtDist = mle.getMinPtDistance(res_ncd)
 }
