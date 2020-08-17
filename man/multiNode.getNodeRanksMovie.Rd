@@ -10,9 +10,9 @@ multiNode.getNodeRanksMovie(S, ig, output_filepath, p1, thresholdDiff,
 \arguments{
 \item{S}{- The subset of variables, S, in a background graph, G.}
 
-\item{ig}{- The igraph object associated with the background knowledge graph.}
+\item{ig}{- The igraph object associated with the network G.}
 
-\item{output_filepath}{- The local directory at which you want still images to be saved.}
+\item{output_filepath}{- The local directory at which you want still PNG images to be saved.}
 
 \item{p1}{- The probability that is preferentially distributed between network nodes by the 
 probability diffusion algorithm based solely on network connectivity. The remaining probability
@@ -33,7 +33,7 @@ Make a movie of the adaptive walk the diffusion probability method makes in sear
 \examples{
 # Read in any network via its adjacency matrix
 adj_mat = matrix(1, nrow=100, ncol=100)
-for (i in 1:100) {or (j in 1:100) {adj_mat[i, j] = rnorm(1, mean=0, sd=1)}}
+for (i in 1:100) { for (j in 1:100) {adj_mat[i, j] = rnorm(1, mean=0, sd=1)}}
 colnames(adj_mat) = sprintf("Compound\%d", 1:100)
 ig = graph.adjacency(adj_mat, mode="undirected", weighted=TRUE, add.colnames="name")
 V(ig)$name = tolower(V(ig)$name)

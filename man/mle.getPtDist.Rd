@@ -26,24 +26,40 @@ patientDistances - a distance matrix, where row and columns are patient identifi
 This function calculates the universal distance between patients, using a mutual information metric, where self-information comes from the minimum encoding length of each patient's encoded modular perturbations in the background knowledge graph.
 }
 \examples{
-# Get patient distances
-data_mx.pvals = apply(data_mx, c(1,2), function(i) 2*pnorm(abs(i), lower.tail = FALSE))
+# Get patient distances for the first 4 patients in the Miller et al 2015 dataset.
+data("Miller2015")
+data_mx = Miller2015[-grep("x - ", rownames(data_mx)),grep("IEM", colnames(Miller2015))]
+data_mx = data_mx[,c(1:4)]
+# Look at the top 15 metabolites for each patient. 
+kmx=15
+topMets_allpts = c()
+for (pt in 1:ncol(data_mx)) { topMets_allpts = c(topMets_allpts, rownames(data_mx)[order(abs(data_mx[,pt]), decreasing=TRUE)[1:kmx]]) }
+topMets_allpts = unique(topMets_allpts)
+# Pre-compute node ranks for all metabolites in topMets_allpts for faster distance calculations.
+ranks = list()
+for (n in 1:length(topMets_allpts)) { ranks[n] = singleNode.getNodeRanksN(n, G, p1=0.9, thresholdDiff=0.01, adj_mat) }
+names(ranks) = topMets_allpts
+# Also pre-compute patient bitstrings for faster distance calculations.
+ptBSbyK = list()
+for (pt in 1:ncol(data_mx)) {
+  S = rownames(data_mx)[order(abs(data_mx[,pt]), decreasing=TRUE)[1:kmx]]
+  ptBSbyK[[ptID]] = singleNode.getPtBSByK(S, ranks)
+}
+# Build your results ("res") list object to store patient distances at different size k's.
 res = list()
-tt = list(ncd=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)))
+t = list(ncd=matrix(NA, nrow=ncol(data_mx), ncol=ncol(data_mx)))
 rownames(t$ncd) = colnames(data_mx)
 colnames(t$ncd) = colnames(data_mx)
-for (i in 1:kmx) {
-  res[[i]] = tt
-}
+for (i in 1:kmx) { res[[i]] = t }
 for (pt in 1:ncol(data_mx)) {
   print(pt)
   ptID = colnames(data_mx)[pt]
   for (pt2 in pt:ncol(data_mx)) {
     ptID2 = colnames(data_mx)[pt2]
+    tmp = mle.getPtDist(ptBSbyK[[ptID]], ptID, ptBSbyK[[ptID2]], ptID2, data_mx, ranks)
     for (k in 1:kmx) {
-      tmp = mle.getPtDist(ptBSbyK[[ptID]][k], ptID, ptBSbyK[[ptID2]][k], ptID2, data_mx, ranks)
-      res[[k]]$ncd[ptID, ptID2] = tmp$NCD
-      res[[k]]$ncd[ptID2, ptID] = tmp$NCD
+      res[[k]]$ncd[ptID, ptID2] = tmp$NCD[k]
+      res[[k]]$ncd[ptID2, ptID] = tmp$NCD[k]
     }
   }
 }

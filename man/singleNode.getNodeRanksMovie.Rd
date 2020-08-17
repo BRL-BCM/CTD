@@ -10,9 +10,9 @@ singleNode.getNodeRanksMovie(S, ig, output_filepath, p1, thresholdDiff,
 \arguments{
 \item{S}{- The subset of variables, S, in a background graph, G.}
 
-\item{ig}{- The igraph object associated with the background knowledge graph.}
+\item{ig}{- The igraph object associated with the network G.}
 
-\item{output_filepath}{- The local directory at which you want still images to be saved.}
+\item{output_filepath}{- The local directory at which you want still PNG images to be saved.}
 
 \item{p1}{- The probability that is preferentially distributed between network nodes by the 
 probability diffusion algorithm based solely on network connectivity. The remaining probability

@@ -34,9 +34,10 @@ Recursively diffuse probability from a starting node based on the connectivity o
 \examples{
 # Read in any network via its adjacency matrix
 adj_mat=matrix(1, nrow=100, ncol=100)
-for (i in 1:100) {for (j in 1:100) {adj_mat[i, j]=rnorm(1, mean=0, sd=1)}}
-colnames(tmp)=sprintf("Metabolite\%d", 1:100)
-G=vector(mode="list", length=colnames(adj_mat))
+for (i in 1:100) {for (j in 1:100){adj_mat[i, j]=rnorm(1, mean=0, sd=1)} }
+colnames(adj_mat)=sprintf("Metabolite\%d", 1:100)
+rownames(adj_mat)=colnames(adj_mat)
+G=vector(mode="list", length=length(colnames(adj_mat)))
 names(G)=colnames(adj_mat)
 G=lapply(G, function(i) i[[1]]=0)
 probs_afterCurrDraw=graph.diffuseP1(p1=1.0, startNode=names(G)[1], G=G[1], visitedNodes=names(G)[1], thresholdDiff=0.01, adj_mat, TRUE)

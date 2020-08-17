@@ -37,12 +37,15 @@ This function calculates the node rankings starting from a given perturbed varia
 # Get the adjacency matrix for network G
 adj_mat = matrix(1, nrow=100, ncol=100)
 for (i in 1:100) {for (j in 1:100) { adj_mat[i, j] = rnorm(1, mean=0, sd=1)} }
-colnames(adj_mat) = sprintf("Compound\%d", 1:100)
+colnames(adj_mat) = sprintf("Metabolite\%d", 1:100)
+rownames(adj_mat) = colnames(adj_mat)
+G = vector("numeric", length=ncol(adj_mat))
+names(G)=colnames(adj_mat)
 # Get node rankings for graph
 ranks = list()
 for (n in 1:length(G)) {
   print(sprintf("Generating node rankings starting with node \%s", names(G)[n]))
-  ranks[[n]] = singleNode.getNodeRanksN(n, G, p1, thresholdDiff, adj_mat)
+  ranks[[n]] = singleNode.getNodeRanksN(n, G, p1=0.9, thresholdDiff=0.01, adj_mat)
 }
 names(ranks) = names(G)
 }

@@ -26,14 +26,27 @@ df - a data.frame object, for every bitstring provided in bs input parameter, a 
 This function calculates the mininmum encoding length associated with a subset of variables given a background knowledge graph.
 }
 \examples{
-# Identify the most significant subset per patient, given the background graph
+# Identify the most significantly connected subset for a given patients' perturbations, given the network G
+data("Miller2015")
+data_mx = Miller2015[-grep("x - ", rownames(data_mx)),grep("IEM", colnames(Miller2015))]
 data_mx.pvals = t(apply(data_mx, c(1,2), function(i) 2*pnorm(abs(i), lower.tail = FALSE)))
-for (pt in 1:ncol(data_mx)) {
-    ptID = colnames(data_mx)[pt]
-    res = mle.getEncodingLength(ptBSbyK[[ptID]], data_mx.pvals, ptID, G)
-    res = res[order(res[,"d.score"], decreasing=TRUE),]
-    print(res)
-}
+# Choose patient #1's (i.e., IEM_1000's) top 30 perturbed metabolites
+ptID = colnames(data_mx)[1]
+S = rownames(data_mx)[order(abs(data_mx[,which(colnames(data_mx)==ptID)]), decreasing=TRUE)[1:30]]
+# Build a 100 node metabolite network
+adj_mat = matrix(1, nrow=100, ncol=100)
+for (i in 1:100) {for (j in 1:100) { adj_mat[i, j] = rnorm(1, mean=0, sd=1)} }
+colnames(adj_mat) = sprintf("Metabolite\%d", 1:100)
+rownames(adj_mat) = colnames(adj_mat)
+G = vector("numeric", length=ncol(adj_mat))
+names(G)=colnames(adj_mat)
+ranks = list()
+for (n in 1:length(S)) { ranks[n] = singleNode.getNodeRanksN(n, G, p1=0.9, thresholdDiff=0.01, adj_mat, S, log2(length(G)), FALSE) }
+names(ranks) = names(S)
+ptBSbyK = singleNode.getPtBSByK(S, ranks)
+res = mle.getEncodingLength(ptBSbyK, data_mx.pvals, ptID, G)
+res = res[order(res[,"d.score"], decreasing=TRUE),]
+print(res)
 }
 \keyword{encoding}
 \keyword{length}

@@ -5,7 +5,7 @@
 \title{Make a movie of the diffusion of probability, P1, from a starting node.}
 \usage{
 graph.diffuseP1Movie(p1, startNode, G, visitedNodes, ig,
-  recursion_level = 1, output_dir = getwd())
+  recursion_level = 1, thresholdDiff, adj_mat, output_dir = getwd())
 }
 \arguments{
 \item{p1}{- The probability being dispersed from the starting node, startNode, which is preferentially distributed 
@@ -17,13 +17,20 @@ between network nodes by the probability diffusion algorithm based solely on net
 
 \item{visitedNodes}{- A character vector of node names, storing the history of previous draws in the node ranking.}
 
+\item{ig}{- The igraph object associated with the network G.}
+
+\item{recursion_level}{- The current depth in the call stack caused by a recursive algorithm.}
+
 \item{thresholdDiff}{- When the probability diffusion algorithm exchanges this amount (thresholdDiff)
 or less between nodes, the algorithm returns up the call stack.}
 
 \item{adj_mat}{- The adjacency matrix that encodes the edge weights for the network, G.}
+
+\item{output_dir}{-  The local directory at which you want still PNG images to be saved.}
 }
 \value{
-G - A list of returned probabilities after the diffusion of probability has truncated, with names of the list being the node names in the background knowledge graph.
+G - A list of returned probabilities after the diffusion of probability has truncated, with names of the 
+            list being the node names in the background knowledge graph.
 }
 \description{
 Recursively diffuse probability from a starting node based on the connectivity of the background knowledge graph, representing the
@@ -53,7 +60,7 @@ V(ig)$x = coords[,1]
 V(ig)$y = coords[,2]
 # Global variable imgNum
 imgNum=1
-G_new = graph.diffuseP1Movie(p1=1.0, startNode, G, visitedNodes, ig, thresholdDiff=0.01, adj_mat, getwd())
+G_new = graph.diffuseP1Movie(p1=1.0, startNode, G, visitedNodes, ig, recursion_level=1, thresholdDiff=0.01, adj_mat, getwd())
 }
 \keyword{diffusion}
 \keyword{event}
