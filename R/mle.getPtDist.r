@@ -7,13 +7,28 @@
 #' @param ptID2 - The identifier associated with patient 2's sample.
 #' @param data_mx - The matrix that gives the perturbation strength (z-scores) for all variables (columns) for each patient (rows).
 #' @param ranks - The list of node ranks, starting with each node in patient 1&2's subsets of interest.
+#' @param p1 - The probability that is preferentially distributed between network nodes by the 
+#'             probability diffusion algorithm based solely on network connectivity. The remaining probability
+#'             (i.e., "p0") is uniformally distributed between network nodes, regardless of connectivity.
+#' @param thresholdDiff - When the probability diffusion algorithm exchanges this amount (thresholdDiff)
+#'                        or less between nodes, the algorithm returns up the call stack.
+#' @param adj_mat - The adjacency matrix that encodes the edge weights for the network, G. 
 #' @return patientDistances - a distance matrix, where row and columns are patient identifiers.
 #' @export mle.getPtDist
 #' @examples
 #' # Get patient distances for the first 4 patients in the Miller et al 2015 dataset.
 #' data("Miller2015")
-#' data_mx = Miller2015[-grep("x - ", rownames(data_mx)),grep("IEM", colnames(Miller2015))]
+#' data_mx = Miller2015[-grep("x - ", rownames(Miller2015)),grep("IEM", colnames(Miller2015))]
 #' data_mx = data_mx[,c(1:4)]
+#' # Build a network, G
+#' adj_mat = matrix(0, nrow=nrow(data_mx), ncol=nrow(data_mx))
+#' rows = sample(1:ncol(adj_mat), 0.1*ncol(adj_mat))
+#' cols = sample(1:ncol(adj_mat), 0.1*ncol(adj_mat))
+#' for (i in rows) {for (j in cols) { adj_mat[i, j] = rnorm(1, mean=0, sd=1)} }
+#' colnames(adj_mat) = rownames(data_mx)
+#' rownames(adj_mat) = rownames(data_mx)
+#' G = vector("numeric", length=ncol(adj_mat))
+#' names(G)=colnames(adj_mat) 
 #' # Look at the top 15 metabolites for each patient. 
 #' kmx=15
 #' topMets_allpts = c()
@@ -40,14 +55,14 @@
 #'   ptID = colnames(data_mx)[pt]
 #'   for (pt2 in pt:ncol(data_mx)) {
 #'     ptID2 = colnames(data_mx)[pt2]
-#'     tmp = mle.getPtDist(ptBSbyK[[ptID]], ptID, ptBSbyK[[ptID2]], ptID2, data_mx, ranks)
+#'     tmp = mle.getPtDist(ptBSbyK[[ptID]], ptID, ptBSbyK[[ptID2]], ptID2, data_mx, ranks, p1=0.9, thresholdDiff=0.01, adj_mat)
 #'     for (k in 1:kmx) {
 #'       res[[k]]$ncd[ptID, ptID2] = tmp$NCD[k]
 #'       res[[k]]$ncd[ptID2, ptID] = tmp$NCD[k]
 #'     }
 #'   }
 #' }
-mle.getPtDist = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, ranks) {
+mle.getPtDist = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, ranks, p1, thresholdDiff, adj_mat) {
   if (length(p1.optBS) != length(p2.optBS)) {
     print("Make sure subset from patient1 is the same size as subset from patient2.")
     return(0)
@@ -82,7 +97,7 @@ mle.getPtDist = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, ranks) {
     ranks = list()
     for (i in 1:length(p12.sig.nodes)) {
       ind = which(names(G)==p12.sig.nodes[i])
-      ranks[[i]] = singleNode.getNodeRanksN(n=ind, G=G, S=p12.sig.nodes, num.misses=log2(length(G)))
+      ranks[[i]] = singleNode.getNodeRanksN(n=ind, G=G, p1, thresholdDiff, adj_mat, S=p12.sig.nodes, num.misses=log2(length(G)))
     }
     p12.e = c()
     for (k in 1:length(p1.optBS)) {

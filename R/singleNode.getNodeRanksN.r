@@ -17,20 +17,20 @@
 #' @keywords network walker
 #' @export singleNode.getNodeRanksN
 #' @examples
-#' # Get the adjacency matrix for network G
-#' adj_mat = matrix(1, nrow=100, ncol=100)
-#' for (i in 1:100) {for (j in 1:100) { adj_mat[i, j] = rnorm(1, mean=0, sd=1)} }
-#' colnames(adj_mat) = sprintf("Metabolite%d", 1:100)
-#' rownames(adj_mat) = colnames(adj_mat)
+#' data("Miller2015")
+#' data_mx = Miller2015[-grep("x - ", rownames(Miller2015)), grep("IEM", colnames(Miller2015))]
+#' # Build an adjacency matrix for network G
+#' adj_mat = matrix(0, nrow=nrow(data_mx), ncol=nrow(data_mx))
+#' rows = sample(1:ncol(adj_mat), 0.1*ncol(adj_mat))
+#' cols = sample(1:ncol(adj_mat), 0.1*ncol(adj_mat))
+#' for (i in rows) {for (j in cols) { adj_mat[i, j] = rnorm(1, mean=0, sd=1)} }
+#' colnames(adj_mat) = rownames(data_mx)
+#' rownames(adj_mat) = rownames(data_mx)
 #' G = vector("numeric", length=ncol(adj_mat))
 #' names(G)=colnames(adj_mat)
-#' # Get node rankings for graph
-#' ranks = list()
-#' for (n in 1:length(G)) {
-#'   print(sprintf("Generating node rankings starting with node %s", names(G)[n]))
-#'   ranks[[n]] = singleNode.getNodeRanksN(n, G, p1=0.9, thresholdDiff=0.01, adj_mat)
-#' }
-#' names(ranks) = names(G)
+#' # Get node rankings for the first metabolite in network G. 
+#' print(sprintf("Generating node rankings starting with node %s", names(G)[n]))
+#' ranks = singleNode.getNodeRanksN(1, G, p1=0.9, thresholdDiff=0.01, adj_mat)
 singleNode.getNodeRanksN = function(n, G, p1, thresholdDiff, adj_mat, S=NULL, num.misses=NULL, verbose=FALSE) {
   p0 = 1 - p1
   if (!is.null(num.misses)) {

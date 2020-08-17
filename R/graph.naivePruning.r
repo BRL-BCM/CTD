@@ -5,7 +5,7 @@
 #' @param ig_dis - The igraph object associated with the disease+reference trained differential interaction network.
 #' @param ig_ref - The igraph object associated with the reference-only trained interaction network.
 #' @return ig_pruned - The pruned igraph object of the disease+reference differential interaction network, with reference edges subtracted.
-#' @importFrom igraph get.edgelist get.edge.ids E delete.edges
+#' @import igraph
 #' @export graph.naivePruning
 #' @examples
 #' # Generate a 100 node "disease-control" network

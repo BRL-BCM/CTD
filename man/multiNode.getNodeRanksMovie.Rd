@@ -5,7 +5,7 @@
 \title{Capture the movement of the adaptive walk of the diffusion probability method.}
 \usage{
 multiNode.getNodeRanksMovie(S, ig, output_filepath, p1, thresholdDiff,
-  zoomIn = FALSE)
+  num.misses = log2(length(G)), zoomIn = FALSE)
 }
 \arguments{
 \item{S}{- The subset of variables, S, in a background graph, G.}
@@ -21,6 +21,8 @@ probability diffusion algorithm based solely on network connectivity. The remain
 \item{thresholdDiff}{- When the probability diffusion algorithm exchanges this amount (thresholdDiff)
 or less between nodes, the algorithm returns up the call stack.}
 
+\item{num.misses}{- The number of missteps allowed before a network walker truncates its walk.}
+
 \item{zoomIn}{- Boolean. Delete nodes outside of node subset's order 1 neighborhood?. Default is FALSE.}
 }
 \value{
@@ -31,14 +33,21 @@ ranksByStartNode - a list object of node rankings Each element is based on a dif
 Make a movie of the adaptive walk the diffusion probability method makes in search of a given patient's perturbed variables.
 }
 \examples{
-# Read in any network via its adjacency matrix
-adj_mat = matrix(1, nrow=100, ncol=100)
-for (i in 1:100) { for (j in 1:100) {adj_mat[i, j] = rnorm(1, mean=0, sd=1)}}
-colnames(adj_mat) = sprintf("Compound\%d", 1:100)
-ig = graph.adjacency(adj_mat, mode="undirected", weighted=TRUE, add.colnames="name")
-V(ig)$name = tolower(V(ig)$name)
-G = vector(mode="list", length=length(V(ig)$name))
-names(G) = V(ig)$name
+# 7 node example network from Thistlethwaite et al., 2020.
+adj_mat = rbind(c(0,2,1,0,0,0,0), # A
+                c(2,0,1,0,0,0,0), # B
+                c(1,0,0,1,0,0,0), # C
+                c(0,0,1,0,2,0,0), # D
+                c(0,0,0,2,0,2,1), # E
+                c(0,0,0,1,2,0,1), # F
+                c(0,0,0,0,1,1,0)  # G
+                )
+rownames(adj_mat) = c("A", "B", "C", "D", "E", "F", "G")
+colnames(adj_mat) = c("A", "B", "C", "D", "E", "F", "G")
+ig = graph.adjacency(as.matrix(adj_mat), mode="undirected", weighted=TRUE)
+G=vector(mode="list", length=7)
+G[1:length(G)] = 0
+names(G) = c("A", "B", "C", "D", "E", "F", "G")
 S = names(G)[sample(1:length(G), 3)]
 multiNode.getNodeRanksMovie(S, ig, output_filepath = getwd(), p1=0.9, thresholdDiff=0.01)
 }

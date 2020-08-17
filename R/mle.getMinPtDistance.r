@@ -6,8 +6,17 @@
 #' @examples
 #' # Get patient distances for the first 4 patients in the Miller et al 2015 dataset.
 #' data("Miller2015")
-#' data_mx = Miller2015[-grep("x - ", rownames(data_mx)),grep("IEM", colnames(Miller2015))]
+#' data_mx = Miller2015[-grep("x - ", rownames(Miller2015)),grep("IEM", colnames(Miller2015))]
 #' data_mx = data_mx[,c(1:4)]
+#' # Build a network, G
+#' adj_mat = matrix(0, nrow=nrow(data_mx), ncol=nrow(data_mx))
+#' rows = sample(1:ncol(adj_mat), 0.1*ncol(adj_mat))
+#' cols = sample(1:ncol(adj_mat), 0.1*ncol(adj_mat))
+#' for (i in rows) {for (j in cols) { adj_mat[i, j] = rnorm(1, mean=0, sd=1)} }
+#' colnames(adj_mat) = rownames(data_mx)
+#' rownames(adj_mat) = rownames(data_mx)
+#' G = vector("numeric", length=ncol(adj_mat))
+#' names(G)=colnames(adj_mat) 
 #' # Look at the top 15 metabolites for each patient. 
 #' kmx=15
 #' topMets_allpts = c()
@@ -34,7 +43,7 @@
 #'   ptID = colnames(data_mx)[pt]
 #'   for (pt2 in pt:ncol(data_mx)) {
 #'     ptID2 = colnames(data_mx)[pt2]
-#'     tmp = mle.getPtDist(ptBSbyK[[ptID]], ptID, ptBSbyK[[ptID2]], ptID2, data_mx, ranks)
+#'     tmp = mle.getPtDist(ptBSbyK[[ptID]], ptID, ptBSbyK[[ptID2]], ptID2, data_mx, ranks, p1=0.9, thresholdDiff=0.01, adj_mat)
 #'     for (k in 1:kmx) {
 #'       res[[k]]$ncd[ptID, ptID2] = tmp$NCD[k]
 #'       res[[k]]$ncd[ptID2, ptID] = tmp$NCD[k]

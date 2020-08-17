@@ -9,34 +9,39 @@
 #'             (i.e., "p0") is uniformally distributed between network nodes, regardless of connectivity.
 #' @param thresholdDiff - When the probability diffusion algorithm exchanges this amount (thresholdDiff)
 #'                        or less between nodes, the algorithm returns up the call stack.
+#' @param num.misses - The number of missteps allowed before a network walker truncates its walk.
 #' @param zoomIn - Boolean. Delete nodes outside of node subset's order 1 neighborhood?. Default is FALSE.
 #' @return ranksByStartNode - a list object of node rankings Each element is based on a different startNode.
 #'         Images are also generated in the output_directory specified.
-#' @importFrom igraph V E degree delete.vertices neighborhood get.adjacency graph.adjacency layout.fruchterman.reingold
+#' @import igraph
 #' @importFrom grDevices dev.off png
 #' @importFrom graphics legend title
 #' @export multiNode.getNodeRanksMovie
 #' @examples
-#' # Read in any network via its adjacency matrix
-#' adj_mat = matrix(1, nrow=100, ncol=100)
-#' for (i in 1:100) { for (j in 1:100) {adj_mat[i, j] = rnorm(1, mean=0, sd=1)}}
-#' colnames(adj_mat) = sprintf("Compound%d", 1:100)
-#' ig = graph.adjacency(adj_mat, mode="undirected", weighted=TRUE, add.colnames="name")
-#' V(ig)$name = tolower(V(ig)$name)
-#' G = vector(mode="list", length=length(V(ig)$name))
-#' names(G) = V(ig)$name
+#' # 7 node example network from Thistlethwaite et al., 2020.
+#' adj_mat = rbind(c(0,2,1,0,0,0,0), # A
+#'                 c(2,0,1,0,0,0,0), # B
+#'                 c(1,0,0,1,0,0,0), # C
+#'                 c(0,0,1,0,2,0,0), # D
+#'                 c(0,0,0,2,0,2,1), # E
+#'                 c(0,0,0,1,2,0,1), # F
+#'                 c(0,0,0,0,1,1,0)  # G
+#'                 )
+#' rownames(adj_mat) = c("A", "B", "C", "D", "E", "F", "G")
+#' colnames(adj_mat) = c("A", "B", "C", "D", "E", "F", "G")
+#' ig = graph.adjacency(as.matrix(adj_mat), mode="undirected", weighted=TRUE)
+#' G=vector(mode="list", length=7)
+#' G[1:length(G)] = 0
+#' names(G) = c("A", "B", "C", "D", "E", "F", "G")
 #' S = names(G)[sample(1:length(G), 3)]
 #' multiNode.getNodeRanksMovie(S, ig, output_filepath = getwd(), p1=0.9, thresholdDiff=0.01)
-multiNode.getNodeRanksMovie = function(S, ig, output_filepath, p1, thresholdDiff, zoomIn=FALSE) {
+multiNode.getNodeRanksMovie = function(S, ig, output_filepath, p1, thresholdDiff, num.misses=log2(length(G)), zoomIn=FALSE) {
   p0 = 1-p1
   if (zoomIn) {
     # TODO :: Test on different sized graphs. Do we like this design decision to subset neighborhood to get better view of network walk????
     ig = delete.vertices(ig, v=V(ig)$name[-which(V(ig)$name %in% names(unlist(neighborhood(ig, nodes=S, order=1))))])
     V(ig)$label.cex = 2
-    V(ig)$label = sprintf("%s:%.2f", V(ig)$name, G)
-    tmp = get.adjacency(ig, attr="weight")
-    tmp = abs(tmp)
-    igraphTestG = graph.adjacency(tmp, mode="undirected", weighted=TRUE)
+    G = G[which(names(G) %in% V(ig)$name)]
   }
   coords = layout.fruchterman.reingold(ig)
   G = vector(mode="list", length=length(V(ig)$name))
@@ -68,6 +73,7 @@ multiNode.getNodeRanksMovie = function(S, ig, output_filepath, p1, thresholdDiff
     stopIterating=FALSE;
     startNode = S[n]
     hits = startNode
+    numMisses = 0
     currentGraph = G
     current_node_set = c(current_node_set, startNode)
     while (stopIterating==FALSE) {
@@ -114,11 +120,15 @@ multiNode.getNodeRanksMovie = function(S, ig, output_filepath, p1, thresholdDiff
 
       # Break ties: When there are ties, choose the first of the winners.
       startNode = names(currentGraph[maxProb[1]])
+      if (startNode %in% S) {
+        numMisses = 0
+      } else {
+        numMisses = numMisses + 1
+      }
       current_node_set = c(current_node_set, startNode)
-      if (all(S %in% c(startNode,current_node_set))) {
+      if (numMisses>num.misses || all(S %in% c(startNode,current_node_set))) {
         stopIterating = TRUE
       }
-
       # After we step into
       V(ig)$label = sprintf("%s:%.2f", V(ig)$name, sumHits)
       png(sprintf("%s/diffusionP1Movie%d_%d.png", output_filepath, n, length(current_node_set)), 500, 500)

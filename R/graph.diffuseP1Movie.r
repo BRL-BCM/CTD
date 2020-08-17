@@ -15,7 +15,7 @@
 #' @param output_dir -  The local directory at which you want still PNG images to be saved.
 #' @return G - A list of returned probabilities after the diffusion of probability has truncated, with names of the 
 #'             list being the node names in the background knowledge graph.
-#' @importFrom igraph V E plot.igraph get.edge.ids
+#' @import igraph
 #' @importFrom grDevices dev.off png
 #' @importFrom graphics legend title
 #' @export graph.diffuseP1Movie

@@ -3,13 +3,13 @@
 #' This function calculates the node rankings starting from a given perturbed variable in a subset of variables in the background knowledge graph.
 #' @param S - A character vector of the node names for the subset of nodes you want to encode.
 #' @param G - A list of probabilities with list names being the node names of the background graph.
-#' @param num.misses - The number of "misses" the network walker will tolerate before switching to fixed length codes for remaining nodes to be found.
 #' @param p1 - The probability that is preferentially distributed between network nodes by the 
 #'             probability diffusion algorithm based solely on network connectivity. The remaining probability
 #'             (i.e., "p0") is uniformally distributed between network nodes, regardless of connectivity.
 #' @param thresholdDiff - When the probability diffusion algorithm exchanges this amount (thresholdDiff)
 #'                        or less between nodes, the algorithm returns up the call stack.
 #' @param adj_mat - The adjacency matrix that encodes the edge weights for the network, G. 
+#' @param num.misses - The number of "misses" the network walker will tolerate before switching to fixed length codes for remaining nodes to be found.
 #' @param verbose - If TRUE, print statements will execute as progress is made. Default is FALSE.
 #' @return ranks - A list of character vectors of node names in the order they were drawn by the
 #'                 probability diffusion algorithm, from each starting node in S.
@@ -20,12 +20,13 @@
 #' # Read in any network via its adjacency matrix
 #' adj_mat = matrix(1, nrow=100, ncol=100)
 #' for (i in 1:100) {for (j in 1:100) {adj_mat[i, j] = rnorm(1, mean=0, sd=1)}}
-#' colnames(adj_mat) = sprintf("Compound%d", 1:100)
-#' G = vector(mode="list", length=colnames(adj_mat))
+#' colnames(adj_mat) = sprintf("Metabolite%d", 1:100)
+#' rownames(adj_mat) = colnames(adj_mat)
+#' G = vector(mode="list", length=ncol(adj_mat))
 #' names(G) = colnames(adj_mat)
 #' S = names(G)[1:3]
 #' ranks = multiNode.getNodeRanks(S, G, p1=0.9, thresholdDiff=0.01, adj_mat)
-multiNode.getNodeRanks = function(S, G, num.misses=NULL, p1, thresholdDiff, adj_mat, verbose=FALSE) {
+multiNode.getNodeRanks = function(S, G, p1, thresholdDiff, adj_mat, num.misses=NULL, verbose=FALSE) {
   p0 = 1-p1
   if (is.null(num.misses)) {
     num.misses = log2(length(G))
