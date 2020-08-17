@@ -12,7 +12,7 @@
 #' @aliases Wangler2017
 #' @docType data
 #' @usage data(Wangler2017)
-#' @return Wangler2017 - The data matrix (metabolite features are rows, patient observations are columns) for 19 untargeted metabolomics 
+#' @format Wangler2017 - The data matrix (metabolite features are rows, patient observations are columns) for 19 untargeted metabolomics 
 #'                       patient samples, alongside metabolite annotations.
 #' @keywords datasets
 #' @references M.F. Wangler, et al. Genetics in Medicine, 2018, 00
@@ -22,4 +22,4 @@
 #' @examples
 #' require(CTD)
 #' data(Wangler2017)
-NULL
+"Wangler2017"

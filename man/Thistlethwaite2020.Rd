@@ -13,7 +13,7 @@ data(Thistlethwaite2020)
 \value{
 cohorts_coded - A list object where elements contain all patient IDs associated with a given diagnosis.
 
-data_zscore - The data matrix (metabolite features are rows, patient observations are columns) for 545 untargeted metabolomics 
+Thistlethwaite2020 - The data matrix (metabolite features are rows, patient observations are columns) for 545 untargeted metabolomics 
                       patient samples, alongside metabolite annotations.
 }
 \description{
