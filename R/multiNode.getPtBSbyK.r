@@ -7,10 +7,10 @@
 #' @return pt.byK - a list of bitstrings, with the names of the list elements the node names of the encoded nodes
 #' @export multiNode.getPtBSbyK
 #' @examples
-#' # Get patient bitstrings for the first 4 patients in the Miller et al 2015 dataset.
+#' # Get patient bitstrings for the first 2 patients in the Miller et al 2015 dataset.
 #' data("Miller2015")
-#' data_mx = Miller2015[-grep("x - ", rownames(Miller2015)),grep("IEM", colnames(Miller2015))]
-#' data_mx = data_mx[,c(1:4)]
+#' data_mx = Miller2015[-c(1,grep("x - ", rownames(Miller2015))),grep("IEM", colnames(Miller2015))]
+#' data_mx = data_mx[,c(1:2)]
 #' # Build a dummy metabolite network for all metabolites in data_mx
 #' adj_mat = matrix(0, nrow=nrow(data_mx), ncol=nrow(data_mx))
 #' rows = sample(1:ncol(adj_mat), 0.1*ncol(adj_mat))
@@ -31,7 +31,7 @@
 #' ptBSbyK = list()
 #' for (pt in 1:ncol(data_mx)) {
 #'   S = rownames(data_mx)[order(abs(data_mx[,pt]), decreasing=TRUE)[1:kmx]]
-#'   ptBSbyK[[pt]] = multiNode.getPtBSByK(S, ranks)
+#'   ptBSbyK[[pt]] = multiNode.getPtBSbyK(S, ranks)
 #' }
 multiNode.getPtBSbyK = function(S, ranks) {
   ranks2 = ranks[which(names(ranks) %in% S)]

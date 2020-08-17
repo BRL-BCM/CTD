@@ -15,7 +15,7 @@ Get minimum patient distances between all pairwise comparisons made.
 \examples{
 # Get patient distances for the first 2 patients in the Miller et al 2015 dataset.
 data("Miller2015")
-data_mx = Miller2015[-grep("x - ", rownames(Miller2015)),grep("IEM", colnames(Miller2015))]
+data_mx = Miller2015[-c(1,grep("x - ", rownames(Miller2015))), grep("IEM", colnames(Miller2015))]
 data_mx = data_mx[,c(1:2)]
 # Build a network, G
 adj_mat = matrix(0, nrow=nrow(data_mx), ncol=nrow(data_mx))

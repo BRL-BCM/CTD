@@ -35,7 +35,7 @@ This function calculates the node rankings starting from a given perturbed varia
 }
 \examples{
 data("Miller2015")
-data_mx = Miller2015[-grep("x - ", rownames(Miller2015)), grep("IEM", colnames(Miller2015))]
+data_mx = Miller2015[-c(1, grep("x - ", rownames(Miller2015))), grep("IEM", colnames(Miller2015))]
 # Build an adjacency matrix for network G
 adj_mat = matrix(0, nrow=nrow(data_mx), ncol=nrow(data_mx))
 rows = sample(1:ncol(adj_mat), 0.1*ncol(adj_mat))

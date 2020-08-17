@@ -21,10 +21,10 @@ This function calculates the bitstrings (1 is a hit; 0 is a miss) associated wit
 trying to find the variables in the encoded subset, given the background knowledge graph.
 }
 \examples{
-# Get patient bitstrings for the first 4 patients in the Miller et al 2015 dataset.
+# Get patient bitstrings for the first 2 patients in the Miller et al 2015 dataset.
 data("Miller2015")
-data_mx = Miller2015[-grep("x - ", rownames(Miller2015)),grep("IEM", colnames(Miller2015))]
-data_mx = data_mx[,c(1:4)]
+data_mx = Miller2015[-c(1,grep("x - ", rownames(Miller2015))),grep("IEM", colnames(Miller2015))]
+data_mx = data_mx[,c(1:2)]
 # Build an adjacency matrix for network G
 adj_mat = matrix(0, nrow=nrow(data_mx), ncol=nrow(data_mx))
 rows = sample(1:ncol(adj_mat), 0.1*ncol(adj_mat))
