@@ -35,7 +35,7 @@ data_mx = Miller2015[-1,grep("IEM_", colnames(Miller2015))]
 data_mx = apply(data_mx, c(1,2), as.numeric)
 diags = unlist(Miller2015["diagnosis",grep("IEM_", colnames(Miller2015))])
 refs = data_mx[,which(diags=="No biochemical genetic diagnosis")]
-ref_fill = as.numeric(Miller2015$`Times identifed in all 200 samples`)/200
+ref_fill = as.numeric(Miller2015$`Times identifed in all 200 samples`[-1])/200
 refs2 = refs[which(ref_fill>0.8),]
 diag_pts = names(diags[which(diags==unique(diags)[1])])
 diag_data = data_mx[which(rownames(data_mx) \%in\% rownames(refs2)), which(colnames(data_mx) \%in\% diag_pts)]
