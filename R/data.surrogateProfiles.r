@@ -14,7 +14,7 @@
 #' @return data_mx_surr - Data matrix with added surrogate profiles.
 #' @importFrom stats na.omit rnorm sd
 #' @export data.surrogateProfiles
-#' @example 
+#' @examples
 #' data("Miller2015")
 #' data_mx = Miller2015[,grep("IEM_", colnames(Miller2015))]
 #' refs = data_mx[,which(diagnoses$diagnosis=="No biochemical genetic diagnosis")]
