@@ -6,7 +6,7 @@
 #' # Get patient distances for the first 2 patients in the Miller et al 2015 dataset.
 #' data("Miller2015")
 #' data_mx = Miller2015[-c(1,grep("x - ", rownames(Miller2015))), grep("IEM", colnames(Miller2015))]
-#' data_mx = data_mx[,c(1:2)]
+#' data_mx = apply(data_mx[,c(1:2)], c(1,2), as.numeric)
 #' # Build a network, G
 #' adj_mat = matrix(0, nrow=nrow(data_mx), ncol=nrow(data_mx))
 #' rows = sample(1:ncol(adj_mat), 0.1*ncol(adj_mat))
@@ -23,7 +23,10 @@
 #' topMets_allpts = unique(topMets_allpts)
 #' # Pre-compute node ranks for all metabolites in topMets_allpts for faster distance calculations.
 #' ranks = list()
-#' for (n in 1:length(topMets_allpts)) { ranks[[n]] = singleNode.getNodeRanksN(n, G, p1=0.9, thresholdDiff=0.01, adj_mat) }
+#' for (n in 1:length(topMets_allpts)) { 
+#'   ind = which(names(G)==topMets_allpts[n])
+#'   ranks[[n]] = singleNode.getNodeRanksN(ind, G, p1=0.9, thresholdDiff=0.01, adj_mat, topMets_allpts, log2(length(G))) 
+#'}
 #' names(ranks) = topMets_allpts
 #' # Also pre-compute patient bitstrings for faster distance calculations.
 #' ptBSbyK = list()

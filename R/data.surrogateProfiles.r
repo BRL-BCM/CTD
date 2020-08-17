@@ -17,6 +17,7 @@
 #' @examples
 #' data("Miller2015")
 #' data_mx = Miller2015[-1,grep("IEM_", colnames(Miller2015))]
+#' data_mx = apply(data_mx, c(1,2), as.numeric)
 #' diags = unlist(Miller2015["diagnosis",grep("IEM_", colnames(Miller2015))])
 #' refs = data_mx[,which(diags=="No biochemical genetic diagnosis")]
 #' ref_fill = as.numeric(Miller2015$`Times identifed in all 200 samples`)/200
