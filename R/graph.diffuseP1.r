@@ -19,9 +19,10 @@
 #' @examples
 #' # Read in any network via its adjacency matrix
 #' adj_mat=matrix(1, nrow=100, ncol=100)
-#' for (i in 1:100) {for (j in 1:100) {adj_mat[i, j]=rnorm(1, mean=0, sd=1)}}
-#' colnames(tmp)=sprintf("Metabolite%d", 1:100)
-#' G=vector(mode="list", length=colnames(adj_mat))
+#' for (i in 1:100) {for (j in 1:100){adj_mat[i, j]=rnorm(1, mean=0, sd=1)} }
+#' colnames(adj_mat)=sprintf("Metabolite%d", 1:100)
+#' rownames(adj_mat)=colnames(adj_mat)
+#' G=vector(mode="list", length=length(colnames(adj_mat)))
 #' names(G)=colnames(adj_mat)
 #' G=lapply(G, function(i) i[[1]]=0)
 #' probs_afterCurrDraw=graph.diffuseP1(p1=1.0, startNode=names(G)[1], G=G[1], visitedNodes=names(G)[1], thresholdDiff=0.01, adj_mat, TRUE)
@@ -31,7 +32,6 @@ graph.diffuseP1=function (p1, startNode, G, visitedNodes, thresholdDiff, adj_mat
                   paste(rep("   ", length(visitedNodes) - 1), collapse=""),
                   p1, startNode, toString(visitedNodes)))
   }
-  adj_mat=adjacency_matrix[[graphNumber]]
   startNodeNeighbors=names(which(abs(adj_mat[, startNode])> 0))
   startNodeUnvisitedNeighbors=startNodeNeighbors[!(startNodeNeighbors %in% visitedNodes)]
   vN=visitedNodes[which(visitedNodes != startNode)]
@@ -79,8 +79,8 @@ graph.diffuseP1=function (p1, startNode, G, visitedNodes, thresholdDiff, adj_mat
                         paste(rep("   ", length(visitedNodes) - 1), collapse=""), inherited.probability/2,
                         z, startNodeUnvisitedNeighbors[z]))
         }
-        G=graph.diffuseP1(inherited.probability/2,
-                            startNodeUnvisitedNeighbors[z], G, c(visitedNodes, startNodeUnvisitedNeighbors[z]), graphNumber,
+        G=graph.diffuseP1(inherited.probability/2, startNodeUnvisitedNeighbors[z], G, 
+                          c(visitedNodes, startNodeUnvisitedNeighbors[z]), thresholdDiff, adj_mat,
                             verbose=FALSE)
       }
       z=z + 1

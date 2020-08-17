@@ -8,14 +8,24 @@
 #' @return pt.byK - a list of bitstrings, with the names of the list elements the node names of the encoded nodes
 #' @export singleNode.getPtBSbyK
 #' @examples
-#' # Load in your profiling data (rows are compounds, columns are samples)
-#' data_mx = read.table("your_profiling_data.txt", sep="\t", header=TRUE)
-#' # Get bitstrings associated with each patient's top kmx variable subsets
-#' kmx = 15
+#' # Get patient distances for the first 4 patients in the Miller et al 2015 dataset.
+#' data("Miller2015")
+#' data_mx = Miller2015[-grep("x - ", rownames(data_mx)),grep("IEM", colnames(Miller2015))]
+#' data_mx = data_mx[,c(1:4)]
+#' # Look at the top 15 metabolites for each patient. 
+#' kmx=15
+#' topMets_allpts = c()
+#' for (pt in 1:ncol(data_mx)) { topMets_allpts = c(topMets_allpts, rownames(data_mx)[order(abs(data_mx[,pt]), decreasing=TRUE)[1:kmx]]) }
+#' topMets_allpts = unique(topMets_allpts)
+#' # Pre-compute node ranks for all metabolites in topMets_allpts for faster distance calculations.
+#' ranks = list()
+#' for (n in 1:length(topMets_allpts)) { ranks[n] = singleNode.getNodeRanksN(n, G, p1=0.9, thresholdDiff=0.01, adj_mat) }
+#' names(ranks) = topMets_allpts
+#' # Also pre-compute patient bitstrings for faster distance calculations.
 #' ptBSbyK = list()
 #' for (pt in 1:ncol(data_mx)) {
-#'   S = data_mx[order(abs(data_mx[,pt]), decreasing=TRUE),pt][1:kmx]
-#'   ptBSbyK[[ptID]] = singleNode.getPtBSbyK(S, ranks)
+#'   S = rownames(data_mx)[order(abs(data_mx[,pt]), decreasing=TRUE)[1:kmx]]
+#'   ptBSbyK[[ptID]] = singleNode.getPtBSByK(S, ranks)
 #' }
 singleNode.getPtBSbyK = function(S, ranks, num.misses=NULL) {
   if (is.null(num.misses)) { num.misses = log2(length(ranks)) }

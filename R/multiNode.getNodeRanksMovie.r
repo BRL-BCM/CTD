@@ -2,8 +2,8 @@
 #'
 #' Make a movie of the adaptive walk the diffusion probability method makes in search of a given patient's perturbed variables.
 #' @param S - The subset of variables, S, in a background graph, G.
-#' @param ig - The igraph object associated with the background knowledge graph.
-#' @param output_filepath - The local directory at which you want still images to be saved.
+#' @param ig - The igraph object associated with the network G.
+#' @param output_filepath - The local directory at which you want still PNG images to be saved.
 #' @param p1 - The probability that is preferentially distributed between network nodes by the 
 #'             probability diffusion algorithm based solely on network connectivity. The remaining probability
 #'             (i.e., "p0") is uniformally distributed between network nodes, regardless of connectivity.
@@ -19,7 +19,7 @@
 #' @examples
 #' # Read in any network via its adjacency matrix
 #' adj_mat = matrix(1, nrow=100, ncol=100)
-#' for (i in 1:100) {or (j in 1:100) {adj_mat[i, j] = rnorm(1, mean=0, sd=1)}}
+#' for (i in 1:100) { for (j in 1:100) {adj_mat[i, j] = rnorm(1, mean=0, sd=1)}}
 #' colnames(adj_mat) = sprintf("Compound%d", 1:100)
 #' ig = graph.adjacency(adj_mat, mode="undirected", weighted=TRUE, add.colnames="name")
 #' V(ig)$name = tolower(V(ig)$name)
@@ -46,19 +46,18 @@ multiNode.getNodeRanksMovie = function(S, ig, output_filepath, p1, thresholdDiff
   adj_mat = as.matrix(get.adjacency(ig, attr="weight"))
 
   # Phase 1: Do adaptive node rankings ahead of time for each possible startNode in subGraphS.
-  if (movie==TRUE) {
-    V(ig)$color = rep("white", length(G))
-    V(ig)$color[which(V(ig)$name %in% S)] = "green"
-    V(ig)$label = sprintf("%s:%.2f", V(ig)$name, G)
-    current_node_set = NULL
-    png(sprintf("%s/diffusionP1Movie%d.png", output_filepath, length(current_node_set)), 500, 500)
-    plot.igraph(ig, layout=coords, vertex.color=V(ig)$color,
-                vertex.label=V(ig)$label, edge.width=5*abs(E(ig)$weight),  mark.col="dark red",
-                mark.groups = current_node_set)
-    title(sprintf("{%s}", paste(as.numeric(current_node_set %in% S), collapse="")), cex.main=2)
-    legend("topright", legend=c("Jackpot Nodes", "Drawn Nodes"), fill=c("green", "dark red"))
-    dev.off()
-  }
+  V(ig)$color = rep("white", length(G))
+  V(ig)$color[which(V(ig)$name %in% S)] = "green"
+  V(ig)$label = sprintf("%s:%.2f", V(ig)$name, G)
+  current_node_set = NULL
+  png(sprintf("%s/diffusionP1Movie%d.png", output_filepath, length(current_node_set)), 500, 500)
+  plot.igraph(ig, layout=coords, vertex.color=V(ig)$color,
+              vertex.label=V(ig)$label, edge.width=5*abs(E(ig)$weight),  mark.col="dark red",
+              mark.groups = current_node_set)
+  title(sprintf("{%s}", paste(as.numeric(current_node_set %in% S), collapse="")), cex.main=2)
+  legend("topright", legend=c("Jackpot Nodes", "Drawn Nodes"), fill=c("green", "dark red"))
+  dev.off()
+
   # Get all node names, so we know what all possible startNodes are.
   ranksByStartNode = list()
   bitStrings.pt = list()
@@ -103,17 +102,15 @@ multiNode.getNodeRanksMovie = function(S, ig, output_filepath, p1, thresholdDiff
       #Set startNode to a node that is the max probability in the new currentGraph
       maxProb = names(which.max(sumHits))
 
-      if (movie==TRUE) {
-        V(ig)$label = sprintf("%s:%.2f", V(ig)$name, sumHits)
-        png(sprintf("%s/diffusionP1Movie%d_%d.png", output_filepath, n, length(current_node_set)), 500, 500)
-        plot.igraph(ig, layout=coords, vertex.color=V(ig)$color,
-                    vertex.label=V(ig)$label, edge.width=5*abs(E(ig)$weight), edge.arrow.size=0.01,
-                    vertex.size=5+round(50*unlist(sumHits), 0), mark.col="dark red",
-                    mark.groups = current_node_set)
-        title(sprintf("{%s}", paste(as.numeric(current_node_set %in% S), collapse="")), cex.main=2)
-        legend("topright", legend=c("Jackpot Nodes", "Drawn Nodes"), fill=c("green", "dark red"))
-        dev.off()
-      }
+      V(ig)$label = sprintf("%s:%.2f", V(ig)$name, sumHits)
+      png(sprintf("%s/diffusionP1Movie%d_%d.png", output_filepath, n, length(current_node_set)), 500, 500)
+      plot.igraph(ig, layout=coords, vertex.color=V(ig)$color,
+                  vertex.label=V(ig)$label, edge.width=5*abs(E(ig)$weight), edge.arrow.size=0.01,
+                  vertex.size=5+round(50*unlist(sumHits), 0), mark.col="dark red",
+                  mark.groups = current_node_set)
+      title(sprintf("{%s}", paste(as.numeric(current_node_set %in% S), collapse="")), cex.main=2)
+      legend("topright", legend=c("Jackpot Nodes", "Drawn Nodes"), fill=c("green", "dark red"))
+      dev.off()
 
       # Break ties: When there are ties, choose the first of the winners.
       startNode = names(currentGraph[maxProb[1]])
@@ -123,17 +120,15 @@ multiNode.getNodeRanksMovie = function(S, ig, output_filepath, p1, thresholdDiff
       }
 
       # After we step into
-      if (movie==TRUE) {
-        V(ig)$label = sprintf("%s:%.2f", V(ig)$name, sumHits)
-        png(sprintf("%s/diffusionP1Movie%d_%d.png", output_filepath, n, length(current_node_set)), 500, 500)
-        plot.igraph(ig, layout=coords, vertex.color=V(ig)$color,
-                    vertex.label=V(ig)$label, edge.width=5*abs(E(ig)$weight), edge.arrow.size=0.01,
-                    vertex.size=5+round(50*unlist(sumHits), 0), mark.col="dark red",
-                    mark.groups = current_node_set)
-        title(sprintf("{%s}", paste(as.numeric(current_node_set %in% S), collapse="")), cex.main=2)
-        legend("topright", legend=c("Jackpot Nodes", "Drawn Nodes"), fill=c("green", "dark red"))
-        dev.off()
-      }
+      V(ig)$label = sprintf("%s:%.2f", V(ig)$name, sumHits)
+      png(sprintf("%s/diffusionP1Movie%d_%d.png", output_filepath, n, length(current_node_set)), 500, 500)
+      plot.igraph(ig, layout=coords, vertex.color=V(ig)$color,
+                  vertex.label=V(ig)$label, edge.width=5*abs(E(ig)$weight), edge.arrow.size=0.01,
+                  vertex.size=5+round(50*unlist(sumHits), 0), mark.col="dark red",
+                  mark.groups = current_node_set)
+      title(sprintf("{%s}", paste(as.numeric(current_node_set %in% S), collapse="")), cex.main=2)
+      legend("topright", legend=c("Jackpot Nodes", "Drawn Nodes"), fill=c("green", "dark red"))
+      dev.off()
     }
 
     ranksByStartNode[[n]] = current_node_set

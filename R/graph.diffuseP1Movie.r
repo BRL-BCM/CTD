@@ -7,11 +7,15 @@
 #' @param startNode - The first variable drawn in the node ranking, from which p1 gets dispersed.
 #' @param G - A list of probabilities, with names of the list being the node names in the background knowledge graph.
 #' @param visitedNodes - A character vector of node names, storing the history of previous draws in the node ranking.
+#' @param ig - The igraph object associated with the network G.
+#' @param recursion_level - The current depth in the call stack caused by a recursive algorithm.
 #' @param thresholdDiff - When the probability diffusion algorithm exchanges this amount (thresholdDiff)
 #'                        or less between nodes, the algorithm returns up the call stack.
 #' @param adj_mat - The adjacency matrix that encodes the edge weights for the network, G. 
-#' @return G - A list of returned probabilities after the diffusion of probability has truncated, with names of the list being the node names in the background knowledge graph.
-#' @importFrom igraph V E plot.igraph
+#' @param output_dir -  The local directory at which you want still PNG images to be saved.
+#' @return G - A list of returned probabilities after the diffusion of probability has truncated, with names of the 
+#'             list being the node names in the background knowledge graph.
+#' @importFrom igraph V E plot.igraph get.edge.ids
 #' @importFrom grDevices dev.off png
 #' @importFrom graphics legend title
 #' @export graph.diffuseP1Movie
@@ -42,8 +46,8 @@
 #' V(ig)$y = coords[,2]
 #' # Global variable imgNum
 #' imgNum=1
-#' G_new = graph.diffuseP1Movie(p1=1.0, startNode, G, visitedNodes, ig, thresholdDiff=0.01, adj_mat, getwd())
-graph.diffuseP1Movie = function(p1, startNode, G, visitedNodes, ig, recursion_level=1, output_dir=getwd()) {
+#' G_new = graph.diffuseP1Movie(p1=1.0, startNode, G, visitedNodes, ig, recursion_level=1, thresholdDiff=0.01, adj_mat, getwd())
+graph.diffuseP1Movie = function(p1, startNode, G, visitedNodes, ig, recursion_level=1, thresholdDiff, adj_mat, output_dir=getwd()) {
   #print(sprintf("%sprob. to diffuse:%f startNode: %s, visitedNodes: %s",
   #              paste(rep("   ", length(visitedNodes) - 1), collapse = ""),
   #              p1, startNode, toString(visitedNodes)))

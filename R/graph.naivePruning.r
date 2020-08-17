@@ -5,8 +5,25 @@
 #' @param ig_dis - The igraph object associated with the disease+reference trained differential interaction network.
 #' @param ig_ref - The igraph object associated with the reference-only trained interaction network.
 #' @return ig_pruned - The pruned igraph object of the disease+reference differential interaction network, with reference edges subtracted.
+#' @importFrom igraph get.edgelist get.edge.ids E delete.edges
 #' @export graph.naivePruning
 #' @examples
+#' # Generate a 100 node "disease-control" network
+#' adj_mat=matrix(0, nrow=100, ncol=100)
+#' rows = sample(1:100, 50, replace=TRUE)
+#' cols = sample(1:100, 50, replace=TRUE)
+#' for (i in rows) {for (j in cols){adj_mat[i, j]=rnorm(1, mean=0, sd=1)} }
+#' colnames(adj_mat)=sprintf("Metabolite%d", 1:100)
+#' ig_dis = graph.adjacency(adj_mat, mode="undirected", weighted=TRUE)
+#' 
+#' # Generate a 100 node reference "control-only" network
+#' adj_mat2=matrix(0, nrow=100, ncol=100)
+#' rows2 = sample(1:100, 50, replace=TRUE)
+#' cols2 = sample(1:100, 50, replace=TRUE)
+#' for (i in rows2) {for (j in cols2){adj_mat2[i, j]=rnorm(1, mean=0, sd=1)} }
+#' colnames(adj_mat2)=sprintf("Metabolite%d", 1:100)
+#' ig_ref = graph.adjacency(adj_mat2, mode="undirected", weighted=TRUE)
+#' 
 #' ig_pruned=graph.naivePruning(ig_dis, ig_ref)
 graph.naivePruning = function(ig_dis, ig_ref) {
   ee = get.edgelist(ig_ref)

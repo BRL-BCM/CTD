@@ -2,8 +2,8 @@
 #'
 #' Make a movie of the fixed, single-node walk the diffusion probability method makes in search of a given patient's perturbed variables.
 #' @param S - The subset of variables, S, in a background graph, G.
-#' @param ig - The igraph object associated with the background knowledge graph.
-#' @param output_filepath - The local directory at which you want still images to be saved.
+#' @param ig - The igraph object associated with the network G.
+#' @param output_filepath - The local directory at which you want still PNG images to be saved.
 #' @param p1 - The probability that is preferentially distributed between network nodes by the 
 #'             probability diffusion algorithm based solely on network connectivity. The remaining probability
 #'             (i.e., "p0") is uniformally distributed between network nodes, regardless of connectivity.
