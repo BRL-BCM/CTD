@@ -49,7 +49,7 @@ for (n in 1:length(S)) {
   ranks[[n]] = singleNode.getNodeRanksN(ind, G, p1=0.9, thresholdDiff=0.01, adj_mat, S, log2(length(G)), FALSE) 
 }
 names(ranks) = S
-ptBSbyK = singleNode.getPtBSByK(S, ranks)
+ptBSbyK = singleNode.getPtBSbyK(S, ranks)
 res = mle.getEncodingLength(ptBSbyK, data_mx.pvals, ptID, G)
 res = res[order(res[,"d.score"], decreasing=TRUE),]
 print(res)
