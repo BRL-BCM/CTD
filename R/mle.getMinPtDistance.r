@@ -52,6 +52,7 @@
 #'     }
 #'   }
 #' }
+#' res_ncd = lapply(res, function(i) i$ncd)
 #' minPtDist = mle.getMinPtDistance(res)
 mle.getMinPtDistance = function(allSimMatrices) {
   ptSim = matrix(1000, nrow=nrow(allSimMatrices[[1]]), ncol=ncol(allSimMatrices[[1]]))
