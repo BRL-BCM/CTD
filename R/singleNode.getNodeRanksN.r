@@ -5,20 +5,31 @@
 #' @param G - A list of probabilities with list names being the node names of the background graph.
 #' @param S - A character vector of node names in the subset you want the network walker to find.
 #' @param num.misses - The number of "misses" the network walker will tolerate before switching to fixed length codes for remaining nodes to be found.
+#' @param p1 - The probability that is preferentially distributed between network nodes by the 
+#'             probability diffusion algorithm based solely on network connectivity. The remaining probability
+#'             (i.e., "p0") is uniformally distributed between network nodes, regardless of connectivity.
+#' @param thresholdDiff - When the probability diffusion algorithm exchanges this amount (thresholdDiff)
+#'                        or less between nodes, the algorithm returns up the call stack.
+#' @param adj_mat - The adjacency matrix that encodes the edge weights for the network, G. 
 #' @param verbose - If TRUE, print statements will execute as progress is made. Default is FALSE.
 #' @return current_node_set - A character vector of node names in the order they were drawn by the probability diffusion algorithm.
 #' @keywords probability diffusion
 #' @keywords network walker
 #' @export singleNode.getNodeRanksN
 #' @examples
+#' # Get the adjacency matrix for network G
+#' adj_mat = matrix(1, nrow=100, ncol=100)
+#' for (i in 1:100) {for (j in 1:100) { adj_mat[i, j] = rnorm(1, mean=0, sd=1)} }
+#' colnames(adj_mat) = sprintf("Compound%d", 1:100)
 #' # Get node rankings for graph
 #' ranks = list()
 #' for (n in 1:length(G)) {
 #'   print(sprintf("Generating node rankings starting with node %s", names(G)[n]))
-#'   ranks[[n]] = singleNode.getNodeRanksN(n, G)
+#'   ranks[[n]] = singleNode.getNodeRanksN(n, G, p1, thresholdDiff, adj_mat)
 #' }
 #' names(ranks) = names(G)
-singleNode.getNodeRanksN = function(n, G, S=NULL, num.misses=NULL, verbose=FALSE) {
+singleNode.getNodeRanksN = function(n, G, p1, thresholdDiff, adj_mat, S=NULL, num.misses=NULL, verbose=FALSE) {
+  p0 = 1 - p1
   if (!is.null(num.misses)) {
     if (is.null(S)) {
       print("You must supply a subset of nodes as parameter S if you supply num.misses.")
@@ -44,7 +55,7 @@ singleNode.getNodeRanksN = function(n, G, S=NULL, num.misses=NULL, verbose=FALSE
     currentGraph[!(names(currentGraph) %in% current_node_set)] = baseP
     # Sanity check. p0_event should add up to exactly p0 (global variable)
     p0_event = sum(unlist(currentGraph[!(names(currentGraph) %in% current_node_set)]))
-    currentGraph = graph.diffuseP1(p1, startNode, currentGraph, current_node_set, 1, verbose=FALSE)
+    currentGraph = graph.diffuseP1(p1, startNode, currentGraph, current_node_set, thresholdDiff, adj_mat, verbose=FALSE)
     # Sanity check. p1_event should add up to exactly p1 (global variable)
     p1_event = sum(unlist(currentGraph[!(names(currentGraph) %in% current_node_set)]))
     if (abs(p1_event-1)>thresholdDiff) {

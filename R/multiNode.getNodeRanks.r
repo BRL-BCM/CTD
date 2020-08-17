@@ -4,6 +4,12 @@
 #' @param S - A character vector of the node names for the subset of nodes you want to encode.
 #' @param G - A list of probabilities with list names being the node names of the background graph.
 #' @param num.misses - The number of "misses" the network walker will tolerate before switching to fixed length codes for remaining nodes to be found.
+#' @param p1 - The probability that is preferentially distributed between network nodes by the 
+#'             probability diffusion algorithm based solely on network connectivity. The remaining probability
+#'             (i.e., "p0") is uniformally distributed between network nodes, regardless of connectivity.
+#' @param thresholdDiff - When the probability diffusion algorithm exchanges this amount (thresholdDiff)
+#'                        or less between nodes, the algorithm returns up the call stack.
+#' @param adj_mat - The adjacency matrix that encodes the edge weights for the network, G. 
 #' @param verbose - If TRUE, print statements will execute as progress is made. Default is FALSE.
 #' @return ranks - A list of character vectors of node names in the order they were drawn by the
 #'                 probability diffusion algorithm, from each starting node in S.
@@ -12,25 +18,17 @@
 #' @export multiNode.getNodeRanks
 #' @examples
 #' # Read in any network via its adjacency matrix
-#' tmp = matrix(1, nrow=100, ncol=100)
-#' for (i in 1:100) {
-#'   for (j in 1:100) {
-#'     tmp[i, j] = rnorm(1, mean=0, sd=1)
-#'   }
-#' }
-#' colnames(tmp) = sprintf("Compound%d", 1:100)
-#' ig = graph.adjacency(tmp, mode="undirected", weighted=TRUE, add.colnames="name")
-#' V(ig)$name = tolower(V(ig)$name)
-#' # Get node rankings for graph
-#' G = vector(mode="list", length=length(V(ig)$name))
-#' names(G) = V(ig)$name
+#' adj_mat = matrix(1, nrow=100, ncol=100)
+#' for (i in 1:100) {for (j in 1:100) {adj_mat[i, j] = rnorm(1, mean=0, sd=1)}}
+#' colnames(adj_mat) = sprintf("Compound%d", 1:100)
+#' G = vector(mode="list", length=colnames(adj_mat))
+#' names(G) = colnames(adj_mat)
 #' S = names(G)[1:3]
-#' ranks = multiNode.getNodeRanks(S, G)
-multiNode.getNodeRanks = function(S, G, num.misses=NULL, verbose=FALSE) {
+#' ranks = multiNode.getNodeRanks(S, G, p1=0.9, thresholdDiff=0.01, adj_mat)
+multiNode.getNodeRanks = function(S, G, num.misses=NULL, p1, thresholdDiff, adj_mat, verbose=FALSE) {
+  p0 = 1-p1
   if (is.null(num.misses)) {
-    thresholdDrawT = log2(length(G))
-  } else {
-    thresholdDrawT = num.misses
+    num.misses = log2(length(G))
   }
   ranks = list()
   for (n in 1:length(S)) {
@@ -56,7 +54,7 @@ multiNode.getNodeRanks = function(S, G, num.misses=NULL, verbose=FALSE) {
         # Sanity check: p0_event should be equal to p0 global variable.
         p0_event = sum(unlist(G[!(names(G) %in% current_node_set)]))
         # Diffuse p1.
-        G = graph.diffuseP1(p1, hits[hit], G, current_node_set, 1, verbose=FALSE)
+        G = graph.diffuseP1(p1, hits[hit], G, current_node_set, thresholdDiff, adj_mat, verbose=FALSE)
         # Sanity check: p1_event should be within 'thresholdDiff' (global variable) of 1.
         p1_event = sum(unlist(G[!(names(G) %in% current_node_set)]))
         if (abs(p1_event-1)>thresholdDiff) {
@@ -81,7 +79,7 @@ multiNode.getNodeRanks = function(S, G, num.misses=NULL, verbose=FALSE) {
       }
 
       current_node_set = c(current_node_set, startNode)
-      if (all(S %in% current_node_set) || numMisses>thresholdDrawT) {
+      if (all(S %in% current_node_set) || numMisses>num.misses) {
         stopIterating = TRUE
       }
 

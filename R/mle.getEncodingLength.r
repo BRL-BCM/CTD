@@ -43,7 +43,7 @@ mle.getEncodingLength = function(bs, pvals, ptID, G) {
     if (!is.null(pvals) && !is.null(ptID)) {
       results[row, "patientID"] = ptID
       results[row, "varPvalue"] = paste(format(pvals[ptID, mets.k], digits=2, width=3), collapse="/")
-      results[row, "fishers.Info"] = -log2(stats.fishersMethod(pvals[ptID, mets.k]))
+      results[row, "fishers.Info"] = -log2(stat.fishersMethod(pvals[ptID, mets.k]))
     }
     results[row, "optimalBS"] = optBS.tmp
     results[row, "subsetSize"] = k

@@ -1,14 +1,28 @@
 #' Surrogate profiles
 #'
 #' Fill in a data matrix rank, when your data is low n, high p. Fill in rank with surrogate profiles.
-#' @param data - Data matrix with observations as rows, features as columns.
+#' @param data - Data matrix with observations (e.g., patient samples) as rows, features 
+#'               (e.g., metabolites or genes) as columns.
 #' @param std - The level of variability (standard deviation) around each feature's
 #'             mean you want to add in surrogate profiles.
 #' @param useMnDiseaseProfile - Boolean. For disease cohorts not showing homogeneity, mean
 #'             across disease profiles and generate disease surrogates around this mean.
 #' @param addHealthyControls - Boolean. Add healthy control profiles to data?
-#' @return data_mx - Data matrix with added surrogate profiles.
+#' @param ref_data - Data matrix for healthy control "reference" samples, observations 
+#'                  (e.g., patient samples) as rows, features (e.g., metabolites or genes) 
+#'                  as columns.
+#' @return data_mx_surr - Data matrix with added surrogate profiles.
+#' @importFrom stats na.omit rnorm sd
 #' @export data.surrogateProfiles
+#' @example 
+#' data("Miller2015")
+#' data_mx = Miller2015[,grep("IEM_", colnames(Miller2015))]
+#' refs = data_mx[,which(diagnoses$diagnosis=="No biochemical genetic diagnosis")]
+#' ref_fill = (Miller2015$`Times identifed in all 200 samples`)/200
+#' refs2 = refs[which(ref_fill>0.8),]
+#' diag_pts = diagnoses[which(diagnoses$diagnosis==unique(diagnoses$diagnosis)[1]), "id"]
+#' diag_data = data_mx[which(rownames(data_mx) %in% rownames(refs2)), which(colnames(data_mx) %in% diag_pts)]
+#' data_mx_surr = data.surrogateProfiles(data = diag_data, std = 1, useMnDiseaseProfile = FALSE, addHealthyControls = FALSE, ref_data = refs2)
 data.surrogateProfiles = function(data, std=1, useMnDiseaseProfile=FALSE, addHealthyControls=TRUE, ref_data=NULL) {
   if (!is.null(ref_data)) {
     ref_data = ref_data[which(rownames(ref_data) %in% rownames(data)),]
@@ -93,33 +107,33 @@ data.surrogateProfiles = function(data, std=1, useMnDiseaseProfile=FALSE, addHea
       rownames(control_surr) = rownames(ref_data)
       dim(control_surr)
     }
-    data_mx = cbind(data_surr, control_surr)
+    data_mx_surr = cbind(data_surr, control_surr)
   } else {
-    data_mx = data_surr
+    data_mx_surr = data_surr
   }
 
-  # Remove metabolites that are NA for all samples in data_mx
+  # Remove metabolites that are NA for all samples in data_mx_surr
   rmThese = c()
-  for (r in 1:nrow(data_mx)) {
-    if (all(is.na(as.numeric(data_mx[rownames(data_mx)[r],])))) {
+  for (r in 1:nrow(data_mx_surr)) {
+    if (all(is.na(as.numeric(data_mx_surr[rownames(data_mx_surr)[r],])))) {
       rmThese = c(rmThese, r)
     } else {
       if (addHealthyControls) {
-        data_mx[r, which(is.na(data_mx[r, ]))] = min(na.omit(as.numeric(ref_data[rownames(data_mx)[r],])))
+        data_mx_surr[r, which(is.na(data_mx_surr[r, ]))] = min(na.omit(as.numeric(ref_data[rownames(data_mx_surr)[r],])))
       } else {
-        data_mx[r, which(is.na(data_mx[r, ]))] = min(na.omit(as.numeric(data_mx[rownames(data_mx)[r],])))
+        data_mx_surr[r, which(is.na(data_mx_surr[r, ]))] = min(na.omit(as.numeric(data_mx_surr[rownames(data_mx_surr)[r],])))
       }
     }
   }
-  if (length(rmThese) > 0) { data_mx = data_mx[-rmThese, ] }
-  any(is.na(data_mx))
-  any(is.infinite(unlist(data_mx)))
+  if (length(rmThese) > 0) { data_mx_surr = data_mx_surr[-rmThese, ] }
+  any(is.na(data_mx_surr))
+  any(is.infinite(unlist(data_mx_surr)))
 
-  var.met = apply(data_mx, 1, sd)
-  if (length(which(var.met == 0)) > 0) { data_mx = data_mx[-which(var.met == 0), ] }
-  rownames(data_mx) = tolower(rownames(data_mx))
-  data_mx = apply(data_mx, c(1, 2), as.numeric)
-  dim(data_mx)
+  var.met = apply(data_mx_surr, 1, sd)
+  if (length(which(var.met == 0)) > 0) { data_mx_surr = data_mx_surr[-which(var.met == 0), ] }
+  rownames(data_mx_surr) = tolower(rownames(data_mx_surr))
+  data_mx_surr = apply(data_mx_surr, c(1, 2), as.numeric)
+  dim(data_mx_surr)
 
-  return(data_mx)
+  return(data_mx_surr)
 }

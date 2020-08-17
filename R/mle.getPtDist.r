@@ -1,13 +1,14 @@
-#' Patient similarity using mutual information MLE metric of patients' most modular, perturbed subsets.
+#' Patient distance metric based on the mutual information of patients' highly connected perturbed metabolite sets.
 #'
 #' This function calculates the universal distance between patients, using a mutual information metric, where self-information comes from the minimum encoding length of each patient's encoded modular perturbations in the background knowledge graph.
 #' @param p1.optBS - The optimal bitstring associated with patient 1.
 #' @param ptID - The identifier associated with patient 1's sample.
 #' @param p2.optBS - The optimal bitstring associated with patient 2.
-#' @param ptID - The identifier associated with patient 2's sample.
+#' @param ptID2 - The identifier associated with patient 2's sample.
 #' @param data_mx - The matrix that gives the perturbation strength (z-scores) for all variables (columns) for each patient (rows).
-#' @return patientSim - a similarity matrix, where row and columns are patient identifiers.
-#' @export mle.getPtSim
+#' @param ranks - The list of node ranks, starting with each node in patient 1&2's subsets of interest.
+#' @return patientDistances - a distance matrix, where row and columns are patient identifiers.
+#' @export mle.getPtDist
 #' @examples
 #' # Get patient distances
 #' data_mx.pvals = apply(data_mx, c(1,2), function(i) 2*pnorm(abs(i), lower.tail = FALSE))
@@ -24,13 +25,13 @@
 #'   for (pt2 in pt:ncol(data_mx)) {
 #'     ptID2 = colnames(data_mx)[pt2]
 #'     for (k in 1:kmx) {
-#'       tmp = mle.getPtSim(ptBSbyK[[ptID]][k], ptID, ptBSbyK[[ptID2]][k], ptID2, data_mx, ranks)
+#'       tmp = mle.getPtDist(ptBSbyK[[ptID]][k], ptID, ptBSbyK[[ptID2]][k], ptID2, data_mx, ranks)
 #'       res[[k]]$ncd[ptID, ptID2] = tmp$NCD
 #'       res[[k]]$ncd[ptID2, ptID] = tmp$NCD
 #'     }
 #'   }
 #' }
-mle.getPtSim = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, ranks) {
+mle.getPtDist = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, ranks) {
   if (length(p1.optBS) != length(p2.optBS)) {
     print("Make sure subset from patient1 is the same size as subset from patient2.")
     return(0)

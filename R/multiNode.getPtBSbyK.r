@@ -3,7 +3,7 @@
 #' This function calculates the bitstrings (1 is a hit; 0 is a miss) associated with the adaptive network walk
 #' made by the diffusion algorithm trying to find the variables in the encoded subset, given the background knowledge graph.
 #' @param S - A character vector of node names describing the node subset to be encoded.
-#' @param ranks - The list of node ranks calculated over all possible nodes, starting with each node in subset of interest.
+#' @param ranks - The list of node ranks calculated over all possible nodes in S, starting with each node in subset of interest.
 #' @return pt.byK - a list of bitstrings, with the names of the list elements the node names of the encoded nodes
 #' @export multiNode.getPtBSbyK
 #' @examples
