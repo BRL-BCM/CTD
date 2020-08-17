@@ -29,6 +29,7 @@ This function calculates the mininmum encoding length associated with a subset o
 # Identify the most significantly connected subset for a given patients' perturbations, given the network G
 data("Miller2015")
 data_mx = Miller2015[-c(1,grep("x - ", rownames(Miller2015))), grep("IEM", colnames(Miller2015))]
+data_mx = apply(data_mx, c(1,2), as.numeric)
 data_mx.pvals = t(apply(data_mx, c(1,2), function(i) 2*pnorm(abs(i), lower.tail = FALSE)))
 # Choose patient #1's (i.e., IEM_1000's) top 15 perturbed metabolites
 ptID = colnames(data_mx)[1]
@@ -51,6 +52,7 @@ for (n in 1:length(S)) {
 names(ranks) = S
 ptBSbyK = singleNode.getPtBSbyK(S, ranks)
 res = mle.getEncodingLength(ptBSbyK, data_mx.pvals, ptID, G)
+# Rows with d.scores > 4.32 are of interest. Anything less indicates no signal.
 res = res[order(res[,"d.score"], decreasing=TRUE),]
 print(res)
 }
