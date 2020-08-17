@@ -30,7 +30,6 @@
 #' G = vector("numeric", length=ncol(adj_mat))
 #' names(G)=colnames(adj_mat)
 #' # Get node rankings for the first metabolite in network G. 
-#' print(sprintf("Generating node rankings starting with node %s", names(G)[n]))
 #' ranks = singleNode.getNodeRanksN(1, G, p1=0.9, thresholdDiff=0.01, adj_mat)
 singleNode.getNodeRanksN = function(n, G, p1, thresholdDiff, adj_mat, S=NULL, num.misses=NULL, verbose=FALSE) {
   p0 = 1 - p1

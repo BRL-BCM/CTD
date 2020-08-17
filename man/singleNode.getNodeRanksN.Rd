@@ -47,7 +47,6 @@ rownames(adj_mat) = rownames(data_mx)
 G = vector("numeric", length=ncol(adj_mat))
 names(G)=colnames(adj_mat)
 # Get node rankings for the first metabolite in network G. 
-print(sprintf("Generating node rankings starting with node \%s", names(G)[n]))
 ranks = singleNode.getNodeRanksN(1, G, p1=0.9, thresholdDiff=0.01, adj_mat)
 }
 \keyword{diffusion}
