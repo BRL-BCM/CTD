@@ -12,7 +12,9 @@ graph.diffuseP1(
   thresholdDiff,
   adj_mat,
   verbose = FALSE,
-  output_dir = ""
+  output_dir = "",
+  recursion_level = 1,
+  coords = NULL
 )
 }
 \arguments{
@@ -33,13 +35,20 @@ or less between nodes, the algorithm returns up the call stack.}
 \item{verbose}{- If debugging or tracking a diffusion event, verbose=TRUE will activate print statements. Default is FALSE.}
 
 \item{output_dir}{- If specified, a image sequence will generate in the output directory specified.}
+
+\item{recursion_level}{- The current depth in the call stack caused by a recursive algorithm. Only relevant if output_dir
+is specified.}
+
+\item{coords}{- The x and y coordinates for each node in the network, to remain static between images. Only relevant if
+output_dir is specified.}
 }
 \value{
-G - A list of returned probabilities after the diffusion of probability has truncated, with names of the list being the node names in the background knowledge graph.
+G - A list of returned probabilities after the diffusion of probability has truncated, with names of the list 
+            being the node names in the background knowledge graph.
 }
 \description{
-Recursively diffuse probability from a starting node based on the connectivity of the background knowledge graph, representing the likelihood that a variable will be
-        most influenced by a perturbation in the starting node.
+Recursively diffuse probability from a starting node based on the connectivity of the background knowledge graph, 
+representing the likelihood that a variable will be most influenced by a perturbation in the starting node.
 }
 \examples{
 # Read in any network via its adjacency matrix
@@ -50,9 +59,11 @@ rownames(adj_mat)=colnames(adj_mat)
 G=vector(mode="list", length=ncol(adj_mat))
 names(G)=colnames(adj_mat)
 G=lapply(G, function(i) i[[1]]=0)
-probs_afterCurrDraw=graph.diffuseP1(p1=1.0, startNode=names(G)[1], G=G[1], visitedNodes=names(G)[1], thresholdDiff=0.01, adj_mat, TRUE)
+probs_afterCurrDraw=graph.diffuseP1(p1=1.0, startNode=names(G)[1], G=G[1], visitedNodes=names(G)[1], 
+                                    thresholdDiff=0.01, adj_mat, TRUE)
 # Make a movie of the diffusion of probability from startNode
-probs_afterCurrDraw=graph.diffuseP1(p1=1.0, startNode=names(G)[1], G=G[1], visitedNodes=names(G)[1], thresholdDiff=0.01, adj_mat, TRUE, getwd())
+probs_afterCurrDraw=graph.diffuseP1(p1=1.0, startNode=names(G)[1], G=G[1], visitedNodes=names(G)[1], 
+                                    thresholdDiff=0.01, adj_mat, TRUE, getwd(), 1, 1)
 }
 \keyword{diffusion}
 \keyword{network}

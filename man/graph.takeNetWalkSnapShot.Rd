@@ -11,6 +11,7 @@ graph.takeNetWalkSnapShot(
   p1,
   visitedNodes,
   S,
+  coords,
   imgNum = 1,
   useLabels = TRUE
 )
@@ -29,14 +30,13 @@ between network nodes by the probability diffusion algorithm based solely on net
 
 \item{S}{- A character vector of node names in the subset you want the network walker to find.}
 
+\item{coords}{- The x and y coordinates for each node in the network, to remain static between images.}
+
 \item{imgNum}{- The image number for this snapshot. If images are being generated in a sequence, this serves as
 an iterator for file naming.}
 
 \item{useLabels}{- If TRUE, node names will display next to their respective nodes in the network. If false
 node names will not display.}
-}
-\value{
-imgNum - The updated image count for the next image in the image-generated movie sequence.
 }
 \description{
 Recursively diffuse probability from a starting node based on the connectivity of the background knowledge graph, representing the
@@ -62,7 +62,5 @@ names(G) = c("A", "B", "C", "D", "E", "F", "G")
 S = c("A", "C")
 visitedNodes = "A"
 coords = layout.fruchterman.reingold(ig)
-V(ig)$x = coords[,1]
-V(ig)$y = coords[,2]
-imgNum = graph.takeNetWalkSnapShot(adj_mat, G, output_dir=getwd(), p1=1.0, visitedNodes, S, imgNum=1, TRUE)
+imgNum = graph.takeNetWalkSnapShot(adj_mat, G, output_dir=getwd(), p1=1.0, visitedNodes, S, coords, imgNum=1, TRUE)
 }

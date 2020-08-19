@@ -11,8 +11,8 @@ graph.takeDiffusionSnapShot(
   p1,
   startNode,
   visitedNodes,
-  imgNum = 1,
-  recursion_level = 1
+  recursion_level = 1,
+  coords
 )
 }
 \arguments{
@@ -29,13 +29,9 @@ between network nodes by the probability diffusion algorithm based solely on net
 
 \item{visitedNodes}{- A character vector of node names, storing the history of previous draws in the node ranking.}
 
-\item{imgNum}{- The image number for this snapshot. If images are being generated in a sequence, this serves as
-an iterator for file naming.}
-
 \item{recursion_level}{- The current depth in the call stack caused by a recursive algorithm.}
-}
-\value{
-imgNum - The updated image count for the next image in the image-generated movie sequence.
+
+\item{coords}{- The x and y coordinates for each node in the network, to remain static between images.}
 }
 \description{
 Recursively diffuse probability from a starting node based on the connectivity of the background knowledge graph, representing the
@@ -63,5 +59,6 @@ visitedNodes = startNode
 coords = layout.fruchterman.reingold(ig)
 V(ig)$x = coords[,1]
 V(ig)$y = coords[,2]
-imgNum = graph.takeDiffusionSnapShot(adj_mat, G, output_dir=getwd(), p1=1.0, startNode, visitedNodes, imgNum=1, recursion_level=1)
+.GlobalEnv$imgNum = 1
+graph.takeDiffusionSnapShot(adj_mat, G, output_dir=getwd(), p1=1.0, startNode, visitedNodes, recursion_level=1, coords)
 }

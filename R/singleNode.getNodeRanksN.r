@@ -15,7 +15,8 @@
 #' @param output_dir - If specified, a image sequence will generate in the output directory specified.
 #' @param useLabels - If TRUE, node names will display next to their respective nodes in the network. If false
 #'                    node names will not display. Only relevant if output_dir is specified. 
-#' @return current_node_set - A character vector of node names in the order they were drawn by the probability diffusion algorithm.
+#' @param coords - The x and y coordinates for each node in the network, to remain static between images.
+#' @return curr_nodeset - A character vector of node names in the order they were drawn by the probability diffusion algorithm.
 #' @keywords probability diffusion
 #' @keywords network walker
 #' @export singleNode.getNodeRanksN
@@ -37,7 +38,7 @@
 #' # Make a movie of the network walker
 #' S = names(G)[sample(seq_len(length(G)), 3, replace=FALSE)]
 #' ranks = singleNode.getNodeRanksN(which(names(G)==S[1]), G, p1=0.9, thresholdDiff=0.01, adj_mat, S, log2(length(G)), FALSE, getwd())
-singleNode.getNodeRanksN = function(n, G, p1, thresholdDiff, adj_mat, S=NULL, num.misses=NULL, verbose=FALSE, output_dir="", useLabels=FALSE) {
+singleNode.getNodeRanksN = function(n, G, p1, thresholdDiff, adj_mat, S=NULL, num.misses=NULL, verbose=FALSE, output_dir="", useLabels=FALSE, coords=NULL) {
   p0 = 1 - p1
   if (is.null(S) && !is.null(num.misses)) {
     print("You must supply a subset of nodes as parameter S if you supply num.misses.")
@@ -49,54 +50,58 @@ singleNode.getNodeRanksN = function(n, G, p1, thresholdDiff, adj_mat, S=NULL, nu
   }
   if (verbose) { print(sprintf("Calculating node rankings %d of %d.", n, length(G))) }
   
-  current_node_set = NULL
+  curr_nodeset = NULL
   stopIterating=FALSE
   startNode = names(G)[n]
-  currentGraph = G
+  currGph = G
   numMisses = 0
-  current_node_set = c(current_node_set, startNode)
-  if (output_dir!="") { graph.takeNetWalkSnapShot(adj_mat, G, output_dir, p1, current_node_set, S, imgNum=length(current_node_set), useLabels) }
+  curr_nodeset = c(curr_nodeset, startNode)
+  if (output_dir!="") { graph.takeNetWalkSnapShot(adj_mat, G, output_dir, p1, curr_nodeset, S, 
+                                                  coords, imgNum=length(curr_nodeset), useLabels) }
   while (stopIterating==FALSE) {
     # Clear probabilities
-    currentGraph[seq_len(length(currentGraph))] = 0 #set probabilities of all nodes to 0
+    currGph[seq_len(length(currGph))] = 0 #set probabilities of all nodes to 0
     #determine base p0 probability
-    baseP = p0/(length(currentGraph)-length(current_node_set))
+    baseP = p0/(length(currGph)-length(curr_nodeset))
     #set probabilities of unseen nodes to baseP
-    currentGraph[!(names(currentGraph) %in% current_node_set)] = baseP
+    currGph[!(names(currGph) %in% curr_nodeset)] = baseP
     # Sanity check. p0_event should add up to exactly p0 (global variable)
-    p0_event = sum(unlist(currentGraph[!(names(currentGraph) %in% current_node_set)]))
-    currentGraph = graph.diffuseP1(p1, startNode, currentGraph, current_node_set, thresholdDiff, adj_mat, verbose=FALSE)
+    p0_event = sum(unlist(currGph[!(names(currGph) %in% curr_nodeset)]))
+    currGph = graph.diffuseP1(p1, startNode, currGph, curr_nodeset, thresholdDiff, adj_mat, verbose=FALSE)
     # Sanity check. p1_event should add up to exactly p1 (global variable)
-    p1_event = sum(unlist(currentGraph[!(names(currentGraph) %in% current_node_set)]))
+    p1_event = sum(unlist(currGph[!(names(currGph) %in% curr_nodeset)]))
     if (abs(p1_event-1)>thresholdDiff) {
       extra.prob.to.diffuse = 1-p1_event
-      currentGraph[names(current_node_set)] = 0
-      currentGraph[!(names(currentGraph) %in% names(current_node_set))] = unlist(currentGraph[!(names(currentGraph) %in% names(current_node_set))]) + extra.prob.to.diffuse/sum(!(names(currentGraph) %in% names(current_node_set)))
+      currGph[names(curr_nodeset)] = 0
+      currGph[!(names(currGph) %in% names(curr_nodeset))] = unlist(currGph[!(names(currGph) %in% names(curr_nodeset))]) + 
+        extra.prob.to.diffuse/sum(!(names(currGph) %in% names(curr_nodeset)))
     }
-    #Set startNode to a node that is the max probability in the new currentGraph
-    maxProb = names(which.max(currentGraph))
-    if (output_dir!="") { graph.takeNetWalkSnapShot(adj_mat, G, output_dir, p1, current_node_set, S, imgNum=length(current_node_set), useLabels) }
+    #Set startNode to a node that is the max probability in the new currGph
+    maxProb = names(which.max(currGph))
+    if (output_dir!="") { graph.takeNetWalkSnapShot(adj_mat, G, output_dir, p1, curr_nodeset, S, 
+                                                    coords, imgNum=length(curr_nodeset), useLabels) }
     
     # Break ties: When there are ties, choose the first of the winners.
-    startNode = names(currentGraph[maxProb[1]])
+    startNode = names(currGph[maxProb[1]])
     if (!is.null(S)) {
       if (startNode %in% S) {
         numMisses = 0
       } else {
         numMisses = numMisses + 1
       }
-      current_node_set = c(current_node_set, startNode)
-      if (numMisses>num.misses || all(S %in% current_node_set)) {
+      curr_nodeset = c(curr_nodeset, startNode)
+      if (numMisses>num.misses || all(S %in% curr_nodeset)) {
         stopIterating = TRUE
       }
     } else {
       # Is S isn't specified, keep drawing until you've drawn all nodes.
-      current_node_set = c(current_node_set, startNode)
-      if (length(current_node_set)>=(length(G))) {
+      curr_nodeset = c(curr_nodeset, startNode)
+      if (length(curr_nodeset)>=(length(G))) {
         stopIterating = TRUE
       }
     }
-    if (output_dir!="") { graph.takeNetWalkSnapShot(adj_mat, G, output_dir, p1, current_node_set, S, imgNum=length(current_node_set), useLabels) }
+    if (output_dir!="") { graph.takeNetWalkSnapShot(adj_mat, G, output_dir, p1, curr_nodeset, S, 
+                                                    coords, imgNum=length(curr_nodeset), useLabels) }
   }
-  return(current_node_set)
+  return(curr_nodeset)
 }

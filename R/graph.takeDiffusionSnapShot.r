@@ -9,10 +9,9 @@
 #'             between network nodes by the probability diffusion algorithm based solely on network connectivity.
 #' @param startNode - The first variable drawn in the node ranking, from which p1 gets dispersed.
 #' @param visitedNodes - A character vector of node names, storing the history of previous draws in the node ranking.
-#' @param imgNum - The image number for this snapshot. If images are being generated in a sequence, this serves as
-#'                 an iterator for file naming.
 #' @param recursion_level - The current depth in the call stack caused by a recursive algorithm.
-#' @return imgNum - The updated image count for the next image in the image-generated movie sequence.
+#' @param coords - The x and y coordinates for each node in the network, to remain static between images.
+#' @return NULL
 #' @export graph.takeDiffusionSnapShot
 #' @import igraph
 #' @importFrom grDevices dev.off png
@@ -39,23 +38,26 @@
 #' coords = layout.fruchterman.reingold(ig)
 #' V(ig)$x = coords[,1]
 #' V(ig)$y = coords[,2]
-#' imgNum = graph.takeDiffusionSnapShot(adj_mat, G, output_dir=getwd(), p1=1.0, startNode, visitedNodes, imgNum=1, recursion_level=1)
-graph.takeDiffusionSnapShot = function(adj_mat, G, output_dir, p1, startNode, visitedNodes, imgNum=1, recursion_level=1) {
+#' .GlobalEnv$imgNum = 1
+#' graph.takeDiffusionSnapShot(adj_mat, G, output_dir=getwd(), p1=1.0, startNode, visitedNodes, recursion_level=1, coords)
+graph.takeDiffusionSnapShot = function(adj_mat, G, output_dir, p1, startNode, visitedNodes, recursion_level=1, coords) {
   ig = graph.adjacency(adj_mat, mode="undirected", weighted = TRUE)
-  coords = layout.fruchterman.reingold(ig)
+  G = G[which(names(G) %in% V(ig)$name)]
   
   V(ig)$color = rep("blue", length(G))
   V(ig)$color[which(V(ig)$name %in% visitedNodes)] = "red"
   V(ig)$label = sprintf("%s:%.2f", V(ig)$name, G)
   png(sprintf("%s/diffusionP1Movie%d.png", output_dir, .GlobalEnv$imgNum), 500, 500)
-  plot.igraph(ig, layout=cbind(V(ig)$x, V(ig)$y), vertex.color=V(ig)$color,
+  plot.igraph(ig, layout=coords, vertex.color=V(ig)$color,
               vertex.label=V(ig)$label, vertex.label.dist = 3, edge.width=5*abs(E(ig)$weight),
               mark.col="black", mark.border = "black", mark.groups = startNode)
   title(sprintf("Diffuse %.2f from %s at recursion level %d.", p1, startNode, recursion_level), cex.main=1)
   legend("bottomright", legend=c("Visited", "Unvisited"), fill=c("red", "blue"))
   dev.off()
   
-  return(imgNum+1)
+  .GlobalEnv$imgNum = .GlobalEnv$imgNum + 1
+  
+  return(NULL)
 }
 
 

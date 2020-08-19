@@ -11,6 +11,10 @@
 #' @param adj_mat - The adjacency matrix that encodes the edge weights for the network, G. 
 #' @param num.misses - The number of "misses" the network walker will tolerate before switching to fixed length codes for remaining nodes to be found.
 #' @param verbose - If TRUE, print statements will execute as progress is made. Default is FALSE.
+#' @param output_dir - If specified, a image sequence will generate in the output directory specified.
+#' @param useLabels - If TRUE, node names will display next to their respective nodes in the network. If false
+#'                    node names will not display. Only relevant if output_dir is specified. 
+#' @param coords - The x and y coordinates for each node in the network, to remain static between images.
 #' @return ranks - A list of character vectors of node names in the order they were drawn by the
 #'                 probability diffusion algorithm, from each starting node in S.
 #' @keywords probability diffusion algorithm
@@ -26,7 +30,7 @@
 #' names(G) = colnames(adj_mat)
 #' S = names(G)[seq_len(3)]
 #' ranks = multiNode.getNodeRanks(S, G, p1=0.9, thresholdDiff=0.01, adj_mat)
-multiNode.getNodeRanks = function(S, G, p1, thresholdDiff, adj_mat, num.misses=NULL, verbose=FALSE) {
+multiNode.getNodeRanks = function(S, G, p1, thresholdDiff, adj_mat, num.misses, verbose=FALSE, output_dir="", useLabels=FALSE, coords=NULL) {
   p0 = 1-p1
   if (is.null(num.misses)) { num.misses = log2(length(G)) }
   
@@ -34,12 +38,13 @@ multiNode.getNodeRanks = function(S, G, p1, thresholdDiff, adj_mat, num.misses=N
   for (n in seq_len(length(S))) {
     if (verbose) { print(sprintf("Calculating node rankings %d of %d.", n, length(S))) }
     current_node_set = NULL
-    if (output_dir!="") { graph.takeNetWalkerSnapShot(adj_mat, G, output_dir, p1, current_node_set, S, imgNum=length(current_node_set)) }
     stopIterating=FALSE
     startNode = S[n]
     hits = startNode
     numMisses = 0
     current_node_set = c(current_node_set, startNode)
+    if (output_dir!="") { graph.takeNetWalkSnapShot(adj_mat, G, output_dir, p1, current_node_set, S, 
+                                                    coords, imgNum=length(current_node_set), useLabels) }
     while (stopIterating==FALSE) {
       sumHits = as.vector(matrix(0, nrow=length(G), ncol=1))
       names(sumHits) = names(G)
@@ -67,7 +72,8 @@ multiNode.getNodeRanks = function(S, G, p1, thresholdDiff, adj_mat, num.misses=N
       sumHits = sumHits/length(hits)
       #Set startNode to a node that is the max probability in the new G
       maxProb = names(which.max(sumHits[-which(names(sumHits) %in% current_node_set)]))
-      if (output_dir!="") { graph.takeNetWalkerSnapShot(adj_mat, sumHits, output_dir, p1, current_node_set, S, imgNum=length(current_node_set)) }
+      if (output_dir!="") { graph.takeNetWalkSnapShot(adj_mat, G, output_dir, p1, current_node_set, S, 
+                                                      coords, imgNum=length(current_node_set), useLabels) }
       
       # Break ties: When there are ties, choose the first of the winners.
       startNode = names(G[maxProb[1]])
@@ -83,7 +89,8 @@ multiNode.getNodeRanks = function(S, G, p1, thresholdDiff, adj_mat, num.misses=N
       if (all(S %in% current_node_set) || numMisses>num.misses) {
         stopIterating = TRUE
       }
-      if (output_dir!="") { graph.takeNetWalkerSnapShot(adj_mat, sumHits, output_dir, p1, current_node_set, S, imgNum=length(current_node_set)) }
+      if (output_dir!="") { graph.takeNetWalkSnapShot(adj_mat, G, output_dir, p1, current_node_set, S, 
+                                                      coords, imgNum=length(current_node_set), useLabels) }
     }
     ranks[[n]] = current_node_set
   }

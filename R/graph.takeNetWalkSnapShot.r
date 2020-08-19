@@ -9,11 +9,12 @@
 #'             between network nodes by the probability diffusion algorithm based solely on network connectivity.
 #' @param visitedNodes - A character vector of node names, storing the history of previous draws in the node ranking.
 #' @param S - A character vector of node names in the subset you want the network walker to find.
+#' @param coords - The x and y coordinates for each node in the network, to remain static between images.
 #' @param imgNum - The image number for this snapshot. If images are being generated in a sequence, this serves as
 #'                 an iterator for file naming.
 #' @param useLabels - If TRUE, node names will display next to their respective nodes in the network. If false
 #'                    node names will not display.
-#' @return imgNum - The updated image count for the next image in the image-generated movie sequence.
+#' @return NULL
 #' @export graph.takeNetWalkSnapShot
 #' @import igraph
 #' @importFrom grDevices dev.off png
@@ -38,20 +39,13 @@
 #' S = c("A", "C")
 #' visitedNodes = "A"
 #' coords = layout.fruchterman.reingold(ig)
-#' V(ig)$x = coords[,1]
-#' V(ig)$y = coords[,2]
-#' imgNum = graph.takeNetWalkSnapShot(adj_mat, G, output_dir=getwd(), p1=1.0, visitedNodes, S, imgNum=1, TRUE)
-graph.takeNetWalkSnapShot = function(adj_mat, G, output_dir, p1, visitedNodes, S, imgNum=1, useLabels=TRUE) {
+#' imgNum = graph.takeNetWalkSnapShot(adj_mat, G, output_dir=getwd(), p1=1.0, visitedNodes, S, coords, imgNum=1, TRUE)
+graph.takeNetWalkSnapShot = function(adj_mat, G, output_dir, p1, visitedNodes, S, coords, imgNum=1, useLabels=TRUE) {
   ig = graph.adjacency(adj_mat, mode="undirected", weighted = TRUE)
-  coords = layout.fruchterman.reingold(ig)
-  
+
   V(ig)$color = rep("white", length(G))
   V(ig)$color[which(V(ig)$name %in% S)] = "green"
-  if (useLabels==TRUE) {
-    V(ig)$label = sprintf("%s:%.2f", V(ig)$name, G)
-  } else {
-    V(ig)$label = rep("", length(V(ig)$name))
-  }
+  if (useLabels==TRUE) { V(ig)$label = V(ig)$name } else { V(ig)$label = rep("", length(V(ig)$name))}
   png(sprintf("%s/netWalkMovie%d_%d.png", output_dir, which(S==visitedNodes[1]), imgNum), 500, 500)
   plot.igraph(ig, layout=coords, vertex.color=V(ig)$color,
               vertex.label=V(ig)$label, edge.width=5*abs(E(ig)$weight), edge.arrow.size=0.01,
@@ -61,5 +55,5 @@ graph.takeNetWalkSnapShot = function(adj_mat, G, output_dir, p1, visitedNodes, S
   legend("topright", legend=c("Jackpot Nodes", "Drawn Nodes"), fill=c("green", "dark red"))
   dev.off()
   
-  return(imgNum+1)
+  return(NULL)
 }

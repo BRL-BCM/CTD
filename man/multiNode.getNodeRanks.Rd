@@ -10,8 +10,11 @@ multiNode.getNodeRanks(
   p1,
   thresholdDiff,
   adj_mat,
-  num.misses = NULL,
-  verbose = FALSE
+  num.misses,
+  verbose = FALSE,
+  output_dir = "",
+  useLabels = FALSE,
+  coords = NULL
 )
 }
 \arguments{
@@ -31,6 +34,13 @@ or less between nodes, the algorithm returns up the call stack.}
 \item{num.misses}{- The number of "misses" the network walker will tolerate before switching to fixed length codes for remaining nodes to be found.}
 
 \item{verbose}{- If TRUE, print statements will execute as progress is made. Default is FALSE.}
+
+\item{output_dir}{- If specified, a image sequence will generate in the output directory specified.}
+
+\item{useLabels}{- If TRUE, node names will display next to their respective nodes in the network. If false
+node names will not display. Only relevant if output_dir is specified.}
+
+\item{coords}{- The x and y coordinates for each node in the network, to remain static between images.}
 }
 \value{
 ranks - A list of character vectors of node names in the order they were drawn by the

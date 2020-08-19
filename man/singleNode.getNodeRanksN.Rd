@@ -14,7 +14,8 @@ singleNode.getNodeRanksN(
   num.misses = NULL,
   verbose = FALSE,
   output_dir = "",
-  useLabels = FALSE
+  useLabels = FALSE,
+  coords = NULL
 )
 }
 \arguments{
@@ -41,9 +42,11 @@ or less between nodes, the algorithm returns up the call stack.}
 
 \item{useLabels}{- If TRUE, node names will display next to their respective nodes in the network. If false
 node names will not display. Only relevant if output_dir is specified.}
+
+\item{coords}{- The x and y coordinates for each node in the network, to remain static between images.}
 }
 \value{
-current_node_set - A character vector of node names in the order they were drawn by the probability diffusion algorithm.
+curr_nodeset - A character vector of node names in the order they were drawn by the probability diffusion algorithm.
 }
 \description{
 This function calculates the node rankings starting from a given perturbed variable in a subset of variables in the background knowledge graph.
