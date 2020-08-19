@@ -11,10 +11,10 @@
 #'                        or less between nodes, the algorithm returns up the call stack.
 #' @param adj_mat - The adjacency matrix that encodes the edge weights for the network, G. 
 #' @param verbose - If debugging or tracking a diffusion event, verbose=TRUE will activate print statements. Default is FALSE.
+#' @param output_dir - If specified, a image sequence will generate in the output directory specified.
 #' @return G - A list of returned probabilities after the diffusion of probability has truncated, with names of the list being the node names in the background knowledge graph.
 #' @export graph.diffuseP1
-#' @keywords generative methods
-#' @keywords diffusion event
+#' @keywords probability diffusion
 #' @keywords network walker
 #' @examples
 #' # Read in any network via its adjacency matrix
@@ -26,12 +26,15 @@
 #' names(G)=colnames(adj_mat)
 #' G=lapply(G, function(i) i[[1]]=0)
 #' probs_afterCurrDraw=graph.diffuseP1(p1=1.0, startNode=names(G)[1], G=G[1], visitedNodes=names(G)[1], thresholdDiff=0.01, adj_mat, TRUE)
-graph.diffuseP1=function (p1, startNode, G, visitedNodes, thresholdDiff, adj_mat, verbose=FALSE) {
+#' # Make a movie of the diffusion of probability from startNode
+#' probs_afterCurrDraw=graph.diffuseP1(p1=1.0, startNode=names(G)[1], G=G[1], visitedNodes=names(G)[1], thresholdDiff=0.01, adj_mat, TRUE, getwd())
+graph.diffuseP1=function (p1, startNode, G, visitedNodes, thresholdDiff, adj_mat, verbose=FALSE, output_dir="") {
   if (verbose==TRUE) {
     print(sprintf("%sprob. to diffuse:%f startNode: %s, visitedNodes: %s",
                   paste(rep("   ", length(visitedNodes) - 1), collapse=""),
                   p1, startNode, toString(visitedNodes)))
   }
+  if (output_dir!="") { takeSnapShot(ig, output_dir, p1, startNode, recursion_level) }
   startNodeNeighbors=names(which(abs(adj_mat[, startNode])> 0))
   startNodeUnvisitedNeighbors=startNodeNeighbors[!(startNodeNeighbors %in% visitedNodes)]
   vN=visitedNodes[which(visitedNodes != startNode)]
@@ -79,12 +82,15 @@ graph.diffuseP1=function (p1, startNode, G, visitedNodes, thresholdDiff, adj_mat
                         paste(rep("   ", length(visitedNodes) - 1), collapse=""), inherited.probability/2,
                         z, startNodeUnvisitedNeighbors[z]))
         }
+        if (movie==TRUE) { takeSnapShot(ig, output_dir, p1, startNode, recursion_level) }
+        
         G=graph.diffuseP1(inherited.probability/2, startNodeUnvisitedNeighbors[z], G, 
                           c(visitedNodes, startNodeUnvisitedNeighbors[z]), thresholdDiff, adj_mat,
                             verbose=FALSE)
       }
       z=z + 1
     }
+    if (output_dir!="") { takeSnapShot(ig, output_dir, p1, startNode, recursion_level) }
   } else {
     if (verbose==TRUE) {print("startNode is stranded with its visited neighbors, or is a singleton. Diffuse p1 uniformly amongst all unvisited nodes")}
     G[!(names(G) %in% visitedNodes)]=unlist(G[!(names(G) %in% visitedNodes)]) + p1/(length(G) - length(visitedNodes))

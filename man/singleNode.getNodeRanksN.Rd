@@ -12,7 +12,9 @@ singleNode.getNodeRanksN(
   adj_mat,
   S = NULL,
   num.misses = NULL,
-  verbose = FALSE
+  verbose = FALSE,
+  output_dir = "",
+  useLabels = FALSE
 )
 }
 \arguments{
@@ -34,6 +36,11 @@ or less between nodes, the algorithm returns up the call stack.}
 \item{num.misses}{- The number of "misses" the network walker will tolerate before switching to fixed length codes for remaining nodes to be found.}
 
 \item{verbose}{- If TRUE, print statements will execute as progress is made. Default is FALSE.}
+
+\item{output_dir}{- If specified, a image sequence will generate in the output directory specified.}
+
+\item{useLabels}{- If TRUE, node names will display next to their respective nodes in the network. If false
+node names will not display. Only relevant if output_dir is specified.}
 }
 \value{
 current_node_set - A character vector of node names in the order they were drawn by the probability diffusion algorithm.
@@ -56,6 +63,9 @@ G = vector("numeric", length=ncol(adj_mat))
 names(G)=colnames(adj_mat)
 # Get node rankings for the first metabolite in network G. 
 ranks = singleNode.getNodeRanksN(1, G, p1=0.9, thresholdDiff=0.01, adj_mat)
+# Make a movie of the network walker
+S = names(G)[sample(seq_len(length(G)), 3, replace=FALSE)]
+ranks = singleNode.getNodeRanksN(which(names(G)==S[1]), G, p1=0.9, thresholdDiff=0.01, adj_mat, S, log2(length(G)), FALSE, getwd())
 }
 \keyword{diffusion}
 \keyword{network}

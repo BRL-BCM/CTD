@@ -11,7 +11,8 @@ graph.diffuseP1(
   visitedNodes,
   thresholdDiff,
   adj_mat,
-  verbose = FALSE
+  verbose = FALSE,
+  output_dir = ""
 )
 }
 \arguments{
@@ -30,6 +31,8 @@ or less between nodes, the algorithm returns up the call stack.}
 \item{adj_mat}{- The adjacency matrix that encodes the edge weights for the network, G.}
 
 \item{verbose}{- If debugging or tracking a diffusion event, verbose=TRUE will activate print statements. Default is FALSE.}
+
+\item{output_dir}{- If specified, a image sequence will generate in the output directory specified.}
 }
 \value{
 G - A list of returned probabilities after the diffusion of probability has truncated, with names of the list being the node names in the background knowledge graph.
@@ -48,10 +51,10 @@ G=vector(mode="list", length=ncol(adj_mat))
 names(G)=colnames(adj_mat)
 G=lapply(G, function(i) i[[1]]=0)
 probs_afterCurrDraw=graph.diffuseP1(p1=1.0, startNode=names(G)[1], G=G[1], visitedNodes=names(G)[1], thresholdDiff=0.01, adj_mat, TRUE)
+# Make a movie of the diffusion of probability from startNode
+probs_afterCurrDraw=graph.diffuseP1(p1=1.0, startNode=names(G)[1], G=G[1], visitedNodes=names(G)[1], thresholdDiff=0.01, adj_mat, TRUE, getwd())
 }
 \keyword{diffusion}
-\keyword{event}
-\keyword{generative}
-\keyword{methods}
 \keyword{network}
+\keyword{probability}
 \keyword{walker}

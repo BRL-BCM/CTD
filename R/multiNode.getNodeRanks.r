@@ -28,15 +28,13 @@
 #' ranks = multiNode.getNodeRanks(S, G, p1=0.9, thresholdDiff=0.01, adj_mat)
 multiNode.getNodeRanks = function(S, G, p1, thresholdDiff, adj_mat, num.misses=NULL, verbose=FALSE) {
   p0 = 1-p1
-  if (is.null(num.misses)) {
-    num.misses = log2(length(G))
-  }
+  if (is.null(num.misses)) { num.misses = log2(length(G)) }
+  
   ranks = list()
   for (n in seq_len(length(S))) {
-    if (verbose) {
-      print(sprintf("Calculating node rankings %d of %d.", n, length(S)))
-    }
+    if (verbose) { print(sprintf("Calculating node rankings %d of %d.", n, length(S))) }
     current_node_set = NULL
+    if (output_dir!="") { graph.takeNetWalkerSnapShot(adj_mat, G, output_dir, p1, current_node_set, S, imgNum=length(current_node_set)) }
     stopIterating=FALSE
     startNode = S[n]
     hits = startNode
@@ -69,6 +67,8 @@ multiNode.getNodeRanks = function(S, G, p1, thresholdDiff, adj_mat, num.misses=N
       sumHits = sumHits/length(hits)
       #Set startNode to a node that is the max probability in the new G
       maxProb = names(which.max(sumHits[-which(names(sumHits) %in% current_node_set)]))
+      if (output_dir!="") { graph.takeNetWalkerSnapShot(adj_mat, sumHits, output_dir, p1, current_node_set, S, imgNum=length(current_node_set)) }
+      
       # Break ties: When there are ties, choose the first of the winners.
       startNode = names(G[maxProb[1]])
       if (startNode %in% S) {
@@ -83,7 +83,7 @@ multiNode.getNodeRanks = function(S, G, p1, thresholdDiff, adj_mat, num.misses=N
       if (all(S %in% current_node_set) || numMisses>num.misses) {
         stopIterating = TRUE
       }
-
+      if (output_dir!="") { graph.takeNetWalkerSnapShot(adj_mat, sumHits, output_dir, p1, current_node_set, S, imgNum=length(current_node_set)) }
     }
     ranks[[n]] = current_node_set
   }
