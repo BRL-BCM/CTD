@@ -33,18 +33,18 @@ data_mx = apply(data_mx, c(1,2), as.numeric)
 data_mx.pvals = t(apply(data_mx, c(1,2), function(i) 2*pnorm(abs(i), lower.tail = FALSE)))
 # Choose patient #1's (i.e., IEM_1000's) top 15 perturbed metabolites
 ptID = colnames(data_mx)[1]
-S = rownames(data_mx)[order(abs(data_mx[,which(colnames(data_mx)==ptID)]), decreasing=TRUE)[1:15]]
+S = rownames(data_mx)[order(abs(data_mx[,which(colnames(data_mx)==ptID)]), decreasing=TRUE)[seq_len(15)]]
 # Build a dummy metabolite network for all metabolites in data_mx
 adj_mat = matrix(0, nrow=nrow(data_mx), ncol=nrow(data_mx))
-rows = sample(1:ncol(adj_mat), 0.1*ncol(adj_mat))
-cols = sample(1:ncol(adj_mat), 0.1*ncol(adj_mat))
+rows = sample(seq_len(ncol(adj_mat)), 0.1*ncol(adj_mat))
+cols = sample(seq_len(ncol(adj_mat)), 0.1*ncol(adj_mat))
 for (i in rows) {for (j in cols) { adj_mat[i, j] = rnorm(1, mean=0, sd=1)} }
 colnames(adj_mat) = rownames(data_mx)
 rownames(adj_mat) = rownames(data_mx)
 G = vector("numeric", length=ncol(adj_mat))
 names(G)=colnames(adj_mat)
 ranks = list()
-for (n in 1:length(S)) { 
+for (n in seq_len(length(S))) { 
   print(sprintf("\%d / \%d", n, length(S)))
   ind = which(names(G)==S[n])
   ranks[[n]] = singleNode.getNodeRanksN(ind, G, p1=0.9, thresholdDiff=0.01, adj_mat, S, log2(length(G)), FALSE) 

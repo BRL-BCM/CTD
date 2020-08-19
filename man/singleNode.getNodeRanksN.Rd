@@ -4,8 +4,16 @@
 \alias{singleNode.getNodeRanksN}
 \title{Generate the fixed , single-node diffusion node rankings, starting from a given perturbed variable.}
 \usage{
-singleNode.getNodeRanksN(n, G, p1, thresholdDiff, adj_mat, S = NULL,
-  num.misses = NULL, verbose = FALSE)
+singleNode.getNodeRanksN(
+  n,
+  G,
+  p1,
+  thresholdDiff,
+  adj_mat,
+  S = NULL,
+  num.misses = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{n}{- The index (out of a vector of node names) of the node ranking you want to calculate.}
@@ -39,8 +47,8 @@ data_mx = Miller2015[-c(1, grep("x - ", rownames(Miller2015))), grep("IEM", coln
 data_mx = apply(data_mx, c(1,2), as.numeric)
 # Build an adjacency matrix for network G
 adj_mat = matrix(0, nrow=nrow(data_mx), ncol=nrow(data_mx))
-rows = sample(1:ncol(adj_mat), 0.1*ncol(adj_mat))
-cols = sample(1:ncol(adj_mat), 0.1*ncol(adj_mat))
+rows = sample(seq_len(ncol(adj_mat)), 0.1*ncol(adj_mat))
+cols = sample(seq_len(ncol(adj_mat)), 0.1*ncol(adj_mat))
 for (i in rows) {for (j in cols) { adj_mat[i, j] = rnorm(1, mean=0, sd=1)} }
 colnames(adj_mat) = rownames(data_mx)
 rownames(adj_mat) = rownames(data_mx)

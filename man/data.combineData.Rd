@@ -4,16 +4,26 @@
 \alias{data.combineData}
 \title{Combine datasets from different source files.}
 \usage{
-data.combineData(ref, data)
+data.combineData(curr_data, more_data)
 }
 \arguments{
-\item{ref}{- Reference samples normalized, imputed data.}
+\item{curr_data}{- Current data matrix}
 
-\item{data}{- Normalized, imputed data. Data matrix with observations as rows, features as columns.}
+\item{more_data}{- Data matrix you want to combine with curr_data.}
 }
 \value{
-combined.data - Z-transformed data.
+combined.data - Combined data matrix.
 }
 \description{
 Combine datasets from different source files.
+}
+\examples{
+# Row names and column names are required for both curr_data and data input matrices.
+curr_data = matrix(rnorm(500), ncol=100)
+rownames(curr_data) = sprintf("Feature\%d", sample(seq_len(20), nrow(curr_data), replace = FALSE))
+colnames(curr_data) = sprintf("Sample\%d", seq_len(ncol(curr_data)))
+more_data = matrix(rnorm(500), ncol=100)
+rownames(more_data) = sprintf("Feature\%d", sample(seq_len(20), nrow(curr_data), replace = FALSE))
+colnames(more_data) = sprintf("Sample\%d", seq_len(ncol(curr_data)))
+combined.data = data.combineData(curr_data, more_data)
 }

@@ -18,7 +18,6 @@
 #' @import igraph
 #' @importFrom grDevices dev.off png
 #' @importFrom graphics legend title
-#' @export graph.diffuseP1Movie
 #' @keywords generative methods
 #' @keywords diffusion event
 #' @keywords network walker

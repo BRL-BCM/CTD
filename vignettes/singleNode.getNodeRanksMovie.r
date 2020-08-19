@@ -16,7 +16,6 @@
 #' @import igraph
 #' @importFrom grDevices dev.off png
 #' @importFrom graphics legend title
-#' @export singleNode.getNodeRanksMovie
 #' @examples
 #' # Read in any network via its adjacency matrix
 #' # 7 node example network from Thistlethwaite et al., 2020.

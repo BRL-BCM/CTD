@@ -2,12 +2,13 @@
 % Please edit documentation in R/data.imputeData.r
 \name{data.imputeData}
 \alias{data.imputeData}
-\title{Impute missing values as lowest observed value.}
+\title{Impute missing values as lowest observed value in a reference population.}
 \usage{
 data.imputeData(data, ref)
 }
 \arguments{
-\item{data}{- Normalized, imputed data. Data matrix with observations as rows, features as columns.}
+\item{data}{- Normalized, imputed data. Data matrix with observations as 
+rows, features as columns.}
 
 \item{ref}{- Reference samples normalized, imputed data.}
 }
@@ -15,5 +16,19 @@ data.imputeData(data, ref)
 imputed.data - Z-transformed data.
 }
 \description{
-Impute missing values as lowest observed value.
+Impute missing values as lowest observed value in a reference population.
+}
+\examples{
+data(Thistlethwaite2020)
+data_mx = Thistlethwaite2020
+# Data with missing values
+dt_w_missing_vals = data_mx[,-seq_len(8)]
+# Reference data can also have missing values
+ref_data = data_mx[,grep("EDTA-REF", colnames(data_mx))]
+fil.rate = apply(ref_data, 1, function(i) sum(is.na(i))/length(i))
+# Can only impute data that are found in reference samples
+dt_w_missing_vals = dt_w_missing_vals[which(fil.rate<1.0),]
+ref_data = ref_data[which(fil.rate<1.0),]
+imputed.data = data.imputeData(dt_w_missing_vals, ref_data)
+print(any(is.na(imputed.data)))
 }

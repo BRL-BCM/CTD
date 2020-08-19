@@ -4,8 +4,15 @@
 \alias{graph.diffuseP1}
 \title{Diffuse Probability P1 from a starting node.}
 \usage{
-graph.diffuseP1(p1, startNode, G, visitedNodes, thresholdDiff, adj_mat,
-  verbose = FALSE)
+graph.diffuseP1(
+  p1,
+  startNode,
+  G,
+  visitedNodes,
+  thresholdDiff,
+  adj_mat,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{p1}{- The probability being dispersed from the starting node, startNode, which is preferentially distributed 
@@ -34,8 +41,8 @@ Recursively diffuse probability from a starting node based on the connectivity o
 \examples{
 # Read in any network via its adjacency matrix
 adj_mat=matrix(1, nrow=100, ncol=100)
-for (i in 1:100) {for (j in 1:100){adj_mat[i, j]=rnorm(1, mean=0, sd=1)} }
-colnames(adj_mat)=sprintf("Metabolite\%d", 1:100)
+for (i in seq_len(100)) {for (j in seq_len(100)){adj_mat[i, j]=rnorm(1, mean=0, sd=1)} }
+colnames(adj_mat)=sprintf("Metabolite\%d", seq_len(100))
 rownames(adj_mat)=colnames(adj_mat)
 G=vector(mode="list", length=ncol(adj_mat))
 names(G)=colnames(adj_mat)

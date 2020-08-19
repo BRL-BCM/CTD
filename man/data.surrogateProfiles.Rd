@@ -4,8 +4,13 @@
 \alias{data.surrogateProfiles}
 \title{Surrogate profiles}
 \usage{
-data.surrogateProfiles(data, std = 1, useMnDiseaseProfile = FALSE,
-  addHealthyControls = TRUE, ref_data = NULL)
+data.surrogateProfiles(
+  data,
+  std = 1,
+  useMnDiseaseProfile = FALSE,
+  addHealthyControls = TRUE,
+  ref_data = NULL
+)
 }
 \arguments{
 \item{data}{- Data matrix with observations (e.g., patient samples) as rows, features 

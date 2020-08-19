@@ -22,11 +22,11 @@ made by the diffusion algorithm trying to find the variables in the encoded subs
 # Get patient bitstrings for the first 2 patients in the Miller et al 2015 dataset.
 data("Miller2015")
 data_mx = Miller2015[-c(1,grep("x - ", rownames(Miller2015))),grep("IEM", colnames(Miller2015))]
-data_mx = apply(data_mx[,c(1:2)], c(1,2), as.numeric)
+data_mx = apply(data_mx[,c(1,2)], c(1,2), as.numeric)
 # Build a dummy metabolite network for all metabolites in data_mx
 adj_mat = matrix(0, nrow=nrow(data_mx), ncol=nrow(data_mx))
-rows = sample(1:ncol(adj_mat), 0.1*ncol(adj_mat))
-cols = sample(1:ncol(adj_mat), 0.1*ncol(adj_mat))
+rows = sample(seq_len(ncol(adj_mat)), 0.1*ncol(adj_mat))
+cols = sample(seq_len(ncol(adj_mat)), 0.1*ncol(adj_mat))
 for (i in rows) {for (j in cols) { adj_mat[i, j] = rnorm(1, mean=0, sd=1)} }
 colnames(adj_mat) = rownames(data_mx)
 rownames(adj_mat) = rownames(data_mx)
@@ -35,14 +35,14 @@ names(G)=colnames(adj_mat)
 # Look at the top 15 metabolites for each patient. 
 kmx=15
 topMets_allpts = c()
-for (pt in 1:ncol(data_mx)) { topMets_allpts = c(topMets_allpts, rownames(data_mx)[order(abs(data_mx[,pt]), decreasing=TRUE)[1:kmx]]) }
+for (pt in seq_len(ncol(data_mx))) { topMets_allpts = c(topMets_allpts, rownames(data_mx)[order(abs(data_mx[,pt]), decreasing=TRUE)[seq_len(kmx)]]) }
 topMets_allpts = unique(topMets_allpts)
 # Pre-compute node ranks for all metabolites in topMets_allpts for faster calculations.
 ranks = multiNode.getNodeRanks(topMets_allpts, G, p1=0.9, thresholdDiff=0.01, adj_mat, log2(length(topMets_allpts)), FALSE) 
 # Store each patient's bitstrings for each size k={1...kmx}.
 ptBSbyK = list()
-for (pt in 1:ncol(data_mx)) {
-  S = rownames(data_mx)[order(abs(data_mx[,pt]), decreasing=TRUE)[1:kmx]]
+for (pt in seq_len(ncol(data_mx))) {
+  S = rownames(data_mx)[order(abs(data_mx[,pt]), decreasing=TRUE)[seq_len(kmx)]]
   ptBSbyK[[pt]] = multiNode.getPtBSbyK(S, ranks)
 }
 }

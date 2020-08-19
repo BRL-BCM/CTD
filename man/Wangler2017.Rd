@@ -4,8 +4,10 @@
 \name{Wangler2017}
 \alias{Wangler2017}
 \title{A metabolomic map of Zellweger spectrum disorders reveals novel disease biomarkers.}
-\format{Wangler2017 - The data matrix (metabolite features are rows, patient observations are columns) for 19 untargeted metabolomics 
-                      patient samples, alongside metabolite annotations.}
+\format{
+Wangler2017 - The data matrix (metabolite features are rows, patient observations are columns) for 19 untargeted metabolomics 
+                      patient samples, alongside metabolite annotations.
+}
 \source{
 \href{https://static-content.springer.com/esm/art:10.1038/gim.2017.262/MediaObjects/41436_2018_207_MOESM2_ESM.xlsx}{Dataset}
 }
@@ -22,7 +24,6 @@ elevations in pipecolic acid and long-chain lysophosphatidylcholines, as well as
 an unanticipated reduction in multiple sphingomyelin species.
 }
 \examples{
-require(CTD)
 data(Wangler2017)
 }
 \references{

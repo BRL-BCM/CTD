@@ -16,7 +16,6 @@
 #' @import igraph
 #' @importFrom grDevices dev.off png
 #' @importFrom graphics legend title
-#' @export multiNode.getNodeRanksMovie
 #' @examples
 #' # 7 node example network from Thistlethwaite et al., 2020.
 #' adj_mat = rbind(c(0,2,1,0,0,0,0), # A

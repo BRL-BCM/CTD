@@ -6,6 +6,7 @@
 #' @return imputed.data - Z-transformed data.
 #' @importFrom stats runif
 #' @export data.imputeData
+#' @examples
 #' data(Thistlethwaite2020)
 #' data_mx = Thistlethwaite2020
 #' # Data with missing values

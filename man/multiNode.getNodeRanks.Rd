@@ -4,8 +4,15 @@
 \alias{multiNode.getNodeRanks}
 \title{Generate the "adaptive walk" node rankings, starting from a given perturbed variable}
 \usage{
-multiNode.getNodeRanks(S, G, p1, thresholdDiff, adj_mat,
-  num.misses = NULL, verbose = FALSE)
+multiNode.getNodeRanks(
+  S,
+  G,
+  p1,
+  thresholdDiff,
+  adj_mat,
+  num.misses = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{S}{- A character vector of the node names for the subset of nodes you want to encode.}
@@ -35,12 +42,12 @@ This function calculates the node rankings starting from a given perturbed varia
 \examples{
 # Read in any network via its adjacency matrix
 adj_mat = matrix(1, nrow=100, ncol=100)
-for (i in 1:100) {for (j in 1:100) {adj_mat[i, j] = rnorm(1, mean=0, sd=1)}}
-colnames(adj_mat) = sprintf("Metabolite\%d", 1:100)
+for (i in seq_len(100)) {for (j in seq_len(100)) {adj_mat[i, j] = rnorm(1, mean=0, sd=1)}}
+colnames(adj_mat) = sprintf("Metabolite\%d", seq_len(100))
 rownames(adj_mat) = colnames(adj_mat)
 G = vector(mode="list", length=ncol(adj_mat))
 names(G) = colnames(adj_mat)
-S = names(G)[1:3]
+S = names(G)[seq_len(3)]
 ranks = multiNode.getNodeRanks(S, G, p1=0.9, thresholdDiff=0.01, adj_mat)
 }
 \keyword{algorithm}

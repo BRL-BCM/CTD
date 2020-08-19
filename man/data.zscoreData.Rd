@@ -12,8 +12,17 @@ data.zscoreData(data, ref)
 \item{ref}{- Reference samples normalized, imputed data.}
 }
 \value{
-zscore.data - Z-transformed data.
+zscored.data - Z-transformed data.
 }
 \description{
 Z-transform normalized, imputed metabolomics data
+}
+\examples{
+dis_data = matrix(rexp(500), ncol=100)
+rownames(dis_data) = sprintf("Feature\%d", seq_len(nrow(dis_data)))
+colnames(dis_data) = sprintf("Sample\%d", seq_len(ncol(dis_data)))
+ref_data = matrix(rexp(500), ncol=100)
+rownames(ref_data) = sprintf("Feature\%d", seq_len(nrow(ref_data)))
+colnames(ref_data) = sprintf("Sample\%d", seq_len(ncol(ref_data)))
+zscored.data = data.zscoreData(dis_data, ref_data)
 }
