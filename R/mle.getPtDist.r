@@ -94,9 +94,9 @@ mle.getPtDist = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, ranks, p1, th
 
   if (is.null(ranks)) {
     # Using the single-node network walker, get optimal bitstring for encoding of patient1's union patient2's subsets
-    p1.sig.nodes = sapply(names(sort(abs(data_mx[,ptID]), decreasing = TRUE)[1:length(p1.optBS)]), trimws)
-    p2.sig.nodes = sapply(names(sort(abs(data_mx[,ptID2]), decreasing = TRUE)[1:length(p2.optBS)]), trimws)
-    p12.sig.nodes = as.character(sapply(unique(c(p1.sig.nodes, p2.sig.nodes)), trimws))
+    p1.sig.nodes = vapply(names(sort(abs(data_mx[,ptID]), decreasing = TRUE)[1:length(p1.optBS)]), trimws)
+    p2.sig.nodes = vapply(names(sort(abs(data_mx[,ptID2]), decreasing = TRUE)[1:length(p2.optBS)]), trimws)
+    p12.sig.nodes = as.character(vapply(unique(c(p1.sig.nodes, p2.sig.nodes)), trimws))
     ranks = list()
     for (i in 1:length(p12.sig.nodes)) {
       ind = which(names(G)==p12.sig.nodes[i])
@@ -117,7 +117,7 @@ mle.getPtDist = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, ranks, p1, th
         p2.sig.nodes_k = unique(c(p2.sig.nodes_k, p2.sig.nodes_cpy[1]))
         p2.sig.nodes_cpy = p2.sig.nodes_cpy[-1]
       }
-      p12.sig.nodes_k = sapply(unique(c(p1.sig.nodes_k, p2.sig.nodes_k)), trimws)
+      p12.sig.nodes_k = vapply(unique(c(p1.sig.nodes_k, p2.sig.nodes_k)), trimws)
       p12.optBS = singleNode.getPtBSbyK(p12.sig.nodes_k, ranks)
       res = mle.getEncodingLength(p12.optBS, NULL, NULL, G)
       p12.e[k] = res[which.max(res[,"d.score"]), "IS.alt"] + log2(choose(length(G), 1))*(length(p12.sig.nodes_k)-which.max(res[,"d.score"]))
@@ -143,7 +143,7 @@ mle.getPtDist = function(p1.optBS, ptID, p2.optBS, ptID2, data_mx, ranks, p1, th
         p2.sig.nodes_k = unique(c(p2.sig.nodes_k, p2.sig.nodes_cpy[1]))
         p2.sig.nodes_cpy = p2.sig.nodes_cpy[-1]
       }
-      p12.sig.nodes_k = sapply(unique(c(p1.sig.nodes_k, p2.sig.nodes_k)), trimws)
+      p12.sig.nodes_k = vapply(unique(c(p1.sig.nodes_k, p2.sig.nodes_k)), trimws)
       p12.optBS = singleNode.getPtBSbyK(p12.sig.nodes_k, ranks)
       res = mle.getEncodingLength(p12.optBS, NULL, NULL, G)
       p12.e[k] = res[which.max(res[,"d.score"]), "IS.alt"] + log2(choose(length(G), 1))*(length(p12.sig.nodes_k)-which.max(res[,"d.score"]))

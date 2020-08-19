@@ -14,6 +14,5 @@
 #' @source \href{https://genboree.org/Metabolomics-Data-Portal/}{Dataset}
 #'
 #' @examples
-#' require(CTD)
 #' data(Thistlethwaite2020)
 "Thistlethwaite2020"

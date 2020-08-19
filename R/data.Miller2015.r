@@ -23,6 +23,5 @@
 #' @source \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4626538/bin/10545_2015_9843_MOESM1_ESM.xls}{Dataset}
 #'
 #' @examples
-#' require(CTD)
 #' data(Miller2015)
 "Miller2015"

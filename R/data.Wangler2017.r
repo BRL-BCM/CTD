@@ -20,6 +20,5 @@
 #' @source \href{https://static-content.springer.com/esm/art:10.1038/gim.2017.262/MediaObjects/41436_2018_207_MOESM2_ESM.xlsx}{Dataset}
 #'
 #' @examples
-#' require(CTD)
 #' data(Wangler2017)
 "Wangler2017"
