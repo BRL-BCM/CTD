@@ -37,7 +37,7 @@
 #' colnames(adj_mat) = c("A", "B", "C", "D", "E", "F", "G")
 #' ig = graph.adjacency(as.matrix(adj_mat), mode="undirected", weighted=TRUE)
 #' G=vector(mode="list", length=7)
-#' G[1:length(G)] = 0
+#' G[seq_len(length(G))] = 0
 #' names(G) = c("A", "B", "C", "D", "E", "F", "G")
 #' startNode = "A"
 #' visitedNodes = startNode
@@ -76,9 +76,9 @@ graph.diffuseP1Movie = function(p1, startNode, G, visitedNodes, ig, recursion_le
     connectionsYes = connections[which(abs(connections) > 0)]
     connectionsNo = connections[intersect(which(connections == 0), which(!(names(connections) %in% c(startNode, vN))))]
     if (length(connectionsNo) > 0) {
-      for (n1 in 1:length(connectionsNo)) {
+      for (n1 in seq_len(length(connectionsNo))) {
         if (length(connectionsYes) > 0) {
-          for (n2 in 1:length(connectionsYes)) {
+          for (n2 in seq_len(length(connectionsYes))) {
             if (abs(adj_mat[names(connectionsYes[n2]), names(connectionsNo[n1])]) > 0) {
               connectionsNo[n1] = adj_mat[names(connectionsYes[n2]), names(connectionsNo[n1])]
               extendedConnections = c(extendedConnections, connectionsNo[n1])

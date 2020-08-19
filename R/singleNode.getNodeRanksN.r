@@ -22,8 +22,8 @@
 #' data_mx = apply(data_mx, c(1,2), as.numeric)
 #' # Build an adjacency matrix for network G
 #' adj_mat = matrix(0, nrow=nrow(data_mx), ncol=nrow(data_mx))
-#' rows = sample(1:ncol(adj_mat), 0.1*ncol(adj_mat))
-#' cols = sample(1:ncol(adj_mat), 0.1*ncol(adj_mat))
+#' rows = sample(seq_len(ncol(adj_mat)), 0.1*ncol(adj_mat))
+#' cols = sample(seq_len(ncol(adj_mat)), 0.1*ncol(adj_mat))
 #' for (i in rows) {for (j in cols) { adj_mat[i, j] = rnorm(1, mean=0, sd=1)} }
 #' colnames(adj_mat) = rownames(data_mx)
 #' rownames(adj_mat) = rownames(data_mx)
@@ -51,7 +51,7 @@ singleNode.getNodeRanksN = function(n, G, p1, thresholdDiff, adj_mat, S=NULL, nu
   current_node_set = c(current_node_set, startNode)
   while (stopIterating==FALSE) {
     # Clear probabilities
-    currentGraph[1:length(currentGraph)] = 0 #set probabilities of all nodes to 0
+    currentGraph[seq_len(length(currentGraph))] = 0 #set probabilities of all nodes to 0
     #determine base p0 probability
     baseP = p0/(length(currentGraph)-length(current_node_set))
     #set probabilities of unseen nodes to baseP

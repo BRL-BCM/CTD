@@ -50,15 +50,15 @@ data.surrogateProfiles = function(data, std=1, useMnDiseaseProfile=FALSE, addHea
     }
     data_surr = matrix(NA, nrow=nrow(data), ncol=ncol(data)+ncol(data)*rpt)
     c_col = ncol(data)+1
-    for (pt in 1:ncol(data)) {
+    for (pt in seq_len(ncol(data))) {
       data_surr[,pt] = data[,pt]
-      for (rrpt in 1:rpt) {
+      for (rrpt in seq_len(rpt)) {
         rr = rnorm(nrow(data), mean=0, sd=std)
         data_surr[,c_col] = as.numeric(data[,pt])+rr
         c_col = c_col+1
       }
     }
-    colnames(data_surr) = c(colnames(data), sprintf("disease_surr%d", 1:(ncol(data_surr)-ncol(data))))
+    colnames(data_surr) = c(colnames(data), sprintf("disease_surr%d", seq_len(ncol(data_surr)-ncol(data))))
     rownames(data_surr) = rownames(data)
     dim(data_surr)
   } else {
@@ -70,15 +70,15 @@ data.surrogateProfiles = function(data, std=1, useMnDiseaseProfile=FALSE, addHea
     }
     data_surr = matrix(NA, nrow=nrow(data), ncol=ncol(data)+ncol(data)*rpt)
     c_col = ncol(data)+1
-    for (pt in 1:ncol(data)) {
+    for (pt in seq_len(ncol(data))) {
       data_surr[,pt] = data[,pt]
-      for (rrpt in 1:rpt) {
+      for (rrpt in seq_len(rpt)) {
         rr = rnorm(nrow(data), mean=0, sd=std)
         data_surr[,c_col] = as.numeric(data[,pt])+rr
         c_col = c_col+1
       }
     }
-    colnames(data_surr) = c(colnames(data), sprintf("disease_surr%d", 1:(ncol(data_surr)-ncol(data))))
+    colnames(data_surr) = c(colnames(data), sprintf("disease_surr%d", seq_len(ncol(data_surr)-ncol(data))))
     rownames(data_surr) = rownames(data)
     dim(data_surr)
   }
@@ -91,19 +91,19 @@ data.surrogateProfiles = function(data, std=1, useMnDiseaseProfile=FALSE, addHea
       rpt = ceiling(nrow(data)/ncol(ref_data)/2)
       control_surr = matrix(NA, nrow=nrow(ref_data), ncol=ncol(ref_data)+ncol(ref_data)*rpt)
       c_col = ncol(ref_data)+1
-      for (pt in 1:ncol(ref_data)) {
+      for (pt in seq_len(ncol(ref_data))) {
         control_surr[,pt] = ref_data[,pt]
-        for (rrpt in 1:rpt) {
+        for (rrpt in seq_len(rpt)) {
           rr = rnorm(nrow(ref_data), mean=0, sd=std)
           control_surr[,c_col] = as.numeric(ref_data[,pt])+rr
           c_col = c_col+1
         }
       }
-      colnames(control_surr) = c(colnames(ref_data), sprintf("control_surr%d", 1:(ncol(control_surr)-ncol(ref_data))))
+      colnames(control_surr) = c(colnames(ref_data), sprintf("control_surr%d", seq_len(ncol(control_surr)-ncol(ref_data))))
       rownames(control_surr) = rownames(ref_data)
       dim(control_surr)
     } else {
-      ind = sample(1:ncol(ref_data), numSurr)
+      ind = sample(seq_len(ncol(ref_data)), numSurr)
       control_surr = ref_data[,ind]
       colnames(control_surr) = colnames(control_surr)[ind]
       rownames(control_surr) = rownames(ref_data)
@@ -116,7 +116,7 @@ data.surrogateProfiles = function(data, std=1, useMnDiseaseProfile=FALSE, addHea
 
   # Remove metabolites that are NA for all samples in data_mx_surr
   rmThese = c()
-  for (r in 1:nrow(data_mx_surr)) {
+  for (r in seq_len(nrow(data_mx_surr))) {
     if (all(is.na(as.numeric(data_mx_surr[rownames(data_mx_surr)[r],])))) {
       rmThese = c(rmThese, r)
     } else {

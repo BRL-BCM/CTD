@@ -357,7 +357,7 @@ type = args[3]
 require(igraph)
 output_dir = sprintf("./diag%s%d", diag, fold)
 str = sprintf("mkdir %s", output_dir)
-system(str) 
+system2(str) 
 
 require(R.utils)
 require(igraph)
@@ -373,8 +373,8 @@ print(sprintf("Total N = %d", totalN))
 
 for (n in 1:totalN) {
   str = sprintf("qsub -v diag=%s,fold=%d,n=%d,type=%s getRanks.pbs", diag, fold, n, type)
-  system(str, wait=FALSE)
-  system("sleep 0.2")
+  system2(str, wait=FALSE)
+  system2("sleep 0.2")
 }
   
 ready=FALSE
@@ -385,15 +385,15 @@ while (!ready) {
   if (length(f)==totalN) {
     ready=TRUE
   } else {
-    system("sleep 20")
-    system("rm *.pbs.*")
+    system2("sleep 20")
+    system2("rm *.pbs.*")
     curr_sum = length(f)
     if (curr_sum > last_sum) {
       last_sum = curr_sum
     } 
   }
 }
-system("rm *.pbs.*")
+system2("rm *.pbs.*")
   
 # collate permutations into one R object
 all_nodes = V(ig)$name
@@ -406,7 +406,7 @@ names(permutationByStartNode) = all_nodes
 save.image(file=sprintf("%sRanks_miller/%s%d-ranks.RData", type, toupper(diag), fold))
 print("collate complete...")
 str = sprintf("rm -r ./diag%s%d", diag, fold)
-system(str)
+system2(str)
 
 #----getRanksN.r----
 require(igraph)
@@ -445,7 +445,7 @@ current_node_set = singleNode.getNodeRanksN(n, G)
 new_dir =  sprintf("./diag%s%d", diag, fold)
 if (!dir.exists(new_dir)) {
   str = sprintf("mkdir %s", new_dir)
-  system(str)
+  system2(str)
 }
 save(current_node_set, file=sprintf("./diag%s%d/%d.RData", diag, fold, n))
 

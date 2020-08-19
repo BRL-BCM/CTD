@@ -2,9 +2,17 @@
 #'
 #' @param data - Normalized, imputed data. Data matrix with observations as rows, features as columns.
 #' @param ref - Reference samples normalized, imputed data.
-#' @return zscore.data - Z-transformed data.
+#' @return zscored.data - Z-transformed data.
 #' @importFrom stats quantile qqnorm lm
 #' @export data.zscoreData
+#' @examples 
+#' dis_data = matrix(rexp(500), ncol=100)
+#' rownames(dis_data) = sprintf("Feature%d", seq_len(nrow(dis_data)))
+#' colnames(dis_data) = sprintf("Sample%d", seq_len(ncol(dis_data)))
+#' ref_data = matrix(rexp(500), ncol=100)
+#' rownames(ref_data) = sprintf("Feature%d", seq_len(nrow(ref_data)))
+#' colnames(ref_data) = sprintf("Sample%d", seq_len(ncol(ref_data)))
+#' zscored.data = data.zscoreData(dis_data, ref_data)
 data.zscoreData = function(data, ref) {
   print("zscoreData() called.")
   
@@ -18,8 +26,8 @@ data.zscoreData = function(data, ref) {
   data = log(data)
   ref = log(data.matrix(ref))
   
-  zscore.data = data
-  for (met in 1:nrow(data)) {
+  zscored.data = data
+  for (met in seq_len(nrow(data))) {
     met_data = as.numeric(ref[met,])
     rmSamples = unique(c(which(is.na(met_data)), which(is.infinite(met_data))))
     if (length(rmSamples)>0) {
@@ -41,9 +49,9 @@ data.zscoreData = function(data, ref) {
       mn.est = as.numeric(t$coefficients[1])
       sd.est = as.numeric(t$coefficients[2])
       rm(d,x,z,df,t)
-      zscore.data[met,] = (data[met, ]-mn.est)/sd.est
+      zscored.data[met,] = (data[met, ]-mn.est)/sd.est
     }
   }
   
-  return(zscore.data)
+  return(zscored.data)
 }

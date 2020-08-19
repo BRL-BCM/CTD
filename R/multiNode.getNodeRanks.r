@@ -19,12 +19,12 @@
 #' @examples
 #' # Read in any network via its adjacency matrix
 #' adj_mat = matrix(1, nrow=100, ncol=100)
-#' for (i in 1:100) {for (j in 1:100) {adj_mat[i, j] = rnorm(1, mean=0, sd=1)}}
-#' colnames(adj_mat) = sprintf("Metabolite%d", 1:100)
+#' for (i in seq_len(100)) {for (j in seq_len(100)) {adj_mat[i, j] = rnorm(1, mean=0, sd=1)}}
+#' colnames(adj_mat) = sprintf("Metabolite%d", seq_len(100))
 #' rownames(adj_mat) = colnames(adj_mat)
 #' G = vector(mode="list", length=ncol(adj_mat))
 #' names(G) = colnames(adj_mat)
-#' S = names(G)[1:3]
+#' S = names(G)[seq_len(3)]
 #' ranks = multiNode.getNodeRanks(S, G, p1=0.9, thresholdDiff=0.01, adj_mat)
 multiNode.getNodeRanks = function(S, G, p1, thresholdDiff, adj_mat, num.misses=NULL, verbose=FALSE) {
   p0 = 1-p1
@@ -32,7 +32,7 @@ multiNode.getNodeRanks = function(S, G, p1, thresholdDiff, adj_mat, num.misses=N
     num.misses = log2(length(G))
   }
   ranks = list()
-  for (n in 1:length(S)) {
+  for (n in seq_len(length(S))) {
     if (verbose) {
       print(sprintf("Calculating node rankings %d of %d.", n, length(S)))
     }
@@ -45,9 +45,9 @@ multiNode.getNodeRanks = function(S, G, p1, thresholdDiff, adj_mat, num.misses=N
     while (stopIterating==FALSE) {
       sumHits = as.vector(matrix(0, nrow=length(G), ncol=1))
       names(sumHits) = names(G)
-      for (hit in 1:length(hits)) {
+      for (hit in seq_len(length(hits))) {
         #Clear probabilities.
-        G[1:length(G)] = 0
+        G[seq_len(length(G))] = 0
         #determine base p0 probability
         baseP = p0/(length(G)-length(current_node_set))
         #set probabilities of unseen nodes to diffused p0 value, baseP

@@ -15,6 +15,9 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE, fig.align="center")
 require(CTD)
 require(huge)
+source("graph.diffuseP1Movie.r")
+source("multiNode.getNodeRanksMovie.r")
+source("singleNode.getNodeRanksMovie.r")
 ```
 This document was rendered at `r Sys.time()`
 
@@ -188,7 +191,7 @@ print(ig)
 adjacency_matrix = list(adj_mat)
 
 # Generate PNGs to animate the multi-node encoding node ranks.
-ranks = multiNode.getNodeRanksMovie(subset.nodes = c("A", "B"), ig, output_filepath = sprintf("%s/images", getwd()), movie=TRUE, zoomIn = FALSE)
+ranks = multiNode.getNodeRanksMovie(subset.nodes = c("A", "B"), ig, output_filepath = sprintf("%s/images", getwd()), zoomIn = FALSE)
 
 # Get node ranks as list object, with no images generated
 ranks = multiNode.getNodeRanks(S = c("A", "B"), G)

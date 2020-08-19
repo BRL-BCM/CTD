@@ -19,8 +19,8 @@
 #' @examples
 #' # Read in any network via its adjacency matrix
 #' adj_mat=matrix(1, nrow=100, ncol=100)
-#' for (i in 1:100) {for (j in 1:100){adj_mat[i, j]=rnorm(1, mean=0, sd=1)} }
-#' colnames(adj_mat)=sprintf("Metabolite%d", 1:100)
+#' for (i in seq_len(100)) {for (j in seq_len(100)){adj_mat[i, j]=rnorm(1, mean=0, sd=1)} }
+#' colnames(adj_mat)=sprintf("Metabolite%d", seq_len(100))
 #' rownames(adj_mat)=colnames(adj_mat)
 #' G=vector(mode="list", length=ncol(adj_mat))
 #' names(G)=colnames(adj_mat)
@@ -42,9 +42,9 @@ graph.diffuseP1=function (p1, startNode, G, visitedNodes, thresholdDiff, adj_mat
     connectionsYes=connections[which(abs(connections)>0)]
     connectionsNo=connections[intersect(which(connections==0), which(!(names(connections) %in% c(startNode, vN))))]
     if (length(connectionsNo)>0) {
-      for (n1 in 1:length(connectionsNo)) {
+      for (n1 in seq_len(length(connectionsNo))) {
         if (length(connectionsYes)>0) {
-          for (n2 in 1:length(connectionsYes)) {
+          for (n2 in seq_len(length(connectionsYes))) {
             if (abs(adj_mat[names(connectionsYes[n2]), names(connectionsNo[n1])])>0) {
               connectionsNo[n1]=adj_mat[names(connectionsYes[n2]), names(connectionsNo[n1])]
               extendedConnections=c(extendedConnections, connectionsNo[n1])

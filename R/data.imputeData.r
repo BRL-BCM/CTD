@@ -1,10 +1,23 @@
-#' Impute missing values as lowest observed value.
+#' Impute missing values as lowest observed value in a reference population.
 #'
-#' @param data - Normalized, imputed data. Data matrix with observations as rows, features as columns.
+#' @param data - Normalized, imputed data. Data matrix with observations as 
+#'               rows, features as columns.
 #' @param ref - Reference samples normalized, imputed data.
 #' @return imputed.data - Z-transformed data.
 #' @importFrom stats runif
 #' @export data.imputeData
+#' data(Thistlethwaite2020)
+#' data_mx = Thistlethwaite2020
+#' # Data with missing values
+#' dt_w_missing_vals = data_mx[,-seq_len(8)]
+#' # Reference data can also have missing values
+#' ref_data = data_mx[,grep("EDTA-REF", colnames(data_mx))]
+#' fil.rate = apply(ref_data, 1, function(i) sum(is.na(i))/length(i))
+#' # Can only impute data that are found in reference samples
+#' dt_w_missing_vals = dt_w_missing_vals[which(fil.rate<1.0),]
+#' ref_data = ref_data[which(fil.rate<1.0),]
+#' imputed.data = data.imputeData(dt_w_missing_vals, ref_data)
+#' print(any(is.na(imputed.data)))
 data.imputeData = function(data, ref) {
   data = data[which(rownames(data) %in% rownames(ref)),]
   ref = ref[which(rownames(ref) %in% rownames(data)),]
@@ -12,23 +25,28 @@ data.imputeData = function(data, ref) {
   ref = ref[sort(rownames(ref)),]
   
   imputed.data = data
-  for (met in 1:nrow(ref)) {
+  for (met in seq_len(nrow(ref))) {
     rowData = ref[met,]
     if (any(is.na(rowData))) {
       rowData = as.numeric(rowData[-which(is.na(rowData))])
     } else {
       rowData = as.numeric(rowData)
     }
-    # Impute using uniform random variable, where a = 0.99*observed minimum, and b = observed minimum
+    # Impute using uniform random variable, where 
+    # a = 0.99*observed minimum, and b = observed minimum
     min_row = min(rowData)
+    cols = which(is.na(data[met,]))
     if (min_row<0) {
       min_row = -1*min_row
-      imputed.data[met, is.na(data[met,])] = tryCatch(-1*runif(sum(is.na(data[met,])), min = 0.99*min_row, max= min_row), 
-                                                      error = function(e) e, warning=function(w) print(sprintf("%s: met%d", w, met)))
+      i_val = -1
     } else {
-      imputed.data[met, is.na(data[met,])] = tryCatch(runif(sum(is.na(data[met,])), min = 0.99*min(rowData), max= min(rowData)), 
-                                                      error = function(e) e, warning=function(w) print(sprintf("%s: met%d", w, met)))
+      i_val = 1
     }
+    imputed.data[met,cols] = tryCatch(i_val*runif(length(cols), 
+                                            min = 0.99*min_row, 
+                                            max= min_row), 
+                                      error = function(e) e,
+                                      warning=function(w) w)
   }
   return(imputed.data)
 }

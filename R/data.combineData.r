@@ -1,28 +1,37 @@
 #' Combine datasets from different source files.
 #'
-#' @param data - Normalized, imputed data. Data matrix with observations as rows, features as columns.
-#' @param ref - Reference samples normalized, imputed data.
-#' @return combined.data - Z-transformed data.
+#' @param curr_data - Current data matrix
+#' @param more_data - Data matrix you want to combine with curr_data.
+#' @return combined.data - Combined data matrix.
 #' @export data.combineData
-data.combineData = function(ref, data) {
-  ref = as.matrix(ref)
-  data = as.matrix(data)
+#' @examples 
+#' # Row names and column names are required for both curr_data and data input matrices.
+#' curr_data = matrix(rnorm(500), ncol=100)
+#' rownames(curr_data) = sprintf("Feature%d", sample(seq_len(20), nrow(curr_data), replace = FALSE))
+#' colnames(curr_data) = sprintf("Sample%d", seq_len(ncol(curr_data)))
+#' more_data = matrix(rnorm(500), ncol=100)
+#' rownames(more_data) = sprintf("Feature%d", sample(seq_len(20), nrow(curr_data), replace = FALSE))
+#' colnames(more_data) = sprintf("Sample%d", seq_len(ncol(curr_data)))
+#' combined.data = data.combineData(curr_data, more_data)
+data.combineData = function(curr_data, more_data) {
+  curr_data = as.matrix(curr_data)
+  more_data = as.matrix(more_data)
   
-  unionMets = unique(c(rownames(ref), rownames(data)))
-  combined.data = matrix(0, nrow=length(unionMets), ncol=ncol(ref)+ncol(data))
+  unionMets = unique(c(rownames(curr_data), rownames(more_data)))
+  combined.data = matrix(0, nrow=length(unionMets), ncol=ncol(curr_data)+ncol(more_data))
   rownames(combined.data) = unionMets
-  colnames(combined.data) = c(colnames(ref), colnames(data))
-  for (r in 1:length(unionMets)) {
-    if (unionMets[r] %in% rownames(ref)) {
-      combined.data[r,colnames(ref)] = as.numeric(ref[unionMets[r], ])
+  colnames(combined.data) = c(colnames(curr_data), colnames(more_data))
+  for (r in seq_len(length(unionMets))) {
+    if (unionMets[r] %in% rownames(curr_data)) {
+      combined.data[r,colnames(curr_data)] = as.numeric(curr_data[unionMets[r], ])
     } else {
-      combined.data[r,colnames(ref)] = rep(NA, ncol(ref))
+      combined.data[r,colnames(curr_data)] = rep(NA, ncol(curr_data))
     }
     
-    if (unionMets[r] %in% rownames(data)) {
-      combined.data[r,colnames(data)] = as.numeric(data[unionMets[r], ])
+    if (unionMets[r] %in% rownames(more_data)) {
+      combined.data[r,colnames(more_data)] = as.numeric(more_data[unionMets[r], ])
     } else {
-      combined.data[r,colnames(data)] = rep(NA, ncol(data))
+      combined.data[r,colnames(more_data)] = rep(NA, ncol(more_data))
     }
   }
   
