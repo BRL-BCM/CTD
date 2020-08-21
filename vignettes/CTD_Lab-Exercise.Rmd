@@ -6,10 +6,6 @@ output:
   pdf_document:
     toc: yes
     toc_depth: '2'
-  html_document:
-    code_folding: hide
-    toc: yes
-    toc_depth: 2
 editor_options:
   chunk_output_type: console
 ---
@@ -18,7 +14,6 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE, fig.align="center")
 require(CTD)
 require(huge)
-require(igraph)
 ```
 This document was rendered at `r Sys.time()`
 
@@ -49,11 +44,11 @@ print(ig)
 
 ## I.II: Learn a graph from data.
 Note all code chunks in sections I - IV may rely on lines in previous code chunks, so do not empty your environment between code chunks.
-```{r learn_graph, eval=FALSE}
+```{r learn_graph}
 # Load the Miller2015_Heparin dataset
 data(Miller2015)
 # Only include metabolites that are present in >90% reference samples.
-fil.rate = Miller2015$`Times identifed in all 200 samples`/200
+fil.rate = as.numeric(Miller2015$`Times identifed in all 200 samples`)/200
 names(fil.rate) = rownames(Miller2015)
 data_mx = Miller2015[,grep("IEM_", colnames(Miller2015))]
 data_mx = data_mx[which(fil.rate>0.90), ]
@@ -123,12 +118,11 @@ G_new[which.max(G_new)]
 Now, delete all diffusionEventMovie*.png files from your current directory, and run the following code. View the new image stack in the same way we did previously.
 ```{r diffusion_with_visited}
 # Now let's see how the probability diffusion algorithm diffuses probability after B has been "stepped" into.
-p1=1.0
 visitedNodes = c("A", "B")
 startNode = "B"
 .GlobalEnv$imgNum=1
 
-G_new = graph.diffuseP1(p1, startNode, G, visitedNodes, thresholdDiff, adj_mat, TRUE, output_dir = sprintf("%s/images", getwd()), 1, coords)
+G_new = graph.diffuseP1(p1=1.0, startNode, G, visitedNodes, thresholdDiff=0.01, adj_mat, TRUE, output_dir = sprintf("%s/images", getwd()), 1, coords)
 # Inherited probabilities across all nodes should add to 1.
 sum(unlist(G_new))
 # Which node inherited the highest probability from startNode?
@@ -159,7 +153,7 @@ print(ig)
 visitedNodes = c("B", "C", "A")
 startNode = "A"
 .GlobalEnv$imgNum = 1
-G_new = graph.diffuseP1(p1, startNode, G, visitedNodes, thresholdDiff, adj_mat, TRUE, output_dir = sprintf("%s/images", getwd()), 1, coords)
+G_new = graph.diffuseP1(p1=1.0, startNode, G, visitedNodes, thresholdDiff=0.01, adj_mat, TRUE, output_dir = sprintf("%s/images", getwd()), 1, coords)
 # Inherited probabilities across all nodes should add to 1.
 sum(unlist(G_new))
 # Which node inherited the highest probability from startNode?
@@ -192,10 +186,10 @@ coords = layout.fruchterman.reingold(ig)
 print(ig)
 
 # Generate PNGs to animate the multi-node encoding node ranks.
-ranks = multiNode.getNodeRanks(S = c("A", "B"), G, p1, thresholdDiff, adj_mat, log2(length(G)), FALSE, output_dir = sprintf("%s/images", getwd()), TRUE, coords)
+ranks = multiNode.getNodeRanks(S = c("A", "B"), G, p1=1.0, thresholdDiff=0.01, adj_mat, log2(length(G)), FALSE, output_dir = sprintf("%s/images", getwd()), TRUE, coords)
 
 # Get node ranks as list object, with no images generated
-ranks = multiNode.getNodeRanks(S = c("A", "B"), G, p1, thresholdDiff, adj_mat, log2(length(G)), FALSE)
+ranks = multiNode.getNodeRanks(S = c("A", "B"), G, p1=1.0, thresholdDiff=0.01, adj_mat, log2(length(G)), FALSE)
 ```
 
 ## III.II Single-Node Diffusion Encoding
@@ -204,12 +198,12 @@ ranks = multiNode.getNodeRanks(S = c("A", "B"), G, p1, thresholdDiff, adj_mat, l
 # walker is not parameterized by the subset being encoded, you can pre-compute node rankings
 # using dynamic programming. Pre-computing node ranks enables quick encoding of thousands of subsets
 # at a time (see The Encoding Process).
-
+S = c("A", "B")
 # Generate PNGs to animate the single-node encoding node ranks.
 ranks = list()
 for (n in seq_len(length(S))) {
   ind = which(names(G)==S[n])
-  ranks[[n]] = singleNode.getNodeRanksN(ind, G, p1, thresholdDiff, adj_mat, S = c("A", "B"), 
+  ranks[[n]] = singleNode.getNodeRanksN(ind, G, p1=1.0, thresholdDiff=0.01, adj_mat, S = S, 
                                         num.misses = log2(length(G)), FALSE, 
                                         output_dir=sprintf("%s/images", getwd()), TRUE, coords)
 }
@@ -220,7 +214,7 @@ S = c("A", "B")
 ranks = list()
 for (n in 1:length(S)) {
   ind = which(names(G)==S[n])
-  ranks[[n]] = singleNode.getNodeRanksN(ind, G, p1, thresholdDiff, adj_mat, S = c("A", "B"), 
+  ranks[[n]] = singleNode.getNodeRanksN(ind, G, p1=1.0, thresholdDiff=0.01, adj_mat, S = S, 
                                         num.misses = log2(length(G)), FALSE)
 }
 names(ranks) = S
@@ -254,7 +248,7 @@ print(S_arg)
 ranks = list()
 for (n in 1:length(S_arg)) {
   ind = which(names(G)==names(S_arg)[n])
-  ranks[[n]] = singleNode.getNodeRanksN(ind, G, p1, thresholdDiff, adj_mat, S = names(S_arg), 
+  ranks[[n]] = singleNode.getNodeRanksN(ind, G, p1=1.0, thresholdDiff=0.01, adj_mat, S = names(S_arg), 
                                         num.misses = log2(length(G)), TRUE)
 }
 names(ranks) = names(S_arg)
@@ -306,7 +300,7 @@ names(which(ptBSbyK[[ind.mx]]==1)) # just the F metabolites that are in S_arg th
 
 
 # V. Patient Distances, Single-Node Encoding Recommended
-```{r patient_distances, eval=FALSE}
+```{r patient_distances}
 data_mx = arg_data[,which(colnames(arg_data) %in% names(diags))]
 data_mx = data_mx[,1:8]
 S_arg = c()
@@ -321,7 +315,7 @@ ranks = list()
 for (n in 1:length(S_arg)) {
   print(sprintf("Calculating node ranks for perturbed metabolite %d/%d across %d patients.", n, length(S_arg), ncol(data_mx)))
   ind = which(names(G)==S_arg[n])
-  ranks[[n]] = singleNode.getNodeRanksN(ind, G, p1, thresholdDiff, adj_mat, S = S_arg, 
+  ranks[[n]] = singleNode.getNodeRanksN(ind, G, p1=1.0, thresholdDiff=0.01, adj_mat, S = S_arg, 
                                         num.misses = log2(length(G)), TRUE)
 }
 names(ranks) = S_arg
@@ -345,14 +339,13 @@ for (pt in 1:ncol(data_mx)) {
     print(sprintf("Patient %d.", pt2))
     ptID2=colnames(data_mx)[pt2]
     # Because we pre-computed node ranks for all perturbed metabolites across our 8 patients, this will complete very quickly.
-    tmp = mle.getPtDist(ptBSbyK[[ptID]], ptID, ptBSbyK[[ptID2]], ptID2, data_mx, ranks, p1, thresholdDiff, adj_mat)
+    tmp = mle.getPtDist(ptBSbyK[[ptID]], ptID, ptBSbyK[[ptID2]], ptID2, data_mx, ranks, p1=1.0, thresholdDiff=0.01, adj_mat)
     for (k in 1:kmx) {
       res[[k]]$ncd[ptID, ptID2] = tmp$NCD[k]
       res[[k]]$ncd[ptID2, ptID] = tmp$NCD[k]
     }
   }
 }
-res_all = res
 
 ```
 
@@ -466,18 +459,18 @@ plot.knnDist = function(patientDist, diagnoses, k, diag, path) {
 }
 
 # if you have diagnostic labels associated with the colnames(data_mx), send them using diagnoses parameter
-res_ncd = lapply(res_all, function(i) i$ncd)
+res_ncd = lapply(res, function(i) i$ncd)
 ncd = mle.getMinPtDistance(res_ncd)
 dd = colnames(data_mx)
 dd[which(dd %in% names(diags)[which(diags=="Argininemia")])] = "ARG"
 dd[which(dd %in% names(diags)[which(diags!="Argininemia")])] = "negCntl"
-names(dd) = colnames(res_all[[1]]$ncd)
+names(dd) = colnames(res[[1]]$ncd)
 
 require(plotly)
 require(gplots)
 require(RColorBrewer)
-colnames(ncd) = colnames(res_all[[1]]$ncd)
-rownames(ncd) = colnames(res_all[[1]]$ncd)
+colnames(ncd) = colnames(res[[1]]$ncd)
+rownames(ncd) = colnames(res[[1]]$ncd)
 p = plot.mdsDist(ncd, dd, k=2, NULL)
 p 
 # Hierarchical clustering
