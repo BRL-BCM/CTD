@@ -46,7 +46,10 @@ graph.takeDiffusionSnapShot = function(adj_mat, G, output_dir, p1, startNode, vi
   
   V(ig)$color = rep("blue", length(G))
   V(ig)$color[which(V(ig)$name %in% visitedNodes)] = "red"
-  V(ig)$label = sprintf("%s:%.2f", V(ig)$name, G)
+  vals = rep(0, length(V(ig)$name))
+  names(vals) = V(ig)$name
+  vals[which(names(vals) %in% names(G))] = G
+  V(ig)$label = sprintf("%s:%.2f", V(ig)$name, vals)
   png(sprintf("%s/diffusionP1Movie%d.png", output_dir, .GlobalEnv$imgNum), 500, 500)
   plot.igraph(ig, layout=coords, vertex.color=V(ig)$color,
               vertex.label=V(ig)$label, vertex.label.dist = 3, edge.width=5*abs(E(ig)$weight),

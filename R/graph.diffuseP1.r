@@ -34,8 +34,10 @@
 #'                                     thresholdDiff=0.01, adj_mat, TRUE)
 #' # Make a movie of the diffusion of probability from startNode
 #' .GlobalEnv$imgNum = 1
+#' ig = graph.adjacency(adj_mat, mode="undirected", weighted=TRUE, add.colnames = "name")
+#' coords = layout.fruchterman.reingold(ig)
 #' probs_afterCurrDraw=graph.diffuseP1(p1=1.0, startNode=names(G)[1], G=G[1], visitedNodes=names(G)[1], 
-#'                                     thresholdDiff=0.01, adj_mat, TRUE, getwd(), 1, 1)
+#'                                     thresholdDiff=0.01, adj_mat, TRUE, getwd(), 1, coords)
 graph.diffuseP1=function (p1, startNode, G, visitedNodes, thresholdDiff, adj_mat, verbose=FALSE, 
                           output_dir="", recursion_level=1, coords=NULL) {
   if (verbose==TRUE) {
