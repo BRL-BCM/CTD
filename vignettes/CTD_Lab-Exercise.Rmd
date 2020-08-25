@@ -2,12 +2,7 @@
 title: "CTD Lab Exercise"
 author: "Lillian Thistlethwaite"
 date: "3/6/2019"
-output:
-  pdf_document:
-    toc: yes
-    toc_depth: '2'
-editor_options:
-  chunk_output_type: console
+output: pdf_document
 ---
   
 ```{r setup, include=FALSE}
@@ -20,7 +15,7 @@ This document was rendered at `r Sys.time()`
 # I. Generate background knowledge graph.
 
 ## I.I: Manually build graphs from adjacency matrices.
-![Figure 1. Cartoon of graph we will build manually via its adjacency matrix.](images/probability_diffusion.svg){width=350px}
+![Figure 1. Cartoon of graph we will build manually via its adjacency matrix.](images/probability_diffusion.png){width=350px}
 
 ```{r manually_build_graph}
 adj_mat = rbind(c(0,3,1,0,0,0,0,0,0), #A's neighbors

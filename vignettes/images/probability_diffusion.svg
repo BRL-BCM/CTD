@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 24.2.3, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 159.6 146.2" style="enable-background:new 0 0 159.6 146.2;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:none;stroke:#000000;stroke-width:3;stroke-miterlimit:10;}
+	.st1{fill:none;stroke:#000000;stroke-width:2;stroke-miterlimit:10;}
+	.st2{fill:none;stroke:#000000;stroke-miterlimit:10;}
+	.st3{fill:none;stroke:#000000;stroke-width:0.75;stroke-miterlimit:10;}
+	.st4{fill:#ED1C24;stroke:#000000;stroke-miterlimit:10;}
+	.st5{fill:#58595B;stroke:#000000;stroke-miterlimit:10;}
+	.st6{fill:#414042;stroke:#000000;stroke-miterlimit:10;}
+	.st7{fill:#808285;stroke:#000000;stroke-miterlimit:10;}
+	.st8{fill:#939598;stroke:#000000;stroke-miterlimit:10;}
+	.st9{fill:#6D6E71;stroke:#000000;stroke-miterlimit:10;}
+	.st10{fill:#E6E7E8;stroke:#000000;stroke-miterlimit:10;}
+	.st11{fill:#BCBEC0;stroke:#000000;stroke-miterlimit:10;}
+	.st12{fill:#F1F2F2;stroke:#000000;stroke-miterlimit:10;}
+	.st13{fill:url(#SVGID_1_);stroke:#000000;stroke-width:0.75;stroke-miterlimit:10;}
+	.st14{font-family:'ArialMT';}
+	.st15{font-size:12px;}
+	.st16{font-size:8px;}
+	.st17{fill:#FFF200;stroke:#000000;stroke-width:0.75;stroke-miterlimit:10;}
+	.st18{font-family:'MyriadPro-Regular';}
+</style>
+<line class="st0" x1="19.8" y1="9.9" x2="27.8" y2="44.2"/>
+<line class="st1" x1="65.1" y1="18.8" x2="97.6" y2="41.9"/>
+<line class="st2" x1="59.3" y1="64.4" x2="97.6" y2="41.9"/>
+<line class="st2" x1="19.8" y1="9.9" x2="65.1" y2="18.8"/>
+<line class="st1" x1="27.8" y1="44.2" x2="65.1" y2="18.8"/>
+<line class="st1" x1="59.3" y1="64.4" x2="27.8" y2="44.2"/>
+<line class="st1" x1="98.8" y1="41.9" x2="132.4" y2="15.6"/>
+<line class="st2" x1="59.3" y1="64.4" x2="113.7" y2="96.2"/>
+<line class="st3" x1="65.1" y1="115.4" x2="113.7" y2="96.2"/>
+<line class="st3" x1="150.6" y1="135.6" x2="113.7" y2="96.2"/>
+<line class="st1" x1="98.8" y1="41.9" x2="113.7" y2="96.2"/>
+<line class="st2" x1="59.3" y1="64.4" x2="65.1" y2="115.4"/>
+<circle class="st4" cx="19.8" cy="9.9" r="5.8"/>
+<circle class="st5" cx="65.1" cy="18.8" r="5.8"/>
+<circle class="st6" cx="27.8" cy="44.2" r="5.8"/>
+<circle class="st7" cx="97.6" cy="41.9" r="5.8"/>
+<circle class="st8" cx="132.4" cy="15.6" r="5.8"/>
+<circle class="st9" cx="59.3" cy="64.4" r="5.8"/>
+<circle class="st10" cx="65.1" cy="115.4" r="5.8"/>
+<circle class="st11" cx="113.7" cy="96.2" r="5.8"/>
+<circle class="st12" cx="149.3" cy="135.6" r="5.8"/>
+<linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="-267.3523" y1="-73.2434" x2="-206.3523" y2="-73.2434" gradientTransform="matrix(0 -1 -1 0 -34.4434 -131.2523)">
+	<stop  offset="0" style="stop-color:#FFFFFF"/>
+	<stop  offset="1" style="stop-color:#000000"/>
+</linearGradient>
+<polygon class="st13" points="45.8,75.1 45.8,136.1 31.8,136.1 31.8,75.1 "/>
+<text transform="matrix(1 0 0 1 6.234 84.6141)" class="st14 st15">High</text>
+<text transform="matrix(1 0 0 1 9.4506 136.0523)" class="st14 st15">Low</text>
+<text transform="matrix(1 0 0 1 42.4554 6.9808)" class="st14 st16">Current node</text>
+<g>
+	<g>
+		<line class="st2" x1="41.1" y1="5.3" x2="25.1" y2="8.7"/>
+		<g>
+			<path d="M19.8,9.9c2.3-1.5,5.1-3.7,6.6-5.8l-0.6,4.5l2.4,3.9C25.9,11.2,22.5,10.3,19.8,9.9z"/>
+		</g>
+	</g>
+</g>
+<polygon class="st17" points="30.5,48.3 27.9,47 25.3,48.4 25.8,45.5 23.7,43.5 26.5,43 27.8,40.4 29.1,43 32,43.4 30,45.4 "/>
+<rect class="st3" width="159.6" height="146.2"/>
+<text transform="matrix(1 0 0 1 5.9891 14.007)" class="st18 st15">A</text>
+<text transform="matrix(1 0 0 1 14.3049 49.854)" class="st18 st15">B</text>
+<text transform="matrix(1 0 0 1 72.8347 20.9129)" class="st18 st15">C</text>
+<text transform="matrix(1 0 0 1 44.7027 72.3431)" class="st18 st15">D</text>
+<text transform="matrix(1 0 0 1 104.6454 48.2696)" class="st18 st15">E</text>
+<text transform="matrix(1 0 0 1 139.3374 15.9887)" class="st18 st15">F</text>
+<text transform="matrix(1 0 0 1 50.1851 122.9528)" class="st18 st15">G</text>
+<text transform="matrix(1 0 0 1 120.0842 98.3321)" class="st18 st15">H</text>
+<text transform="matrix(1 0 0 1 138.925 139.914)" class="st18 st15">I</text>
+</svg>
