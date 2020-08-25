@@ -62,6 +62,7 @@ G=lapply(G, function(i) i[[1]]=0)
 probs_afterCurrDraw=graph.diffuseP1(p1=1.0, startNode=names(G)[1], G=G[1], visitedNodes=names(G)[1], 
                                     thresholdDiff=0.01, adj_mat, TRUE)
 # Make a movie of the diffusion of probability from startNode
+.GlobalEnv$imgNum = 1
 probs_afterCurrDraw=graph.diffuseP1(p1=1.0, startNode=names(G)[1], G=G[1], visitedNodes=names(G)[1], 
                                     thresholdDiff=0.01, adj_mat, TRUE, getwd(), 1, 1)
 }
