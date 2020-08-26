@@ -30,7 +30,7 @@
 #' names(G) = colnames(adj_mat)
 #' S = names(G)[seq_len(3)]
 #' ranks = multiNode.getNodeRanks(S, G, p1=0.9, thresholdDiff=0.01, adj_mat)
-multiNode.getNodeRanks = function(S, G, p1, thresholdDiff, adj_mat, num.misses, verbose=FALSE, output_dir="", useLabels=FALSE, coords=NULL) {
+multiNode.getNodeRanks = function(S, G, p1, thresholdDiff, adj_mat, num.misses=NULL, verbose=FALSE, output_dir="", useLabels=FALSE, coords=NULL) {
   p0 = 1-p1
   if (is.null(num.misses)) { num.misses = log2(length(G)) }
   
