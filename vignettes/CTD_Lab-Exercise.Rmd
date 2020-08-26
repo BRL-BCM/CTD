@@ -3,6 +3,10 @@ title: "CTD Lab Exercise"
 author: "Lillian Thistlethwaite"
 date: "3/6/2019"
 output: pdf_document
+vignette: >
+  %\VignetteIndexEntry{CTD Lab Exercise}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
 ---
   
 ```{r setup, include=FALSE}

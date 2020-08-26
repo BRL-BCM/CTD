@@ -10,7 +10,7 @@ multiNode.getNodeRanks(
   p1,
   thresholdDiff,
   adj_mat,
-  num.misses,
+  num.misses = NULL,
   verbose = FALSE,
   output_dir = "",
   useLabels = FALSE,
