@@ -375,39 +375,8 @@ plot.mdsDist = function(patientDist, diagnoses, k, diag) {
   }
   return(p)
 }
-# Hierarchical clustering
-plot.hmDist = function(patientDist, path, diagnoses=NULL) {
-  if (is.null(diagnoses)) {
-    png(sprintf("%s/ptDistances_hc.png", path), 3000, 1000)
-    heatmap.2(x=patientDist,
-              dendrogram="both",
-              Rowv=TRUE,
-              Colv=TRUE,
-              cexRow=0.75,cexCol=1, margins=c(12,12),
-              trace="none", key=TRUE,
-              col=bluered,
-              notecol="black")
-    dev.off()
-  } else {
-    d = diagnoses
-    png(sprintf("%s/ptDistances_hc.png", path), 3000, 1000)
-    heatmap.2(x=patientDist,
-              dendrogram="both",
-              Rowv=TRUE,
-              Colv=TRUE,
-              ColSideColors = c(brewer.pal(12, "Set3"), brewer.pal(9, "BrBG"))[as.numeric(as.factor(as.character(d)))],
-              RowSideColors = c(brewer.pal(12, "Set3"), brewer.pal(9, "BrBG"))[as.numeric(as.factor(as.character(d)))],
-              cexRow=0.75,cexCol=1, margins=c(12,12),
-              trace="none", key=TRUE,
-              col=bluered,
-              notecol="black")
-    legend("left", legend=unique(sort(as.character(d))), fill=c(brewer.pal(12, "Set3"), brewer.pal(9, "BrBG")), cex=2)
-    dev.off()
-  }
-  return(0)
-}
 # K-nearest neighbors
-plot.knnDist = function(patientDist, diagnoses, k, diag, path) {
+plot.knnDist = function(patientDist, diagnoses, diag) {
   diagnoses = diagnoses[colnames(patientDist)]
   # Add a GREEN edge between patient nodes if k nearest neighbor is correct diagnosis (either TP or TN)
   # Add a RED edge between patient nodes if k nearest neighbor is incorrect diagnosis (either FP or FN)
@@ -450,11 +419,8 @@ plot.knnDist = function(patientDist, diagnoses, k, diag, path) {
   grps[[1]] = names(diagnoses)[which(diagnoses==diag)]
   grps[[2]] = names(diagnoses)[which(diagnoses!=diag)]
   names(grps) = names(table(diagnoses))
-  png(sprintf("%s/ptDistances_knn.png", path), 3000, 1000)
-  plot(ig, mark.groups = grps, mark.col = c("white", "black"), layout=layout.circle, edge.width=3, edge.arrow.size=0.5)
-  dev.off()
   
-  return(0)
+  return(ig)
 }
 
 # if you have diagnostic labels associated with the colnames(data_mx), send them using diagnoses parameter
@@ -473,9 +439,15 @@ rownames(ncd) = colnames(res[[1]]$ncd)
 p = plot.mdsDist(ncd, dd, k=2, NULL)
 p 
 # Hierarchical clustering
-# A PNG image called "ptDistances.png" will save in the path set as parameter "path" in plot.hmDist function call.
-plot.hmDist(ncd, path=getwd(), dd)
+heatmap.2(x=ncd,dendrogram="both", Rowv=TRUE,Colv=TRUE,
+          ColSideColors = c(brewer.pal(12, "Set3"), brewer.pal(9, "BrBG"))[as.numeric(as.factor(as.character(dd)))],
+          RowSideColors = c(brewer.pal(12, "Set3"), brewer.pal(9, "BrBG"))[as.numeric(as.factor(as.character(dd)))],
+          cexRow=0.75,cexCol=1, margins=c(12,12), trace="none", key=TRUE,
+          col=bluered, notecol="black")
+legend("left", legend=unique(sort(as.character(dd))), fill=c(brewer.pal(12, "Set3"), brewer.pal(9, "BrBG")), cex=2)
 
 # K-NN
-plot.knnDist(ncd, dd, diag="ARG", path=getwd())
+ig = plot.knnDist(ncd, dd, diag="ARG")
+plot(ig, mark.groups = grps, mark.col = c("white", "black"), layout=layout.circle, edge.width=3, edge.arrow.size=0.5)
+
 ```

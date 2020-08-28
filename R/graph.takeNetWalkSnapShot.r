@@ -14,7 +14,7 @@
 #'                 an iterator for file naming.
 #' @param useLabels - If TRUE, node names will display next to their respective nodes in the network. If false
 #'                    node names will not display.
-#' @return NULL
+#' @return 0
 #' @export graph.takeNetWalkSnapShot
 #' @import igraph
 #' @importFrom grDevices dev.off png
@@ -55,5 +55,5 @@ graph.takeNetWalkSnapShot = function(adj_mat, G, output_dir, p1, visitedNodes, S
   legend("topright", legend=c("Jackpot Nodes", "Drawn Nodes"), fill=c("green", "dark red"))
   dev.off()
   
-  return(NULL)
+  return(0)
 }

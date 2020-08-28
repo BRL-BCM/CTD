@@ -10,6 +10,5 @@
 #' @keywords datasets
 #'
 #' @examples
-#' require(CTD)
 #' data(cohorts_coded)
 "cohorts_coded"

@@ -11,7 +11,7 @@
 #' @param visitedNodes - A character vector of node names, storing the history of previous draws in the node ranking.
 #' @param recursion_level - The current depth in the call stack caused by a recursive algorithm.
 #' @param coords - The x and y coordinates for each node in the network, to remain static between images.
-#' @return NULL
+#' @return 0
 #' @export graph.takeDiffusionSnapShot
 #' @import igraph
 #' @importFrom grDevices dev.off png
@@ -60,7 +60,7 @@ graph.takeDiffusionSnapShot = function(adj_mat, G, output_dir, p1, startNode, vi
   
   .GlobalEnv$imgNum = .GlobalEnv$imgNum + 1
   
-  return(NULL)
+  return(0)
 }
 
 

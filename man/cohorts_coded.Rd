@@ -16,7 +16,6 @@ data(cohorts_coded)
 Patient sample identifiers mapped to known clinical diagnosis.
 }
 \examples{
-require(CTD)
 data(cohorts_coded)
 }
 \keyword{datasets}
