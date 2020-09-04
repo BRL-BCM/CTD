@@ -39,7 +39,7 @@
 #' S = c("A", "C")
 #' visitedNodes = "A"
 #' coords = layout.fruchterman.reingold(ig)
-#' imgNum = graph.takeNetWalkSnapShot(adj_mat, G, output_dir=getwd(), p1=1.0, visitedNodes, S, coords, imgNum=1, TRUE)
+#' graph.takeNetWalkSnapShot(adj_mat, G, output_dir=getwd(), p1=1.0, visitedNodes, S, coords, imgNum=1, TRUE)
 graph.takeNetWalkSnapShot = function(adj_mat, G, output_dir, p1, visitedNodes, S, coords, imgNum=1, useLabels=TRUE) {
   ig = graph.adjacency(adj_mat, mode="undirected", weighted = TRUE)
 

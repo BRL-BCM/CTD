@@ -20,6 +20,23 @@
 #' imputed.data = data.imputeData(dt_w_missing_vals, ref_data)
 #' print(any(is.na(imputed.data)))
 data.imputeData = function(data, ref) {
+  # First, remove metabolites that are NA for all data and/or ref samples
+  rmThese.ref = c()
+  for (r in seq_len(nrow(ref))) {
+    if (all(is.na(as.numeric(ref[rownames(ref)[r],])))) {
+      rmThese.ref = c(rmThese.ref, r)
+    } 
+  }
+  if (length(rmThese) > 0) { ref = ref[-rmThese.ref, ] }
+  rmThese.data = c()
+  for (r in seq_len(nrow(data))) {
+    if (all(is.na(as.numeric(data[rownames(data)[r],])))) {
+      rmThese.data = c(rmThese.data, r)
+    } 
+  }
+  if (length(rmThese) > 0) { data = data[-rmThese.data, ] }
+  
+  # Next, match metabolites between data and ref matrices
   data = data[which(rownames(data) %in% rownames(ref)),]
   ref = ref[which(rownames(ref) %in% rownames(data)),]
   data = data[sort(rownames(data)),]

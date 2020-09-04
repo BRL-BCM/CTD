@@ -28,6 +28,7 @@
 graph.naivePruning = function(ig_dis, ig_ref) {
   ee = get.edgelist(ig_ref)
   ee = ee[which(apply(ee, 1, function(i) all(i %in% V(ig_dis)$name))),]
+  if (is.null(nrow(ee))) { ee = t(ee) }
   it = 0
   for (e in seq_len(nrow(ee))) {
     e.id.dis = get.edge.ids(ig_dis, vp=ee[e,])
@@ -40,7 +41,7 @@ graph.naivePruning = function(ig_dis, ig_ref) {
         E(ig_dis)$weight[e.id.dis] = E(ig_dis)$weight[e.id.dis] - E(ig_ref)$weight[e.id.ref]
         it = it + 1
       }
-      if (isSameDirection && (abs(E(ig_ref)$weight[e.id.ref]) > abs(E(ig_dis)$weight[e.id.dis]))) {
+      if (isSameDirection && (abs(E(ig_ref)$weight[e.id.ref]) >= abs(E(ig_dis)$weight[e.id.dis]))) {
         ig_dis = delete.edges(ig_dis, edges = E(ig_dis)[[e.id.dis]])
         it = it + 1
       }
