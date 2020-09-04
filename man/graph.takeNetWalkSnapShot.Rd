@@ -38,6 +38,9 @@ an iterator for file naming.}
 \item{useLabels}{- If TRUE, node names will display next to their respective nodes in the network. If false
 node names will not display.}
 }
+\value{
+0
+}
 \description{
 Recursively diffuse probability from a starting node based on the connectivity of the background knowledge graph, representing the
 likelihood that a variable will be most influenced by a perturbation in the starting node.
@@ -62,5 +65,5 @@ names(G) = c("A", "B", "C", "D", "E", "F", "G")
 S = c("A", "C")
 visitedNodes = "A"
 coords = layout.fruchterman.reingold(ig)
-imgNum = graph.takeNetWalkSnapShot(adj_mat, G, output_dir=getwd(), p1=1.0, visitedNodes, S, coords, imgNum=1, TRUE)
+graph.takeNetWalkSnapShot(adj_mat, G, output_dir=getwd(), p1=1.0, visitedNodes, S, coords, imgNum=1, TRUE)
 }

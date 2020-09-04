@@ -4,35 +4,24 @@
 \alias{data.surrogateProfiles}
 \title{Surrogate profiles}
 \usage{
-data.surrogateProfiles(
-  data,
-  std = 1,
-  useMnDiseaseProfile = FALSE,
-  addHealthyControls = TRUE,
-  ref_data = NULL
-)
+data.surrogateProfiles(data, std = 1, ref_data = NULL)
 }
 \arguments{
-\item{data}{- Data matrix with observations (e.g., patient samples) as rows, features 
-(e.g., metabolites or genes) as columns.}
+\item{data}{- Data matrix with observations (e.g., patient samples) as columns, features 
+(e.g., metabolites or genes) as rows}
 
-\item{std}{- The level of variability (standard deviation) around each feature's
-mean you want to add in surrogate profiles.}
-
-\item{useMnDiseaseProfile}{- Boolean. For disease cohorts not showing homogeneity, mean
-across disease profiles and generate disease surrogates around this mean.}
-
-\item{addHealthyControls}{- Boolean. Add healthy control profiles to data?}
+\item{std}{- The level of variability (standard deviation) around each observed feature's
+z-score you want to add to generate the surrogate profiles.}
 
 \item{ref_data}{- Data matrix for healthy control "reference" samples, observations 
-(e.g., patient samples) as rows, features (e.g., metabolites or genes) 
-as columns.}
+(e.g., patient samples) as columns, features (e.g., metabolites or genes) 
+as rows}
 }
 \value{
 data_mx_surr - Data matrix with added surrogate profiles.
 }
 \description{
-Fill in a data matrix rank, when your data is low n, high p. Fill in rank with surrogate profiles.
+Fill in a data matrix rank with surrogate profiles., when your data is low n, high p.
 }
 \examples{
 data("Miller2015")
@@ -44,5 +33,5 @@ ref_fill = as.numeric(Miller2015$`Times identifed in all 200 samples`[-1])/200
 refs2 = refs[which(ref_fill>0.8),]
 diag_pts = names(diags[which(diags==unique(diags)[1])])
 diag_data = data_mx[which(rownames(data_mx) \%in\% rownames(refs2)), which(colnames(data_mx) \%in\% diag_pts)]
-data_mx_surr = data.surrogateProfiles(data = diag_data, std = 1, useMnDiseaseProfile = FALSE, addHealthyControls = FALSE, ref_data = refs2)
+data_mx_surr = data.surrogateProfiles(data = diag_data, std = 1, ref_data = refs2)
 }

@@ -33,6 +33,9 @@ between network nodes by the probability diffusion algorithm based solely on net
 
 \item{coords}{- The x and y coordinates for each node in the network, to remain static between images.}
 }
+\value{
+0
+}
 \description{
 Recursively diffuse probability from a starting node based on the connectivity of the background knowledge graph, representing the
 likelihood that a variable will be most influenced by a perturbation in the starting node.
