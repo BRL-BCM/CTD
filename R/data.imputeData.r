@@ -27,14 +27,14 @@ data.imputeData = function(data, ref) {
       rmThese.ref = c(rmThese.ref, r)
     } 
   }
-  if (length(rmThese) > 0) { ref = ref[-rmThese.ref, ] }
+  if (length(rmThese.ref) > 0) { ref = ref[-rmThese.ref, ] }
   rmThese.data = c()
   for (r in seq_len(nrow(data))) {
     if (all(is.na(as.numeric(data[rownames(data)[r],])))) {
       rmThese.data = c(rmThese.data, r)
     } 
   }
-  if (length(rmThese) > 0) { data = data[-rmThese.data, ] }
+  if (length(rmThese.data) > 0) { data = data[-rmThese.data, ] }
   
   # Next, match metabolites between data and ref matrices
   data = data[which(rownames(data) %in% rownames(ref)),]
