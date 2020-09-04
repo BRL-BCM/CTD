@@ -68,7 +68,7 @@ arg_data = data_mx[,which(diags=="Argininemia")]
 # Markov Random Field network on data. While surrogate profiles are not required, they tend 
 # to learn less complex networks (i.e., networks with less edges) and in faster time.
 ind = which(diags=="No biochemical genetic diagnosis")
-arg_data=data.surrogateProfiles(arg_data, 1, FALSE, TRUE, ref_data = data_mx[,ind])
+arg_data=data.surrogateProfiles(arg_data, 1, ref_data = data_mx[,ind])
 dim(arg_data)
 
 # Learn a Gaussian Markov Random Field model using the Graphical LASSO in the R 
@@ -460,10 +460,6 @@ plot.knnDist = function(patientDist, diagnoses, diag) {
   print(sprintf("Sens = %.2f, Spec= %.2f", sens, spec))
 
   V(ig)$label = rep("", length(V(ig)$name))
-  grps = list()
-  grps[[1]] = names(diagnoses)[which(diagnoses==diag)]
-  grps[[2]] = names(diagnoses)[which(diagnoses!=diag)]
-  names(grps) = names(table(diagnoses))
   
   return(ig)
 }
@@ -496,6 +492,10 @@ legend("left", legend=unique(sort(as.character(dd))),
 
 # K-NN
 ig = plot.knnDist(ncd, dd, diag="ARG")
+grps = list()
+grps[[1]] = dd[which(dd=="ARG")]
+grps[[2]] = dd[which(dd!="ARG")]
+names(grps) = names(table(dd))
 plot(ig, mark.groups = grps, mark.col = c("white", "black"), 
      layout=layout.circle, edge.width=3, edge.arrow.size=0.5)
 
