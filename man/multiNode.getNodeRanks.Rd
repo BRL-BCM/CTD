@@ -2,7 +2,8 @@
 % Please edit documentation in R/multiNode.getNodeRanks.r
 \name{multiNode.getNodeRanks}
 \alias{multiNode.getNodeRanks}
-\title{Generate the "adaptive walk" node rankings, starting from a given perturbed variable}
+\title{Generate the "adaptive walk" node rankings, starting from a given perturbed
+variable}
 \usage{
 multiNode.getNodeRanks(
   S,
@@ -11,54 +12,68 @@ multiNode.getNodeRanks(
   thresholdDiff,
   adj_mat,
   num.misses = NULL,
-  verbose = FALSE,
-  output_dir = "",
-  useLabels = FALSE,
+  verbose = F,
+  out_dir = "",
+  useLabels = F,
   coords = NULL
 )
 }
 \arguments{
-\item{S}{- A character vector of the node names for the subset of nodes you want to encode.}
+\item{S}{- A character vector of the node names for the subset of nodes you
+want to encode.}
 
-\item{G}{- A list of probabilities with list names being the node names of the background graph.}
+\item{G}{- A list of probabilities with list names being the node names of
+the network.}
 
-\item{p1}{- The probability that is preferentially distributed between network nodes by the 
-probability diffusion algorithm based solely on network connectivity. The remaining probability
-(i.e., "p0") is uniformally distributed between network nodes, regardless of connectivity.}
+\item{p1}{- The probability that is preferentially distributed between
+network nodes by the probability diffusion algorithm based
+solely on network connectivity. The remaining probability, 1-p1,
+is uniformally distributed between network nodes, regardless of
+connectivity.}
 
-\item{thresholdDiff}{- When the probability diffusion algorithm exchanges this amount (thresholdDiff)
-or less between nodes, the algorithm returns up the call stack.}
+\item{thresholdDiff}{- When the probability diffusion algorithm exchanges
+this amount or less between nodes, the algorithm 
+returns up the call stack.}
 
-\item{adj_mat}{- The adjacency matrix that encodes the edge weights for the network, G.}
+\item{adj_mat}{- The adjacency matrix that encodes the edge weights for the
+network, G.}
 
-\item{num.misses}{- The number of "misses" the network walker will tolerate before switching to fixed length codes for remaining nodes to be found.}
+\item{num.misses}{- The number of "misses" the network walker will tolerate
+before switching to fixed length codes for remaining
+nodes to be found.}
 
-\item{verbose}{- If TRUE, print statements will execute as progress is made. Default is FALSE.}
+\item{verbose}{- If T, print statements will execute as progress is made.
+Default is F.}
 
-\item{output_dir}{- If specified, a image sequence will generate in the output directory specified.}
+\item{out_dir}{- If specified, a image sequence will generate in the
+output directory specified.}
 
-\item{useLabels}{- If TRUE, node names will display next to their respective nodes in the network. If false
-node names will not display. Only relevant if output_dir is specified.}
+\item{useLabels}{- If T, node names will display next to their respective
+nodes in the network. If F, node names will not display.
+Only relevant if out_dir is specified.}
 
-\item{coords}{- The x and y coordinates for each node in the network, to remain static between images.}
+\item{coords}{- The x and y coordinates for each node in the network, to
+remain static between images.}
 }
 \value{
-ranks - A list of character vectors of node names in the order they were drawn by the
-                probability diffusion algorithm, from each starting node in S.
+ranks - A list of character vectors of node names in the order they
+                were drawn by the probability diffusion algorithm, from each
+                starting node in S.
 }
 \description{
-This function calculates the node rankings starting from a given perturbed variable in a subset of variables in the background knowledge graph.
+This function calculates the node rankings starting from a given node in a
+subset of nodes in a given network, G.
 }
 \examples{
 # Read in any network via its adjacency matrix
-adj_mat = matrix(1, nrow=100, ncol=100)
-for (i in seq_len(100)) {for (j in seq_len(100)) {adj_mat[i, j] = rnorm(1, mean=0, sd=1)}}
-colnames(adj_mat) = sprintf("Metabolite\%d", seq_len(100))
-rownames(adj_mat) = colnames(adj_mat)
-G = vector(mode="list", length=ncol(adj_mat))
-names(G) = colnames(adj_mat)
-S = names(G)[seq_len(3)]
-ranks = multiNode.getNodeRanks(S, G, p1=0.9, thresholdDiff=0.01, adj_mat)
+adj_mat=matrix(1, nrow=100, ncol=100)
+for(i in seq_len(100)){for (j in seq_len(100)){adj_mat[i,j]=rnorm(1,0,1)}}
+colnames(adj_mat)=sprintf("Metabolite\%d", seq_len(100))
+rownames(adj_mat)=colnames(adj_mat)
+G=vector(mode="list", length=ncol(adj_mat))
+names(G)=colnames(adj_mat)
+S=names(G)[seq_len(3)]
+ranks=multiNode.getNodeRanks(S, G, p1=0.9, thresholdDiff=0.01, adj_mat)
 }
 \keyword{algorithm}
 \keyword{diffusion}

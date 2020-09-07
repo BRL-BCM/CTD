@@ -8,12 +8,13 @@ Description: An R package for pattern discovery in weighted graphs. Two use case
 Depends: R (>= 4.0), gmp, igraph, stats, grDevices, graphics
 Suggests: 
     knitr,
+    rmarkdown,
     huge,
     plotly,
     gplots,
     RColorBrewer,
     testthat
-VignetteBuilder: knitr
+VignetteBuilder: rmarkdown
 biocViews: BiomedicalInformatics, Metabolomics, SystemsBiology, GraphAndNetwork
 License: MIT + file LICENSE
 Encoding: UTF-8

@@ -7,31 +7,34 @@
 data.surrogateProfiles(data, std = 1, ref_data = NULL)
 }
 \arguments{
-\item{data}{- Data matrix with observations (e.g., patient samples) as columns, features 
-(e.g., metabolites or genes) as rows}
+\item{data}{- Data matrix with observations (e.g., patient samples)
+as columns, features (e.g., metabolites or genes) as rows}
 
-\item{std}{- The level of variability (standard deviation) around each observed feature's
-z-score you want to add to generate the surrogate profiles.}
+\item{std}{- The level of variability (standard deviation) around each
+observed feature's z-score you want to add to generate the 
+surrogate profiles.}
 
-\item{ref_data}{- Data matrix for healthy control "reference" samples, observations 
-(e.g., patient samples) as columns, features (e.g., metabolites or genes) 
-as rows}
+\item{ref_data}{- Data matrix for healthy control "reference" samples,
+observations (e.g., patient samples) as columns, 
+features (e.g., metabolites or genes) as rows}
 }
 \value{
 data_mx_surr - Data matrix with added surrogate profiles.
 }
 \description{
-Fill in a data matrix rank with surrogate profiles., when your data is low n, high p.
+Fill in a data matrix rank with surrogate profiles., when your data is
+low n, high p.
 }
 \examples{
 data("Miller2015")
-data_mx = Miller2015[-1,grep("IEM_", colnames(Miller2015))]
-data_mx = apply(data_mx, c(1,2), as.numeric)
-diags = unlist(Miller2015["diagnosis",grep("IEM_", colnames(Miller2015))])
-refs = data_mx[,which(diags=="No biochemical genetic diagnosis")]
-ref_fill = as.numeric(Miller2015$`Times identifed in all 200 samples`[-1])/200
-refs2 = refs[which(ref_fill>0.8),]
-diag_pts = names(diags[which(diags==unique(diags)[1])])
-diag_data = data_mx[which(rownames(data_mx) \%in\% rownames(refs2)), which(colnames(data_mx) \%in\% diag_pts)]
-data_mx_surr = data.surrogateProfiles(data = diag_data, std = 1, ref_data = refs2)
+data_mx=Miller2015[-1,grep("IEM_", colnames(Miller2015))]
+data_mx=apply(data_mx, c(1,2), as.numeric)
+diags=unlist(Miller2015["diagnosis",grep("IEM_", colnames(Miller2015))])
+refs=data_mx[,which(diags=="No biochemical genetic diagnosis")]
+ref_fill=as.numeric(Miller2015$`Times identifed in all 200 samples`[-1])/200
+refs2=refs[which(ref_fill>0.8),]
+diag_pts=names(diags[which(diags==unique(diags)[1])])
+diag_data=data_mx[which(rownames(data_mx) \%in\% rownames(refs2)), 
+                  which(colnames(data_mx) \%in\% diag_pts)]
+data_mx_surr=data.surrogateProfiles(data=diag_data, std=1, ref_data=refs2)
 }

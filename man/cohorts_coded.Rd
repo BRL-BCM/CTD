@@ -3,7 +3,8 @@
 \docType{data}
 \name{cohorts_coded}
 \alias{cohorts_coded}
-\title{Patient sample identifiers mapped to known clinical diagnosis.}
+\title{Patient sample identifiers mapped to known clinical
+diagnosis.}
 \format{
 cohorts_coded - A list object where elements contain all patient 
                         IDs associated with a given diagnosis, as
@@ -13,7 +14,8 @@ cohorts_coded - A list object where elements contain all patient
 data(cohorts_coded)
 }
 \description{
-Patient sample identifiers mapped to known clinical diagnosis.
+Patient sample identifiers mapped to known clinical
+diagnosis.
 }
 \examples{
 data(cohorts_coded)

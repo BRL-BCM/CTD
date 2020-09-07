@@ -1,4 +1,5 @@
-#' @title Patient sample identifiers mapped to known clinical diagnosis.
+#' @title Patient sample identifiers mapped to known clinical
+#' diagnosis.
 #' 
 #' @name cohorts_coded
 #' @aliases cohorts_coded

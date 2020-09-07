@@ -5,7 +5,7 @@ date: "3/6/2019"
 output: pdf_document
 vignette: >
   %\VignetteIndexEntry{CTD Lab Exercise}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{rmarkdown::render}
   \usepackage[utf8]{inputenc}
 ---
   
@@ -112,7 +112,7 @@ startNode = "A"
 visitedNodes = startNode
 coords = layout.fruchterman.reingold(ig)
 .GlobalEnv$imgNum = 1
-G_new = graph.diffuseP1(p1=1.0, startNode=startNode, G=G, visitedNodes=visitedNodes, 
+G_new = graph.diffuseP1(p1=1.0, sn=startNode, G=G, vNodes=visitedNodes, 
                         thresholdDiff=0.01, adj_mat=adj_mat, verbose=TRUE, 
                         output_dir = sprintf("%s/images", getwd()), 
                         recursion_level = 1, coords = coords)
@@ -133,7 +133,7 @@ visitedNodes = c("A", "B")
 startNode = "B"
 .GlobalEnv$imgNum=1
 
-G_new = graph.diffuseP1(p1=1.0, startNode, G, visitedNodes, thresholdDiff=0.01, 
+G_new = graph.diffuseP1(p1=1.0, sn=startNode, G, vNodes=visitedNodes, thresholdDiff=0.01, 
                         adj_mat, TRUE, output_dir = sprintf("%s/images", getwd()), 
                         1, coords)
 # Inherited probabilities across all nodes should add to 1.
@@ -173,7 +173,7 @@ print(ig)
 visitedNodes = c("B", "C", "A")
 startNode = "A"
 .GlobalEnv$imgNum = 1
-G_new = graph.diffuseP1(p1=1.0, startNode, G, visitedNodes, thresholdDiff=0.01, 
+G_new = graph.diffuseP1(p1=1.0, sn=startNode, G, vNodes=visitedNodes, thresholdDiff=0.01, 
                         adj_mat, TRUE, output_dir = sprintf("%s/images", getwd()), 
                         1, coords)
 # Inherited probabilities across all nodes should add to 1.

@@ -3,9 +3,11 @@
 \docType{data}
 \name{Wangler2017}
 \alias{Wangler2017}
-\title{A metabolomic map of Zellweger spectrum disorders reveals novel disease biomarkers.}
+\title{A metabolomic map of Zellweger spectrum disorders reveals 
+novel disease biomarkers.}
 \format{
-Wangler2017 - The data matrix (metabolite features are rows, patient observations are columns) for 19 untargeted metabolomics 
+Wangler2017 - The data matrix (metabolite features are
+rows, patient observations are columns) for 19 untargeted metabolomics 
                       patient samples, alongside metabolite annotations.
 }
 \source{
@@ -15,13 +17,15 @@ Wangler2017 - The data matrix (metabolite features are rows, patient observation
 data(Wangler2017)
 }
 \description{
-Global metabolic profiling obtained by untargeted mass spectrometry-based
-metabolomic platform for the detection of novel and known inborn errors of
-metabolism.  This untargeted approach collected z-score values for >650 unique
-compounds from human plasma.  Data set contains 19 individual plasma samples with
-confirmed biallelic pathogenic variants in the PEX1 gene. These samples revealed
-elevations in pipecolic acid and long-chain lysophosphatidylcholines, as well as
-an unanticipated reduction in multiple sphingomyelin species.
+Global metabolic profiling obtained by untargeted
+mass spectrometry-based metabolomic platform for the detection
+of novel and known inborn errors of metabolism.  This untargeted 
+approach collected z-score values for >650 unique compounds from
+human plasma.  Data set contains 19 individual plasma samples with
+confirmed biallelic pathogenic variants in the PEX1 gene. These 
+samples revealed elevations in pipecolic acid and long-chain
+lysophosphatidylcholines, as well as an unanticipated reduction
+in multiple sphingomyelin species.
 }
 \examples{
 data(Wangler2017)

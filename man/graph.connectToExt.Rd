@@ -7,15 +7,19 @@
 graph.connectToExt(adj_mat, startNode, visitedNodes)
 }
 \arguments{
-\item{adj_mat}{- The adjacency matrix that encodes the edge weights for the network.}
+\item{adj_mat}{- The adjacency matrix that encodes the edge weights 
+for the network.}
 
-\item{startNode}{- The node most recently visited by the network walker, from which p1 gets dispersed.}
+\item{startNode}{- The node most recently visited by the network walker,
+from which p1 gets dispersed.}
 
-\item{visitedNodes}{- The history of previous draws in the node ranking sequence.}
+\item{visitedNodes}{- The history of previous draws in the node ranking
+sequence.}
 }
 \value{
-adj_matAfter - The adjacency matrix where the startNode is now connected to its unvisited "extended" neighbors. An
-                       extended neighbor is the neighbor of a neighbor.
+adj_matAfter - The adjacency matrix where the startNode is now
+                       connected to its unvisited "extended" neighbors.
+                       An extended neighbor is the neighbor of a neighbor.
 }
 \description{
 Connect a node to its unvisited "extended" neighbors.
@@ -31,7 +35,7 @@ adj_mat = rbind(c(0,2,1,0,0,0,0), # A
                 )
 rownames(adj_mat) = c("A", "B", "C", "D", "E", "F", "G")
 colnames(adj_mat) = c("A", "B", "C", "D", "E", "F", "G")
-ig = graph.adjacency(as.matrix(adj_mat), mode="undirected", weighted=TRUE)
+ig = graph.adjacency(as.matrix(adj_mat), mode="undirected",weighted=T)
 G=vector(mode="list", length=7)
 G[seq_len(length(G))] = 0
 names(G) = c("A", "B", "C", "D", "E", "F", "G")

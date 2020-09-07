@@ -6,67 +6,83 @@
 \usage{
 graph.diffuseP1(
   p1,
-  startNode,
+  sn,
   G,
-  visitedNodes,
+  vNodes,
   thresholdDiff,
   adj_mat,
-  verbose = FALSE,
-  output_dir = "",
-  recursion_level = 1,
+  verbose = F,
+  out_dir = "",
+  r_level = 1,
   coords = NULL
 )
 }
 \arguments{
-\item{p1}{- The probability being dispersed from the starting node, startNode, which is preferentially distributed 
-between network nodes by the probability diffusion algorithm based solely on network connectivity.}
+\item{p1}{- The probability being dispersed from the starting node, 
+sn, which is preferentially distributed between 
+network nodes by the probability diffusion algorithm 
+based solely on network connectivity.}
 
-\item{startNode}{- The node most recently visited by the network walker, from which p1 gets dispersed.}
+\item{sn}{- "Start node", or the node most recently visited by the
+network walker, from which p1 gets dispersed.}
 
-\item{G}{- A list of probabilities, with names of the list being the node names in the background knowledge graph.}
+\item{G}{- A list of probabilities, with names of the list being the 
+node names in the network.}
 
-\item{visitedNodes}{- The history of previous draws in the node ranking sequence.}
+\item{vNodes}{- "Visited nodes", or the history of previous draws
+in the node ranking sequence.}
 
-\item{thresholdDiff}{- When the probability diffusion algorithm exchanges this amount (thresholdDiff)
-or less between nodes, the algorithm returns up the call stack.}
+\item{thresholdDiff}{- When the probability diffusion algorithm exchanges
+this amount (thresholdDiff) or less between nodes, 
+the algorithm returns up the call stack.}
 
-\item{adj_mat}{- The adjacency matrix that encodes the edge weights for the network, G.}
+\item{adj_mat}{- The adjacency matrix that encodes the edge weights for
+the network, G.}
 
-\item{verbose}{- If debugging or tracking a diffusion event, verbose=TRUE will activate print statements. Default is FALSE.}
+\item{verbose}{- If debugging or tracking a diffusion event, verbose=T will
+activate print statements. Default is F}
 
-\item{output_dir}{- If specified, a image sequence will generate in the output directory specified.}
+\item{out_dir}{- If specified, a image sequence will generate in the
+output directory specified.}
 
-\item{recursion_level}{- The current depth in the call stack caused by a recursive algorithm. Only relevant if output_dir
+\item{r_level}{- "Recursion level", or the current depth in the call stack 
+caused by a recursive algorithm. Only relevant if out_dir
 is specified.}
 
-\item{coords}{- The x and y coordinates for each node in the network, to remain static between images. Only relevant if
-output_dir is specified.}
+\item{coords}{- The x and y coordinates for each node in the network, to
+remain static between images. Only relevant if out_dir
+is specified.}
 }
 \value{
-G - A list of returned probabilities after the diffusion of probability has truncated, with names of the list 
-            being the node names in the background knowledge graph.
+G - A list of returned probabilities after the diffusion of
+            probability has truncated, with names of the list being the
+            node names in the network.
 }
 \description{
-Recursively diffuse probability from a starting node based on the connectivity of the background knowledge graph, 
-representing the likelihood that a variable will be most influenced by a perturbation in the starting node.
+Recursively diffuse probability from a starting node based on the
+connectivity of the network, representing the likelihood that a 
+variable is most influenced by a perturbation in the starting node.
 }
 \examples{
 # Read in any network via its adjacency matrix
 adj_mat=matrix(1, nrow=100, ncol=100)
-for (i in seq_len(100)) {for (j in seq_len(100)){adj_mat[i, j]=rnorm(1, mean=0, sd=1)} }
+for (i in seq_len(100)){for (j in seq_len(100)){adj_mat[i,j]=rnorm(1,0,1)}}
 colnames(adj_mat)=sprintf("Metabolite\%d", seq_len(100))
 rownames(adj_mat)=colnames(adj_mat)
 G=vector(mode="list", length=ncol(adj_mat))
 names(G)=colnames(adj_mat)
 G=lapply(G, function(i) i[[1]]=0)
-probs_afterCurrDraw=graph.diffuseP1(p1=1.0, startNode=names(G)[1], G=G[1], visitedNodes=names(G)[1], 
-                                    thresholdDiff=0.01, adj_mat, TRUE)
-# Make a movie of the diffusion of probability from startNode
+probs_afterCurrDraw=graph.diffuseP1(p1=1.0, sn=names(G)[1], G=G,
+                                    vNodes=names(G)[1], 
+                                    thresholdDiff=0.01, adj_mat, T)
+# Make a movie of the diffusion of probability from sn
 .GlobalEnv$imgNum = 1
-ig = graph.adjacency(adj_mat, mode="undirected", weighted=TRUE, add.colnames = "name")
+ig=graph.adjacency(adj_mat,mode="undirected",weighted=T,add.colnames="name")
 coords = layout.fruchterman.reingold(ig)
-probs_afterCurrDraw=graph.diffuseP1(p1=1.0, startNode=names(G)[1], G=G[1], visitedNodes=names(G)[1], 
-                                    thresholdDiff=0.01, adj_mat, TRUE, getwd(), 1, coords)
+probs_afterCurrDraw=graph.diffuseP1(p1=1.0, sn=names(G)[1], G=G,
+                                    vNodes=names(G)[1],
+                                    thresholdDiff=0.01, adj_mat, T,
+                                    getwd(), 1, coords)
 }
 \keyword{diffusion}
 \keyword{network}

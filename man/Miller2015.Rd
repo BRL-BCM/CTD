@@ -3,12 +3,14 @@
 \docType{data}
 \name{Miller2015}
 \alias{Miller2015}
-\title{Untargeted metabolomic analysis for the clinical screening of inborn errors
-of metabolism}
+\title{Untargeted metabolomic analysis for the clinical screening of 
+inborn errors of metabolism}
 \format{
-Miller2015 - The data frame with 1203 metabolite features as rows, and 186 untargeted metabolomics 
-                      patient samples as columns, alongside 16 metabolite annotations. The first row also
-                      provides the biochemical diagnosis confirmed for each patient sample.
+Miller2015 - The data frame with 1203 metabolite features 
+                     as rows, and 186 untargeted metabolomics patient 
+                     samples as columns, alongside 16 metabolite annotations.
+                     The first row also provides the biochemical diagnosis 
+                     confirmed for each patient sample.
 }
 \source{
 \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4626538/bin/10545_2015_9843_MOESM1_ESM.xls}{Dataset}
@@ -17,14 +19,15 @@ Miller2015 - The data frame with 1203 metabolite features as rows, and 186 untar
 data(Miller2015)
 }
 \description{
-Global metabolic profiling obtained by untargeted mass spectrometry-based
-metabolomic platform for the detection of novel and known inborn errors of
-metabolism.  This untargeted approach collected z-score values for ~1200 unique
-compounds (including ~500 named human analytes) from human plasma.  Data set
-contains 186 individual plasma samples (118 confirmed inborn errors of
-metabolism).  The outcome describes excellent sensitivity and specificity for
-the detection of a wide rage of metabolic disorders and identified novel
-biomarkers for some diseases.
+Global metabolic profiling obtained by untargeted mass 
+spectrometry-based metabolomic platform for the detection of novel 
+and known inborn errors of metabolism.  This untargeted approach 
+collected z-score values for ~1200 unique compounds (including 
+~500 named human analytes) from human plasma.  Data set contains 
+186 individual plasma samples (118 confirmed inborn errors of
+metabolism).  The outcome describes excellent sensitivity and 
+specificity for the detection of a wide rage of metabolic disorders 
+and identified novel biomarkers for some diseases.
 }
 \examples{
 data(Miller2015)

@@ -2,38 +2,44 @@
 % Please edit documentation in R/graph.naivePruning.r
 \name{graph.naivePruning}
 \alias{graph.naivePruning}
-\title{Pruning edges from disease differential network that also occur in reference-only network.}
+\title{Pruning edges from disease differential network that also 
+occur in reference-only network.}
 \usage{
 graph.naivePruning(ig_dis, ig_ref)
 }
 \arguments{
-\item{ig_dis}{- The igraph object associated with the disease+reference trained differential interaction network.}
+\item{ig_dis}{- The igraph object associated with the
+disease+reference trained differential network.}
 
-\item{ig_ref}{- The igraph object associated with the reference-only trained interaction network.}
+\item{ig_ref}{- The igraph object associated with the reference-only
+trained interaction network.}
 }
 \value{
-ig_pruned - The pruned igraph object of the disease+reference differential interaction network, with reference edges subtracted.
+ig_pruned - The pruned igraph object of the disease+reference
+                    differential network, with reference edges subtracted.
 }
 \description{
-Recursively diffuse probability from a starting node based on the connectivity of the background knowledge graph, representing the likelihood that a variable will be
-        most influenced by a perturbation in the starting node.
+Recursively diffuse probability from a starting node based
+on the connectivity of the background knowledge graph,
+representing the likelihood that a variable will be
+most influenced by a perturbation in the starting node.
 }
 \examples{
 # Generate a 100 node "disease-control" network
 adj_mat=matrix(0, nrow=100, ncol=100)
-rows = sample(seq_len(100), 50, replace=TRUE)
-cols = sample(seq_len(100), 50, replace=TRUE)
+rows = sample(seq_len(100), 50, replace=T)
+cols = sample(seq_len(100), 50, replace=T)
 for (i in rows) {for (j in cols){adj_mat[i, j]=rnorm(1, mean=0, sd=1)} }
 colnames(adj_mat)=sprintf("Metabolite\%d", seq_len(100))
-ig_dis = graph.adjacency(adj_mat, mode="undirected", weighted=TRUE)
+ig_dis = graph.adjacency(adj_mat, mode="undirected", weighted=T)
 
 # Generate a 100 node reference "control-only" network
 adj_mat2=matrix(0, nrow=100, ncol=100)
-rows2 = sample(seq_len(100), 50, replace=TRUE)
-cols2 = sample(seq_len(100), 50, replace=TRUE)
-for (i in rows2) {for (j in cols2){adj_mat2[i, j]=rnorm(1, mean=0, sd=1)} }
+rows2 = sample(seq_len(100), 50, replace=T)
+cols2 = sample(seq_len(100), 50, replace=T)
+for (i in rows2) {for (j in cols2){adj_mat2[i, j]=rnorm(1, mean=0, sd=1)}}
 colnames(adj_mat2)=sprintf("Metabolite\%d", seq_len(100))
-ig_ref = graph.adjacency(adj_mat2, mode="undirected", weighted=TRUE)
+ig_ref = graph.adjacency(adj_mat2, mode="undirected", weighted=T)
 
 ig_pruned=graph.naivePruning(ig_dis, ig_ref)
 }
