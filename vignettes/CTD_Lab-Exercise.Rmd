@@ -493,10 +493,10 @@ legend("left", legend=unique(sort(as.character(dd))),
 # K-NN
 ig = plot.knnDist(ncd, dd, diag="ARG")
 grps = list()
-grps[[1]] = dd[which(dd=="ARG")]
-grps[[2]] = dd[which(dd!="ARG")]
+grps[[1]] = names(dd)[which(dd=="ARG")]
+grps[[2]] = names(dd)[which(dd!="ARG")]
 names(grps) = names(table(dd))
-plot(ig, mark.groups = grps, mark.col = c("white", "black"), 
-     layout=layout.circle, edge.width=3, edge.arrow.size=0.5)
+plot.igraph(ig, mark.groups = grps, mark.col = c("white", "black"), 
+            layout=layout.circle, edge.width=3, edge.arrow.size=0.5)
 
 ```
