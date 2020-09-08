@@ -9,7 +9,7 @@ test_that("Entropy function works", {
 test_that("Fisher's method works", {
   expect_equal(stat.fishersMethod(c(0, 0, 0)), 0)
   expect_equal(stat.fishersMethod(c(1, 1, 1)), 1)
-  expect_equal(is.numeric(stat.fishersMethod(c(0.24, 0.34, 0.42))), T)
+  expect_equal(is.numeric(stat.fishersMethod(c(0.24, 0.34, 0.42))), TRUE)
 })
 
 # data.cohorts_coded.r
@@ -29,9 +29,9 @@ test_that("Zscore data works", {
   zscored.data = data.zscoreData(dis_data, ref_data)
   # Test1. surr.data should be a numeric matrix.
   expect_equal(class(zscored.data)[1], "matrix")
-  expect_equal(all(apply(zscored.data, c(1,2), is.numeric)), T)
+  expect_equal(all(apply(zscored.data, c(1,2), is.numeric)), TRUE)
   # Test2. If data.imputeData.r works, there should be no NAs.  
-  expect_equal(any(is.na(zscored.data)), F)
+  expect_equal(any(is.na(zscored.data)), FALSE)
 })
 
 # Combine datasets.
@@ -41,21 +41,21 @@ test_that("Combine data works", {
   curr_data = matrix(rnorm(500), ncol=100)
   rownames(curr_data) = sprintf("Feature%d", sample(seq_len(20), 
                                               nrow(curr_data), 
-                                            replace = F))
+                                            replace = FALSE))
   colnames(curr_data) = sprintf("Curr.Sample%d", seq_len(ncol(curr_data)))
   more_data = matrix(rnorm(500), ncol=100)
   rownames(more_data) = sprintf("Feature%d", sample(seq_len(20), 
                                             nrow(curr_data), 
-                                            replace = F))
+                                            replace = FALSE))
   colnames(more_data) = sprintf("More.Sample%d", seq_len(ncol(curr_data)))
   combined.data = data.combineData(curr_data, more_data)
   expect_equal(class(combined.data)[1], "matrix")
   # Test1. Number of returned columns should be larger than or 
   #        equal to max number of columns of between the two input matrices.
-  expect_equal(ncol(combined.data) >= max(ncol(curr_data), ncol(more_data)), T)
+  expect_equal(ncol(combined.data) >= max(ncol(curr_data), ncol(more_data)), TRUE)
   # Test2. Number of returned columns should be less than or 
   #        equal to sum of columns of between the two input matrices.
-  expect_equal(ncol(combined.data) <= ncol(curr_data)+ncol(more_data), T)
+  expect_equal(ncol(combined.data) <= ncol(curr_data)+ncol(more_data), TRUE)
 })
 
 # Surrogate profile generation.
@@ -67,31 +67,31 @@ test_that("Surrogate profiles works", {
   rownames(more_data) = sprintf("Feature%d", seq_len(nrow(more_data)))
   colnames(more_data) = sprintf("More.Sample%d", seq_len(ncol(more_data)))
   # Add missingness so data.imputeData.r will be tested.
-  curr_data[sample(1:nrow(curr_data), 25, replace=F), 
-            sample(1:ncol(curr_data), 10, replace=F)] = NA
-  more_data[sample(1:nrow(more_data), 25, replace=F), 
-            sample(1:ncol(more_data), 10, replace=F)] = NA
+  curr_data[sample(1:nrow(curr_data), 25, replace=FALSE), 
+            sample(1:ncol(curr_data), 10, replace=FALSE)] = NA
+  more_data[sample(1:nrow(more_data), 25, replace=FALSE), 
+            sample(1:ncol(more_data), 10, replace=FALSE)] = NA
   surr.data = data.surrogateProfiles(curr_data, 1, ref_data = more_data)
   # Test1. surr.data should be a numeric matrix.
   expect_equal(class(surr.data)[1], "matrix")
-  expect_equal(all(apply(surr.data, c(1,2), is.numeric)), T)
+  expect_equal(all(apply(surr.data, c(1,2), is.numeric)), TRUE)
   # Test2. If data.imputeData.r works, there should be no NAs.  
-  expect_equal(any(is.na(surr.data)), F)
+  expect_equal(any(is.na(surr.data)), FALSE)
   # Test3. If ref_data is specified, you should have both "disease_surr"
   #        and "control_surr" in the colnames of the returned matrix.
   expect_equal(any(grepl("disease_surr", colnames(surr.data))) && 
-               any(grepl("control_surr", colnames(surr.data))), T)
+               any(grepl("control_surr", colnames(surr.data))), TRUE)
 })
 
 # Network pruning
 test_that("Network pruning works", {
-  ig = graph.adjacency(get.adjacency(sample_gnp(10, 0.8)), mode = "undirected", weighted = T)
-  ig_ref = graph.adjacency(get.adjacency(sample_gnp(10, 0.8)), mode = "undirected", weighted = T)
+  ig = graph.adjacency(get.adjacency(sample_gnp(10, 0.8)), mode = "undirected", weighted = TRUE)
+  ig_ref = graph.adjacency(get.adjacency(sample_gnp(10, 0.8)), mode = "undirected", weighted = TRUE)
   V(ig)$name = LETTERS[1:10]
   V(ig_ref)$name = LETTERS[1:10]
   # graph.naivePruning.r
   ig_pruned = graph.naivePruning(ig, ig_ref)
-  expect_equal(length(E(ig_pruned)$weight) <= length(E(ig)$weight), T)
+  expect_equal(length(E(ig_pruned)$weight) <= length(E(ig)$weight), TRUE)
 })
 
 # Probability diffusion algorithm
@@ -110,12 +110,12 @@ test_that("Probability diffusion works", {
   colnames(adj_mat) = c("A", "B", "C", "D", "E", "F", "G", "H", "I")
   G = vector("numeric", length=ncol(adj_mat))
   names(G)=colnames(adj_mat)
-  ig = graph.adjacency(adj_mat, mode="undirected", weighted=T, add.colnames = "name")
+  ig = graph.adjacency(adj_mat, mode="undirected", weighted=TRUE, add.colnames = "name")
   coords = layout.fruchterman.reingold(ig)
   .GlobalEnv$imgNum = 1
   # If no errors, graph.takeDiffusionSnapShot.r works and graph.connectToExt.r works.
   G_new = graph.diffuseP1(p1=1.0, sn="A", G=G, vNodes="A", 
-                          thresholdDiff=0.01, adj_mat=adj_mat, verbose=T, 
+                          thresholdDiff=0.01, adj_mat=adj_mat, verbose=TRUE, 
                           out_dir = getwd(), r_level = 1, coords = coords)
   # Inherited probabilities across all nodes should add to 1.
   # Which node inherited the highest probability from startNode?
@@ -125,12 +125,12 @@ test_that("Probability diffusion works", {
   # Test2. Sum of returned probabilities over all nodes should be 1.
   expect_equal(sum(unlist(G_new)), 1)
   # Test3. No errors thrown when movie is generated (means graph.takeDiffusionSnapShot.r works)
-  expect_equal(length(G_new)==length(G), T)
+  expect_equal(length(G_new)==length(G), TRUE)
   # Test4. No errors thrown when start node is stranded by its visited nodes 
   #        (means graph.connectToExt.r works).
   G_new = graph.diffuseP1(p1=1.0, sn="A", G=G, vNodes=c("A","B","C"), 
                           thresholdDiff=0.01, adj_mat=adj_mat)
-  expect_equal(length(G_new)==length(G), T)
+  expect_equal(length(G_new)==length(G), TRUE)
 })
 
 # Multi-node encoding
@@ -150,22 +150,22 @@ test_that("Multi-node pipeline works", {
   G = vector("numeric", length=ncol(adj_mat))
   names(G)=colnames(adj_mat)
   # multiNode.getNodeRanks.r, with movie functionality
-  ig = graph.adjacency(adj_mat, mode="undirected", weighted=T, add.colnames = "name")
+  ig = graph.adjacency(adj_mat, mode="undirected", weighted=TRUE, add.colnames = "name")
   coords = layout.fruchterman.reingold(ig)
   S = names(G)[1:3]
   ranks = multiNode.getNodeRanks(S=S, G=G, p1=0.9, thresholdDiff=0.01, adj_mat=adj_mat,
-                                 num.misses=log2(length(G)), verbose=F, 
-                                 out_dir=getwd(), useLabels=T, coords=coords)
+                                 num.misses=log2(length(G)), verbose=FALSE, 
+                                 out_dir=getwd(), useLabels=TRUE, coords=coords)
   # If no error, we know graph.takeNetWalkSnapShot.r is also working.
-  expect_equal(all(lapply(ranks, length)>0), T)
-  expect_equal(all(unlist(lapply(ranks, function(i) any(S %in% i)))), T)
+  expect_equal(all(lapply(ranks, length)>0), TRUE)
+  expect_equal(all(unlist(lapply(ranks, function(i) any(S %in% i)))), TRUE)
   # mle.getPtBSbyK.r
   ptBSbyK = mle.getPtBSbyK(S, ranks)
-  expect_equal(all(lapply(ptBSbyK, sum)>0), T)
+  expect_equal(all(lapply(ptBSbyK, sum)>0), TRUE)
   # mle.getEncodingLength.r
   res = mle.getEncodingLength(ptBSbyK, NULL, NULL, G)
-  expect_equal(nrow(res)==length(S), T)
-  expect_equal(max(res$d.score)>0, T)
+  expect_equal(nrow(res)==length(S), TRUE)
+  expect_equal(max(res$d.score)>0, TRUE)
 })
 
 # Single-node encoding
@@ -185,29 +185,29 @@ test_that("Single node pipeline works", {
   G = vector("numeric", length=ncol(adj_mat))
   names(G)=colnames(adj_mat)
   # singleNode.getNodeRanksN.r, with movie functionality
-  ig = graph.adjacency(adj_mat, mode="undirected", weighted=T, add.colnames = "name")
+  ig = graph.adjacency(adj_mat, mode="undirected", weighted=TRUE, add.colnames = "name")
   coords = layout.fruchterman.reingold(ig)
   S = names(G)[1:3]
   ranks=list()
   # If S is not specified, ranks should be length of G
   for (i in 1:length(S)) {
     ranks[[i]] = singleNode.getNodeRanksN(n=i, G=G, p1=0.9, thresholdDiff=0.01, adj_mat=adj_mat, 
-                                          S=S, num.misses=log2(length(G)), verbose=F, 
-                                          out_dir=getwd(), useLabels=T, coords=coords)
+                                          S=S, num.misses=log2(length(G)), verbose=FALSE, 
+                                          out_dir=getwd(), useLabels=TRUE, coords=coords)
   }
   names(ranks)=S
   # If no error, we know graph.takeNetWalkSnapShot.r is also working.
-  expect_equal(all(lapply(ranks, length)>0), T)
+  expect_equal(all(lapply(ranks, length)>0), TRUE)
   # Try without specifying S. Should be length of G
   ranks[[1]] = singleNode.getNodeRanksN(n=1, G=G, p1=0.9, thresholdDiff=0.01, adj_mat=adj_mat)
-  expect_equal(length(ranks[[1]])==length(G), T)
+  expect_equal(length(ranks[[1]])==length(G), TRUE)
   # mle.getPtBSbyK.r
   ptBSbyK = mle.getPtBSbyK(S, ranks)
-  expect_equal(all(lapply(ptBSbyK, sum)>0), T)
+  expect_equal(all(lapply(ptBSbyK, sum)>0), TRUE)
   # mle.getEncodingLength.r
   res = mle.getEncodingLength(ptBSbyK, NULL, NULL, G)
-  expect_equal(nrow(res)==length(S), T)
-  expect_equal(max(res$d.score)>0, T)
+  expect_equal(nrow(res)==length(S), TRUE)
+  expect_equal(max(res$d.score)>0, TRUE)
 })
 
 # Patient distances 
@@ -225,7 +225,7 @@ test_that("Patient distances works", {
   rownames(adj_mat) = c("A", "B", "C", "D", "E", "F", "G", "H", "I")
   colnames(adj_mat) = c("A", "B", "C", "D", "E", "F", "G", "H", "I")
   data_mx = apply(Miller2015[-1,which(Miller2015[1,]=="Argininemia")], c(1,2), as.numeric)
-  data_mx = data_mx[sample(1:nrow(data_mx), nrow(adj_mat), replace=F),]
+  data_mx = data_mx[sample(1:nrow(data_mx), nrow(adj_mat), replace=FALSE),]
   rownames(data_mx) = c("A", "B", "C", "D", "E", "F", "G", "H", "I")
   G = vector("numeric", length=ncol(adj_mat))
   names(G)=colnames(adj_mat)
@@ -237,7 +237,7 @@ test_that("Patient distances works", {
   # Also pre-compute patient bitstrings for faster distance calculations.
   ptBSbyK = list()
   for (pt in seq_len(ncol(data_mx))) {
-   S = names(sort(abs(data_mx[,pt]),decreasing=T)[seq_len(3)])
+   S = names(sort(abs(data_mx[,pt]),decreasing=TRUE)[seq_len(3)])
    ptBSbyK[[colnames(data_mx)[pt]]] = mle.getPtBSbyK(S, ranks)
   }
   # Build your results ("res") list object to store patient distances at different size k's.
@@ -258,13 +258,13 @@ test_that("Patient distances works", {
       }
     }
   }
-  expect_equal(length(res)==3, T)
-  expect_equal(unlist(lapply(res, function(i) any(is.na(i$ncd)))), c(F, F, F))
-  expect_equal(all(unlist(lapply(res, function(i) all(i$ncd>=0)))), T)
-  expect_equal(all(unlist(lapply(res, function(i) all(diag(i$ncd)==0)))), T)
+  expect_equal(length(res)==3, TRUE)
+  expect_equal(unlist(lapply(res, function(i) any(is.na(i$ncd)))), c(FALSE, FALSE, FALSE))
+  expect_equal(all(unlist(lapply(res, function(i) all(i$ncd>=0)))), TRUE)
+  expect_equal(all(unlist(lapply(res, function(i) all(diag(i$ncd)==0)))), TRUE)
   # mle.getMinPtDistance.r
   min_dist = mle.getMinPtDistance(lapply(res, function(i) i$ncd))
-  expect_equal(all(min_dist>=0) && all(min_dist<=1), T)
+  expect_equal(all(min_dist>=0) && all(min_dist<=1), TRUE)
 })
 
 

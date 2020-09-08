@@ -18,8 +18,8 @@
 #'                        the algorithm returns up the call stack.
 #' @param adj_mat - The adjacency matrix that encodes the edge weights for
 #'                  the network, G. 
-#' @param verbose - If debugging or tracking a diffusion event, verbose=TRUE will
-#'                  activate print statements. Default is FALSE.
+#' @param verbose - If debugging or tracking a diffusion event, verbose=TRUE
+#'                  will activate print statements. Default is FALSE.
 #' @param out_dir - If specified, a image sequence will generate in the
 #'                  output directory specified.
 #' @param r_level - "Recursion level", or the current depth in the call stack 
@@ -89,8 +89,7 @@ graph.diffuseP1=function (p1,sn,G,vNodes,thresholdDiff,adj_mat,verbose=FALSE,
                   G=graph.diffuseP1(i.prob/2,snUvNbors[z],G,
                                     c(vNodes,snUvNbors[z]),thresholdDiff,
                                     adj_mat,verbose=verbose,out_dir,r_level+1,
-                                    coords)
-            }
+                                    coords)}
             z=z + 1
         }
         if(out_dir!=""){graph.diffusionSnapShot(adj_mat,G,out_dir,p1,sn,

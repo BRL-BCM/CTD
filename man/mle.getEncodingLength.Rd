@@ -41,7 +41,7 @@ data("Miller2015")
 data_mx = Miller2015[-c(1,grep("x - ",rownames(Miller2015))),
                         grep("IEM", colnames(Miller2015))]
 data_mx = apply(data_mx, c(1,2), as.numeric)
-data_pval=TRUE(apply(data_mx,c(1,2),
+data_pval=t(apply(data_mx,c(1,2),
                   function(i)2*pnorm(abs(i),lower.tail=FALSE)))
 # Choose patient #1's (i.e., IEM_1000's) top 15 perturbed metabolites
 ptID = colnames(data_mx)[1]

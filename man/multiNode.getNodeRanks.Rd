@@ -49,8 +49,8 @@ Default is FALSE.}
 output directory specified.}
 
 \item{useLabels}{- If TRUE, node names will display next to their respective
-nodes in the network. If FALSE, node names will not display.
-Only relevant if out_dir is specified.}
+nodes in the network. If FALSE, node names will not
+display. Only relevant if out_dir is specified.}
 
 \item{coords}{- The x and y coordinates for each node in the network, to
 remain static between images.}
