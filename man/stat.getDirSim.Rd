@@ -62,7 +62,7 @@ ptBSbyK = list()
 for (pt in seq_len(ncol(data_mx))) {
   S=rownames(data_mx)[order(abs(data_mx[,pt]),
                             decreasing=TRUE)[seq_len(kmx)]]
-  ptBSbyK[[pt]] = singleNode.getPtBSbyK(S, ranks)
+  ptBSbyK[[pt]] = mle.getPtBSbyK(S, ranks)
 }
 # Build your results ("res") list object to store patient distances at
 # different size k's.
