@@ -56,7 +56,7 @@
 #'                                     thresholdDiff=0.01, adj_mat, TRUE,
 #'                                     getwd(), 1, coords)
 graph.diffuseP1=function (p1,sn,G,vNodes,thresholdDiff,adj_mat,verbose=FALSE,
-                          out_dir="",r_level=1,coords=NULL){
+                            out_dir="",r_level=1,coords=NULL){
     nTabs=paste(rep("   ",r_level-1),collapse="") # for verbose stmts
     if(verbose==TRUE) {
         print(sprintf("%sprob. to diffuse:%f sn: %s, visitedNodes: %s",
@@ -82,7 +82,7 @@ graph.diffuseP1=function (p1,sn,G,vNodes,thresholdDiff,adj_mat,verbose=FALSE,
                     G[[snUvNbors[z]]]=G[[snUvNbors[z]]]-i.prob/2
                     if(verbose==TRUE){
                         print(sprintf("%stook %f from child#%d:%s to send",
-                                      nTabs,i.prob/2,z,snUvNbors[z]))}
+                                        nTabs,i.prob/2,z,snUvNbors[z]))}
                     if(out_dir!=""){graph.diffusionSnapShot(adj_mat,G,out_dir,
                                                             p1,sn,vNodes,
                                                             r_level,coords)}

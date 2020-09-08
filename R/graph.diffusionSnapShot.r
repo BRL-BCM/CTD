@@ -50,8 +50,8 @@
 #' .GlobalEnv$imgNum = 1
 #' graph.diffusionSnapShot(adj_mat,G,getwd(),1.0,"A","A",1,coords)
 graph.diffusionSnapShot = function(adj_mat, G, output_dir, p1,
-                                       startNode, visitedNodes,
-                                       recursion_level=1, coords) {
+                                        startNode, visitedNodes,
+                                        recursion_level=1, coords) {
     ig = graph.adjacency(adj_mat, mode="undirected", weighted = TRUE)
     G = G[which(names(G) %in% V(ig)$name)]
     V(ig)$color = rep("blue", length(G))
@@ -67,7 +67,7 @@ graph.diffusionSnapShot = function(adj_mat, G, output_dir, p1,
                 edge.width=5*abs(E(ig)$weight), mark.col="black", 
                 mark.border = "black", mark.groups = startNode)
     title(sprintf("Diffuse %.2f from %s at recursion level %d.",
-                  p1, startNode, recursion_level), cex.main=1)
+                    p1, startNode, recursion_level), cex.main=1)
     legend("bottomright", legend=c("Visited", "Unvisited"),
             fill=c("red", "blue"))
     dev.off()

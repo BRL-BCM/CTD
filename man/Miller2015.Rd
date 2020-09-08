@@ -19,9 +19,9 @@ data(Miller2015)
 }
 \description{
 Untargeted metabolomic analysis for the clinical screening of 
-inborn errors of metabolism. Global metabolic profiling obtained by untargeted mass 
-spectrometry-based metabolomic platform for the detection of novel 
-and known inborn errors of metabolism.  This untargeted approach 
+inborn errors of metabolism. Global metabolic profiling obtained by 
+untargeted mass spectrometry-based metabolomic platform for the detection
+of novel and known inborn errors of metabolism.  This untargeted approach 
 collected z-score values for ~1200 unique compounds (including 
 ~500 named human analytes) from human plasma.  Data set contains 
 186 individual plasma samples (118 confirmed inborn errors of

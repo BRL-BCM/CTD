@@ -51,7 +51,7 @@
 #' graph.netWalkSnapShot(adj_mat,G,output_dir=getwd(),p1=1.0,
 #'                       "A",S,coords,1,TRUE)
 graph.netWalkSnapShot = function(adj_mat, G, output_dir, p1, visitedNodes, S,
-                                 coords, imgNum=1, useLabels=TRUE) {
+                                    coords, imgNum=1, useLabels=TRUE) {
     ig=graph.adjacency(adj_mat,mode="undirected",weighted=TRUE)
     V(ig)$color=rep("white", length(G))
     V(ig)$color[which(V(ig)$name %in% S)]="green"

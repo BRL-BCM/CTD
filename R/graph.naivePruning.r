@@ -53,7 +53,6 @@ graph.naivePruning = function(ig_dis, ig_ref) {
             }
         }
     }
-    print(sprintf("%s edges were modified in the disease+reference
-                    network.", it))
+    print(sprintf("%s edges were modified in the dis+ref net.", it))
     return (ig_dis)
 }

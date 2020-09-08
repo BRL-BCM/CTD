@@ -52,10 +52,11 @@ multiNode.getNodeRanks=function(S,G,p1,thresholdDiff,adj_mat,num.misses=NULL,
     for (n in seq_len(length(S))) {
         if(verbose){print(sprintf("Node rankings %d of %d.", n, length(S)))}
         stopIterating=FALSE
-        curr_ns=startNode=S[n] # current node set
+        curr_ns=startNode=S[n] #current node set
         numMisses=0
         if(out_dir!=""){graph.netWalkSnapShot(adj_mat,G,out_dir,p1,curr_ns,S, 
-                                                coords,length(curr_ns),useLabels)}
+                                                coords,length(curr_ns),
+                                                useLabels)}
         while(stopIterating==FALSE) {
             hits = curr_ns[which(curr_ns %in% S)]#diffuse from all nodes in hits
             sumHits=as.vector(matrix(0, nrow=length(G), ncol=1))
@@ -93,5 +94,3 @@ multiNode.getNodeRanks=function(S,G,p1,thresholdDiff,adj_mat,num.misses=NULL,
     names(ranks)=S
     return(ranks)
 }
-
-

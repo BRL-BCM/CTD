@@ -33,7 +33,7 @@ data.zscoreData = function(data, ref) {
         if (length(rmSamples)>0) {x=met_data[-rmSamples]} else {x=met_data}
         if (!all(is.na(x))) {
             if (length(x[intersect(which(x>quantile(x, 0.025)), 
-                                   which(x<quantile(x, .975)))])>3) {
+                                    which(x<quantile(x, .975)))])>3) {
                 x = x[intersect(which(x>quantile(x, 0.025)),
                                 which(x<quantile(x, .975)))]
             }

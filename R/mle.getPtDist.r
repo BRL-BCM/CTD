@@ -85,7 +85,7 @@
 #'   }
 #' }
 mle.getPtDist=function(p1.optBS,ptID,p2.optBS,ptID2,data_mx,ranks,p1,
-                       thresholdDiff,adj_mat) {
+                        thresholdDiff,adj_mat) {
     if (length(p1.optBS)!=length(p2.optBS)){
         return("Error: Pt1 Subset different size from Pt2.")}
     if (is.null(ranks)) {return("Error: Must specify ranks")}
@@ -96,11 +96,12 @@ mle.getPtDist=function(p1.optBS,ptID,p2.optBS,ptID2,data_mx,ranks,p1,
     dirSim = stat.getDirSim(ptID, ptID2, length(p1.optBS), data_mx)
     #Get optimal encoding of patient1's union patient2's subsets
     p1.e=p2.e=p12.e=c()
+    bits_fixed=log2(choose(length(G),1)) #fixed length encoding length
     for (k in seq_len(length(p1.optBS))) {
         p1.e[k]=res.p1[which.max(res.p1[seq_len(k),"d.score"]),"IS.alt"]+
-            log2(choose(length(G),1))*(k-which.max(res.p1[seq_len(k),"d.score"]))
+            bits_fixed*(k-which.max(res.p1[seq_len(k),"d.score"]))
         p2.e[k]=res.p2[which.max(res.p2[seq_len(k),"d.score"]),"IS.alt"]+
-            log2(choose(length(G),1))*(k-which.max(res.p2[seq_len(k),"d.score"]))
+            bits_fixed*(k-which.max(res.p2[seq_len(k),"d.score"]))
         # p12
         p1.sig.nodes_cpy=names(sort(abs(data_mx[,ptID]),
                                     decreasing=TRUE)[seq_len(length(p1.optBS))])

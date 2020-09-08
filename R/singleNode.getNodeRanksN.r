@@ -104,7 +104,8 @@ singleNode.getNodeRanksN = function(n,G,p1,thresholdDiff,adj_mat,S=NULL,
             curr_ns = c(curr_ns, startNode)
             if(length(curr_ns)>=(length(G))){stopIterating=TRUE}}
         if(out_dir!=""){graph.netWalkSnapShot(adj_mat,G,out_dir,p1,curr_ns,S, 
-                                                coords,length(curr_ns),useLabels)}
+                                                coords,length(curr_ns),
+                                                useLabels)}
     }
     return(curr_ns)
 }
