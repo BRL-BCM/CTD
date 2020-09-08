@@ -54,11 +54,11 @@
 #' ranks=singleNode.getNodeRanksN(1,G,p1=0.9,thresholdDiff=0.01,adj_mat)
 #' # Make a movie of the network walker
 #' S=names(G)[sample(seq_len(length(G)), 3, replace=FALSE)]
-#' ig=graph.adjacency(adj_mat,mode="undirected",weighted=T,add.colnames="name")
+#' ig=graph.adjacency(adj_mat,mode="undirected",weighted=TRUE,add.colnames="name")
 #' coords=layout.fruchterman.reingold(ig)
 #' ranks = singleNode.getNodeRanksN(which(names(G)==S[1]),G,p1=0.9,
 #'                                  thresholdDiff=0.01,adj_mat,S,
-#'                                  log2(length(G)),F,getwd())
+#'                                  log2(length(G)),FALSE,getwd())
 singleNode.getNodeRanksN = function(n,G,p1,thresholdDiff,adj_mat,S=NULL,
                                     num.misses=NULL,verbose=F,out_dir="",
                                     useLabels=F,coords=NULL) {
@@ -91,9 +91,9 @@ singleNode.getNodeRanksN = function(n,G,p1,thresholdDiff,adj_mat,S=NULL,
         currGph[ind]=unlist(currGph[ind])+extra.prob.to.diffuse/sum(ind)}
       # Set startNode to a node that is the max probability in the new currGph
       maxProb=names(which.max(currGph))
-      if(out_dir!=""){graph.takeNetWalkSnapShot(adj_mat,G,out_dir,p1,curr_ns,S, 
-                                                coords,length(curr_ns),
-                                                useLabels)}
+      if(out_dir!=""){graph.netWalkSnapShot(adj_mat,G,out_dir,p1,curr_ns,S, 
+                                            coords,length(curr_ns),
+                                            useLabels)}
       # Break ties: When there are ties, choose the first of the winners.
       startNode = names(currGph[maxProb[1]])
       if (!is.null(S)) { # draw until all members of S are found

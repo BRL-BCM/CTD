@@ -76,9 +76,9 @@ multiNode.getNodeRanks=function(S,G,p1,thresholdDiff,adj_mat,num.misses=NULL,
         }
         sumHits=sumHits/length(hits) #Get average prob across diffusion events
         maxProb=names(which.max(sumHits[-which(names(sumHits) %in% curr_ns)]))
-        if(out_dir!=""){graph.takeNetWalkSnapShot(adj_mat,G,out_dir,p1,curr_ns,
-                                                  S,coords,length(curr_ns),
-                                                  useLabels)}
+        if(out_dir!=""){graph.netWalkSnapShot(adj_mat,G,out_dir,p1,curr_ns,
+                                              S,coords,length(curr_ns),
+                                              useLabels)}
         startNode=names(G[maxProb[1]]) # Break ties: Choose first of winners.
         if (startNode %in% S) {
           numMisses=0
@@ -86,9 +86,9 @@ multiNode.getNodeRanks=function(S,G,p1,thresholdDiff,adj_mat,num.misses=NULL,
         } else {numMisses=numMisses+1}
         curr_ns=c(curr_ns, startNode)
         if(all(S %in% curr_ns) || numMisses>num.misses){stopIterating=T}
-        if(out_dir!=""){graph.takeNetWalkSnapShot(adj_mat,G,out_dir,p1,curr_ns,
-                                                  S,coords,length(curr_ns),
-                                                  useLabels)}
+        if(out_dir!=""){graph.netWalkSnapShot(adj_mat,G,out_dir,p1,curr_ns,
+                                              S,coords,length(curr_ns),
+                                              useLabels)}
       }
       ranks[[n]]=curr_ns
     }

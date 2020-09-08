@@ -27,7 +27,7 @@
 #' for(pt in seq_len(ncol(data_mx))){
 #'   topMets_allpts=c(topMets_allpts, 
 #'                    rownames(data_mx)[order(abs(data_mx[,pt]),
-#'                                            decreasing=T)[seq_len(kmx)]])
+#'                                            decreasing=TRUE)[seq_len(kmx)]])
 #' }
 #' topMets_allpts = unique(topMets_allpts)
 #' # Pre-compute node ranks for all metabolites in topMets_allpts for
@@ -42,7 +42,7 @@
 #' # Also pre-compute patient bitstrings for faster distance calculations.
 #' ptBSbyK = list()
 #' for (pt in seq_len(ncol(data_mx))) {
-#'   S=rownames(data_mx)[order(abs(data_mx[,pt]),decreasing=T)[seq_len(kmx)]]
+#'   S=rownames(data_mx)[order(abs(data_mx[,pt]),decreasing=TRUE)[seq_len(kmx)]]
 #'   ptBSbyK[[pt]]=mle.getPtBSbyK(S, ranks)
 #' }
 #' # Build your results ("res") list object to store patient distances at

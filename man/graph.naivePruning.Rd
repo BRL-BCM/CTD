@@ -27,19 +27,17 @@ most influenced by a perturbation in the starting node.
 \examples{
 # Generate a 100 node "disease-control" network
 adj_mat=matrix(0, nrow=100, ncol=100)
-rows = sample(seq_len(100), 50, replace=T)
-cols = sample(seq_len(100), 50, replace=T)
-for (i in rows) {for (j in cols){adj_mat[i, j]=rnorm(1, mean=0, sd=1)} }
+rows = sample(seq_len(100), 50, replace=TRUE)
+cols = sample(seq_len(100), 50, replace=TRUE)
+for (i in rows) {for (j in cols){adj_mat[i,j]=rnorm(1,0,1)}}
 colnames(adj_mat)=sprintf("Metabolite\%d", seq_len(100))
-ig_dis = graph.adjacency(adj_mat, mode="undirected", weighted=T)
-
+ig_dis = graph.adjacency(adj_mat, mode="undirected", weighted=TRUE)
 # Generate a 100 node reference "control-only" network
 adj_mat2=matrix(0, nrow=100, ncol=100)
-rows2 = sample(seq_len(100), 50, replace=T)
-cols2 = sample(seq_len(100), 50, replace=T)
-for (i in rows2) {for (j in cols2){adj_mat2[i, j]=rnorm(1, mean=0, sd=1)}}
+rows2 = sample(seq_len(100), 50, replace=TRUE)
+cols2 = sample(seq_len(100), 50, replace=TRUE)
+for (i in rows2) {for (j in cols2){adj_mat2[i,j]=rnorm(1,0,1)}}
 colnames(adj_mat2)=sprintf("Metabolite\%d", seq_len(100))
-ig_ref = graph.adjacency(adj_mat2, mode="undirected", weighted=T)
-
+ig_ref = graph.adjacency(adj_mat2, mode="undirected", weighted=TRUE)
 ig_pruned=graph.naivePruning(ig_dis, ig_ref)
 }

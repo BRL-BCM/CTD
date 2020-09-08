@@ -19,7 +19,7 @@
 #' adj_mat = matrix(0, nrow=nrow(data_mx), ncol=nrow(data_mx))
 #' rows = sample(seq_len(ncol(adj_mat)), 0.1*ncol(adj_mat))
 #' cols = sample(seq_len(ncol(adj_mat)), 0.1*ncol(adj_mat))
-#' for (i in rows) {for (j in cols) {adj_mat[i, j]=rnorm(1,mean=0,sd=1)}}
+#' for (i in rows) {for (j in cols) {adj_mat[i,j]=rnorm(1,mean=0,sd=1)}}
 #' colnames(adj_mat) = rownames(data_mx)
 #' rownames(adj_mat) = rownames(data_mx)
 #' G = vector("numeric", length=ncol(adj_mat))
@@ -30,21 +30,21 @@
 #' for (pt in seq_len(ncol(data_mx))) {
 #'   topMets_allpts=c(topMets_allpts, 
 #'                    rownames(data_mx)[order(abs(data_mx[,pt]),
-#'                                            decreasing=T)[seq_len(kmx)]])}
+#'                                            decreasing=TRUE)[seq_len(kmx)]])}
 #' topMets_allpts = unique(topMets_allpts)
 #' # Pre-compute node ranks for all metabolites in topMets_allpts
 #' # for faster distance calculations.
 #' ranks = list()
 #' for (n in seq_len(length(topMets_allpts))) { 
 #'   ind = which(names(G)==topMets_allpts[n])
-#'   ranks[[n]]=singleNode.getNodeRanksN(ind,G,0.9,0.01,adj_mat
+#'   ranks[[n]]=singleNode.getNodeRanksN(ind,G,0.9,0.01,adj_mat,
 #'                                       topMets_allpts,log2(length(G))) 
 #' }
 #' names(ranks) = topMets_allpts
 #' # Also pre-compute patient bitstrings for faster distance calculations.
 #' ptBSbyK = list()
 #' for (pt in seq_len(ncol(data_mx))) {
-#'   S=rownames(data_mx)[order(abs(data_mx[,pt]),decreasing=T)[seq_len(kmx)]]
+#'   S=rownames(data_mx)[order(abs(data_mx[,pt]),decreasing=TRUE)[seq_len(kmx)]]
 #'   ptBSbyK[[pt]] = singleNode.getPtBSbyK(S, ranks)
 #' }
 #' # Build your results ("res") list object to store patient distances at
@@ -59,7 +59,7 @@
 #'   ptID=colnames(data_mx)[pt]
 #'   for (pt2 in pt:ncol(data_mx)) {
 #'     ptID2=colnames(data_mx)[pt2]
-#'     tmp=getDirSim(ptID,ptID2,kmx,data_mx)
+#'     tmp=stat.getDirSim(ptID,ptID2,kmx,data_mx)
 #'     for (k in seq_len(kmx)) {
 #'       res[[k]]$dir[ptID, ptID2]=tmp[k]
 #'       res[[k]]$dir[ptID2, ptID]=tmp[k]

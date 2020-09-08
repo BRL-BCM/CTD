@@ -45,14 +45,15 @@
 #' G=lapply(G, function(i) i[[1]]=0)
 #' probs_afterCurrDraw=graph.diffuseP1(p1=1.0, sn=names(G)[1], G=G,
 #'                                     vNodes=names(G)[1], 
-#'                                     thresholdDiff=0.01, adj_mat, T)
+#'                                     thresholdDiff=0.01, adj_mat, TRUE)
 #' # Make a movie of the diffusion of probability from sn
 #' .GlobalEnv$imgNum = 1
-#' ig=graph.adjacency(adj_mat,mode="undirected",weighted=T,add.colnames="name")
+#' ig=graph.adjacency(adj_mat,mode="undirected",weighted=TRUE,
+#'                    add.colnames="name")
 #' coords = layout.fruchterman.reingold(ig)
 #' probs_afterCurrDraw=graph.diffuseP1(p1=1.0, sn=names(G)[1], G=G,
 #'                                     vNodes=names(G)[1],
-#'                                     thresholdDiff=0.01, adj_mat, T,
+#'                                     thresholdDiff=0.01, adj_mat, TRUE,
 #'                                     getwd(), 1, coords)
 graph.diffuseP1=function (p1,sn,G,vNodes,thresholdDiff,adj_mat,verbose=F,
                           out_dir="",r_level=1,coords=NULL){
@@ -73,8 +74,8 @@ graph.diffuseP1=function (p1,sn,G,vNodes,thresholdDiff,adj_mat,verbose=F,
         G[[snUvNbors[z]]]=G[[snUvNbors[z]]]+i.prob
         if(verbose==T) {
           print(sprintf("%schild#%d %s got %f",nTabs,z,snUvNbors[z],i.prob))}
-        if(out_dir!=""){graph.takeDiffusionSnapShot(adj_mat,G,out_dir,p1,
-                                                    sn,vNodes,r_level,coords)}
+        if(out_dir!=""){graph.diffusionSnapShot(adj_mat,G,out_dir,p1,
+                                                sn,vNodes,r_level,coords)}
         nNbors=G[names(which(abs(adj_mat2[,snUvNbors[z]])>0))]
         if(length(nNbors)>0 && i.prob/2>thresholdDiff &&
            ((length(vNodes)+1)<length(G))) {
@@ -82,16 +83,16 @@ graph.diffuseP1=function (p1,sn,G,vNodes,thresholdDiff,adj_mat,verbose=F,
           if(verbose==T) {
             print(sprintf("%stook %f from child#%d:%s to send",nTabs,i.prob/2,
                           z,snUvNbors[z]))}
-          if(out_dir!=""){graph.takeDiffusionSnapShot(adj_mat,G,out_dir,p1,sn,
-                                                      vNodes,r_level,coords)}
+          if(out_dir!=""){graph.diffusionSnapShot(adj_mat,G,out_dir,p1,sn,
+                                                  vNodes,r_level,coords)}
           G=graph.diffuseP1(i.prob/2,snUvNbors[z],G,c(vNodes,snUvNbors[z]),
                             thresholdDiff,adj_mat,verbose=verbose,out_dir,
                             r_level+1,coords)
         }
         z=z + 1
       }
-      if(out_dir!=""){graph.takeDiffusionSnapShot(adj_mat,G,out_dir,p1,sn,
-                                                  vNodes,r_level,coords)}
+      if(out_dir!=""){graph.diffusionSnapShot(adj_mat,G,out_dir,p1,sn,
+                                              vNodes,r_level,coords)}
     } else {
       if(verbose==T) {
         print(sprintf("sn %s is stranded by its visited neighbors, or is
@@ -99,8 +100,8 @@ graph.diffuseP1=function (p1,sn,G,vNodes,thresholdDiff,adj_mat,verbose=F,
                       nodes.", sn))}
       G[!(names(G)%in%vNodes)]=unlist(G[!(names(G)%in%vNodes)])+
                                      p1/(length(G)-length(vNodes))
-      if(out_dir!=""){graph.takeDiffusionSnapShot(adj_mat,G,out_dir,p1,sn,
-                                                  vNodes,r_level,coords)}
+      if(out_dir!=""){graph.diffusionSnapShot(adj_mat,G,out_dir,p1,sn,
+                                              vNodes,r_level,coords)}
     }
     return(G)
 }

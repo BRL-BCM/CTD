@@ -35,7 +35,7 @@ adj_mat = rbind(c(0,2,1,0,0,0,0), # A
                 )
 rownames(adj_mat) = c("A", "B", "C", "D", "E", "F", "G")
 colnames(adj_mat) = c("A", "B", "C", "D", "E", "F", "G")
-ig = graph.adjacency(as.matrix(adj_mat), mode="undirected",weighted=T)
+ig = graph.adjacency(as.matrix(adj_mat), mode="undirected",weighted=TRUE)
 G=vector(mode="list", length=7)
 G[seq_len(length(G))] = 0
 names(G) = c("A", "B", "C", "D", "E", "F", "G")
