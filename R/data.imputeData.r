@@ -20,51 +20,45 @@
 #' imputed.data = data.imputeData(dt_w_missing_vals, ref_data)
 #' print(any(is.na(imputed.data)))
 data.imputeData = function(data, ref) {
-    # First, remove metabolites that are NA for all data and/or ref samples
+    # Remove metabolites that are NA for all data/ref samples
     rmThese.ref = c()
-    for (r in seq_len(nrow(ref))) {
-      if (all(is.na(as.numeric(ref[rownames(ref)[r],])))) {
-        rmThese.ref = c(rmThese.ref, r)
-      } 
-    }
-    if (length(rmThese.ref) > 0) { ref = ref[-rmThese.ref, ] }
+    for(r in seq_len(nrow(ref))){
+        if(all(is.na(as.numeric(ref[rownames(ref)[r],])))){
+          rmThese.ref = c(rmThese.ref, r)}}
+    if(length(rmThese.ref)>0){ref=ref[-rmThese.ref,]}
     rmThese.data = c()
     for (r in seq_len(nrow(data))) {
-      if (all(is.na(as.numeric(data[rownames(data)[r],])))) {
-        rmThese.data = c(rmThese.data, r)
-      } 
-    }
-    if (length(rmThese.data) > 0) { data = data[-rmThese.data, ] }
-    
-    # Next, match metabolites between data and ref matrices
+        if (all(is.na(as.numeric(data[rownames(data)[r],])))){
+          rmThese.data=c(rmThese.data, r)}}
+    if(length(rmThese.data)>0){data=data[-rmThese.data,]}
+    # Match metabolites between data and ref matrices
     data = data[which(rownames(data) %in% rownames(ref)),]
     ref = ref[which(rownames(ref) %in% rownames(data)),]
     data = data[sort(rownames(data)),]
     ref = ref[sort(rownames(ref)),]
-    
     imputed.data = data
     for (met in seq_len(nrow(ref))) {
-      rowData = ref[met,]
-      if (any(is.na(rowData))) {
-        rowData = as.numeric(rowData[-which(is.na(rowData))])
-      } else {
-        rowData = as.numeric(rowData)
-      }
-      # Impute using uniform random variable, where 
-      # a = 0.99*observed minimum, and b = observed minimum
-      min_row = min(rowData)
-      cols = which(is.na(data[met,]))
-      if (min_row<0) {
-        min_row = -1*min_row
-        i_val = -1
-      } else {
-        i_val = 1
-      }
-      imputed.data[met,cols] = tryCatch(i_val*runif(length(cols), 
-                                              min = 0.99*min_row, 
-                                              max= min_row), 
-                                        error = function(e) e,
-                                        warning=function(w) w)
+        rowData = ref[met,]
+        if (any(is.na(rowData))) {
+            rowData = as.numeric(rowData[-which(is.na(rowData))])
+        } else {
+            rowData = as.numeric(rowData)
+        }
+        # Impute using uniform random variable, where 
+        # a = 0.99*observed minimum, and b = observed minimum
+        min_row = min(rowData)
+        cols = which(is.na(data[met,]))
+        if (min_row<0) {
+            min_row = -1*min_row
+            i_val = -1
+        } else {
+            i_val = 1
+        }
+        imputed.data[met,cols] = tryCatch(i_val*runif(length(cols),
+                                                      min = 0.99*min_row,
+                                                      max= min_row),
+                                          error = function(e) e,
+                                          warning=function(w) w)
     }
     return(imputed.data)
 }

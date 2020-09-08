@@ -78,8 +78,9 @@ test_that("Surrogate profiles works", {
   # Test2. If data.imputeData.r works, there should be no NAs.  
   expect_equal(any(is.na(surr.data)), F)
   # Test3. If ref_data is specified, you should have both "disease_surr"
-  #        and "cntl_surr" in the colnames of the returned matrix.
-  expect_equal(any(grepl("disease_surr", colnames(surr.data))) && any(grepl("cntl_surr", colnames(surr.data))), T)
+  #        and "control_surr" in the colnames of the returned matrix.
+  expect_equal(any(grepl("disease_surr", colnames(surr.data))) && 
+               any(grepl("control_surr", colnames(surr.data))), T)
 })
 
 # Network pruning
@@ -158,8 +159,8 @@ test_that("Multi-node pipeline works", {
   # If no error, we know graph.takeNetWalkSnapShot.r is also working.
   expect_equal(all(lapply(ranks, length)>0), T)
   expect_equal(all(unlist(lapply(ranks, function(i) any(S %in% i)))), T)
-  # multiNode.getPtBSbyK.r
-  ptBSbyK = multiNode.getPtBSbyK(S, ranks)
+  # mle.getPtBSbyK.r
+  ptBSbyK = mle.getPtBSbyK(S, ranks)
   expect_equal(all(lapply(ptBSbyK, sum)>0), T)
   # mle.getEncodingLength.r
   res = mle.getEncodingLength(ptBSbyK, NULL, NULL, G)
@@ -200,8 +201,8 @@ test_that("Single node pipeline works", {
   # Try without specifying S. Should be length of G
   ranks[[1]] = singleNode.getNodeRanksN(n=1, G=G, p1=0.9, thresholdDiff=0.01, adj_mat=adj_mat)
   expect_equal(length(ranks[[1]])==length(G), T)
-  # singleNode.getPtBSbyK.r
-  ptBSbyK = singleNode.getPtBSbyK(S, ranks)
+  # mle.getPtBSbyK.r
+  ptBSbyK = mle.getPtBSbyK(S, ranks)
   expect_equal(all(lapply(ptBSbyK, sum)>0), T)
   # mle.getEncodingLength.r
   res = mle.getEncodingLength(ptBSbyK, NULL, NULL, G)

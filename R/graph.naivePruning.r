@@ -35,28 +35,29 @@ graph.naivePruning = function(ig_dis, ig_ref) {
     if (is.null(nrow(ee))) { ee = t(ee) }
     it=0
     for (e in seq_len(nrow(ee))) {
-      e.id.dis=get.edge.ids(ig_dis, vp=ee[e,])
-      e.id.ref=get.edge.ids(ig_ref, vp=ee[e,])
-      if (e.id.dis!=0) {
-        isSameDirection=ifelse((((E(ig_dis)$weight[e.id.dis]<0) &&
-                                   (E(ig_ref)$weight[e.id.ref]<0)) || 
-                               ((E(ig_dis)$weight[e.id.dis]>0) &&
-                                  (E(ig_ref)$weight[e.id.ref]>0))),T,F)
-        
-        if (isSameDirection && (abs(E(ig_ref)$weight[e.id.ref])<
-                                abs(E(ig_dis)$weight[e.id.dis]))) {
-          new_w=E(ig_dis)$weight[e.id.dis]-E(ig_ref)$weight[e.id.ref]
-          E(ig_dis)$weight[e.id.dis]=new_w
-          it=it + 1
+        e.id.dis=get.edge.ids(ig_dis, vp=ee[e,])
+        e.id.ref=get.edge.ids(ig_ref, vp=ee[e,])
+        if (e.id.dis!=0) {
+            isSameDirection=ifelse((((E(ig_dis)$weight[e.id.dis]<0) &&
+                                       (E(ig_ref)$weight[e.id.ref]<0)) || 
+                                   ((E(ig_dis)$weight[e.id.dis]>0) &&
+                                      (E(ig_ref)$weight[e.id.ref]>0))),
+                                   TRUE,FALSE)
+            if (isSameDirection && (abs(E(ig_ref)$weight[e.id.ref])<
+                                    abs(E(ig_dis)$weight[e.id.dis]))) {
+                new_w=E(ig_dis)$weight[e.id.dis]-E(ig_ref)$weight[e.id.ref]
+                E(ig_dis)$weight[e.id.dis]=new_w
+                it=it + 1
+            }
+            if (isSameDirection && (abs(E(ig_ref)$weight[e.id.ref]) >=
+                                    abs(E(ig_dis)$weight[e.id.dis]))) {
+                ig_dis=delete.edges(ig_dis, edges = E(ig_dis)[[e.id.dis]])
+                it=it + 1
+            }
         }
-        if (isSameDirection && (abs(E(ig_ref)$weight[e.id.ref]) >=
-                                abs(E(ig_dis)$weight[e.id.dis]))) {
-          ig_dis=delete.edges(ig_dis, edges = E(ig_dis)[[e.id.dis]])
-          it=it + 1
-        }
-      }
     }
-    print(sprintf("%s edges were modified in the disease+reference network.", it))
+    print(sprintf("%s edges were modified in the disease+reference
+                  network.", it))
     return (ig_dis)
 }
 

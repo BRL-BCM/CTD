@@ -23,8 +23,9 @@
 #' @param imgNum - The image number for this snapshot. If images are being 
 #'                 generated in a sequence, this serves as an iterator for file
 #'                 naming.
-#' @param useLabels - If T, node names will display next to their respective nodes
-#'                    in the network. If F, node names will not display.
+#' @param useLabels - If TRUE, node names will display next to their respective 
+#'                    nodes in the network. If FALSE, node names will not
+#'                    display.
 #' @return 0
 #' @export graph.netWalkSnapShot
 #' @import igraph
@@ -49,14 +50,15 @@
 #' names(G) = c("A", "B", "C", "D", "E", "F", "G")
 #' S = c("A", "C")
 #' coords = layout.fruchterman.reingold(ig)
-#' graph.netWalkSnapShot(adj_mat,G,output_dir=getwd(),p1=1.0,"A",S,coords,1,T)
+#' graph.netWalkSnapShot(adj_mat,G,output_dir=getwd(),p1=1.0,
+#'                       "A",S,coords,1,TRUE)
 graph.netWalkSnapShot = function(adj_mat, G, output_dir, p1, visitedNodes, S,
-                                 coords, imgNum=1, useLabels=T) {
-    ig=graph.adjacency(adj_mat,mode="undirected",weighted=T)
+                                 coords, imgNum=1, useLabels=TRUE) {
+    ig=graph.adjacency(adj_mat,mode="undirected",weighted=TRUE)
     V(ig)$color=rep("white", length(G))
     V(ig)$color[which(V(ig)$name %in% S)]="green"
-    if(useLabels==T){
-      V(ig)$label = V(ig)$name
+    if(useLabels==TRUE){
+        V(ig)$label = V(ig)$name
     }else{V(ig)$label=rep("", length(V(ig)$name))}
     png(sprintf("%s/netWalkMovie%d_%d.png", output_dir, 
                 which(S==visitedNodes[1]), imgNum), 500, 500)

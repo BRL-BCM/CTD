@@ -44,7 +44,8 @@
 #' # Also pre-compute patient bitstrings for faster distance calculations.
 #' ptBSbyK = list()
 #' for (pt in seq_len(ncol(data_mx))) {
-#'   S=rownames(data_mx)[order(abs(data_mx[,pt]),decreasing=TRUE)[seq_len(kmx)]]
+#'   S=rownames(data_mx)[order(abs(data_mx[,pt]),
+#'                             decreasing=TRUE)[seq_len(kmx)]]
 #'   ptBSbyK[[pt]] = singleNode.getPtBSbyK(S, ranks)
 #' }
 #' # Build your results ("res") list object to store patient distances at
@@ -70,21 +71,21 @@ stat.getDirSim = function(ptID, ptID2, kmx, data_mx) {
   # Get optimal bitstring for encoding of patient1's union patient2's subsets
   dirSim = vector("numeric", length=kmx)
   for (k in seq_len(kmx)) {
-    p1.sig.nodes = rownames(data_mx)[order(abs(data_mx[,ptID]),
-                                           decreasing=T)][seq_len(k)]
-    p2.sig.nodes=rownames(data_mx)[order(abs(data_mx[,ptID2]),
-                                         decreasing=T)][seq_len(k)]
-    p1.dirs = data_mx[p1.sig.nodes, ptID]
-    p1.dirs[which(!(p1.dirs>0))] = 0
-    p1.dirs[which(p1.dirs>0)] = 1
-    p2.dirs = data_mx[p2.sig.nodes, ptID2]
-    p2.dirs[which(!(p2.dirs>0))] = 0
-    p2.dirs[which(p2.dirs>0)] = 1
-    p1.sig.nodes = sprintf("%s%d", p1.sig.nodes, p1.dirs)
-    p2.sig.nodes = sprintf("%s%d", p2.sig.nodes, p2.dirs)
-    dirSim[k]=1-(length(intersect(p1.sig.nodes,
-                                  p2.sig.nodes))/length(union(p1.sig.nodes, 
-                                                              p2.sig.nodes)))
+      p1.sig.nodes = rownames(data_mx)[order(abs(data_mx[,ptID]),
+                                             decreasing=TRUE)][seq_len(k)]
+      p2.sig.nodes=rownames(data_mx)[order(abs(data_mx[,ptID2]),
+                                           decreasing=TRUE)][seq_len(k)]
+      p1.dirs = data_mx[p1.sig.nodes, ptID]
+      p1.dirs[which(!(p1.dirs>0))] = 0
+      p1.dirs[which(p1.dirs>0)] = 1
+      p2.dirs = data_mx[p2.sig.nodes, ptID2]
+      p2.dirs[which(!(p2.dirs>0))] = 0
+      p2.dirs[which(p2.dirs>0)] = 1
+      p1.sig.nodes = sprintf("%s%d", p1.sig.nodes, p1.dirs)
+      p2.sig.nodes = sprintf("%s%d", p2.sig.nodes, p2.dirs)
+      dirSim[k]=1-(length(intersect(p1.sig.nodes,
+                                    p2.sig.nodes))/length(union(p1.sig.nodes, 
+                                                                p2.sig.nodes)))
   }
   return(dirSim)
 }

@@ -60,7 +60,8 @@ names(ranks) = topMets_allpts
 # Also pre-compute patient bitstrings for faster distance calculations.
 ptBSbyK = list()
 for (pt in seq_len(ncol(data_mx))) {
-  S=rownames(data_mx)[order(abs(data_mx[,pt]),decreasing=TRUE)[seq_len(kmx)]]
+  S=rownames(data_mx)[order(abs(data_mx[,pt]),
+                            decreasing=TRUE)[seq_len(kmx)]]
   ptBSbyK[[pt]] = singleNode.getPtBSbyK(S, ranks)
 }
 # Build your results ("res") list object to store patient distances at

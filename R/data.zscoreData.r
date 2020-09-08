@@ -26,25 +26,25 @@ data.zscoreData = function(data, ref) {
     ref = log(data.matrix(ref))
     zscored.data = data
     for (met in seq_len(nrow(data))) {
-      met_data = as.numeric(ref[met,])
-      rmSamples=unique(c(which(is.na(met_data)),which(is.infinite(met_data))))
-      if (length(rmSamples)>0) {x=met_data[-rmSamples]} else {x=met_data}
-      if (!all(is.na(x))) {
-        if (length(x[intersect(which(x>quantile(x, 0.025)), 
-                               which(x<quantile(x, .975)))])>3) {
-          x = x[intersect(which(x>quantile(x, 0.025)),
-                          which(x<quantile(x, .975)))]
+        met_data = as.numeric(ref[met,])
+        rmSamples=unique(c(which(is.na(met_data)),which(is.infinite(met_data))))
+        if (length(rmSamples)>0) {x=met_data[-rmSamples]} else {x=met_data}
+        if (!all(is.na(x))) {
+            if (length(x[intersect(which(x>quantile(x, 0.025)), 
+                                   which(x<quantile(x, .975)))])>3) {
+                x = x[intersect(which(x>quantile(x, 0.025)),
+                                which(x<quantile(x, .975)))]
+            }
+            d = qqnorm(x, plot.it = FALSE);
+            x = as.numeric(d$y)
+            z = as.numeric(d$x)
+            df = data.frame(x=x,z=z)
+            t = lm(x~z, data=df)
+            mn.est = as.numeric(t$coefficients[1])
+            sd.est = as.numeric(t$coefficients[2])
+            rm(d,x,z,df,t)
+            zscored.data[met,] = (data[met, ]-mn.est)/sd.est
         }
-        d = qqnorm(x, plot.it = FALSE);
-        x = as.numeric(d$y)
-        z = as.numeric(d$x)
-        df = data.frame(x=x,z=z)
-        t = lm(x~z, data=df)
-        mn.est = as.numeric(t$coefficients[1])
-        sd.est = as.numeric(t$coefficients[2])
-        rm(d,x,z,df,t)
-        zscored.data[met,] = (data[met, ]-mn.est)/sd.est
-      }
     }
     return(zscored.data)
 }

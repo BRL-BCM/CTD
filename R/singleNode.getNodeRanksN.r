@@ -22,13 +22,13 @@
 #'                        returns up the call stack.
 #' @param adj_mat - The adjacency matrix that encodes the edge weights for the 
 #'                  network, G. 
-#' @param verbose - If T, print statements will execute as progress is made.
-#'                  Default is F.
+#' @param verbose - If TRUE, print statements will execute as progress is made.
+#'                  Default is FALSE.
 #' @param out_dir - If specified, a image sequence will generate in the 
 #'                  output directory specified.
-#' @param useLabels - If T, node names will display next to their respective
-#'                    nodes in the network. If F, node names will not display.
-#'                    Only relevant if out_dir is specified. 
+#' @param useLabels - If TRUE, node names will display next to their respective
+#'                    nodes in the network. If FALSE, node names will not
+#'                    display. Only relevant if out_dir is specified. 
 #' @param coords - The x and y coordinates for each node in the network, to 
 #'                 remain static between images.
 #' @return curr_ns - A character vector of node names in the order they
@@ -54,18 +54,19 @@
 #' ranks=singleNode.getNodeRanksN(1,G,p1=0.9,thresholdDiff=0.01,adj_mat)
 #' # Make a movie of the network walker
 #' S=names(G)[sample(seq_len(length(G)), 3, replace=FALSE)]
-#' ig=graph.adjacency(adj_mat,mode="undirected",weighted=TRUE,add.colnames="name")
+#' ig=graph.adjacency(adj_mat,mode="undirected",weighted=TRUE,
+#'                    add.colnames="name")
 #' coords=layout.fruchterman.reingold(ig)
 #' ranks = singleNode.getNodeRanksN(which(names(G)==S[1]),G,p1=0.9,
 #'                                  thresholdDiff=0.01,adj_mat,S,
 #'                                  log2(length(G)),FALSE,getwd())
 singleNode.getNodeRanksN = function(n,G,p1,thresholdDiff,adj_mat,S=NULL,
-                                    num.misses=NULL,verbose=F,out_dir="",
-                                    useLabels=F,coords=NULL) {
+                                    num.misses=NULL,verbose=FALSE,out_dir="",
+                                    useLabels=FALSE,coords=NULL) {
     p0=1-p1
     if (is.null(S) && (!is.null(num.misses) || out_dir!="")) {
-      print("You must also supply S if out_dir or num.misses is supplied")
-      return(0)}
+        print("You must also supply S if out_dir or num.misses is supplied")
+        return(0)}
     if(verbose){print(sprintf("Node ranking %d of %d.",n,length(G)))}
     curr_ns = NULL # current node set
     stopIterating=FALSE
@@ -76,35 +77,35 @@ singleNode.getNodeRanksN = function(n,G,p1,thresholdDiff,adj_mat,S=NULL,
     if(out_dir!=""){graph.netWalkSnapShot(adj_mat,G,out_dir,p1,curr_ns,S, 
                                           coords,length(curr_ns),useLabels)}
     while (stopIterating==FALSE) {
-      currGph[seq_len(length(currGph))]=0 # clear probabilities
-      baseP=p0/(length(currGph)-length(curr_ns))
-      #set unvisited nodes to baseP
-      currGph[!(names(currGph) %in% curr_ns)]=baseP
-      currGph=graph.diffuseP1(p1,startNode,currGph,curr_ns,thresholdDiff,
-                              adj_mat,verbose=F)
-      # Sanity check. p1_event should add up to roughly p1
-      p1_event = sum(unlist(currGph[!(names(currGph) %in% curr_ns)]))
-      if (abs(p1_event-1)>thresholdDiff) {
-        extra.prob.to.diffuse=1-p1_event
-        currGph[names(curr_ns)]=0
-        ind=!(names(currGph)%in%names(curr_ns))
-        currGph[ind]=unlist(currGph[ind])+extra.prob.to.diffuse/sum(ind)}
-      # Set startNode to a node that is the max probability in the new currGph
-      maxProb=names(which.max(currGph))
-      if(out_dir!=""){graph.netWalkSnapShot(adj_mat,G,out_dir,p1,curr_ns,S, 
-                                            coords,length(curr_ns),
-                                            useLabels)}
-      # Break ties: When there are ties, choose the first of the winners.
-      startNode = names(currGph[maxProb[1]])
-      if (!is.null(S)) { # draw until all members of S are found
-        if(startNode %in% S){numMisses=0}else{numMisses=numMisses+1}
-        curr_ns = c(curr_ns, startNode)
-        if (numMisses>num.misses || all(S %in% curr_ns)){stopIterating=T}
-      } else { # keep drawing until you've drawn all nodes in G
-        curr_ns = c(curr_ns, startNode)
-        if(length(curr_ns)>=(length(G))){stopIterating=T}}
-      if(out_dir!=""){graph.netWalkSnapShot(adj_mat,G,out_dir,p1,curr_ns,S, 
-                                            coords,length(curr_ns),useLabels)}
+        currGph[seq_len(length(currGph))]=0 # clear probabilities
+        baseP=p0/(length(currGph)-length(curr_ns))
+        #set unvisited nodes to baseP
+        currGph[!(names(currGph) %in% curr_ns)]=baseP
+        currGph=graph.diffuseP1(p1,startNode,currGph,curr_ns,thresholdDiff,
+                                adj_mat,verbose=FALSE)
+        # Sanity check. p1_event should add up to roughly p1
+        p1_event = sum(unlist(currGph[!(names(currGph) %in% curr_ns)]))
+        if (abs(p1_event-1)>thresholdDiff) {
+            extra.prob.to.diffuse=1-p1_event
+            currGph[names(curr_ns)]=0
+            ind=!(names(currGph)%in%names(curr_ns))
+            currGph[ind]=unlist(currGph[ind])+extra.prob.to.diffuse/sum(ind)}
+        # Set startNode to the node with the max probability in the new currGph
+        maxProb=names(which.max(currGph))
+        if(out_dir!=""){graph.netWalkSnapShot(adj_mat,G,out_dir,p1,curr_ns,S, 
+                                              coords,length(curr_ns),
+                                              useLabels)}
+        # Break ties: When there are ties, choose the first of the winners.
+        startNode = names(currGph[maxProb[1]])
+        if (!is.null(S)) { # draw until all members of S are found
+            if(startNode %in% S){numMisses=0}else{numMisses=numMisses+1}
+            curr_ns = c(curr_ns, startNode)
+            if (numMisses>num.misses||all(S %in% curr_ns)){stopIterating=TRUE}
+        } else { # keep drawing until you've drawn all nodes in G
+            curr_ns = c(curr_ns, startNode)
+            if(length(curr_ns)>=(length(G))){stopIterating=TRUE}}
+        if(out_dir!=""){graph.netWalkSnapShot(adj_mat,G,out_dir,p1,curr_ns,S, 
+                                              coords,length(curr_ns),useLabels)}
     }
     return(curr_ns)
 }

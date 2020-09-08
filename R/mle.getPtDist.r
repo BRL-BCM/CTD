@@ -88,7 +88,7 @@
 mle.getPtDist=function(p1.optBS,ptID,p2.optBS,ptID2,data_mx,ranks,p1,
                        thresholdDiff,adj_mat) {
     if (length(p1.optBS)!=length(p2.optBS)){
-      return("Error: Pt1 Subset different size from Pt2.")}
+        return("Error: Pt1 Subset different size from Pt2.")}
     if (is.null(ranks)) {return("Error: Must specify ranks")}
     G = vector(mode="list", length=nrow(data_mx))
     names(G) = rownames(data_mx)
@@ -98,32 +98,32 @@ mle.getPtDist=function(p1.optBS,ptID,p2.optBS,ptID2,data_mx,ranks,p1,
     #Get optimal encoding of patient1's union patient2's subsets
     p1.e=p2.e=p12.e=c()
     for (k in seq_len(length(p1.optBS))) {
-      p1.e[k]=res.p1[which.max(res.p1[1:k,"d.score"]),"IS.alt"]+
-        log2(choose(length(G),1))*(k-which.max(res.p1[1:k,"d.score"]))
-      p2.e[k]=res.p2[which.max(res.p2[1:k,"d.score"]),"IS.alt"]+
-        log2(choose(length(G),1))*(k-which.max(res.p2[1:k,"d.score"]))
-      # p12
-      p1.sig.nodes_cpy=names(sort(abs(data_mx[,ptID]),
-                                  decreasing=T)[seq_len(length(p1.optBS))])
-      p2.sig.nodes_cpy=names(sort(abs(data_mx[,ptID2]),
-                                  decreasing=T)[seq_len(length(p2.optBS))])
-      p1.sig.nodes_k = names(which(p1.optBS[[k]]==1))
-      p2.sig.nodes_k = names(which(p2.optBS[[k]]==1))
-      while (length(p1.sig.nodes_k)<k) {
-        p1.sig.nodes_k = unique(c(p1.sig.nodes_k, p1.sig.nodes_cpy[1]))
-        p1.sig.nodes_cpy = p1.sig.nodes_cpy[-1]
-      }
-      while (length(p2.sig.nodes_k)<k) {
-        p2.sig.nodes_k = unique(c(p2.sig.nodes_k, p2.sig.nodes_cpy[1]))
-        p2.sig.nodes_cpy = p2.sig.nodes_cpy[-1]
-      }
-      p12.sig.nodes_k=vapply(unique(c(p1.sig.nodes_k, p2.sig.nodes_k)),
-                             trimws, character(1))
-      p12.optBS = mle.getPtBSbyK(p12.sig.nodes_k, ranks)
-      res = mle.getEncodingLength(p12.optBS, NULL, NULL, G)
-      p12.e[k] = res[which.max(res[,"d.score"]), "IS.alt"] +
-        log2(choose(length(G), 1))*(length(p12.sig.nodes_k)-
-                                      which.max(res[,"d.score"]))
+        p1.e[k]=res.p1[which.max(res.p1[seq_len(k),"d.score"]),"IS.alt"]+
+          log2(choose(length(G),1))*(k-which.max(res.p1[seq_len(k),"d.score"]))
+        p2.e[k]=res.p2[which.max(res.p2[seq_len(k),"d.score"]),"IS.alt"]+
+          log2(choose(length(G),1))*(k-which.max(res.p2[seq_len(k),"d.score"]))
+        # p12
+        p1.sig.nodes_cpy=names(sort(abs(data_mx[,ptID]),
+                                    decreasing=TRUE)[seq_len(length(p1.optBS))])
+        p2.sig.nodes_cpy=names(sort(abs(data_mx[,ptID2]),
+                                    decreasing=TRUE)[seq_len(length(p2.optBS))])
+        p1.sig.nodes_k = names(which(p1.optBS[[k]]==1))
+        p2.sig.nodes_k = names(which(p2.optBS[[k]]==1))
+        while (length(p1.sig.nodes_k)<k) {
+            p1.sig.nodes_k = unique(c(p1.sig.nodes_k, p1.sig.nodes_cpy[1]))
+            p1.sig.nodes_cpy = p1.sig.nodes_cpy[-1]
+        }
+        while (length(p2.sig.nodes_k)<k) {
+            p2.sig.nodes_k = unique(c(p2.sig.nodes_k, p2.sig.nodes_cpy[1]))
+            p2.sig.nodes_cpy = p2.sig.nodes_cpy[-1]
+        }
+        p12.sig.nodes_k=vapply(unique(c(p1.sig.nodes_k, p2.sig.nodes_k)),
+                               trimws, character(1))
+        p12.optBS = mle.getPtBSbyK(p12.sig.nodes_k, ranks)
+        res = mle.getEncodingLength(p12.optBS, NULL, NULL, G)
+        p12.e[k] = res[which.max(res[,"d.score"]), "IS.alt"] +
+          log2(choose(length(G), 1))*(length(p12.sig.nodes_k)-
+                                        which.max(res[,"d.score"]))
     }
     # Normalized Compression Distance, Jaccard Distance (w/ Directionality)
     ncd=(p12.e-apply(cbind(p1.e,p2.e),1,min))/apply(cbind(p1.e,p2.e),1,max)

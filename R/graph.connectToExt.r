@@ -37,33 +37,31 @@ graph.connectToExt=function (adj_mat, startNode, visitedNodes) {
     vN=visitedNodes[which(visitedNodes != startNode)]
     extConnections=NULL
     if (length(vN)>0 && length(startNodeUnvisitedNbors)==0) {
-      adj_matAfter=adj_mat[-which(rownames(adj_mat) %in% vN),
-                           -which(colnames(adj_mat) %in% vN)]
-      connections=adj_mat[startNode, ]
-      connectionsYes=connections[which(abs(connections)>0)]
-      connectionsNo=connections[intersect(which(connections==0),
-                                          which(!(names(connections)%in%
-                                                    c(startNode, vN))))]
-      if (length(connectionsNo)>0) {
-        for (n1 in seq_len(length(connectionsNo))) {
-          if (length(connectionsYes)>0) {
-            for (n2 in seq_len(length(connectionsYes))) {
-              if (abs(adj_mat[names(connectionsYes[n2]),
-                              names(connectionsNo[n1])])>0) {
-                connectionsNo[n1]=adj_mat[names(connectionsYes[n2]),
-                                          names(connectionsNo[n1])]
-                extConnections=c(extConnections,connectionsNo[n1])
-              }
+        adj_matAfter=adj_mat[-which(rownames(adj_mat) %in% vN),
+                             -which(colnames(adj_mat) %in% vN)]
+        connections=adj_mat[startNode, ]
+        connectionsYes=connections[which(abs(connections)>0)]
+        connectionsNo=connections[intersect(which(connections==0),
+                                            which(!(names(connections)%in%
+                                                      c(startNode, vN))))]
+        if (length(connectionsNo)>0) {
+            for (n1 in seq_len(length(connectionsNo))) {
+                if (length(connectionsYes)>0) {
+                    for (n2 in seq_len(length(connectionsYes))) {
+                        if (abs(adj_mat[names(connectionsYes[n2]),
+                                        names(connectionsNo[n1])])>0) {
+                            connectionsNo[n1]=adj_mat[names(connectionsYes[n2]),
+                                                      names(connectionsNo[n1])]
+                            extConnections=c(extConnections,connectionsNo[n1])
+                        }
+                    }
+                }
             }
-          }
         }
-      }
-      if (length(extConnections)>0) {
-        adj_matAfter[startNode, names(extConnections)]=extConnections
-        adj_matAfter[names(extConnections), startNode]=extConnections
-      }
-    } else {
-      adj_matAfter = adj_mat
-    }
+        if (length(extConnections)>0) {
+            adj_matAfter[startNode, names(extConnections)]=extConnections
+            adj_matAfter[names(extConnections), startNode]=extConnections
+        }
+    } else {adj_matAfter = adj_mat}
     return(adj_matAfter)
 }

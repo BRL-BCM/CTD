@@ -14,7 +14,7 @@ graph.netWalkSnapShot(
   S,
   coords,
   imgNum = 1,
-  useLabels = T
+  useLabels = TRUE
 )
 }
 \arguments{
@@ -45,8 +45,9 @@ remain static between images.}
 generated in a sequence, this serves as an iterator for file
 naming.}
 
-\item{useLabels}{- If T, node names will display next to their respective nodes
-in the network. If F, node names will not display.}
+\item{useLabels}{- If TRUE, node names will display next to their respective 
+nodes in the network. If FALSE, node names will not
+display.}
 }
 \value{
 0
@@ -75,5 +76,6 @@ G[seq_len(length(G))] = 0
 names(G) = c("A", "B", "C", "D", "E", "F", "G")
 S = c("A", "C")
 coords = layout.fruchterman.reingold(ig)
-graph.netWalkSnapShot(adj_mat,G,output_dir=getwd(),p1=1.0,"A",S,coords,1,T)
+graph.netWalkSnapShot(adj_mat,G,output_dir=getwd(),p1=1.0,
+                      "A",S,coords,1,TRUE)
 }

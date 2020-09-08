@@ -11,7 +11,7 @@ graph.diffuseP1(
   vNodes,
   thresholdDiff,
   adj_mat,
-  verbose = F,
+  verbose = FALSE,
   out_dir = "",
   r_level = 1,
   coords = NULL
@@ -39,8 +39,8 @@ the algorithm returns up the call stack.}
 \item{adj_mat}{- The adjacency matrix that encodes the edge weights for
 the network, G.}
 
-\item{verbose}{- If debugging or tracking a diffusion event, verbose=T will
-activate print statements. Default is F}
+\item{verbose}{- If debugging or tracking a diffusion event, verbose=TRUE will
+activate print statements. Default is FALSE.}
 
 \item{out_dir}{- If specified, a image sequence will generate in the
 output directory specified.}

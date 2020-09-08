@@ -71,12 +71,12 @@ mle.getMinPtDistance = function(allSimMatrices) {
     minPtSim = matrix(1000, nrow=nrow(allSimMatrices[[1]]),
                       ncol=ncol(allSimMatrices[[1]]))
     for (ind in seq_len(length(allSimMatrices))) {
-      for (n1 in seq_len(nrow(allSimMatrices[[ind]]))) {
-        for (n2 in seq_len(ncol(allSimMatrices[[ind]]))) {
-          minPtSim[n1, n2] = min(minPtSim[n1, n2],
-                                 allSimMatrices[[ind]][n1, n2])
+        for (n1 in seq_len(nrow(allSimMatrices[[ind]]))) {
+            for (n2 in seq_len(ncol(allSimMatrices[[ind]]))) {
+                minPtSim[n1, n2] = min(minPtSim[n1, n2],
+                                       allSimMatrices[[ind]][n1, n2])
+            }
         }
-      }
     }
     return(minPtSim)
 }

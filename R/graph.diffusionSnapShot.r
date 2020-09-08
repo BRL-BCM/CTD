@@ -54,7 +54,6 @@ graph.diffusionSnapShot = function(adj_mat, G, output_dir, p1,
                                        recursion_level=1, coords) {
     ig = graph.adjacency(adj_mat, mode="undirected", weighted = TRUE)
     G = G[which(names(G) %in% V(ig)$name)]
-    
     V(ig)$color = rep("blue", length(G))
     V(ig)$color[which(V(ig)$name %in% visitedNodes)] = "red"
     vals = rep(0, length(V(ig)$name))

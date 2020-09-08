@@ -20,12 +20,12 @@
 #' @param num.misses - The number of "misses" the network walker will tolerate
 #'                     before switching to fixed length codes for remaining
 #'                     nodes to be found.
-#' @param verbose - If T, print statements will execute as progress is made.
-#'                  Default is F.
+#' @param verbose - If TRUE, print statements will execute as progress is made.
+#'                  Default is FALSE.
 #' @param out_dir - If specified, a image sequence will generate in the
 #'                     output directory specified.
-#' @param useLabels - If T, node names will display next to their respective
-#'                    nodes in the network. If F, node names will not display.
+#' @param useLabels - If TRUE, node names will display next to their respective
+#'                    nodes in the network. If FALSE, node names will not display.
 #'                    Only relevant if out_dir is specified. 
 #' @param coords - The x and y coordinates for each node in the network, to
 #'                 remain static between images.
@@ -46,51 +46,50 @@
 #' S=names(G)[seq_len(3)]
 #' ranks=multiNode.getNodeRanks(S, G, p1=0.9, thresholdDiff=0.01, adj_mat)
 multiNode.getNodeRanks=function(S,G,p1,thresholdDiff,adj_mat,num.misses=NULL,
-                                verbose=F,out_dir="",useLabels=F,coords=NULL){
+                                verbose=FALSE,out_dir="",useLabels=FALSE,
+                                coords=NULL){
     if(is.null(num.misses)){num.misses=log2(length(G))}
     ranks=list()
     for (n in seq_len(length(S))) {
-      if(verbose){print(sprintf("Node rankings %d of %d.", n, length(S)))}
-      stopIterating=F
-      curr_ns=startNode=S[n] # current node set
-      numMisses=0
-      if(out_dir!=""){graph.netWalkSnapShot(adj_mat,G,out_dir,p1,curr_ns,S, 
-                                            coords,length(curr_ns),useLabels)}
-      while (stopIterating==F) {
-        hits = curr_ns[which(curr_ns %in% S)] # diffuse from all nodes in hits
-        sumHits=as.vector(matrix(0, nrow=length(G), ncol=1))
-        names(sumHits)=names(G)
-        for (hit in seq_len(length(hits))) {
-          G[seq_len(length(G))]=0 #Clear probabilities.
-          baseP=(1-p1)/(length(G)-length(curr_ns))
-          G[which(!(names(G) %in% curr_ns))]=baseP
-          G=graph.diffuseP1(p1,hits[hit],G,curr_ns,thresholdDiff,adj_mat,F)
-          # Sanity check: p1_event should be within 'thresholdDiff' of p1.
-          p1_event=sum(unlist(G[!(names(G) %in% curr_ns)]))
-          if (abs(p1_event-1)>thresholdDiff) {
-            G[names(curr_ns)]=0
-            ind=which(!(names(G) %in% names(curr_ns)))
-            G[ind]=unlist(G[ind]) + (1-p1_event)/length(ind)
-          }
-          sumHits=sumHits+unlist(G)
+        if(verbose){print(sprintf("Node rankings %d of %d.", n, length(S)))}
+        stopIterating=FALSE
+        curr_ns=startNode=S[n] # current node set
+        numMisses=0
+        if(out_dir!=""){graph.netWalkSnapShot(adj_mat,G,out_dir,p1,curr_ns,S, 
+                                              coords,length(curr_ns),useLabels)}
+        while(stopIterating==FALSE) {
+            hits = curr_ns[which(curr_ns %in% S)]#diffuse from all nodes in hits
+            sumHits=as.vector(matrix(0, nrow=length(G), ncol=1))
+            names(sumHits)=names(G)
+            for (hit in seq_len(length(hits))) {
+                G[seq_len(length(G))]=0 #Clear probabilities.
+                baseP=(1-p1)/(length(G)-length(curr_ns))
+                G[which(!(names(G) %in% curr_ns))]=baseP
+                G=graph.diffuseP1(p1,hits[hit],G,curr_ns,thresholdDiff,adj_mat)
+                #Sanity check: p1_event should be within 'thresholdDiff' of p1.
+                p1_event=sum(unlist(G[!(names(G) %in% curr_ns)]))
+                if (abs(p1_event-1)>thresholdDiff) {
+                    G[names(curr_ns)]=0
+                    ind=which(!(names(G) %in% names(curr_ns)))
+                    G[ind]=unlist(G[ind]) + (1-p1_event)/length(ind)}
+                sumHits=sumHits+unlist(G)
+            }
+            sumHits=sumHits/length(hits) #Get avg prob across diffusion events
+            maxProb=names(which.max(sumHits[-which(names(sumHits)%in%curr_ns)]))
+            if(out_dir!=""){graph.netWalkSnapShot(adj_mat,G,out_dir,p1,curr_ns,
+                                                  S,coords,length(curr_ns),
+                                                  useLabels)}
+            startNode=names(G[maxProb[1]]) #Break ties: Choose first winner
+            if (startNode %in% S) {
+                numMisses=0
+                hits=c(hits, startNode)} else {numMisses=numMisses+1}
+            curr_ns=c(curr_ns, startNode)
+            if(all(S %in% curr_ns) || numMisses>num.misses){stopIterating=TRUE}
+            if(out_dir!=""){graph.netWalkSnapShot(adj_mat,G,out_dir,p1,curr_ns,
+                                                  S,coords,length(curr_ns),
+                                                  useLabels)}
         }
-        sumHits=sumHits/length(hits) #Get average prob across diffusion events
-        maxProb=names(which.max(sumHits[-which(names(sumHits) %in% curr_ns)]))
-        if(out_dir!=""){graph.netWalkSnapShot(adj_mat,G,out_dir,p1,curr_ns,
-                                              S,coords,length(curr_ns),
-                                              useLabels)}
-        startNode=names(G[maxProb[1]]) # Break ties: Choose first of winners.
-        if (startNode %in% S) {
-          numMisses=0
-          hits=c(hits, startNode)
-        } else {numMisses=numMisses+1}
-        curr_ns=c(curr_ns, startNode)
-        if(all(S %in% curr_ns) || numMisses>num.misses){stopIterating=T}
-        if(out_dir!=""){graph.netWalkSnapShot(adj_mat,G,out_dir,p1,curr_ns,
-                                              S,coords,length(curr_ns),
-                                              useLabels)}
-      }
-      ranks[[n]]=curr_ns
+        ranks[[n]]=curr_ns
     }
     names(ranks)=S
     return(ranks)

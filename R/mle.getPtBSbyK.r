@@ -54,46 +54,44 @@ mle.getPtBSbyK=function(S, ranks, num.misses=NULL) {
     ranks2=ranks[which(names(ranks) %in% S)]
     pt.bitString=list()
     for (p in seq_len(length(S))) {
-      miss=0
-      thresh=length(ranks2[[S[p]]])
-      for (ii in seq_len(length(ranks2[[S[p]]]))) {
-        ind_t=as.numeric(ranks2[[S[p]]][ii] %in% S)
-        if (ind_t==0) {
-          miss=miss + 1
-          if (miss >= num.misses) {
-            thresh=ii
-            break;
-          }
-        } else { miss=0 }
-        pt.bitString[[S[p]]][ii]=ind_t
-      }
-      pt.bitString[[S[p]]]=pt.bitString[[S[p]]][seq_len(thresh)]
-      names(pt.bitString[[S[p]]])=ranks2[[S[p]]][seq_len(thresh)]
-      ind=which(pt.bitString[[S[p]]] == 1)
-      pt.bitString[[S[p]]]=pt.bitString[[S[p]]][seq_len(ind[length(ind)])]
+        miss=0
+        thresh=length(ranks2[[S[p]]])
+        for (ii in seq_len(length(ranks2[[S[p]]]))) {
+            ind_t=as.numeric(ranks2[[S[p]]][ii] %in% S)
+            if (ind_t==0) {
+                miss=miss + 1
+                if (miss >= num.misses) {
+                    thresh=ii
+                    break;
+                }
+            } else { miss=0 }
+            pt.bitString[[S[p]]][ii]=ind_t
+        }
+        pt.bitString[[S[p]]]=pt.bitString[[S[p]]][seq_len(thresh)]
+        names(pt.bitString[[S[p]]])=ranks2[[S[p]]][seq_len(thresh)]
+        ind=which(pt.bitString[[S[p]]] == 1)
+        pt.bitString[[S[p]]]=pt.bitString[[S[p]]][seq_len(ind[length(ind)])]
     }
     # For each k, find the ranks that found at least k in S. Which node 
     # rankings, from different start nodes, found the first k soonest?
     pt.byK=list()
     for (k in seq_len(length(S))) {
-      pt.byK_tmp=pt.bitString
-      # Which found at least k nodes
-      bestInd=vector("numeric", length(S))
-      for (p in seq_len(length(S))) {
-        bestInd[p]=sum(pt.bitString[[p]])
-      }
-      if (length(which(bestInd>=k))>0) {
-        pt.byK_tmp=pt.byK_tmp[which(bestInd>=k)]
-        # Which found the most nodes soonest
-        bestInd=vector("numeric", length(pt.byK_tmp))
-        for (p in seq_len(length(pt.byK_tmp))) {
-          bestInd[p]=sum(which(pt.byK_tmp[[p]] == 1)[seq_len(k)])
+        pt.byK_tmp=pt.bitString
+        # Which found at least k nodes
+        bestInd=vector("numeric", length(S))
+        for (p in seq_len(length(S))) {
+            bestInd[p]=sum(pt.bitString[[p]])
         }
-        maxInd=max(which(pt.byK_tmp[[which.min(bestInd)]]==1)[seq_len(k)])
-        pt.byK[[k]]=pt.byK_tmp[[which.min(bestInd)]][seq_len(maxInd)]
-      } else {
-        pt.byK[[k]]=pt.byK_tmp[[which.max(bestInd)]]
-      }
+        if (length(which(bestInd>=k))>0) {
+            pt.byK_tmp=pt.byK_tmp[which(bestInd>=k)]
+            # Which found the most nodes soonest
+            bestInd=vector("numeric", length(pt.byK_tmp))
+            for (p in seq_len(length(pt.byK_tmp))) {
+                bestInd[p]=sum(which(pt.byK_tmp[[p]] == 1)[seq_len(k)])
+            }
+            maxInd=max(which(pt.byK_tmp[[which.min(bestInd)]]==1)[seq_len(k)])
+            pt.byK[[k]]=pt.byK_tmp[[which.min(bestInd)]][seq_len(maxInd)]
+        } else {pt.byK[[k]]=pt.byK_tmp[[which.max(bestInd)]]}
     }
     return(pt.byK)
 }

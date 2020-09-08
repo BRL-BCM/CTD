@@ -29,7 +29,7 @@
 #' data_mx = Miller2015[-c(1,grep("x - ",rownames(Miller2015))),
 #'                         grep("IEM", colnames(Miller2015))]
 #' data_mx = apply(data_mx, c(1,2), as.numeric)
-#' data_pval=t(apply(data_mx,c(1,2),
+#' data_pval=TRUE(apply(data_mx,c(1,2),
 #'                   function(i)2*pnorm(abs(i),lower.tail=FALSE)))
 #' # Choose patient #1's (i.e., IEM_1000's) top 15 perturbed metabolites
 #' ptID = colnames(data_mx)[1]
@@ -60,37 +60,40 @@
 #' print(res)
 mle.getEncodingLength = function(bs, pvals, ptID, G) {
     if (is.null(pvals)) {
-      results = data.frame(optimalBS=character(),subsetSize=integer(),
-                           opt.T=integer(),IS.null=numeric(),
-                           IS.alt=numeric(),d.score=numeric(),stringsAsFactors=F)
+        results = data.frame(optimalBS=character(),subsetSize=integer(),
+                             opt.T=integer(),IS.null=numeric(),
+                             IS.alt=numeric(),d.score=numeric(),
+                             stringsAsFactors=FALSE)
     } else {
-      results = data.frame(patientID=character(),optimalBS=character(),
-                           subsetSize=integer(),opt.T=integer(),
-                           varPvalue=numeric(),fishers.Info=numeric(),
-                           IS.null=numeric(),IS.alt=numeric(),d.score=numeric(),
-                           stringsAsFactors=F)
+        results = data.frame(patientID=character(),optimalBS=character(),
+                             subsetSize=integer(),opt.T=integer(),
+                             varPvalue=numeric(),fishers.Info=numeric(),
+                             IS.null=numeric(),IS.alt=numeric(),
+                             d.score=numeric(),stringsAsFactors=FALSE)
     }
     row=1
-    for (k in seq_len(length(bs))) { # Assume k=1 corresponds to subset of size 1
-      optBS=bs[[k]]
-      mets.k=names(optBS)[which(optBS==1)]
-      found=sum(optBS)
-      not_found=k-found
-      e=(not_found+1)*log2(length(G)) + length(optBS)-1
-      optBS.tmp = gsub("1", "T", paste(as.character(optBS), collapse=""))
-      if (!is.null(pvals) && !is.null(ptID)) {
-        results[row,"patientID"] = ptID
-        results[row,"varPvalue"]=paste(format(pvals[ptID, mets.k],
-                                              digits=2,width=3), collapse="/")
-        results[row,"fishers.Info"]=-log2(stat.fishersMethod(pvals[ptID,mets.k]))
-      }
-      results[row,"optimalBS"]=optBS.tmp
-      results[row,"subsetSize"]=k
-      results[row,"opt.T"]=found
-      results[row,"IS.null"]=log2(chooseZ(length(G), k))
-      results[row,"IS.alt"]=e
-      results[row,"d.score"]=round(log2(chooseZ(length(G), k)) - e, 3)
-      row=row+1
+    for (k in seq_len(length(bs))) { #Assume k=1 corresponds to subset of size 1
+        optBS=bs[[k]]
+        mets.k=names(optBS)[which(optBS==1)]
+        found=sum(optBS)
+        not_found=k-found
+        e=(not_found+1)*log2(length(G)) + length(optBS)-1
+        optBS.tmp = gsub("1", "T", paste(as.character(optBS), collapse=""))
+        if (!is.null(pvals) && !is.null(ptID)) {
+            results[row,"patientID"] = ptID
+            results[row,"varPvalue"]=paste(format(pvals[ptID, mets.k],
+                                                  digits=2,width=3),
+                                           collapse="/")
+            fishers.pval=-log2(stat.fishersMethod(pvals[ptID,mets.k]))
+            results[row,"fishers.Info"]=fishers.pval
+        }
+        results[row,"optimalBS"]=optBS.tmp
+        results[row,"subsetSize"]=k
+        results[row,"opt.T"]=found
+        results[row,"IS.null"]=log2(chooseZ(length(G), k))
+        results[row,"IS.alt"]=e
+        results[row,"d.score"]=round(log2(chooseZ(length(G), k)) - e, 3)
+        row=row+1
     }
     return (results)
 }
