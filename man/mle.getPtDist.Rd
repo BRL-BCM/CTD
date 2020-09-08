@@ -2,8 +2,7 @@
 % Please edit documentation in R/mle.getPtDist.r
 \name{mle.getPtDist}
 \alias{mle.getPtDist}
-\title{Patient distance metric based on the mutual information of patients' highly
-connected perturbed metabolite sets.}
+\title{CTDncd: A network-based distance metric.}
 \usage{
 mle.getPtDist(
   p1.optBS,
@@ -54,7 +53,7 @@ patientDistances - a distance matrix, where row and columns are
 This function calculates the universal distance between patients, using a
 mutual information metric, where self-information comes from the minimum
 encoding length of each patient's encoded modular perturbations in the
-background knowledge graph.
+network.
 }
 \examples{
 # Get patient distances for the first 2 patients in the Miller 2015 dataset.

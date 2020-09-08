@@ -1,6 +1,6 @@
-#' @title Patient sample identifiers mapped to known clinical
-#' diagnosis.
-#' 
+#' @title Disease cohorts with coded identifiers
+#' @description Patient sample identifiers mapped to known clinical
+#' diagnoses.
 #' @name cohorts_coded
 #' @aliases cohorts_coded
 #' @docType data

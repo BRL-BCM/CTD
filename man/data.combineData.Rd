@@ -2,7 +2,7 @@
 % Please edit documentation in R/data.combineData.r
 \name{data.combineData}
 \alias{data.combineData}
-\title{Combine datasets from different source files.}
+\title{Combine datasets}
 \usage{
 data.combineData(curr_data, more_data)
 }
@@ -15,7 +15,7 @@ data.combineData(curr_data, more_data)
 combined.data - Combined data matrix.
 }
 \description{
-Combine datasets from different source files.
+Combine datasets
 }
 \examples{
 # Row names and column names are required for both input matrices.

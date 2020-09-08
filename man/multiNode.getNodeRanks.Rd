@@ -2,8 +2,7 @@
 % Please edit documentation in R/multiNode.getNodeRanks.r
 \name{multiNode.getNodeRanks}
 \alias{multiNode.getNodeRanks}
-\title{Generate the "adaptive walk" node rankings, starting from a given perturbed
-variable}
+\title{Generate multi-node node rankings ("adaptive" walk)}
 \usage{
 multiNode.getNodeRanks(
   S,

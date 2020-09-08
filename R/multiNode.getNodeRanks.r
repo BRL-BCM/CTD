@@ -1,5 +1,4 @@
-#' Generate the "adaptive walk" node rankings, starting from a given perturbed
-#' variable
+#' Generate multi-node node rankings ("adaptive" walk) 
 #'
 #' This function calculates the node rankings starting from a given node in a
 #' subset of nodes in a given network, G.
@@ -56,7 +55,7 @@ multiNode.getNodeRanks=function(S,G,p1,thresholdDiff,adj_mat,num.misses=NULL,
         curr_ns=startNode=S[n] # current node set
         numMisses=0
         if(out_dir!=""){graph.netWalkSnapShot(adj_mat,G,out_dir,p1,curr_ns,S, 
-                                              coords,length(curr_ns),useLabels)}
+                                                coords,length(curr_ns),useLabels)}
         while(stopIterating==FALSE) {
             hits = curr_ns[which(curr_ns %in% S)]#diffuse from all nodes in hits
             sumHits=as.vector(matrix(0, nrow=length(G), ncol=1))
@@ -77,8 +76,8 @@ multiNode.getNodeRanks=function(S,G,p1,thresholdDiff,adj_mat,num.misses=NULL,
             sumHits=sumHits/length(hits) #Get avg prob across diffusion events
             maxProb=names(which.max(sumHits[-which(names(sumHits)%in%curr_ns)]))
             if(out_dir!=""){graph.netWalkSnapShot(adj_mat,G,out_dir,p1,curr_ns,
-                                                  S,coords,length(curr_ns),
-                                                  useLabels)}
+                                                    S,coords,length(curr_ns),
+                                                    useLabels)}
             startNode=names(G[maxProb[1]]) #Break ties: Choose first winner
             if (startNode %in% S) {
                 numMisses=0
@@ -86,8 +85,8 @@ multiNode.getNodeRanks=function(S,G,p1,thresholdDiff,adj_mat,num.misses=NULL,
             curr_ns=c(curr_ns, startNode)
             if(all(S %in% curr_ns) || numMisses>num.misses){stopIterating=TRUE}
             if(out_dir!=""){graph.netWalkSnapShot(adj_mat,G,out_dir,p1,curr_ns,
-                                                  S,coords,length(curr_ns),
-                                                  useLabels)}
+                                                    S,coords,length(curr_ns),
+                                                    useLabels)}
         }
         ranks[[n]]=curr_ns
     }

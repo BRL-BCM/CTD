@@ -1,4 +1,4 @@
-#' Connect a node to its unvisited "extended" neighbors.
+#' Connect a node to its unvisited "extended" neighbors
 #' 
 #' @param adj_mat - The adjacency matrix that encodes the edge weights 
 #'                  for the network. 
@@ -38,21 +38,21 @@ graph.connectToExt=function (adj_mat, startNode, visitedNodes) {
     extConnections=NULL
     if (length(vN)>0 && length(startNodeUnvisitedNbors)==0) {
         adj_matAfter=adj_mat[-which(rownames(adj_mat) %in% vN),
-                             -which(colnames(adj_mat) %in% vN)]
+                                -which(colnames(adj_mat) %in% vN)]
         connections=adj_mat[startNode, ]
-        connectionsYes=connections[which(abs(connections)>0)]
-        connectionsNo=connections[intersect(which(connections==0),
-                                            which(!(names(connections)%in%
-                                                      c(startNode, vN))))]
-        if (length(connectionsNo)>0) {
-            for (n1 in seq_len(length(connectionsNo))) {
-                if (length(connectionsYes)>0) {
-                    for (n2 in seq_len(length(connectionsYes))) {
-                        if (abs(adj_mat[names(connectionsYes[n2]),
-                                        names(connectionsNo[n1])])>0) {
-                            connectionsNo[n1]=adj_mat[names(connectionsYes[n2]),
-                                                      names(connectionsNo[n1])]
-                            extConnections=c(extConnections,connectionsNo[n1])
+        connYes=connections[which(abs(connections)>0)]
+        connNo=connections[intersect(which(connections==0),
+                                        which(!(names(connections)%in%
+                                                    c(startNode, vN))))]
+        if (length(connNo)>0) {
+            for (n1 in seq_len(length(connNo))) {
+                if (length(connYes)>0) {
+                    for (n2 in seq_len(length(connYes))) {
+                        if (abs(adj_mat[names(connYes[n2]),
+                                        names(connNo[n1])])>0) {
+                            connNo[n1]=adj_mat[names(connYes[n2]),
+                                                names(connNo[n1])]
+                            extConnections=c(extConnections,connNo[n1])
                         }
                     }
                 }

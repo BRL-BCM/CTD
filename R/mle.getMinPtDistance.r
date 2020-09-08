@@ -1,5 +1,7 @@
-#' Get minimum patient distances between all pairwise comparisons made.
-#'
+#' Get minimum patient distances
+#' 
+#' Given a series of patient distance matrices, return the minimum
+#' distance between all pairwise patient comparisons made.
 #' @param allSimMatrices - A list of all similarity matrices, across all 
 #'                         k for a given graph, or across many graphs.
 #' @return minPtSim - Pairwise patient distances representing the minimum
@@ -69,12 +71,12 @@
 #' minPtDist = mle.getMinPtDistance(res_ncd)
 mle.getMinPtDistance = function(allSimMatrices) {
     minPtSim = matrix(1000, nrow=nrow(allSimMatrices[[1]]),
-                      ncol=ncol(allSimMatrices[[1]]))
+                        ncol=ncol(allSimMatrices[[1]]))
     for (ind in seq_len(length(allSimMatrices))) {
         for (n1 in seq_len(nrow(allSimMatrices[[ind]]))) {
             for (n2 in seq_len(ncol(allSimMatrices[[ind]]))) {
                 minPtSim[n1, n2] = min(minPtSim[n1, n2],
-                                       allSimMatrices[[ind]][n1, n2])
+                                        allSimMatrices[[ind]][n1, n2])
             }
         }
     }

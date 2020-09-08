@@ -1,4 +1,4 @@
-#' Combine datasets from different source files.
+#' Combine datasets
 #'
 #' @param curr_data - Current data matrix
 #' @param more_data - Data matrix you want to combine with curr_data.

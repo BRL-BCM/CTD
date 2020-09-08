@@ -2,7 +2,7 @@
 % Please edit documentation in R/data.surrogateProfiles.r
 \name{data.surrogateProfiles}
 \alias{data.surrogateProfiles}
-\title{Surrogate profiles}
+\title{Generate surrogate profiles}
 \usage{
 data.surrogateProfiles(data, std = 1, ref_data = NULL)
 }

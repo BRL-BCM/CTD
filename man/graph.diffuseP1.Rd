@@ -2,7 +2,7 @@
 % Please edit documentation in R/graph.diffuseP1.r
 \name{graph.diffuseP1}
 \alias{graph.diffuseP1}
-\title{Diffuse Probability P1 from a starting node.}
+\title{Diffuse Probability P1 from a starting node}
 \usage{
 graph.diffuseP1(
   p1,

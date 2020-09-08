@@ -2,7 +2,7 @@
 % Please edit documentation in R/mle.getEncodingLength.r
 \name{mle.getEncodingLength}
 \alias{mle.getEncodingLength}
-\title{Minimum encoding length (MLE)}
+\title{Minimum encoding length}
 \usage{
 mle.getEncodingLength(bs, pvals, ptID, G)
 }

@@ -3,9 +3,7 @@
 \docType{data}
 \name{Thistlethwaite2020}
 \alias{Thistlethwaite2020}
-\title{Clinical Diagnosis of Metabolic Disorders using Untargeted 
-Metabolomic Profiling and Disease-specific Networks Learned from 
-Patient Data}
+\title{Thistlethwaite et al. (2020)}
 \format{
 Thistlethwaite2020 - A data frame with 1364 metabolite 
                              features as rows and 545 untargeted 
@@ -19,7 +17,9 @@ Thistlethwaite2020 - A data frame with 1364 metabolite
 data(Thistlethwaite2020)
 }
 \description{
-A meta-analysis of previous untargeted metabolomics
+Clinical Diagnosis of Metabolic Disorders using Untargeted 
+Metabolomic Profiling and Disease-specific Networks Learned from 
+Patient Data. A meta-analysis of previous untargeted metabolomics
 studies describing 16 unique inborn errors of metabolism.
 }
 \examples{

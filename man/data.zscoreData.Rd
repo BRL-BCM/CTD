@@ -2,7 +2,7 @@
 % Please edit documentation in R/data.zscoreData.r
 \name{data.zscoreData}
 \alias{data.zscoreData}
-\title{Z-transform normalized, imputed metabolomics data}
+\title{Z-transform available data}
 \usage{
 data.zscoreData(data, ref)
 }
@@ -16,7 +16,8 @@ observations as rows, features as columns.}
 zscored.data - Z-transformed data.
 }
 \description{
-Z-transform normalized, imputed metabolomics data
+The z-transform is meant to work with normalized,
+imputed metabolomics data
 }
 \examples{
 dis_data = matrix(rexp(500), ncol=100)

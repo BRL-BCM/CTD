@@ -2,8 +2,7 @@
 % Please edit documentation in R/graph.netWalkSnapShot.r
 \name{graph.netWalkSnapShot}
 \alias{graph.netWalkSnapShot}
-\title{Take a snapshot of the current state of a probability diffusion 
-algorithm}
+\title{Capture the current location of a network walker}
 \usage{
 graph.netWalkSnapShot(
   adj_mat,
@@ -53,9 +52,8 @@ display.}
 0
 }
 \description{
-The probability diffusion algorithm diffuses probability, p1,
-from a starting node preferentially by observed edge weights
-in a network.
+A network walker steps towards the node that inherited the highest
+probability from the last node that it stepped into.
 }
 \examples{
 # 7 node example graph illustrating diffusion of probability based on network

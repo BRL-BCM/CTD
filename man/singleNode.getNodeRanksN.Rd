@@ -2,8 +2,7 @@
 % Please edit documentation in R/singleNode.getNodeRanksN.r
 \name{singleNode.getNodeRanksN}
 \alias{singleNode.getNodeRanksN}
-\title{Generate the fixed , single-node diffusion node rankings, starting from
-a given perturbed variable.}
+\title{Generate single-node node rankings ("fixed" walk)}
 \usage{
 singleNode.getNodeRanksN(
   n,

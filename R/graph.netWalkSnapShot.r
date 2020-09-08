@@ -1,9 +1,7 @@
-#' Take a snapshot of the current state of a probability diffusion 
-#' algorithm
+#' Capture the current location of a network walker
 #' 
-#' The probability diffusion algorithm diffuses probability, p1,
-#' from a starting node preferentially by observed edge weights
-#' in a network.
+#' A network walker steps towards the node that inherited the highest
+#' probability from the last node that it stepped into.
 #' @param adj_mat - The adjacency matrix that encodes the edge weights for
 #'                  the network, G. 
 #' @param G - A list of probabilities, with names of the list being the node
@@ -67,9 +65,9 @@ graph.netWalkSnapShot = function(adj_mat, G, output_dir, p1, visitedNodes, S,
                 edge.arrow.size=0.01, vertex.size=5+round(50*unlist(G), 0), 
                 mark.col="dark red", mark.groups = visitedNodes)
     title(sprintf("{%s}", paste(as.numeric(visitedNodes %in% S), collapse="")), 
-          cex.main=2)
+            cex.main=2)
     legend("topright", legend=c("Jackpot Nodes", "Drawn Nodes"), 
-           fill=c("green", "dark red"))
+            fill=c("green", "dark red"))
     dev.off()
     return(0)
 }

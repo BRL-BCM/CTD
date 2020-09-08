@@ -1,10 +1,9 @@
-#' Patient distance metric based on the mutual information of patients' highly
-#' connected perturbed metabolite sets.
+#' CTDncd: A network-based distance metric.
 #'
 #' This function calculates the universal distance between patients, using a
 #' mutual information metric, where self-information comes from the minimum
 #' encoding length of each patient's encoded modular perturbations in the
-#' background knowledge graph.
+#' network.
 #' @param p1.optBS - The optimal bitstring associated with patient 1.
 #' @param ptID - The identifier associated with patient 1's sample.
 #' @param p2.optBS - The optimal bitstring associated with patient 2.
@@ -99,9 +98,9 @@ mle.getPtDist=function(p1.optBS,ptID,p2.optBS,ptID2,data_mx,ranks,p1,
     p1.e=p2.e=p12.e=c()
     for (k in seq_len(length(p1.optBS))) {
         p1.e[k]=res.p1[which.max(res.p1[seq_len(k),"d.score"]),"IS.alt"]+
-          log2(choose(length(G),1))*(k-which.max(res.p1[seq_len(k),"d.score"]))
+            log2(choose(length(G),1))*(k-which.max(res.p1[seq_len(k),"d.score"]))
         p2.e[k]=res.p2[which.max(res.p2[seq_len(k),"d.score"]),"IS.alt"]+
-          log2(choose(length(G),1))*(k-which.max(res.p2[seq_len(k),"d.score"]))
+            log2(choose(length(G),1))*(k-which.max(res.p2[seq_len(k),"d.score"]))
         # p12
         p1.sig.nodes_cpy=names(sort(abs(data_mx[,ptID]),
                                     decreasing=TRUE)[seq_len(length(p1.optBS))])
@@ -118,15 +117,14 @@ mle.getPtDist=function(p1.optBS,ptID,p2.optBS,ptID2,data_mx,ranks,p1,
             p2.sig.nodes_cpy = p2.sig.nodes_cpy[-1]
         }
         p12.sig.nodes_k=vapply(unique(c(p1.sig.nodes_k, p2.sig.nodes_k)),
-                               trimws, character(1))
+                                trimws, character(1))
         p12.optBS = mle.getPtBSbyK(p12.sig.nodes_k, ranks)
         res = mle.getEncodingLength(p12.optBS, NULL, NULL, G)
         p12.e[k] = res[which.max(res[,"d.score"]), "IS.alt"] +
-          log2(choose(length(G), 1))*(length(p12.sig.nodes_k)-
+            log2(choose(length(G), 1))*(length(p12.sig.nodes_k)-
                                         which.max(res[,"d.score"]))
     }
     # Normalized Compression Distance, Jaccard Distance (w/ Directionality)
     ncd=(p12.e-apply(cbind(p1.e,p2.e),1,min))/apply(cbind(p1.e,p2.e),1,max)
     return(list(p1.e=p1.e, p2.e=p2.e, p12.e=p12.e, dirSim=dirSim, NCD=ncd))
 }
-

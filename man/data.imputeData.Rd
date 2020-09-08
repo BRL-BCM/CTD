@@ -2,7 +2,7 @@
 % Please edit documentation in R/data.imputeData.r
 \name{data.imputeData}
 \alias{data.imputeData}
-\title{Impute missing values as lowest observed value in a reference population.}
+\title{Impute missing values}
 \usage{
 data.imputeData(data, ref)
 }
@@ -16,7 +16,7 @@ rows, features as columns.}
 imputed.data - Z-transformed data.
 }
 \description{
-Impute missing values as lowest observed value in a reference population.
+Impute missing values as lowest observed value in a reference population
 }
 \examples{
 data(Thistlethwaite2020)

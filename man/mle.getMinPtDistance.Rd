@@ -2,7 +2,7 @@
 % Please edit documentation in R/mle.getMinPtDistance.r
 \name{mle.getMinPtDistance}
 \alias{mle.getMinPtDistance}
-\title{Get minimum patient distances between all pairwise comparisons made.}
+\title{Get minimum patient distances}
 \usage{
 mle.getMinPtDistance(allSimMatrices)
 }
@@ -16,7 +16,8 @@ minPtSim - Pairwise patient distances representing the minimum
                    matrices.
 }
 \description{
-Get minimum patient distances between all pairwise comparisons made.
+Given a series of patient distance matrices, return the minimum
+distance between all pairwise patient comparisons made.
 }
 \examples{
 # Get patient distances for the first 2 patients in the Miller 2015 dataset.

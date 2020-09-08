@@ -2,7 +2,7 @@
 % Please edit documentation in R/mle.getPtBSbyK.r
 \name{mle.getPtBSbyK}
 \alias{mle.getPtBSbyK}
-\title{Generate patient-specific bitstrings from a network walker.}
+\title{Generate patient-specific bitstrings}
 \usage{
 mle.getPtBSbyK(S, ranks, num.misses = NULL)
 }

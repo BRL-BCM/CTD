@@ -2,7 +2,7 @@
 % Please edit documentation in R/graph.diffusionSnapShot.r
 \name{graph.diffusionSnapShot}
 \alias{graph.diffusionSnapShot}
-\title{Make a movie of the diffusion of probability, P1, from a starting node.}
+\title{Capture the current state of probability diffusion}
 \usage{
 graph.diffusionSnapShot(
   adj_mat,
@@ -47,8 +47,8 @@ remain static between images.}
 }
 \description{
 Recursively diffuse probability from a starting node based on the
-connectivity of the background knowledge graph, representing the
-likelihood that a variable will be most influenced by a perturbation
+connectivity in a network, G, where the probability represents the
+likelihood that a variable will be influenced by a perturbation
 in the starting node.
 }
 \examples{

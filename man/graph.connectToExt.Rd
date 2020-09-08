@@ -2,7 +2,7 @@
 % Please edit documentation in R/graph.connectToExt.r
 \name{graph.connectToExt}
 \alias{graph.connectToExt}
-\title{Connect a node to its unvisited "extended" neighbors.}
+\title{Connect a node to its unvisited "extended" neighbors}
 \usage{
 graph.connectToExt(adj_mat, startNode, visitedNodes)
 }
@@ -22,7 +22,7 @@ adj_matAfter - The adjacency matrix where the startNode is now
                        An extended neighbor is the neighbor of a neighbor.
 }
 \description{
-Connect a node to its unvisited "extended" neighbors.
+Connect a node to its unvisited "extended" neighbors
 }
 \examples{
 adj_mat = rbind(c(0,2,1,0,0,0,0), # A

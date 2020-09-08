@@ -1,4 +1,4 @@
-#' Minimum encoding length (MLE)
+#' Minimum encoding length 
 #'
 #' This function calculates the mininmum encoding length associated with a
 #' subset of variables given a background knowledge graph.
@@ -61,15 +61,15 @@
 mle.getEncodingLength = function(bs, pvals, ptID, G) {
     if (is.null(pvals)) {
         results = data.frame(optimalBS=character(),subsetSize=integer(),
-                             opt.T=integer(),IS.null=numeric(),
-                             IS.alt=numeric(),d.score=numeric(),
-                             stringsAsFactors=FALSE)
+                                opt.T=integer(),IS.null=numeric(),
+                                IS.alt=numeric(),d.score=numeric(),
+                                stringsAsFactors=FALSE)
     } else {
         results = data.frame(patientID=character(),optimalBS=character(),
-                             subsetSize=integer(),opt.T=integer(),
-                             varPvalue=numeric(),fishers.Info=numeric(),
-                             IS.null=numeric(),IS.alt=numeric(),
-                             d.score=numeric(),stringsAsFactors=FALSE)
+                                subsetSize=integer(),opt.T=integer(),
+                                varPvalue=numeric(),fishers.Info=numeric(),
+                                IS.null=numeric(),IS.alt=numeric(),
+                                d.score=numeric(),stringsAsFactors=FALSE)
     }
     row=1
     for (k in seq_len(length(bs))) { #Assume k=1 corresponds to subset of size 1
@@ -82,8 +82,8 @@ mle.getEncodingLength = function(bs, pvals, ptID, G) {
         if (!is.null(pvals) && !is.null(ptID)) {
             results[row,"patientID"] = ptID
             results[row,"varPvalue"]=paste(format(pvals[ptID, mets.k],
-                                                  digits=2,width=3),
-                                           collapse="/")
+                                                    digits=2,width=3),
+                                            collapse="/")
             fishers.pval=-log2(stat.fishersMethod(pvals[ptID,mets.k]))
             results[row,"fishers.Info"]=fishers.pval
         }

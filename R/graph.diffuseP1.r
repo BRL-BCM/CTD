@@ -1,4 +1,4 @@
-#' Diffuse Probability P1 from a starting node.
+#' Diffuse Probability P1 from a starting node
 #'
 #' Recursively diffuse probability from a starting node based on the
 #' connectivity of the network, representing the likelihood that a 
@@ -60,7 +60,7 @@ graph.diffuseP1=function (p1,sn,G,vNodes,thresholdDiff,adj_mat,verbose=FALSE,
     nTabs=paste(rep("   ",r_level-1),collapse="") # for verbose stmts
     if(verbose==TRUE) {
         print(sprintf("%sprob. to diffuse:%f sn: %s, visitedNodes: %s",
-                      nTabs,p1,sn,toString(vNodes)))}
+                        nTabs,p1,sn,toString(vNodes)))}
     if(out_dir!=""){graph.diffusionSnapShot(adj_mat,G,out_dir,p1,sn,
                                             vNodes,r_level,coords)}
     adj_mat2=graph.connectToExt(adj_mat,sn,vNodes)
@@ -78,18 +78,18 @@ graph.diffuseP1=function (p1,sn,G,vNodes,thresholdDiff,adj_mat,verbose=FALSE,
                                                     vNodes,r_level,coords)}
             nNbors=G[names(which(abs(adj_mat2[,snUvNbors[z]])>0))]
             if(length(nNbors)>0 && i.prob/2>thresholdDiff &&
-               ((length(vNodes)+1)<length(G))) {
-                  G[[snUvNbors[z]]]=G[[snUvNbors[z]]]-i.prob/2
-                  if(verbose==TRUE){
-                      print(sprintf("%stook %f from child#%d:%s to send",nTabs,
-                                    i.prob/2,z,snUvNbors[z]))}
-                  if(out_dir!=""){graph.diffusionSnapShot(adj_mat,G,out_dir,p1,
-                                                          sn,vNodes,r_level,
-                                                          coords)}
-                  G=graph.diffuseP1(i.prob/2,snUvNbors[z],G,
-                                    c(vNodes,snUvNbors[z]),thresholdDiff,
-                                    adj_mat,verbose=verbose,out_dir,r_level+1,
-                                    coords)}
+                ((length(vNodes)+1)<length(G))) {
+                    G[[snUvNbors[z]]]=G[[snUvNbors[z]]]-i.prob/2
+                    if(verbose==TRUE){
+                        print(sprintf("%stook %f from child#%d:%s to send",
+                                      nTabs,i.prob/2,z,snUvNbors[z]))}
+                    if(out_dir!=""){graph.diffusionSnapShot(adj_mat,G,out_dir,
+                                                            p1,sn,vNodes,
+                                                            r_level,coords)}
+                    G=graph.diffuseP1(i.prob/2,snUvNbors[z],G,
+                                        c(vNodes,snUvNbors[z]),thresholdDiff,
+                                        adj_mat,verbose=verbose,out_dir,
+                                        r_level+1,coords)}
             z=z + 1
         }
         if(out_dir!=""){graph.diffusionSnapShot(adj_mat,G,out_dir,p1,sn,
@@ -99,7 +99,7 @@ graph.diffuseP1=function (p1,sn,G,vNodes,thresholdDiff,adj_mat,verbose=FALSE,
             print(sprintf("%s is singleton or stranded by visited n.bors",sn))
             print("Diffuse p1 uniformly amongst all unvisited nodes.")}
         G[!(names(G)%in%vNodes)]=unlist(G[!(names(G)%in%vNodes)])+
-                                       p1/(length(G)-length(vNodes))
+                                        p1/(length(G)-length(vNodes))
         if(out_dir!=""){graph.diffusionSnapShot(adj_mat,G,out_dir,p1,sn,
                                                 vNodes,r_level,coords)}
     }

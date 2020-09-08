@@ -1,10 +1,7 @@
-#' Pruning edges from disease differential network that also 
-#' occur in reference-only network.
-#'
-#' Recursively diffuse probability from a starting node based
-#' on the connectivity of the background knowledge graph,
-#' representing the likelihood that a variable will be
-#' most influenced by a perturbation in the starting node.
+#' Network pruning for disease-specific network determination
+#' 
+#' Prune edges from a disease+control "differential" network that also 
+#' occur in the control-only network.
 #' @param ig_dis - The igraph object associated with the
 #'                 disease+reference trained differential network.
 #' @param ig_ref - The igraph object associated with the reference-only
@@ -39,10 +36,10 @@ graph.naivePruning = function(ig_dis, ig_ref) {
         e.id.ref=get.edge.ids(ig_ref, vp=ee[e,])
         if (e.id.dis!=0) {
             isSameDirection=ifelse((((E(ig_dis)$weight[e.id.dis]<0) &&
-                                       (E(ig_ref)$weight[e.id.ref]<0)) || 
-                                   ((E(ig_dis)$weight[e.id.dis]>0) &&
-                                      (E(ig_ref)$weight[e.id.ref]>0))),
-                                   TRUE,FALSE)
+                                        (E(ig_ref)$weight[e.id.ref]<0)) || 
+                                    ((E(ig_dis)$weight[e.id.dis]>0) &&
+                                        (E(ig_ref)$weight[e.id.ref]>0))),
+                                    TRUE,FALSE)
             if (isSameDirection && (abs(E(ig_ref)$weight[e.id.ref])<
                                     abs(E(ig_dis)$weight[e.id.dis]))) {
                 new_w=E(ig_dis)$weight[e.id.dis]-E(ig_ref)$weight[e.id.ref]
@@ -57,12 +54,6 @@ graph.naivePruning = function(ig_dis, ig_ref) {
         }
     }
     print(sprintf("%s edges were modified in the disease+reference
-                  network.", it))
+                    network.", it))
     return (ig_dis)
 }
-
-
-
-
-
-

@@ -2,8 +2,7 @@
 % Please edit documentation in R/graph.naivePruning.r
 \name{graph.naivePruning}
 \alias{graph.naivePruning}
-\title{Pruning edges from disease differential network that also 
-occur in reference-only network.}
+\title{Network pruning for disease-specific network determination}
 \usage{
 graph.naivePruning(ig_dis, ig_ref)
 }
@@ -19,10 +18,8 @@ ig_pruned - The pruned igraph object of the disease+reference
                     differential network, with reference edges subtracted.
 }
 \description{
-Recursively diffuse probability from a starting node based
-on the connectivity of the background knowledge graph,
-representing the likelihood that a variable will be
-most influenced by a perturbation in the starting node.
+Prune edges from a disease+control "differential" network that also 
+occur in the control-only network.
 }
 \examples{
 # Generate a 100 node "disease-control" network

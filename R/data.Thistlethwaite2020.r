@@ -1,8 +1,8 @@
-#' @title Clinical Diagnosis of Metabolic Disorders using Untargeted 
-#' Metabolomic Profiling and Disease-specific Networks Learned from 
-#' Patient Data
+#' @title Thistlethwaite et al. (2020)
 #' 
-#' @description  A meta-analysis of previous untargeted metabolomics
+#' @description Clinical Diagnosis of Metabolic Disorders using Untargeted 
+#' Metabolomic Profiling and Disease-specific Networks Learned from 
+#' Patient Data. A meta-analysis of previous untargeted metabolomics
 #' studies describing 16 unique inborn errors of metabolism.
 #' 
 #' @name Thistlethwaite2020

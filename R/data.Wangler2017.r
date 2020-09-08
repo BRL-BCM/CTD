@@ -1,7 +1,7 @@
-#' @title A metabolomic map of Zellweger spectrum disorders reveals 
-#' novel disease biomarkers.
-#'
-#' @description Global metabolic profiling obtained by untargeted
+#' @title Wangler et al. (2017)
+#' 
+#' @description A metabolomic map of Zellweger spectrum disorders reveals 
+#' novel disease biomarkers. Global metabolic profiling obtained by untargeted
 #' mass spectrometry-based metabolomic platform for the detection
 #' of novel and known inborn errors of metabolism.  This untargeted 
 #' approach collected z-score values for >650 unique compounds from

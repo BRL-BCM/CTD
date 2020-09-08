@@ -3,8 +3,7 @@
 \docType{data}
 \name{Wangler2017}
 \alias{Wangler2017}
-\title{A metabolomic map of Zellweger spectrum disorders reveals 
-novel disease biomarkers.}
+\title{Wangler et al. (2017)}
 \format{
 Wangler2017 - The data matrix (metabolite features are
 rows, patient observations are columns) for 19 untargeted metabolomics 
@@ -17,7 +16,8 @@ rows, patient observations are columns) for 19 untargeted metabolomics
 data(Wangler2017)
 }
 \description{
-Global metabolic profiling obtained by untargeted
+A metabolomic map of Zellweger spectrum disorders reveals 
+novel disease biomarkers. Global metabolic profiling obtained by untargeted
 mass spectrometry-based metabolomic platform for the detection
 of novel and known inborn errors of metabolism.  This untargeted 
 approach collected z-score values for >650 unique compounds from

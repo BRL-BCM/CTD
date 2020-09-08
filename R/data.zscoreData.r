@@ -1,5 +1,7 @@
-#' Z-transform normalized, imputed metabolomics data
-#'
+#' Z-transform available data
+#' 
+#' The z-transform is meant to work with normalized,
+#' imputed metabolomics data
 #' @param data - Normalized, imputed data. Data matrix with 
 #'               observations as rows, features as columns.
 #' @param ref - Reference samples normalized, imputed data.

@@ -1,4 +1,4 @@
-#' Generate patient-specific bitstrings from a network walker.
+#' Generate patient-specific bitstrings
 #'
 #' This function calculates the bitstrings (1 is a hit; 0 is a miss)
 #' associated with a network walker which tries to find all nodes in

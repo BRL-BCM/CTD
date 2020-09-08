@@ -1,5 +1,6 @@
-#' Impute missing values as lowest observed value in a reference population.
-#'
+#' Impute missing values
+#' 
+#' Impute missing values as lowest observed value in a reference population
 #' @param data - Normalized, imputed data. Data matrix with observations as 
 #'               rows, features as columns.
 #' @param ref - Reference samples normalized, imputed data.

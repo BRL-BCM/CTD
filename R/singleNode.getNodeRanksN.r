@@ -1,5 +1,4 @@
-#' Generate the fixed , single-node diffusion node rankings, starting from
-#' a given perturbed variable.
+#' Generate single-node node rankings ("fixed" walk) 
 #'
 #' This function calculates the node rankings starting from a given perturbed 
 #' variable in a subset of variables in the network.
@@ -75,7 +74,7 @@ singleNode.getNodeRanksN = function(n,G,p1,thresholdDiff,adj_mat,S=NULL,
     numMisses = 0
     curr_ns = c(curr_ns, startNode)
     if(out_dir!=""){graph.netWalkSnapShot(adj_mat,G,out_dir,p1,curr_ns,S, 
-                                          coords,length(curr_ns),useLabels)}
+                                            coords,length(curr_ns),useLabels)}
     while (stopIterating==FALSE) {
         currGph[seq_len(length(currGph))]=0 # clear probabilities
         baseP=p0/(length(currGph)-length(curr_ns))
@@ -93,8 +92,8 @@ singleNode.getNodeRanksN = function(n,G,p1,thresholdDiff,adj_mat,S=NULL,
         # Set startNode to the node with the max probability in the new currGph
         maxProb=names(which.max(currGph))
         if(out_dir!=""){graph.netWalkSnapShot(adj_mat,G,out_dir,p1,curr_ns,S, 
-                                              coords,length(curr_ns),
-                                              useLabels)}
+                                                coords,length(curr_ns),
+                                                useLabels)}
         # Break ties: When there are ties, choose the first of the winners.
         startNode = names(currGph[maxProb[1]])
         if (!is.null(S)) { # draw until all members of S are found
@@ -105,7 +104,7 @@ singleNode.getNodeRanksN = function(n,G,p1,thresholdDiff,adj_mat,S=NULL,
             curr_ns = c(curr_ns, startNode)
             if(length(curr_ns)>=(length(G))){stopIterating=TRUE}}
         if(out_dir!=""){graph.netWalkSnapShot(adj_mat,G,out_dir,p1,curr_ns,S, 
-                                              coords,length(curr_ns),useLabels)}
+                                                coords,length(curr_ns),useLabels)}
     }
     return(curr_ns)
 }

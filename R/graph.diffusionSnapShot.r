@@ -1,8 +1,8 @@
-#' Make a movie of the diffusion of probability, P1, from a starting node.
+#' Capture the current state of probability diffusion
 #'
 #' Recursively diffuse probability from a starting node based on the
-#' connectivity of the background knowledge graph, representing the
-#' likelihood that a variable will be most influenced by a perturbation
+#' connectivity in a network, G, where the probability represents the
+#' likelihood that a variable will be influenced by a perturbation
 #' in the starting node.
 #' @param adj_mat - The adjacency matrix that encodes the edge weights for
 #'                  the network, G. 
@@ -69,7 +69,7 @@ graph.diffusionSnapShot = function(adj_mat, G, output_dir, p1,
     title(sprintf("Diffuse %.2f from %s at recursion level %d.",
                   p1, startNode, recursion_level), cex.main=1)
     legend("bottomright", legend=c("Visited", "Unvisited"),
-           fill=c("red", "blue"))
+            fill=c("red", "blue"))
     dev.off()
     .GlobalEnv$imgNum = .GlobalEnv$imgNum + 1
     return(0)

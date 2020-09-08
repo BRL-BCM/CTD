@@ -1,7 +1,7 @@
-#' @title Untargeted metabolomic analysis for the clinical screening of 
-#' inborn errors of metabolism
+#' @title Miller et al. (2015)
 #'
-#' @description Global metabolic profiling obtained by untargeted mass 
+#' @description Untargeted metabolomic analysis for the clinical screening of 
+#' inborn errors of metabolism. Global metabolic profiling obtained by untargeted mass 
 #' spectrometry-based metabolomic platform for the detection of novel 
 #' and known inborn errors of metabolism.  This untargeted approach 
 #' collected z-score values for ~1200 unique compounds (including 

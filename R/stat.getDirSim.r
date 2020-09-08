@@ -1,4 +1,5 @@
 #' DirSim: The Jaccard distance with directionality incorporated.
+#' 
 #' @param ptID - The identifier associated with patient 1's sample.
 #' @param ptID2 - The identifier associated with patient 2's sample.
 #' @param kmx - The number of top perturbations to consider in distance
@@ -68,24 +69,23 @@
 #'   }
 #' }
 stat.getDirSim = function(ptID, ptID2, kmx, data_mx) {
-  # Get optimal bitstring for encoding of patient1's union patient2's subsets
-  dirSim = vector("numeric", length=kmx)
-  for (k in seq_len(kmx)) {
-      p1.sig.nodes = rownames(data_mx)[order(abs(data_mx[,ptID]),
-                                             decreasing=TRUE)][seq_len(k)]
-      p2.sig.nodes=rownames(data_mx)[order(abs(data_mx[,ptID2]),
-                                           decreasing=TRUE)][seq_len(k)]
-      p1.dirs = data_mx[p1.sig.nodes, ptID]
-      p1.dirs[which(!(p1.dirs>0))] = 0
-      p1.dirs[which(p1.dirs>0)] = 1
-      p2.dirs = data_mx[p2.sig.nodes, ptID2]
-      p2.dirs[which(!(p2.dirs>0))] = 0
-      p2.dirs[which(p2.dirs>0)] = 1
-      p1.sig.nodes = sprintf("%s%d", p1.sig.nodes, p1.dirs)
-      p2.sig.nodes = sprintf("%s%d", p2.sig.nodes, p2.dirs)
-      dirSim[k]=1-(length(intersect(p1.sig.nodes,
-                                    p2.sig.nodes))/length(union(p1.sig.nodes, 
-                                                                p2.sig.nodes)))
-  }
-  return(dirSim)
+    # Get optimal bitstring for encoding of patient1's union patient2's subsets
+    dirSim = vector("numeric", length=kmx)
+    for (k in seq_len(kmx)) {
+        p1.sig=rownames(data_mx)[order(abs(data_mx[,ptID]),
+                                        decreasing=TRUE)][seq_len(k)]
+        p2.sig=rownames(data_mx)[order(abs(data_mx[,ptID2]),
+                                        decreasing=TRUE)][seq_len(k)]
+        p1.dirs = data_mx[p1.sig, ptID]
+        p1.dirs[which(!(p1.dirs>0))] = 0
+        p1.dirs[which(p1.dirs>0)] = 1
+        p2.dirs = data_mx[p2.sig, ptID2]
+        p2.dirs[which(!(p2.dirs>0))] = 0
+        p2.dirs[which(p2.dirs>0)] = 1
+        p1.sig = sprintf("%s%d", p1.sig, p1.dirs)
+        p2.sig = sprintf("%s%d", p2.sig, p2.dirs)
+        p12.sig=union(p1.sig,p2.sig)
+        dirSim[k]=1-(length(intersect(p1.sig,p2.sig))/length(p12.sig))
+    }
+    return(dirSim)
 }
