@@ -422,11 +422,11 @@ plot.mdsDist = function(patientDist, diagnoses, k, diag) {
         z=round(fitDist[,3], 2)
         df=data.frame(x=x,y=y,z=z,color=diagnoses,label=colnames(patientDist))
         p=plot_ly(df,x=~x,y=~y,z=~z,color=~color,text=~label,
-                  marker=list(size=20))
+                    marker=list(size=20))
     } else {
         df=data.frame(x=x,y=y,color=diagnoses,label=colnames(patientDist))
         p=plot_ly(df,x=~x,y=~y,color=~color,text=~label,
-                  marker=list(size=20))
+                    marker=list(size=20))
     }
     return(p)
 }
@@ -452,23 +452,23 @@ plot.knnDist = function(patientDist, diagnoses, diag) {
             tp=tp + 1
             ind=ind[which(diag_pt_ind==diag)]
             ig=add.edges(ig,
-                         edges=c(colnames(patientDist)[pt1],names(ind[1])),
-                         attr=list(color="green", lty=1))
+                            edges=c(colnames(patientDist)[pt1],names(ind[1])),
+                            attr=list(color="green", lty=1))
         } else if (diag_pt_ind!=diag && diag_pt1!=diag) { # True negative
             tn=tn + 1
             ig=add.edges(ig,
-                         edges=c(colnames(patientDist)[pt1],names(ind[1])),
-                         attr=list(color="green", lty=1))
+                            edges=c(colnames(patientDist)[pt1],names(ind[1])),
+                            attr=list(color="green", lty=1))
         } else if (diag_pt_ind==diag && diag_pt1!=diag) { # False positive
             fp=fp + 1
             ig=add.edges(ig,
-                         edges=c(colnames(patientDist)[pt1],names(ind[1])),
-                         attr=list(color="red", lty=1))
+                            edges=c(colnames(patientDist)[pt1],names(ind[1])),
+                            attr=list(color="red", lty=1))
         } else { # False negative
             fn=fn + 1
             ig=add.edges(ig,
-                         edges=c(colnames(patientDist)[pt1],names(ind[1])),
-                         attr=list(color="red", lty=1))
+                            edges=c(colnames(patientDist)[pt1],names(ind[1])),
+                            attr=list(color="red", lty=1))
         }
     }
     print(sprintf("Tp = %d, Tn= %d, Fp = %d, Fn=%d", tp, tn, fp, fn))
