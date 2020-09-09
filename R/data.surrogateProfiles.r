@@ -45,6 +45,7 @@ data.surrogateProfiles = function(data, std=1, ref_data=NULL) {
                             sprintf("disease_surr%d",
                                     seq_len(ncol(d_surr)-ncol(data))))
         rownames(d_surr)=rownames(data)
+        d_surr=d_surr[,sample(seq_len(ncol(d_surr)), numSurr)]
     } else {d_surr = data[,sample(seq_len(ncol(data)), numSurr)]}
     if (!is.null(ref_data)) {
         if (numSurr>ncol(ref_data)) { # Generate control surrogates
@@ -61,6 +62,7 @@ data.surrogateProfiles = function(data, std=1, ref_data=NULL) {
                                 sprintf("control_surr%d",
                                         seq_len(ncol(c_surr)-ncol(ref_data))))
             rownames(c_surr)=rownames(ref_data)
+            c_surr=c_surr[,sample(seq_len(ncol(c_surr)), numSurr)]
         } else {c_surr=ref_data[,sample(seq_len(ncol(ref_data)), numSurr)]}
         data_mx_surr=cbind(d_surr, c_surr)
     } else {data_mx_surr = d_surr}
