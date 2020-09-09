@@ -12,10 +12,7 @@ confirmed for each patient sample.
 }
 \source{
 Supporting Information: jimd1029-sup-0001.xls
-(\href{
-paste("https://onlinelibrary.wiley.com/action/downloadSupplement?",
-"doi=10.1007%2Fs10545-015-9843-7&file=jimd1029-sup-0001.xls",
-sep="")}{Dataset})
+(\href{https://tinyurl.com/yypsbghe}{Dataset})
 }
 \usage{
 data(Miller2015)
@@ -38,6 +35,6 @@ data(Miller2015)
 \references{
 Miller et al. (2015). Untargeted metabolomic analysis for the
 clinical screening of inborn errors of metabolism. J Inherit Metab Dis,
-38: 1029–1039. (\href{www.doi.org/10.1007/s10545-015-9843-7}{PubMed})
+38: 1029–1039. (\href{https://doi.org/10.1007/s10545-015-9843-7}{Article})
 }
 \keyword{datasets}

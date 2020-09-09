@@ -10,22 +10,19 @@ rows, patient observations are columns) for 19 untargeted metabolomics
 patient samples, alongside metabolite annotations.
 }
 \source{
-Electronic supplementary material, Supplementary Tables 
-\href{
-paste("https://static-content.springer.com/esm/art:10.1038/",
-"gim.2017.262/MediaObjects/41436_2018_207_MOESM2_ESM.xlsx",
-sep="")}{Dataset}
+Electronic supplementary material, Supplementary Tables
+(\href{https://tinyurl.com/y4zus9l2}{Dataset})
 }
 \usage{
 data(Wangler2017)
 }
 \description{
 A metabolomic map of Zellweger spectrum disorders reveals 
-novel disease biomarkers. Global metabolic profiling obtained by untargeted
-mass spectrometry-based metabolomic platform for the detection
-of novel and known inborn errors of metabolism.  This untargeted 
-approach collected z-score values for >650 unique compounds from
-human plasma.  Data set contains 19 individual plasma samples with
+novel disease biomarkers. Global metabolic profiling obtained by 
+untargetedmass spectrometry-based metabolomic platform for the 
+detectionof novel and known inborn errors of metabolism.  This 
+untargeted approach collected z-score values for >650 unique compounds 
+fromhuman plasma.  Data set contains 19 individual plasma samples with
 confirmed biallelic pathogenic variants in the PEX1 gene. These 
 samples revealed elevations in pipecolic acid and long-chain
 lysophosphatidylcholines, as well as an unanticipated reduction
@@ -35,7 +32,9 @@ in multiple sphingomyelin species.
 data(Wangler2017)
 }
 \references{
-M.F. Wangler, et al. Genetics in Medicine, 2018, 00
-(\href{www.doi.org/10.1038/gim.2017.262}{PubMed})
+M.F. Wangler, et al. (2018). A metabolomic map of Zellweger 
+spectrum disorders reveals novel disease biomarkers. Genetics in 
+Medicine, 20: 1274-1283.
+(\href{https://doi.org/10.1038/gim.2017.262}{Article})
 }
 \keyword{datasets}
