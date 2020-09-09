@@ -498,10 +498,10 @@ p
 # Hierarchical clustering
 dd_f = as.numeric(as.factor(as.character(dd)))
 heatmap.2(x=ncd,dendrogram="both", Rowv=TRUE,Colv=TRUE,
-          ColSideColors=c(brewer.pal(12,"Set3"),brewer.pal(9,"BrBG"))[dd_f],
-          RowSideColors=c(brewer.pal(12,"Set3"),brewer.pal(9,"BrBG"))[dd_f],
-          cexRow=0.75,cexCol=1, margins=c(12,12), trace="none", key=TRUE,
-          col=bluered, notecol="black")
+            ColSideColors=c(brewer.pal(12,"Set3"),brewer.pal(9,"BrBG"))[dd_f],
+            RowSideColors=c(brewer.pal(12,"Set3"),brewer.pal(9,"BrBG"))[dd_f],
+            cexRow=0.75,cexCol=1, margins=c(12,12), trace="none", key=TRUE,
+            col=bluered, notecol="black")
 legend("left", legend=unique(sort(as.character(dd))), 
         fill=c(brewer.pal(12,"Set3"), brewer.pal(9,"BrBG")), cex=2)
 # K-NN
