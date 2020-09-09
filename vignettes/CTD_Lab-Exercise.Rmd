@@ -17,9 +17,8 @@ require(huge)
 This document was rendered at `r Sys.time()`
 
 # I. Generate background knowledge graph.
-
 ## I.I: Manually build graphs from adjacency matrices.
-![Figure 1. Cartoon of graph we will build manually via its adjacency matrix.](images/probability_diffusion.png){width=350px}
+![Figure 1. Cartoon of network in manually_build_graph code chunk.](images/probability_diffusion.png){width=350px}
 
 ```{r manually_build_graph}
 adj_mat = rbind(c(0,3,1,0,0,0,0,0,0), #A's neighbors
@@ -41,9 +40,9 @@ print(ig)
 
 ```
 
-
 ## I.II: Learn a graph from data.
-Note all code chunks in sections I - IV may rely on lines in previous code chunks, so do not empty your environment between code chunks.
+Note all code chunks in sections I - IV may rely on lines in previous code
+chunks, so do not empty your environment between code chunks.
 ```{r learn_graph}
 # Load the Miller2015_Heparin dataset
 data(Miller2015)
@@ -102,11 +101,12 @@ print(ig_arg)
 
 # II. The Probability Diffusion Algorithm
 ## II.I From a starting node.
-Run the following code, then go to the directory, and open all diffusionEventMovie*.png files all at once. 
-Starting from the first image, view how the probability diffusion algorithm works to diffuse 100% 
-probability to the rest of the graph. Be sure to pay attention to the recursion level listed in the title 
-of each image, to imagine where in the call stack the algorithm is at the captured time the image was 
-generated.
+Run the following code, then go to the directory, and open all 
+diffusionEventMovie*.png files all at once. Starting from the first image,
+view how the probability diffusion algorithm works to diffuse 100% 
+probability to the rest of the graph. Be sure to pay attention to the
+recursion level listed in the title of each image, to imagine where in the
+call stack the algorithm is at the captured time the image was generated.
 ```{r diffusion_no_visited}
 G=vector(mode="list", length=length(V(ig)$name))
 G[1:length(G)] = 0
@@ -127,8 +127,9 @@ G_new[which.max(G_new)]
 ```
 
 ## II.II From a starting node, after visiting previous nodes.
-Now, delete all diffusionEventMovie*.png files from your current directory, and run 
-the following code. View the new image stack in the same way we did previously.
+Now, delete all diffusionEventMovie*.png files from your current directory,
+and run the following code. View the new image stack in the same way we did
+previously.
 ```{r diffusion_with_visited}
 # Now let's see how the probability diffusion algorithm diffuses probability
 # after B has been "stepped" into.
@@ -147,11 +148,12 @@ G_new[which.max(G_new)]
 ```
 
 ## II.III Diffusing through visited nodes, based on connectivity.
-Sometimes the startNode is "stranded" by a bunch of visited nodes. The diffusion algorithm 
-diffuses "through" visited nodes, so that nodes in the same connected component can be 
-prioritized over nodes in a different connected component, or "island nodes" (e.g. in the 
-below code snippet, "I" is an island node). This only works currently for nodes 2 hops away 
-from the current startNode, however.
+Sometimes the startNode is "stranded" by a bunch of visited nodes. The
+diffusion algorithm diffuses "through" visited nodes, so that nodes in the 
+same connected component can be prioritized over nodes in a different 
+connected component, or "island nodes" (e.g. in the below code snippet, 
+"I" is an island node). This only works currently for nodes 2 hops away from
+the current startNode, however.
 ```{r diffuse_through_visited}
 adj_mat = rbind(c(0,1,2,0,0,0,0,0,0), #A's neighbors
                 c(1,0,3,0,0,0,0,0,0), #B's neighbors
@@ -261,10 +263,9 @@ names(ranks) = S
 ```
 
 
-
 # IV. The Encoding Process
-We're going to go back to our data using the Arginase deficiency network model, 
-and the Miller et al (2015) dataset.
+We're going to go back to our data using the Arginase deficiency network
+model, and the Miller et al (2015) dataset.
 ## IV.0 Re-define the Arginase deficiency network model
 ``` {r arg_network}
 print(ig_arg)
@@ -351,7 +352,6 @@ ptBSbyK[[ind.mx]] # all metabolites in the bitstring
 names(which(ptBSbyK[[ind.mx]]==1))
 ```
 
-
 # V. Patient Distances, Single-Node Encoding Recommended
 ```{r patient_distances}
 data_mx=arg_data[,which(colnames(arg_data) %in% names(diags))]
@@ -409,8 +409,6 @@ for (pt in 1:ncol(data_mx)) {
 }
 
 ```
-
-
 
 # VI. Visualizations
 ```{r visualizations}

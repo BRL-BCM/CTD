@@ -69,7 +69,7 @@ variable in a subset of variables in the network.
 \examples{
 data("Miller2015")
 data_mx=Miller2015[-c(1,grep("x - ",rownames(Miller2015))),
-                   grep("IEM", colnames(Miller2015))]
+                    grep("IEM", colnames(Miller2015))]
 data_mx=apply(data_mx, c(1,2), as.numeric)
 # Build an adjacency matrix for network G
 adj_mat=matrix(0, nrow=nrow(data_mx),ncol=nrow(data_mx))
@@ -85,11 +85,11 @@ ranks=singleNode.getNodeRanksN(1,G,p1=0.9,thresholdDiff=0.01,adj_mat)
 # Make a movie of the network walker
 S=names(G)[sample(seq_len(length(G)), 3, replace=FALSE)]
 ig=graph.adjacency(adj_mat,mode="undirected",weighted=TRUE,
-                   add.colnames="name")
+                    add.colnames="name")
 coords=layout.fruchterman.reingold(ig)
 ranks = singleNode.getNodeRanksN(which(names(G)==S[1]),G,p1=0.9,
-                                 thresholdDiff=0.01,adj_mat,S,
-                                 log2(length(G)),FALSE,getwd())
+                                    thresholdDiff=0.01,adj_mat,S,
+                                    log2(length(G)),FALSE,getwd())
 }
 \keyword{diffusion}
 \keyword{network}

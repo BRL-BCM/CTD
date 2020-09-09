@@ -6,15 +6,13 @@
 #' @export data.combineData
 #' @examples 
 #' # Row names and column names are required for both input matrices.
-#' curr_data = matrix(rnorm(500), ncol=100)
-#' rownames(curr_data) = sprintf("Feature%d", sample(seq_len(20), 
-#'                                            nrow(curr_data), 
-#'                                            replace = FALSE))
-#' colnames(curr_data) = sprintf("Sample%d", seq_len(ncol(curr_data)))
-#' more_data = matrix(rnorm(500), ncol=100)
-#' rownames(more_data) = sprintf("Feature%d", sample(seq_len(20), 
-#'                                            nrow(curr_data), 
-#'                                            replace = FALSE))
+#' curr_data=matrix(rnorm(500), ncol=100)
+#' rownames(curr_data)=sprintf("Feature%d",sample(seq_len(20), 
+#'                              nrow(curr_data),replace = FALSE))
+#' colnames(curr_data)=sprintf("Sample%d", seq_len(ncol(curr_data)))
+#' more_data=matrix(rnorm(500), ncol=100)
+#' rownames(more_data)=sprintf("Feature%d",sample(seq_len(20), 
+#'                              nrow(curr_data),replace = FALSE))
 #' colnames(more_data) = sprintf("Sample%d", seq_len(ncol(curr_data)))
 #' combined.data = data.combineData(curr_data, more_data)
 data.combineData = function(curr_data, more_data) {

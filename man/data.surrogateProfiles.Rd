@@ -35,6 +35,6 @@ ref_fill=as.numeric(Miller2015$`Times identifed in all 200 samples`[-1])/200
 refs2=refs[which(ref_fill>0.8),]
 diag_pts=names(diags[which(diags==unique(diags)[1])])
 diag_data=data_mx[which(rownames(data_mx) \%in\% rownames(refs2)), 
-                  which(colnames(data_mx) \%in\% diag_pts)]
+                    which(colnames(data_mx) \%in\% diag_pts)]
 data_mx_surr=data.surrogateProfiles(data=diag_data, std=1, ref_data=refs2)
 }

@@ -59,7 +59,7 @@ network.
 # Get patient distances for the first 2 patients in the Miller 2015 dataset.
 data("Miller2015")
 data_mx = Miller2015[-c(1,grep("x - ", rownames(Miller2015))),
-                     grep("IEM",colnames(Miller2015))]
+                        grep("IEM",colnames(Miller2015))]
 data_mx = apply(data_mx[,c(1,2)], c(1,2), as.numeric)
 # Build a network, G
 adj_mat = matrix(0, nrow=nrow(data_mx), ncol=nrow(data_mx))
@@ -74,24 +74,25 @@ names(G)=colnames(adj_mat)
 kmx=15
 topMets_allpts = c()
 for (pt in seq_len(ncol(data_mx))) {
-  topMets_allpts=c(topMets_allpts, 
-                   rownames(data_mx)[order(abs(data_mx[,pt]),
-                                           decreasing=TRUE)[seq_len(kmx)]])}
+    topMets_allpts=c(topMets_allpts, 
+                    rownames(data_mx)[order(abs(data_mx[,pt]),
+                                            decreasing=TRUE)[seq_len(kmx)]])}
 topMets_allpts = unique(topMets_allpts)
 # Pre-compute node ranks for all metabolites in topMets_allpts
 # for faster distance calculations.
 ranks = list()
 for (n in seq_len(length(topMets_allpts))) { 
-  ind = which(names(G)==topMets_allpts[n])
-  ranks[[n]]=singleNode.getNodeRanksN(ind,G,0.9,0.01,adj_mat,
-                                      topMets_allpts,log2(length(G))) 
+    ind = which(names(G)==topMets_allpts[n])
+    ranks[[n]]=singleNode.getNodeRanksN(ind,G,0.9,0.01,adj_mat,
+                                        topMets_allpts,log2(length(G))) 
 }
 names(ranks) = topMets_allpts
 # Also pre-compute patient bitstrings for faster distance calculations.
 ptBSbyK = list()
 for (pt in seq_len(ncol(data_mx))) {
-  S=rownames(data_mx)[order(abs(data_mx[,pt]),decreasing=TRUE)[seq_len(kmx)]]
-  ptBSbyK[[pt]] = mle.getPtBSbyK(S, ranks)
+    S=rownames(data_mx)[order(abs(data_mx[,pt]),
+                                decreasing=TRUE)[seq_len(kmx)]]
+    ptBSbyK[[pt]] = mle.getPtBSbyK(S, ranks)
 }
 # Build your results ("res") list object to store patient distances at
 # different size k's.
@@ -101,16 +102,16 @@ rownames(t$ncd) = colnames(data_mx)
 colnames(t$ncd) = colnames(data_mx)
 for (i in seq_len(kmx)) { res[[i]] = t }
 for (pt in seq_len(ncol(data_mx))) {
-  print(pt)
-  ptID = colnames(data_mx)[pt]
-  for (pt2 in pt:ncol(data_mx)) {
-    ptID2 = colnames(data_mx)[pt2]
-    tmp=mle.getPtDist(ptBSbyK[[pt]],ptID,ptBSbyK[[pt2]],ptID2,
-                      data_mx,ranks,p1=0.9,thresholdDiff=0.01,adj_mat)
-    for (k in seq_len(kmx)) {
-      res[[k]]$ncd[ptID, ptID2] = tmp$NCD[k]
-      res[[k]]$ncd[ptID2, ptID] = tmp$NCD[k]
+    print(pt)
+    ptID = colnames(data_mx)[pt]
+    for (pt2 in pt:ncol(data_mx)) {
+        ptID2 = colnames(data_mx)[pt2]
+        tmp=mle.getPtDist(ptBSbyK[[pt]],ptID,ptBSbyK[[pt2]],ptID2,
+                            data_mx,ranks,p1=0.9,thresholdDiff=0.01,adj_mat)
+        for (k in seq_len(kmx)) {
+            res[[k]]$ncd[ptID, ptID2] = tmp$NCD[k]
+            res[[k]]$ncd[ptID2, ptID] = tmp$NCD[k]
+        }
     }
-  }
 }
 }

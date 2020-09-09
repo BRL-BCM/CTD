@@ -78,7 +78,7 @@ probs_afterCurrDraw=graph.diffuseP1(p1=1.0, sn=names(G)[1], G=G,
 # Make a movie of the diffusion of probability from sn
 .GlobalEnv$imgNum = 1
 ig=graph.adjacency(adj_mat,mode="undirected",weighted=TRUE,
-                   add.colnames="name")
+                    add.colnames="name")
 coords = layout.fruchterman.reingold(ig)
 probs_afterCurrDraw=graph.diffuseP1(p1=1.0, sn=names(G)[1], G=G,
                                     vNodes=names(G)[1],
