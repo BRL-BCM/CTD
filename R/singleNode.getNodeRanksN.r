@@ -35,7 +35,7 @@
 #' @keywords probability diffusion
 #' @keywords network walker
 #' @export singleNode.getNodeRanksN
-#' @usage singleNode.getNodeRanksN(n,G,p1=0.9,thresholdDiff=0.01,adj_mat,
+#' @usage singleNode.getNodeRanksN(n,G,p1,thresholdDiff,adj_mat,
 #'                                     S=NULL,num.misses=NULL,verbose=FALSE,
 #'                                     out_dir="",useLabels=FALSE,coords=NULL)
 #' @examples
