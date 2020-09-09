@@ -15,8 +15,8 @@
 #' @usage data(Miller2015)
 #' @format Miller2015 - The data frame with 1203 metabolite features as rows,
 #' and 186 untargeted metabolomics patient samples as columns, alongside 16
-#' metabolite annotations. The first row also provides the biochemical diagnosis 
-#' confirmed for each patient sample.
+#' metabolite annotations. The first row also provides the biochemical
+#' diagnosis confirmed for each patient sample.
 #' @keywords datasets
 #' @references Miller et al. (2015). Untargeted metabolomic analysis for the
 #' clinical screening of inborn errors of metabolism. J Inherit Metab Dis,
