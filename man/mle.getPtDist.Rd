@@ -38,7 +38,7 @@ network, G.}
 }
 \value{
 patientDistances - a distance matrix, where row and columns are
-                           patient identifiers.
+patient identifiers.
 }
 \description{
 This function calculates the universal distance between patients, using a

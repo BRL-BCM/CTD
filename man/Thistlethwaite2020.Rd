@@ -6,9 +6,8 @@
 \title{Thistlethwaite et al. (2020)}
 \format{
 Thistlethwaite2020 - A data frame with 1364 metabolite 
-                             features as rows and 545 untargeted 
-                             metabolomics patient samples as columns, 
-                             alongside 8 metabolite annotations.
+features as rows and 545 untargeted metabolomics patient samples
+as columns, alongside 8 metabolite annotations.
 }
 \source{
 \href{https://genboree.org/Metabolomics-Data-Portal/}{Dataset}

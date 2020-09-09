@@ -31,7 +31,7 @@
 #' @param coords - The x and y coordinates for each node in the network, to 
 #'                 remain static between images.
 #' @return curr_ns - A character vector of node names in the order they
-#'                   were drawn by the probability diffusion algorithm.
+#' were drawn by the probability diffusion algorithm.
 #' @keywords probability diffusion
 #' @keywords network walker
 #' @export singleNode.getNodeRanksN

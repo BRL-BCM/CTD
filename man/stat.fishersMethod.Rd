@@ -11,7 +11,7 @@ stat.fishersMethod(x)
 }
 \value{
 a floating point number, a combined p-value using Fisher's 
-        method.
+method.
 }
 \description{
 Fisher's combined p-value, used to combine the results of individual 

@@ -17,11 +17,15 @@
 #' @usage data(Wangler2017)
 #' @format Wangler2017 - The data matrix (metabolite features are
 #' rows, patient observations are columns) for 19 untargeted metabolomics 
-#'                       patient samples, alongside metabolite annotations.
+#' patient samples, alongside metabolite annotations.
 #' @keywords datasets
 #' @references M.F. Wangler, et al. Genetics in Medicine, 2018, 00
-#' (\href{https://www.ncbi.nlm.nih.gov/pubmed/29419819}{PubMed})
-#' @source \href{https://static-content.springer.com/esm/art:10.1038/gim.2017.262/MediaObjects/41436_2018_207_MOESM2_ESM.xlsx}{Dataset}
+#' (\href{www.doi.org/10.1038/gim.2017.262}{PubMed})
+#' @source Electronic supplementary material, Supplementary Tables 
+#' \href{
+#' paste("https://static-content.springer.com/esm/art:10.1038/",
+#' "gim.2017.262/MediaObjects/41436_2018_207_MOESM2_ESM.xlsx",
+#' sep="")}{Dataset}
 #'
 #' @examples
 #' data(Wangler2017)

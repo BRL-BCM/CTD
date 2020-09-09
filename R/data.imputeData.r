@@ -1,10 +1,11 @@
 #' Impute missing values
 #' 
 #' Impute missing values as lowest observed value in a reference population
-#' @param data - Normalized, imputed data. Data matrix with observations as 
-#'               rows, features as columns.
-#' @param ref - Reference samples normalized, imputed data.
-#' @return imputed.data - Z-transformed data.
+#' @param data - Normalized data with some missingness. Data matrix with 
+#'               features as rows, samples as columns.
+#' @param ref - Reference sample data with features as rows, samples as
+#'              columns. Can include some missingness.
+#' @return imputed.data - Imputed data.
 #' @importFrom stats runif
 #' @export data.imputeData
 #' @examples

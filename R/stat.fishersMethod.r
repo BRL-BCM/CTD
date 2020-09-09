@@ -4,7 +4,7 @@
 #' statistical tests into an overall hypothesis.
 #' @param x - A vector of p-values (floating point numbers).
 #' @return a floating point number, a combined p-value using Fisher's 
-#'         method.
+#' method.
 #' @importFrom stats pchisq
 #' @export stat.fishersMethod
 #' @examples

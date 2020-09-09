@@ -7,13 +7,14 @@
 data.imputeData(data, ref)
 }
 \arguments{
-\item{data}{- Normalized, imputed data. Data matrix with observations as 
-rows, features as columns.}
+\item{data}{- Normalized data with some missingness. Data matrix with 
+features as rows, samples as columns.}
 
-\item{ref}{- Reference samples normalized, imputed data.}
+\item{ref}{- Reference sample data with features as rows, samples as
+columns. Can include some missingness.}
 }
 \value{
-imputed.data - Z-transformed data.
+imputed.data - Imputed data.
 }
 \description{
 Impute missing values as lowest observed value in a reference population

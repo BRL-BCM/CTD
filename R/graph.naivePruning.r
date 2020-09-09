@@ -7,7 +7,7 @@
 #' @param ig_ref - The igraph object associated with the reference-only
 #'                 trained interaction network.
 #' @return ig_pruned - The pruned igraph object of the disease+reference
-#'                     differential network, with reference edges subtracted.
+#' differential network, with reference edges subtracted.
 #' @import igraph
 #' @export graph.naivePruning
 #' @examples

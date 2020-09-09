@@ -7,10 +7,11 @@
 data.zscoreData(data, ref)
 }
 \arguments{
-\item{data}{- Normalized, imputed data. Data matrix with 
-observations as rows, features as columns.}
+\item{data}{- Normalized, imputed data. Data matrix includes 
+features as rows, samples as columns.}
 
-\item{ref}{- Reference samples normalized, imputed data.}
+\item{ref}{- Normalized, imputed reference sample data. Data
+includes features as rows, samples as columns.}
 }
 \value{
 zscored.data - Z-transformed data.

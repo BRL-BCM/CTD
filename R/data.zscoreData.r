@@ -2,9 +2,10 @@
 #' 
 #' The z-transform is meant to work with normalized,
 #' imputed metabolomics data
-#' @param data - Normalized, imputed data. Data matrix with 
-#'               observations as rows, features as columns.
-#' @param ref - Reference samples normalized, imputed data.
+#' @param data - Normalized, imputed data. Data matrix includes 
+#'               features as rows, samples as columns.
+#' @param ref - Normalized, imputed reference sample data. Data
+#'              includes features as rows, samples as columns.
 #' @return zscored.data - Z-transformed data.
 #' @importFrom stats quantile qqnorm lm
 #' @export data.zscoreData

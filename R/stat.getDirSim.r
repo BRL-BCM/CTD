@@ -8,7 +8,7 @@
 #'                  (z-scores) for all variables (columns) for each
 #'                  patient (rows).
 #' @return dirSim - a distance matrix, where row and columns are
-#'                  patient identifiers.
+#' patient identifiers.
 #' @export stat.getDirSim
 #' @examples
 #' # Get patient distances for the first 2 patients in the Miller 2015 dataset.

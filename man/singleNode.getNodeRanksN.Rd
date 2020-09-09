@@ -50,7 +50,7 @@ remain static between images.}
 }
 \value{
 curr_ns - A character vector of node names in the order they
-                  were drawn by the probability diffusion algorithm.
+were drawn by the probability diffusion algorithm.
 }
 \description{
 This function calculates the node rankings starting from a given perturbed 

@@ -7,8 +7,8 @@
 #' @param visitedNodes - The history of previous draws in the node ranking
 #'                       sequence.
 #' @return adj_matAfter - The adjacency matrix where the startNode is now
-#'                         connected to its unvisited "extended" neighbors.
-#'                         An extended neighbor is the neighbor of a neighbor.
+#' connected to its unvisited "extended" neighbors. An extended neighbor is
+#' the neighbor of a neighbor.
 #' @export graph.connectToExt
 #' @examples
 #' adj_mat = rbind(c(0,2,1,0,0,0,0), # A

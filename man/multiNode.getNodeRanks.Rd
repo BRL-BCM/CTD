@@ -46,8 +46,8 @@ remain static between images.}
 }
 \value{
 ranks - A list of character vectors of node names in the order they
-                were drawn by the probability diffusion algorithm, from each
-                starting node in S.
+were drawn by the probability diffusion algorithm, from each starting node
+in S.
 }
 \description{
 This function calculates the node rankings starting from a given node in a

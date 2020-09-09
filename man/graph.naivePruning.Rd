@@ -15,7 +15,7 @@ trained interaction network.}
 }
 \value{
 ig_pruned - The pruned igraph object of the disease+reference
-                    differential network, with reference edges subtracted.
+differential network, with reference edges subtracted.
 }
 \description{
 Prune edges from a disease+control "differential" network that also 

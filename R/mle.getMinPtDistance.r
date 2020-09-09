@@ -5,8 +5,7 @@
 #' @param allSimMatrices - A list of all similarity matrices, across all 
 #'                         k for a given graph, or across many graphs.
 #' @return minPtSim - Pairwise patient distances representing the minimum
-#'                    patient distance observed across several distance 
-#'                    matrices.
+#' patient distance observed across several distance matrices.
 #' @export mle.getMinPtDistance
 #' @examples
 #' # Get patient distances for the first 2 patients in the Miller 2015 dataset.

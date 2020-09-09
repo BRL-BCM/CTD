@@ -24,7 +24,7 @@
 #' @param adj_mat - The adjacency matrix that encodes the edge weights for the
 #'                  network, G. 
 #' @return patientDistances - a distance matrix, where row and columns are
-#'                            patient identifiers.
+#' patient identifiers.
 #' @export mle.getPtDist
 #' @usage mle.getPtDist(p1.optBS,ptID,pt2.optBS,ptID2,data_mx,ranks,p1=0.9,
 #'                         thresholdDiff=0.01,adj_mat)

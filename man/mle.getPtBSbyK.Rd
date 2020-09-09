@@ -18,7 +18,7 @@ before path truncation occurs.}
 }
 \value{
 pt.byK - a list of bitstrings, with the names of the list elements
-                 the node names of the encoded nodes
+the node names of the encoded nodes
 }
 \description{
 This function calculates the bitstrings (1 is a hit; 0 is a miss)

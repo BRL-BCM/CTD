@@ -20,7 +20,7 @@ patient (rows).}
 }
 \value{
 dirSim - a distance matrix, where row and columns are
-                 patient identifiers.
+patient identifiers.
 }
 \description{
 DirSim: The Jaccard distance with directionality incorporated.

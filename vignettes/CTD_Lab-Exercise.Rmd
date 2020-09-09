@@ -94,7 +94,8 @@ diag(arg_icov) = 0
 rownames(arg_icov) = rownames(arg_data)
 colnames(arg_icov) = rownames(arg_data)
 # Convert adjacency matrices to an igraph object.
-ig_arg = graph.adjacency(arg_icov, mode="undirected", weighted=TRUE, add.colnames="name")
+ig_arg = graph.adjacency(arg_icov, mode="undirected", weighted=TRUE,
+                         add.colnames="name")
 print(ig_arg)
 ```
 
@@ -426,12 +427,14 @@ plot.mdsDist = function(patientDist, diagnoses, k, diag) {
     x = round(fitDist[,1], 2)
     y = round(fitDist[,2], 2)
     if (k==3) {
-        z = round(fitDist[,3], 2)
-        df = data.frame(x=x, y=y, z=z, color=diagnoses, label=colnames(patientDist))
-        p = plot_ly(df, x=~x, y=~y, z=~z, color=~color, text=~label, marker = list(size = 20))
+        z=round(fitDist[,3], 2)
+        df=data.frame(x=x,y=y,z=z,color=diagnoses,label=colnames(patientDist))
+        p=plot_ly(df,x=~x,y=~y,z=~z,color=~color,text=~label,
+                  marker=list(size=20))
     } else {
-        df = data.frame(x=x, y=y, color=diagnoses, label=colnames(patientDist))
-        p = plot_ly(df, x=~x, y=~y, color=~color, text=~label, marker = list(size = 20))
+        df=data.frame(x=x,y=y,color=diagnoses,label=colnames(patientDist))
+        p=plot_ly(df,x=~x,y=~y,color=~color,text=~label,
+                  marker=list(size=20))
     }
     return(p)
 }

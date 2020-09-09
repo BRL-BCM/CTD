@@ -12,8 +12,7 @@ k for a given graph, or across many graphs.}
 }
 \value{
 minPtSim - Pairwise patient distances representing the minimum
-                   patient distance observed across several distance 
-                   matrices.
+patient distance observed across several distance matrices.
 }
 \description{
 Given a series of patient distance matrices, return the minimum

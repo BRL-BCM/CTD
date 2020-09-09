@@ -10,7 +10,7 @@
 #' @param num.misses - The number of misses tolerated by the network walker
 #'                     before path truncation occurs.
 #' @return pt.byK - a list of bitstrings, with the names of the list elements
-#'                  the node names of the encoded nodes
+#' the node names of the encoded nodes
 #' @export mle.getPtBSbyK
 #' @examples
 #' # Get patient bitstrings for the first 2 patients in the Miller 2015 dataset.

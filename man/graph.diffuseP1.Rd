@@ -45,8 +45,8 @@ is specified.}
 }
 \value{
 G - A list of returned probabilities after the diffusion of
-            probability has truncated, with names of the list being the
-            node names in the network.
+probability has truncated, with names of the list being the node names
+in the network.
 }
 \description{
 Recursively diffuse probability from a starting node based on the

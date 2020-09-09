@@ -29,8 +29,8 @@
 #' @param coords - The x and y coordinates for each node in the network, to
 #'                 remain static between images.
 #' @return ranks - A list of character vectors of node names in the order they
-#'                 were drawn by the probability diffusion algorithm, from each
-#'                 starting node in S.
+#' were drawn by the probability diffusion algorithm, from each starting node
+#' in S.
 #' @keywords probability diffusion algorithm
 #' @keywords network walker algorithm
 #' @export multiNode.getNodeRanks

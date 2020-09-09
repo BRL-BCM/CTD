@@ -18,8 +18,8 @@ sequence.}
 }
 \value{
 adj_matAfter - The adjacency matrix where the startNode is now
-                        connected to its unvisited "extended" neighbors.
-                        An extended neighbor is the neighbor of a neighbor.
+connected to its unvisited "extended" neighbors. An extended neighbor is
+the neighbor of a neighbor.
 }
 \description{
 Connect a node to its unvisited "extended" neighbors

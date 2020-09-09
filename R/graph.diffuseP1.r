@@ -29,8 +29,8 @@
 #'                 remain static between images. Only relevant if out_dir
 #'                 is specified.
 #' @return G - A list of returned probabilities after the diffusion of
-#'             probability has truncated, with names of the list being the
-#'             node names in the network.
+#' probability has truncated, with names of the list being the node names
+#' in the network.
 #' @export graph.diffuseP1
 #' @keywords probability diffusion
 #' @keywords network walker

@@ -21,14 +21,13 @@ the background graph.}
 }
 \value{
 df - a data.frame object, for every bitstring provided in bs input
-             parameter, a row is returned with the following data: the
-             patientID; the bitstring evaluated where T denotes a hit and 0
-             denotes a miss; the subsetSize, or the number of hits in the
-             bitstring; the individual p-values associated with the
-             variable's perturbations, delimited by '/'; the combined p-value
-             of all variables in the set using Fisher's method; Shannon's
-             entropy, IS.null; the minimum encoding length IS.alt; and 
-             IS.null-IS.alt, the d.score.
+parameter, a row is returned with the following data: the patientID; the 
+bitstring evaluated where T denotes a hit and 0 denotes a miss; the
+subsetSize, or the number of hits in the bitstring; the individual p-values
+associated with the variable's perturbations, delimited by '/'; the combined
+p-value of all variables in the set using Fisher's method; Shannon's
+entropy, IS.null; the minimum encoding length IS.alt; and IS.null-IS.alt,
+the d.score.
 }
 \description{
 This function calculates the mininmum encoding length associated with a

@@ -5,14 +5,17 @@
 \alias{Miller2015}
 \title{Miller et al. (2015)}
 \format{
-Miller2015 - The data frame with 1203 metabolite features 
-                     as rows, and 186 untargeted metabolomics patient 
-                     samples as columns, alongside 16 metabolite annotations.
-                     The first row also provides the biochemical diagnosis 
-                     confirmed for each patient sample.
+Miller2015 - The data frame with 1203 metabolite features as rows,
+and 186 untargeted metabolomics patient samples as columns, alongside 16
+metabolite annotations. The first row also provides the biochemical diagnosis 
+confirmed for each patient sample.
 }
 \source{
-\href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4626538/bin/10545_2015_9843_MOESM1_ESM.xls}{Dataset}
+Supporting Information: jimd1029-sup-0001.xls
+(\href{
+paste("https://onlinelibrary.wiley.com/action/downloadSupplement?",
+"doi=10.1007%2Fs10545-015-9843-7&file=jimd1029-sup-0001.xls",
+sep="")}{Dataset})
 }
 \usage{
 data(Miller2015)
@@ -33,7 +36,8 @@ and identified novel biomarkers for some diseases.
 data(Miller2015)
 }
 \references{
-Miller et al. (2015) J Inherit Metab Dis. 2015; 38: 1029–1039
-(\href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4626538/}{PubMed})
+Miller et al. (2015). Untargeted metabolomic analysis for the
+clinical screening of inborn errors of metabolism. J Inherit Metab Dis,
+38: 1029–1039. (\href{www.doi.org/10.1007/s10545-015-9843-7}{PubMed})
 }
 \keyword{datasets}
