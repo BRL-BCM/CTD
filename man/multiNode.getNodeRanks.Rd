@@ -4,8 +4,9 @@
 \alias{multiNode.getNodeRanks}
 \title{Generate multi-node node rankings ("adaptive" walk)}
 \usage{
-multiNode.getNodeRanks(S, G, p1=0.9, thresholdDiff=0.01, adj_mat,
-                                NULL, FALSE, "", FALSE, NULL)
+multiNode.getNodeRanks(S,G,p1,thresholdDiff,adj_mat,num.misses=NULL,
+                                verbose=FALSE,out_dir="",useLabels=FALSE,
+                                coords=NULL)
 }
 \arguments{
 \item{S}{- A character vector of the node names for the subset of nodes you

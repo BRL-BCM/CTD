@@ -4,9 +4,9 @@
 \alias{singleNode.getNodeRanksN}
 \title{Generate single-node node rankings ("fixed" walk)}
 \usage{
-singleNode.getNodeRanksN(which(names(G)==S[1]),G,p1=0.9,
-                                    thresholdDiff=0.01,adj_mat,S,
-                                    log2(length(G)),FALSE,getwd())
+singleNode.getNodeRanksN(n,G,p1=0.9,thresholdDiff=0.01,adj_mat,
+                                    S=NULL,num.misses=NULL,verbose=FALSE,
+                                    out_dir="",useLabels=FALSE,coords=NULL)
 }
 \arguments{
 \item{n}{- The index (out of a vector of node names) of the node ranking

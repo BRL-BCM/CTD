@@ -26,8 +26,8 @@
 #'                    display.
 #' @return 0
 #' @export graph.netWalkSnapShot
-#' @usage graph.netWalkSnapShot(adj_mat,G,output_dir=getwd(),p1=1.0,
-#'                                 "A",S,coords,1,TRUE)
+#' @usage graph.netWalkSnapShot(adj_mat,G,output_dir,p1,visitedNodes,S,
+#'                                 coords,imgNum=1,useLabels=TRUE)
 #' @import igraph
 #' @importFrom grDevices dev.off png
 #' @importFrom graphics legend title

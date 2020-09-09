@@ -4,7 +4,8 @@
 \alias{graph.diffusionSnapShot}
 \title{Capture the current state of probability diffusion}
 \usage{
-graph.diffusionSnapShot(adj_mat,G,getwd(),1.0,"A","A",1,coords)
+graph.diffusionSnapShot(adj_mat,G,output_dir,p1,startNode,
+                                visitedNodes,recursion_level,coords)
 }
 \arguments{
 \item{adj_mat}{- The adjacency matrix that encodes the edge weights for
