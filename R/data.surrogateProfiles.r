@@ -44,9 +44,7 @@ data.surrogateProfiles = function(data, std=1, ref_data=NULL) {
         colnames(d_surr)=c(colnames(data),
                             sprintf("disease_surr%d",
                                     seq_len(ncol(d_surr)-ncol(data))))
-        rownames(d_surr)=rownames(data)
-        d_surr=d_surr[,sample(seq_len(ncol(d_surr)), numSurr)]
-    } else {d_surr = data[,sample(seq_len(ncol(data)), numSurr)]}
+        rownames(d_surr)=rownames(data)} else {d_surr=data}
     if (!is.null(ref_data)) {
         if (numSurr>ncol(ref_data)) { # Generate control surrogates
             c_surr=matrix(NA, nrow=nrow(ref_data),
@@ -61,12 +59,12 @@ data.surrogateProfiles = function(data, std=1, ref_data=NULL) {
             colnames(c_surr)=c(colnames(ref_data),
                                 sprintf("control_surr%d",
                                         seq_len(ncol(c_surr)-ncol(ref_data))))
-            rownames(c_surr)=rownames(ref_data)
-            c_surr=c_surr[,sample(seq_len(ncol(c_surr)), numSurr)]
-        } else {c_surr=ref_data[,sample(seq_len(ncol(ref_data)), numSurr)]}
+            rownames(c_surr)=rownames(ref_data)} else {c_surr=ref_data}
+        d_surr=d_surr[,sample(seq_len(ncol(d_surr)), numSurr)]
+        c_surr=c_surr[,sample(seq_len(ncol(c_surr)), numSurr)]
         data_mx_surr=cbind(d_surr, c_surr)
     } else {data_mx_surr = d_surr}
-    # Impute metabolites that are NA for all samples in data_mx_surr
+    # Impute metabolites that are NA
     if (!is.null(ref_data)){data_mx_surr=data.imputeData(data_mx_surr,ref_data)
     } else { data_mx_surr = data.imputeData(data_mx_surr, data) }
     var.met = apply(data_mx_surr, 1, sd) # Remove metabolites that do no vary
