@@ -4,18 +4,8 @@
 \alias{graph.diffuseP1}
 \title{Diffuse Probability P1 from a starting node}
 \usage{
-graph.diffuseP1(
-  p1,
-  sn,
-  G,
-  vNodes,
-  thresholdDiff,
-  adj_mat,
-  verbose = FALSE,
-  out_dir = "",
-  r_level = 1,
-  coords = NULL
-)
+graph.diffuseP1(p1,sn,G,vNodes,thresholdDiff,adj_mat,verbose=FALSE,
+                        out_dir="",r_level=1,coords=NULL)
 }
 \arguments{
 \item{p1}{- The probability being dispersed from the starting node, 

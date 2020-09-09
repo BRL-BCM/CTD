@@ -71,8 +71,8 @@ for (pt in seq_len(ncol(data_mx))) {
     ptID = colnames(data_mx)[pt]
     for (pt2 in pt:ncol(data_mx)) {
         ptID2 = colnames(data_mx)[pt2]
-        tmp = mle.getPtDist(ptBSbyK[[pt]], ptID, ptBSbyK[[pt2]], ptID2, data_mx,
-                            ranks, p1=0.9, thresholdDiff=0.01, adj_mat)
+        tmp = mle.getPtDist(ptBSbyK[[pt]],ptID,ptBSbyK[[pt2]],ptID2,data_mx,
+                            ranks,p1=0.9,thresholdDiff=0.01,adj_mat)
         for (k in seq_len(kmx)) {
             res[[k]]$ncd[ptID, ptID2] = tmp$NCD[k]
             res[[k]]$ncd[ptID2, ptID] = tmp$NCD[k]

@@ -34,6 +34,8 @@
 #' @keywords probability diffusion algorithm
 #' @keywords network walker algorithm
 #' @export multiNode.getNodeRanks
+#' @usage multiNode.getNodeRanks(S, G, p1=0.9, thresholdDiff=0.01, adj_mat,
+#'                                 NULL, FALSE, "", FALSE, NULL)
 #' @examples
 #' # Read in any network via its adjacency matrix
 #' adj_mat=matrix(1, nrow=100, ncol=100)

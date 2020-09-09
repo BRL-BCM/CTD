@@ -24,6 +24,7 @@
 #'                remain static between images.
 #' @return 0
 #' @export graph.diffusionSnapShot
+#' @usage graph.diffusionSnapShot(adj_mat,G,getwd(),1.0,"A","A",1,coords)
 #' @import igraph
 #' @importFrom grDevices dev.off png
 #' @importFrom graphics legend title

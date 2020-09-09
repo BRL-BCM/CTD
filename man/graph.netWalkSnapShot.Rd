@@ -4,17 +4,8 @@
 \alias{graph.netWalkSnapShot}
 \title{Capture the current location of a network walker}
 \usage{
-graph.netWalkSnapShot(
-  adj_mat,
-  G,
-  output_dir,
-  p1,
-  visitedNodes,
-  S,
-  coords,
-  imgNum = 1,
-  useLabels = TRUE
-)
+graph.netWalkSnapShot(adj_mat,G,output_dir=getwd(),p1=1.0,
+                                "A",S,coords,1,TRUE)
 }
 \arguments{
 \item{adj_mat}{- The adjacency matrix that encodes the edge weights for

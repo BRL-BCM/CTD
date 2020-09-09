@@ -35,6 +35,9 @@
 #' @keywords probability diffusion
 #' @keywords network walker
 #' @export singleNode.getNodeRanksN
+#' @usage singleNode.getNodeRanksN(which(names(G)==S[1]),G,p1=0.9,
+#'                                     thresholdDiff=0.01,adj_mat,S,
+#'                                     log2(length(G)),FALSE,getwd())
 #' @examples
 #' data("Miller2015")
 #' data_mx=Miller2015[-c(1,grep("x - ",rownames(Miller2015))),

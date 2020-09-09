@@ -26,6 +26,8 @@
 #' @return patientDistances - a distance matrix, where row and columns are
 #'                            patient identifiers.
 #' @export mle.getPtDist
+#' @usage mle.getPtDist(p1.optBS,ptID,pt2.optBS,ptID2,data_mx,ranks,p1=0.9,
+#'                         thresholdDiff=0.01,adj_mat)
 #' @examples
 #' # Get patient distances for the first 2 patients in the Miller 2015 dataset.
 #' data("Miller2015")

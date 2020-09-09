@@ -34,6 +34,8 @@
 #' @export graph.diffuseP1
 #' @keywords probability diffusion
 #' @keywords network walker
+#' @usage graph.diffuseP1(p1,sn,G,vNodes,thresholdDiff,adj_mat,verbose=FALSE,
+#'                         out_dir="",r_level=1,coords=NULL)
 #' @examples
 #' # Read in any network via its adjacency matrix
 #' adj_mat=matrix(1, nrow=100, ncol=100)
@@ -55,7 +57,7 @@
 #'                                     vNodes=names(G)[1],
 #'                                     thresholdDiff=0.01, adj_mat, TRUE,
 #'                                     getwd(), 1, coords)
-graph.diffuseP1=function (p1,sn,G,vNodes,thresholdDiff,adj_mat,verbose=FALSE,
+graph.diffuseP1=function(p1,sn,G,vNodes,thresholdDiff,adj_mat,verbose=FALSE,
                             out_dir="",r_level=1,coords=NULL){
     nTabs=paste(rep("   ",r_level-1),collapse="") # for verbose stmts
     if(verbose==TRUE) {

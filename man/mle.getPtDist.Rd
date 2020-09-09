@@ -4,17 +4,8 @@
 \alias{mle.getPtDist}
 \title{CTDncd: A network-based distance metric.}
 \usage{
-mle.getPtDist(
-  p1.optBS,
-  ptID,
-  p2.optBS,
-  ptID2,
-  data_mx,
-  ranks,
-  p1,
-  thresholdDiff,
-  adj_mat
-)
+mle.getPtDist(p1.optBS,ptID,pt2.optBS,ptID2,data_mx,ranks,p1=0.9,
+                        thresholdDiff=0.01,adj_mat)
 }
 \arguments{
 \item{p1.optBS}{- The optimal bitstring associated with patient 1.}

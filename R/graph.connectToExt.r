@@ -31,7 +31,7 @@
 #' V(ig)$x = coords[,1]
 #' V(ig)$y = coords[,2]
 #' adj_matAfter = graph.connectToExt(adj_mat, startNode, visitedNodes)
-graph.connectToExt=function (adj_mat, startNode, visitedNodes) {
+graph.connectToExt=function(adj_mat, startNode, visitedNodes) {
     startNodeNbors=names(which(abs(adj_mat[, startNode])> 0))
     startNodeUnvisitedNbors=startNodeNbors[!(startNodeNbors%in%visitedNodes)]
     vN=visitedNodes[which(visitedNodes != startNode)]
