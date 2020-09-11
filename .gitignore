@@ -1,6 +1,8 @@
 
+*.Rproj
 *.png
 *.DS_Store
 .Rproj.user/*
 *.Rhistory
 *.pper
+.Rproj.user
