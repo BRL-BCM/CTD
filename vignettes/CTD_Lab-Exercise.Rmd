@@ -107,6 +107,9 @@ probability to the rest of the graph. Be sure to pay attention to the
 recursion level listed in the title of each image, to imagine where in the
 call stack the algorithm is at the captured time the image was generated.
 ```{r diffusion_no_visited}
+if (!dir.exists(sprintf("%s/images", getwd()))) { 
+    dir.create(sprintf("%s/images", getwd()))
+}
 G=vector(mode="list", length=length(V(ig)$name))
 G[1:length(G)] = 0
 names(G) = c("A", "B", "C", "D", "E", "F", "G", "H", "I")
