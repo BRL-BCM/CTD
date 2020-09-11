@@ -57,17 +57,19 @@ This function calculates the node rankings starting from a given perturbed
 variable in a subset of variables in the network.
 }
 \examples{
-data("Miller2015")
-data_mx=Miller2015[-c(1,grep("x - ",rownames(Miller2015))),
-                    grep("IEM", colnames(Miller2015))]
-data_mx=apply(data_mx, c(1,2), as.numeric)
 # Build an adjacency matrix for network G
-adj_mat=matrix(0, nrow=nrow(data_mx),ncol=nrow(data_mx))
-rows=sample(seq_len(ncol(adj_mat)),0.1*ncol(adj_mat))
-cols=sample(seq_len(ncol(adj_mat)),0.1*ncol(adj_mat))
-for(i in rows){for (j in cols){adj_mat[i,j]=rnorm(1,0,1)}}
-colnames(adj_mat) = rownames(data_mx)
-rownames(adj_mat) = rownames(data_mx)
+adj_mat=rbind(c(0,1,2,0,0,0,0,0,0), #A's neighbors
+                c(1,0,3,0,0,0,0,0,0), #B's neighbors
+                c(2,3,0,0,1,0,0,0,0), #C's neighbors
+                c(0,0,0,0,0,0,1,1,0), #D's neighbors
+                c(0,0,1,0,0,1,0,0,0), #E's neighbors
+                c(0,0,0,0,1,0,0,0,0), #F's neighbors
+                c(0,0,0,1,0,0,0,1,0), #G's neighbors
+                c(0,0,0,1,0,0,1,0,0), #H's neighbors
+                c(0,0,0,0,0,0,0,0,0) #I's neighbors
+                )
+rownames(adj_mat)=c("A","B","C","D","E","F","G","H","I")
+colnames(adj_mat)=c("A","B","C","D","E","F","G","H","I")
 G=vector("numeric", length=ncol(adj_mat))
 names(G)=colnames(adj_mat)
 # Get node rankings for the first metabolite in network G. 
