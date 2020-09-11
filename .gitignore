@@ -1,6 +1,5 @@
-
+*.svg
 *.Rproj
-*.png
 *.DS_Store
 .Rproj.user/*
 *.Rhistory
