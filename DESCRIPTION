@@ -13,7 +13,7 @@ Suggests:
     gplots,
     RColorBrewer,
     testthat
-VignetteBuilder: rmarkdown
+VignetteBuilder: knitr
 biocViews: BiomedicalInformatics, Metabolomics, SystemsBiology, GraphAndNetwork
 License: MIT + file LICENSE
 Encoding: UTF-8

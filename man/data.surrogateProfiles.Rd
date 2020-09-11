@@ -4,7 +4,7 @@
 \alias{data.surrogateProfiles}
 \title{Generate surrogate profiles}
 \usage{
-data.surrogateProfiles(data, std = 1, ref_data = NULL)
+data.surrogateProfiles(data, std = 1, ref_data)
 }
 \arguments{
 \item{data}{- Data matrix with observations (e.g., patient samples)
@@ -12,14 +12,14 @@ as columns, features (e.g., metabolites or genes) as rows}
 
 \item{std}{- The level of variability (standard deviation) around each
 observed feature's z-score you want to add to generate the 
-surrogate profiles.}
+surrogate profiles}
 
 \item{ref_data}{- Data matrix for healthy control "reference" samples,
 observations (e.g., patient samples) as columns, 
 features (e.g., metabolites or genes) as rows}
 }
 \value{
-data_mx_surr - Data matrix with added surrogate profiles.
+data_mx_surr - Data matrix with added surrogate profiles
 }
 \description{
 Fill in a data matrix rank with surrogate profiles., when your data is

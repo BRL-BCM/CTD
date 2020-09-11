@@ -5,7 +5,7 @@ date: "3/6/2019"
 output: pdf_document
 vignette: >
     %\VignetteIndexEntry{CTD Lab Exercise}
-    %\VignetteEngine{rmarkdown::render}
+    %\VignetteEngine{knitr::rmarkdown}
     \usepackage[utf8]{inputenc}
 ---
 ```{r setup, include=FALSE}
@@ -18,7 +18,6 @@ This document was rendered at `r Sys.time()`
 # I. Generate background knowledge graph.
 ## I.I: Manually build graphs from adjacency matrices.
 ![Cartoon of example network](images/probability_diffusion.png){width=350px}
-
 ```{r manually_build_graph}
 adj_mat = rbind(c(0,3,1,0,0,0,0,0,0), #A's neighbors
                 c(3,0,2,2,0,0,0,0,0), #B's neighbors
@@ -302,10 +301,10 @@ ptBSbyK = mle.getPtBSbyK(names(S_arg), ranks)
 
 ## IV.IV Get encoding length of minimum length codeword.
 ```{r encoding_length}
-ptID = colnames(arg_data)[1]
 ind = which(colnames(arg_data) %in% names(diags))
 data_mx.pvals=apply(arg_data[,ind], c(1,2),
                     function(i) 2*pnorm(abs(i), lower.tail=FALSE))
+ptID = "IEM_1006"
 res = mle.getEncodingLength(ptBSbyK, t(data_mx.pvals), ptID, G)
 ind.mx = which.max(res$d.score)
 res[ind.mx,]
@@ -349,7 +348,7 @@ names(which(ptBSbyK[[ind.mx]]==1))
 # V. Patient Distances, Single-Node Encoding Recommended
 ```{r patient_distances}
 data_mx=arg_data[,which(colnames(arg_data) %in% names(diags))]
-data_mx=data_mx[,1:8]
+data_mx=data_mx[,seq_len(8)]
 S_arg=c()
 for (pt in 1:ncol(data_mx)) {
     ptID=colnames(data_mx)[pt]

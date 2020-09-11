@@ -130,5 +130,6 @@ mle.getPtDist=function(p1.optBS,ptID,p2.optBS,ptID2,data_mx,ranks,p1,
     }
     # Normalized Compression Distance, Jaccard Distance (w/ Directionality)
     ncd=(p12.e-apply(cbind(p1.e,p2.e),1,min))/apply(cbind(p1.e,p2.e),1,max)
+    ncd[which(ncd<0)]=0
     return(list(p1.e=p1.e, p2.e=p2.e, p12.e=p12.e, dirSim=dirSim, NCD=ncd))
 }

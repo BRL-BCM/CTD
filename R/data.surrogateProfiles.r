@@ -6,11 +6,11 @@
 #'               as columns, features (e.g., metabolites or genes) as rows
 #' @param std - The level of variability (standard deviation) around each
 #'              observed feature's z-score you want to add to generate the 
-#'              surrogate profiles.
+#'              surrogate profiles
 #' @param ref_data - Data matrix for healthy control "reference" samples,
 #'                   observations (e.g., patient samples) as columns, 
 #'                   features (e.g., metabolites or genes) as rows
-#' @return data_mx_surr - Data matrix with added surrogate profiles.
+#' @return data_mx_surr - Data matrix with added surrogate profiles
 #' @importFrom stats na.omit rnorm sd
 #' @export data.surrogateProfiles
 #' @examples
@@ -25,12 +25,10 @@
 #' diag_data=data_mx[which(rownames(data_mx) %in% rownames(refs2)), 
 #'                     which(colnames(data_mx) %in% diag_pts)]
 #' data_mx_surr=data.surrogateProfiles(data=diag_data, std=1, ref_data=refs2)
-data.surrogateProfiles = function(data, std=1, ref_data=NULL) {
-    if (!is.null(ref_data)) {
-        ref_data=ref_data[which(rownames(ref_data) %in% rownames(data)),]
-        data=data[which(rownames(data) %in% rownames(ref_data)),]
-        rpt=ceiling(nrow(data)/ncol(data)/2)
-    } else {rpt=ceiling(nrow(data)/ncol(data))}
+data.surrogateProfiles = function(data, std=1, ref_data) {
+    ref_data=ref_data[which(rownames(ref_data) %in% rownames(data)),]
+    data=data[which(rownames(data) %in% rownames(ref_data)),]
+    rpt=ceiling(nrow(data)/ncol(data)/2)
     numSurr = ceiling(nrow(data)/2)
     if (numSurr>ncol(data)) { # Generate disease surrogates
         d_surr=matrix(NA, nrow=nrow(data),ncol=ncol(data)+ncol(data)*rpt)
@@ -42,28 +40,29 @@ data.surrogateProfiles = function(data, std=1, ref_data=NULL) {
                 d_surr[,c_col]=as.numeric(data[,pt])+rr
                 c_col=c_col+1}}
         colnames(d_surr)=c(colnames(data),
-                            sprintf("disease_surr%d",
-                                    seq_len(ncol(d_surr)-ncol(data))))
+                           sprintf("disease_surr%d",
+                                   seq_len(ncol(d_surr)-ncol(data))))
         rownames(d_surr)=rownames(data)} else {d_surr=data}
-    if (!is.null(ref_data)) {
-        if (numSurr>ncol(ref_data)) { # Generate control surrogates
-            c_surr=matrix(NA, nrow=nrow(ref_data),
-                            ncol=ncol(ref_data)+ncol(ref_data)*rpt)
-            c_col = ncol(ref_data)+1
-            for (pt in seq_len(ncol(ref_data))) {
-                c_surr[,pt]=ref_data[,pt]
-                for (rrpt in seq_len(rpt)) {
-                    rr=rnorm(nrow(ref_data), mean=0, sd=std)
-                    c_surr[,c_col]=as.numeric(ref_data[,pt])+rr
-                    c_col=c_col+1}}
-            colnames(c_surr)=c(colnames(ref_data),
-                                sprintf("control_surr%d",
-                                        seq_len(ncol(c_surr)-ncol(ref_data))))
-            rownames(c_surr)=rownames(ref_data)} else {c_surr=ref_data}
-        d_surr=d_surr[,sample(seq_len(ncol(d_surr)), numSurr)]
-        c_surr=c_surr[,sample(seq_len(ncol(c_surr)), numSurr)]
-        data_mx_surr=cbind(d_surr, c_surr)
-    } else {data_mx_surr = d_surr}
+    if (numSurr>ncol(ref_data)) { # Generate control surrogates
+        c_surr=matrix(NA, nrow=nrow(ref_data),
+                      ncol=ncol(ref_data)+ncol(ref_data)*rpt)
+        c_col = ncol(ref_data)+1
+        for (pt in seq_len(ncol(ref_data))) {
+            c_surr[,pt]=ref_data[,pt]
+            for (rrpt in seq_len(rpt)) {
+                rr=rnorm(nrow(ref_data), mean=0, sd=std)
+                c_surr[,c_col]=as.numeric(ref_data[,pt])+rr
+                c_col=c_col+1}}
+        colnames(c_surr)=c(colnames(ref_data),
+                           sprintf("control_surr%d",
+                                   seq_len(ncol(c_surr)-ncol(ref_data))))
+        rownames(c_surr)=rownames(ref_data)} else {c_surr=ref_data}
+    d_surr=d_surr[,c(1:ncol(data),sample(seq(ncol(data)+1,ncol(d_surr)),
+                                         numSurr-ncol(data)))]
+    c_surr=c_surr[,c(1:ncol(ref_data),
+                     sample(seq(ncol(ref_data)+1,ncol(c_surr)),
+                            numSurr-ncol(data)))]
+    data_mx_surr=cbind(d_surr, c_surr)
     # Impute metabolites that are NA
     if (!is.null(ref_data)){data_mx_surr=data.imputeData(data_mx_surr,ref_data)
     } else { data_mx_surr = data.imputeData(data_mx_surr, data) }
