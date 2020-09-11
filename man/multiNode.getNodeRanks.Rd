@@ -56,10 +56,18 @@ subset of nodes in a given network, G.
 }
 \examples{
 # Read in any network via its adjacency matrix
-adj_mat=matrix(1, nrow=100, ncol=100)
-for(i in seq_len(100)){for (j in seq_len(100)){adj_mat[i,j]=rnorm(1,0,1)}}
-colnames(adj_mat)=sprintf("Metabolite\%d", seq_len(100))
-rownames(adj_mat)=colnames(adj_mat)
+adj_mat=rbind(c(0,1,2,0,0,0,0,0,0), #A's neighbors
+                c(1,0,3,0,0,0,0,0,0), #B's neighbors
+                c(2,3,0,0,1,0,0,0,0), #C's neighbors
+                c(0,0,0,0,0,0,1,1,0), #D's neighbors
+                c(0,0,1,0,0,1,0,0,0), #E's neighbors
+                c(0,0,0,0,1,0,0,0,0), #F's neighbors
+                c(0,0,0,1,0,0,0,1,0), #G's neighbors
+                c(0,0,0,1,0,0,1,0,0), #H's neighbors
+                c(0,0,0,0,0,0,0,0,0) #I's neighbors
+                )
+rownames(adj_mat)=c("A","B","C","D","E","F","G","H","I")
+colnames(adj_mat)=c("A","B","C","D","E","F","G","H","I")
 G=vector(mode="list", length=ncol(adj_mat))
 names(G)=colnames(adj_mat)
 S=names(G)[seq_len(3)]
