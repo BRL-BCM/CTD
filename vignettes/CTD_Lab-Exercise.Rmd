@@ -12,12 +12,12 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE, fig.align="center")
 require(CTD)
 require(huge)
+print(sprintf("Current directory is %s: ", getwd()))
 ```
 This document was rendered at `r Sys.time()`
 
 # I. Generate background knowledge graph.
 ## I.I: Manually build graphs from adjacency matrices.
-![Cartoon of example network](./images/probability_diffusion.png){width=350px}
 ```{r manually_build_graph}
 adj_mat = rbind(c(0,3,1,0,0,0,0,0,0), #A's neighbors
                 c(3,0,2,2,0,0,0,0,0), #B's neighbors
@@ -35,6 +35,9 @@ colnames(adj_mat) = c("A", "B", "C", "D", "E", "F", "G", "H", "I")
 ig = graph.adjacency(adj_mat, mode="undirected", weighted=TRUE,
                         add.colnames = "name")
 print(ig)
+# Multiply edge weights by 5 to amplify edge width
+# differences
+plot.igraph(ig, edge.width=5*E(ig)$weight)
 
 ```
 
@@ -101,7 +104,7 @@ print(ig_arg)
 # II. The Probability Diffusion Algorithm
 ## II.I From a starting node.
 Run the following code, then go to the directory, and open all 
-diffusionEventMovie*.png files all at once. Starting from the first image,
+diffusionP1Movie*.png files all at once. Starting from the first image,
 view how the probability diffusion algorithm works to diffuse 100% 
 probability to the rest of the graph. Be sure to pay attention to the
 recursion level listed in the title of each image, to imagine where in the
@@ -117,18 +120,19 @@ startNode = "A"
 visitedNodes = startNode
 coords = layout.fruchterman.reingold(ig)
 .GlobalEnv$imgNum = 1
-G_new = graph.diffuseP1(p1=1.0, sn=startNode, G=G, vNodes=visitedNodes, 
-                        thresholdDiff=0.01, adj_mat=adj_mat, verbose=TRUE, 
-                        out_dir = sprintf("%s/images", getwd()), 
-                        r_level = 1, coords = coords)
+# Uncomment next lines if you want to generate movie images
+#G_new = graph.diffuseP1(p1=1.0, sn=startNode, G=G, vNodes=visitedNodes, 
+#                        thresholdDiff=0.01, adj_mat=adj_mat, verbose=TRUE, 
+#                        out_dir = sprintf("%s/images", getwd()), 
+#                        r_level = 1, coords = coords)
 # Inherited probabilities across all nodes should add to 1.
-sum(unlist(G_new))
+#sum(unlist(G_new))
 # Which node inherited the highest probability from startNode?
-G_new[which.max(G_new)]
+#G_new[which.max(G_new)]
 ```
 
 ## II.II From a starting node, after visiting previous nodes.
-Now, delete all diffusionEventMovie*.png files from your current directory,
+Now, delete all diffusionP1Movie*.png files from your current directory,
 and run the following code. View the new image stack in the same way we did
 previously.
 ```{r diffusion_with_visited}
@@ -137,14 +141,15 @@ previously.
 visitedNodes = c("A", "B")
 startNode = "B"
 .GlobalEnv$imgNum=1
-G_new = graph.diffuseP1(p1=1.0, sn=startNode, G, vNodes=visitedNodes,
-                        thresholdDiff=0.01, adj_mat, TRUE, 
-                        out_dir = sprintf("%s/images", getwd()), 
-                        1, coords)
+# Uncomment the next lines if you want to generate movie images
+#G_new = graph.diffuseP1(p1=1.0, sn=startNode, G, vNodes=visitedNodes,
+#                        thresholdDiff=0.01, adj_mat, TRUE, 
+#                        out_dir = sprintf("%s/images", getwd()), 
+#                        1, coords)
 # Inherited probabilities across all nodes should add to 1.
-sum(unlist(G_new))
+#sum(unlist(G_new))
 # Which node inherited the highest probability from startNode?
-G_new[which.max(G_new)]
+#G_new[which.max(G_new)]
 ```
 
 ## II.III Diffusing through visited nodes, based on connectivity.
@@ -179,14 +184,15 @@ print(ig)
 visitedNodes = c("B", "C", "A")
 startNode = "A"
 .GlobalEnv$imgNum = 1
-G_new = graph.diffuseP1(p1=1.0, sn=startNode, G, vNodes=visitedNodes,
-                        thresholdDiff=0.01, adj_mat, TRUE, 
-                        out_dir = sprintf("%s/images", getwd()), 
-                        1, coords)
+# Uncomment the next lines if you want to generate movie images
+#G_new = graph.diffuseP1(p1=1.0, sn=startNode, G, vNodes=visitedNodes,
+#                        thresholdDiff=0.01, adj_mat, TRUE, 
+#                        out_dir = sprintf("%s/images", getwd()), 
+#                        1, coords)
 # Inherited probabilities across all nodes should add to 1.
-sum(unlist(G_new))
+#sum(unlist(G_new))
 # Which node inherited the highest probability from startNode?
-G_new[which.max(G_new)]
+#G_new[which.max(G_new)]
 ```
 
 
