@@ -12,6 +12,13 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE, fig.align="center")
 require(CTD)
 require(huge)
+require(plotly)
+require(gplots)
+require(RColorBrewer)
+if (.Platform$OS.type=="windows") {
+    require(webshot)
+    webshot::install_phantomjs()
+}
 print(sprintf("Current directory is %s: ", getwd()))
 ```
 This document was rendered at `r Sys.time()`
@@ -77,7 +84,6 @@ dim(arg_data)
 # the R package "huge". 
 # Select the regularization parameter based on the "STARS" stability
 # estimate.
-require(huge)
 #This will take 30 seconds - 1 minute.
 arg = huge(t(arg_data), method="glasso")
 plot(arg)
@@ -496,9 +502,6 @@ dd[which(dd %in% names(diags)[which(diags=="Argininemia")])] = "ARG"
 dd[which(dd %in% names(diags)[which(diags!="Argininemia")])] = "negCntl"
 names(dd) = colnames(res[[1]]$ncd)
 
-require(plotly)
-require(gplots)
-require(RColorBrewer)
 colnames(ncd)=colnames(res[[1]]$ncd)
 rownames(ncd)=colnames(res[[1]]$ncd)
 p=plot.mdsDist(ncd, dd, k=2, NULL)
