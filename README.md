@@ -3,7 +3,7 @@ Our novel network-based approach, CTD, “connects the dots” between metabolit
 
 ## Using CTD in R.
 ### Installation
-In R, install the devtools package, and install CTD by install_github(“BRL-BCM/CTD”). We also plan to submit the package to Bioconductor and hope it will be available soon.
+In R, install the devtools package, and install CTD by install_github(“BRL-BCM/CTD”). 
 
 ### Look at the package Rmd vignette.
 Located in /vignette/CTD_Lab-Exercise.Rmd. It will take you across all the stages in the analysis pipeline, including:
