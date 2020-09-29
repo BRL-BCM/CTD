@@ -1,5 +1,5 @@
 Package: CTD
-Title: CTD method for 'connecting the dots' in weighted graphs
+Title: A Method for 'Connecting The Dots' in Weighted Graphs
 Version: 0.99.5
 Date: 2020-09-12
 Authors@R: person("Lillian", "Thistlethwaite", email="lillian.thistlethwaite@bcm.edu", role=c("aut", "cre"))
