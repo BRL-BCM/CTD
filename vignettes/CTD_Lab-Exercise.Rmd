@@ -3,6 +3,7 @@ title: "CTD Lab Exercise"
 author: "Lillian Thistlethwaite"
 date: "3/6/2019"
 output: pdf_document
+always_allow_html: true
 vignette: >
     %\VignetteIndexEntry{CTD Lab Exercise}
     %\VignetteEngine{knitr::rmarkdown}
@@ -15,8 +16,10 @@ require(huge)
 require(plotly)
 require(gplots)
 require(RColorBrewer)
-require(webshot)
-webshot::install_phantomjs()
+if (.Platform$OS.type=="windows") {
+    require(webshot)
+    webshot::install_phantomjs()
+}
 print(sprintf("Current directory is %s: ", getwd()))
 ```
 This document was rendered at `r Sys.time()`
