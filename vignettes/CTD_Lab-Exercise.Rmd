@@ -3,7 +3,6 @@ title: "CTD Lab Exercise"
 author: "Lillian Thistlethwaite"
 date: "3/6/2019"
 output: pdf_document
-always_allow_html: true
 vignette: >
     %\VignetteIndexEntry{CTD Lab Exercise}
     %\VignetteEngine{knitr::rmarkdown}
@@ -13,13 +12,9 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE, fig.align="center")
 require(CTD)
 require(huge)
-require(plotly)
+require(ggplot2)
 require(gplots)
 require(RColorBrewer)
-if (.Platform$OS.type=="windows") {
-    require(webshot)
-    webshot::install_phantomjs()
-}
 print(sprintf("Current directory is %s: ", getwd()))
 ```
 This document was rendered at `r Sys.time()`
@@ -379,12 +374,10 @@ S_arg = unique(S_arg)
 # (recommended) (e.g., a computing cluster) this finishes in minutes. 
 ranks=list()
 for (n in 1:length(S_arg)) {
-    print(sprintf("Node ranks for perturbed metabolite %d/%d.",
-                    n, length(S_arg)))
     ind=which(names(G)==S_arg[n])
     ranks[[n]]=singleNode.getNodeRanksN(ind,G,p1=1.0,thresholdDiff=0.01, 
                                         adj_mat,S=S_arg, 
-                                        num.misses=log2(length(G)),TRUE)
+                                        num.misses=log2(length(G)),FALSE)
 }
 names(ranks)=S_arg
 # Calculate patient bitstrings
@@ -401,10 +394,8 @@ rownames(t$ncd) = colnames(data_mx)
 colnames(t$ncd) = colnames(data_mx)
 for (i in 1:kmx) { res[[i]] = t }
 for (pt in 1:ncol(data_mx)) {
-    print(sprintf("Patient %d vs...", pt))
     ptID=colnames(data_mx)[pt]
     for (pt2 in pt:ncol(data_mx)) {
-        print(sprintf("Patient %d.", pt2))
         ptID2=colnames(data_mx)[pt2]
         # Because we pre-computed node ranks for all perturbed metabolites
         # across our 8 patients, this will complete very quickly.
@@ -421,28 +412,17 @@ for (pt in 1:ncol(data_mx)) {
 # VI. Visualizations
 ```{r visualizations}
 # Multi-dimensional scaling
-plot.mdsDist = function(patientDist, diagnoses, k, diag) {
-    if (!(k %in% c(2,3))) {
-        print("K must be either 2-dimensions or 3-dimensions.")
-        return(0)
-    }
+plot.mdsDist = function(patientDist, diagnoses, diag) {
     if (is.null(diagnoses)) {
         print("To view patient clusters, please provide clinical labels.")
         return(0)
     }
-    fitDist = cmdscale(patientDist, eig=FALSE, k=k)
+    fitDist = cmdscale(patientDist, eig=FALSE, k=2)
     x = round(fitDist[,1], 2)
     y = round(fitDist[,2], 2)
-    if (k==3) {
-        z=round(fitDist[,3], 2)
-        df=data.frame(x=x,y=y,z=z,color=diagnoses,label=colnames(patientDist))
-        p=plot_ly(df,x=~x,y=~y,z=~z,color=~color,text=~label,
-                    marker=list(size=20))
-    } else {
-        df=data.frame(x=x,y=y,color=diagnoses,label=colnames(patientDist))
-        p=plot_ly(df,x=~x,y=~y,color=~color,text=~label,
-                    marker=list(size=20))
-    }
+    df=data.frame(x=x,y=y,color=as.factor(diagnoses),label=colnames(patientDist))
+    p=ggplot(df,aes(x,y,label=label))+geom_point(aes(colour=color),size=5)+
+        geom_label(nudge_x = 0.1)
     return(p)
 }
 # K-nearest neighbors
@@ -505,7 +485,7 @@ names(dd) = colnames(res[[1]]$ncd)
 
 colnames(ncd)=colnames(res[[1]]$ncd)
 rownames(ncd)=colnames(res[[1]]$ncd)
-p=plot.mdsDist(ncd, dd, k=2, NULL)
+p=plot.mdsDist(ncd, dd, NULL)
 p 
 # Hierarchical clustering
 dd_f = as.numeric(as.factor(as.character(dd)))
