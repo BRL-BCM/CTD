@@ -15,10 +15,8 @@ require(huge)
 require(plotly)
 require(gplots)
 require(RColorBrewer)
-if (.Platform$OS.type=="windows") {
-    require(webshot)
-    webshot::install_phantomjs()
-}
+require(webshot)
+webshot::install_phantomjs()
 print(sprintf("Current directory is %s: ", getwd()))
 ```
 This document was rendered at `r Sys.time()`
