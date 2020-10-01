@@ -74,14 +74,6 @@ G=vector("numeric", length=ncol(adj_mat))
 names(G)=colnames(adj_mat)
 # Get node rankings for the first metabolite in network G. 
 ranks=singleNode.getNodeRanksN(1,G,p1=0.9,thresholdDiff=0.01,adj_mat)
-# Make a movie of the network walker
-S=names(G)[sample(seq_len(length(G)), 3, replace=FALSE)]
-ig=graph.adjacency(adj_mat,mode="undirected",weighted=TRUE,
-                    add.colnames="name")
-coords=layout.fruchterman.reingold(ig)
-ranks = singleNode.getNodeRanksN(which(names(G)==S[1]),G,p1=0.9,
-                                    thresholdDiff=0.01,adj_mat,S,
-                                    log2(length(G)),FALSE,getwd())
 }
 \keyword{diffusion}
 \keyword{network}

@@ -65,6 +65,7 @@ G[seq_len(length(G))] = 0
 names(G) = c("A", "B", "C", "D", "E", "F", "G")
 S = c("A", "C")
 coords = layout.fruchterman.reingold(ig)
-graph.netWalkSnapShot(adj_mat,G,output_dir=getwd(),p1=1.0,
-                        "A",S,coords,1,TRUE)
+# Uncomment to run
+#graph.netWalkSnapShot(adj_mat,G,output_dir=getwd(),p1=1.0,
+#                        "A",S,coords,1,TRUE)
 }

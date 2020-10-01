@@ -64,5 +64,6 @@ coords = layout.fruchterman.reingold(ig)
 V(ig)$x = coords[,1]
 V(ig)$y = coords[,2]
 .GlobalEnv$imgNum = 1
-graph.diffusionSnapShot(adj_mat,G,getwd(),1.0,"A","A",1,coords)
+# Uncomment to run
+#graph.diffusionSnapShot(adj_mat,G,getwd(),1.0,"A","A",1,coords)
 }
