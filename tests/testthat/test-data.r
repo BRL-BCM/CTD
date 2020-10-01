@@ -113,10 +113,8 @@ test_that("Probability diffusion works", {
   ig = graph.adjacency(adj_mat, mode="undirected", weighted=TRUE, add.colnames = "name")
   coords = layout.fruchterman.reingold(ig)
   .GlobalEnv$imgNum = 1
-  # If no errors, graph.takeDiffusionSnapShot.r works and graph.connectToExt.r works.
   G_new = graph.diffuseP1(p1=1.0, sn="A", G=G, vNodes="A", 
-                          thresholdDiff=0.01, adj_mat=adj_mat, verbose=TRUE, 
-                          out_dir = getwd(), r_level = 1, coords = coords)
+                          thresholdDiff=0.01, adj_mat=adj_mat, verbose=FALSE)
   # Inherited probabilities across all nodes should add to 1.
   # Which node inherited the highest probability from startNode?
   expect_equal(names(G_new[which.max(G_new)]), "B")
@@ -154,8 +152,7 @@ test_that("Multi-node pipeline works", {
   coords = layout.fruchterman.reingold(ig)
   S = names(G)[1:3]
   ranks = multiNode.getNodeRanks(S=S, G=G, p1=0.9, thresholdDiff=0.01, adj_mat=adj_mat,
-                                 num.misses=log2(length(G)), verbose=FALSE, 
-                                 out_dir=getwd(), useLabels=TRUE, coords=coords)
+                                 num.misses=log2(length(G)), verbose=FALSE)
   # If no error, we know graph.takeNetWalkSnapShot.r is also working.
   expect_equal(all(lapply(ranks, length)>0), TRUE)
   expect_equal(all(unlist(lapply(ranks, function(i) any(S %in% i)))), TRUE)
@@ -192,8 +189,7 @@ test_that("Single node pipeline works", {
   # If S is not specified, ranks should be length of G
   for (i in 1:length(S)) {
     ranks[[i]] = singleNode.getNodeRanksN(n=i, G=G, p1=0.9, thresholdDiff=0.01, adj_mat=adj_mat, 
-                                          S=S, num.misses=log2(length(G)), verbose=FALSE, 
-                                          out_dir=getwd(), useLabels=TRUE, coords=coords)
+                                          S=S, num.misses=log2(length(G)), verbose=FALSE)
   }
   names(ranks)=S
   # If no error, we know graph.takeNetWalkSnapShot.r is also working.

@@ -245,7 +245,7 @@ ranks = multiNode.getNodeRanks(S = c("A", "B"), G, p1=1.0,
 # Pre-computing node ranks enables quick encoding of thousands of subsets
 # at a time (see The Encoding Process).
 S = c("A", "B")
-out_dir=sprintf("%s/images",getwd())
+#out_dir=sprintf("%s/images",getwd())
 # Uncomment the following lines to generate PNGs and animate the 
 # single-node encoding node ranks.
 #ranks = list()
