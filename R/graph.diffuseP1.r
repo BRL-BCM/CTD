@@ -56,15 +56,6 @@
 #' probs_afterCurrDraw=graph.diffuseP1(p1=1.0, sn=names(G)[1], G=G,
 #'                                     vNodes=names(G)[1], 
 #'                                     thresholdDiff=0.01, adj_mat, TRUE)
-#' # Make a movie of the diffusion of probability from sn
-#' .GlobalEnv$imgNum = 1
-#' ig=graph.adjacency(adj_mat,mode="undirected",weighted=TRUE,
-#'                     add.colnames="name")
-#' coords = layout.fruchterman.reingold(ig)
-#' probs_afterCurrDraw=graph.diffuseP1(p1=1.0, sn=names(G)[1], G=G,
-#'                                     vNodes=names(G)[1],
-#'                                     thresholdDiff=0.01, adj_mat, TRUE,
-#'                                     getwd(), 1, coords)
 graph.diffuseP1=function(p1,sn,G,vNodes,thresholdDiff,adj_mat,verbose=FALSE,
                             out_dir="",r_level=1,coords=NULL){
     nTabs=paste(rep("   ",r_level-1),collapse="") # for verbose stmts
