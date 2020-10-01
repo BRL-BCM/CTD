@@ -33,8 +33,8 @@ colnames(adj_mat) = rownames(data_mx)
 rownames(adj_mat) = rownames(data_mx)
 G = vector("numeric", length=ncol(adj_mat))
 names(G)=colnames(adj_mat) 
-# Look at the top 15 metabolites for each patient. 
-kmx=15
+# Look at the top 5 metabolites for each patient. 
+kmx=5
 topMets_allpts = c()
 for(pt in seq_len(ncol(data_mx))){
     topMets_allpts=c(topMets_allpts, 

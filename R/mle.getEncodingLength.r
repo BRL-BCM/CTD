@@ -30,10 +30,10 @@
 #' data_mx = apply(data_mx, c(1,2), as.numeric)
 #' data_pval=t(apply(data_mx,c(1,2),
 #'                     function(i)2*pnorm(abs(i),lower.tail=FALSE)))
-#' # Choose patient #1's (i.e., IEM_1000's) top 15 perturbed metabolites
+#' # Choose patient #1's (i.e., IEM_1000's) top 5 perturbed metabolites
 #' ptID = colnames(data_mx)[1]
 #' S=rownames(data_mx)[order(abs(data_mx[,which(colnames(data_mx)==ptID)]),
-#'                             decreasing=TRUE)[seq_len(15)]]
+#'                             decreasing=TRUE)[seq_len(5)]]
 #' # Build a dummy metabolite network for all metabolites in data_mx
 #' adj_mat=matrix(0, nrow=nrow(data_mx), ncol=nrow(data_mx))
 #' rows=sample(seq_len(ncol(adj_mat)), 0.1*ncol(adj_mat))

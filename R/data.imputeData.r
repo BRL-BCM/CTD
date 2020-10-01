@@ -12,9 +12,9 @@
 #' data(Thistlethwaite2020)
 #' data_mx = Thistlethwaite2020
 #' # Data with missing values
-#' dt_w_missing_vals = data_mx[,-seq_len(8)]
+#' dt_w_missing_vals = data_mx[1:25,-seq_len(8)]
 #' # Reference data can also have missing values
-#' ref_data = data_mx[,grep("EDTA-REF", colnames(data_mx))]
+#' ref_data = data_mx[1:25,grep("EDTA-REF", colnames(data_mx))]
 #' fil.rate = apply(ref_data, 1, function(i) sum(is.na(i))/length(i))
 #' # Can only impute data that are found in reference samples
 #' dt_w_missing_vals = dt_w_missing_vals[which(fil.rate<1.0),]

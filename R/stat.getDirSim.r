@@ -16,39 +16,8 @@
 #' data_mx = Miller2015[-c(1,grep("x - ", rownames(Miller2015))),
 #'                         grep("IEM",colnames(Miller2015))]
 #' data_mx = apply(data_mx[,c(1,2)], c(1,2), as.numeric)
-#' # Build a network, G
-#' adj_mat = matrix(0, nrow=nrow(data_mx), ncol=nrow(data_mx))
-#' rows = sample(seq_len(ncol(adj_mat)), 0.1*ncol(adj_mat))
-#' cols = sample(seq_len(ncol(adj_mat)), 0.1*ncol(adj_mat))
-#' for (i in rows) {for (j in cols) {adj_mat[i,j]=rnorm(1,mean=0,sd=1)}}
-#' colnames(adj_mat) = rownames(data_mx)
-#' rownames(adj_mat) = rownames(data_mx)
-#' G = vector("numeric", length=ncol(adj_mat))
-#' names(G)=colnames(adj_mat) 
-#' # Look at the top 15 metabolites for each patient. 
-#' kmx=15
-#' topMets_allpts = c()
-#' for (pt in seq_len(ncol(data_mx))) {
-#'     topMets_allpts=c(topMets_allpts, 
-#'                     rownames(data_mx)[order(abs(data_mx[,pt]),
-#'                                             decreasing=TRUE)[seq_len(kmx)]])}
-#' topMets_allpts = unique(topMets_allpts)
-#' # Pre-compute node ranks for all metabolites in topMets_allpts
-#' # for faster distance calculations.
-#' ranks = list()
-#' for (n in seq_len(length(topMets_allpts))) { 
-#'     ind = which(names(G)==topMets_allpts[n])
-#'     ranks[[n]]=singleNode.getNodeRanksN(ind,G,0.9,0.01,adj_mat,
-#'                                         topMets_allpts,log2(length(G))) 
-#' }
-#' names(ranks) = topMets_allpts
-#' # Also pre-compute patient bitstrings for faster distance calculations.
-#' ptBSbyK = list()
-#' for (pt in seq_len(ncol(data_mx))) {
-#'     S=rownames(data_mx)[order(abs(data_mx[,pt]),
-#'                                 decreasing=TRUE)[seq_len(kmx)]]
-#'     ptBSbyK[[pt]] = mle.getPtBSbyK(S, ranks)
-#' }
+#' # Look at the top 5 metabolites for each patient. 
+#' kmx=5
 #' # Build your results ("res") list object to store patient distances at
 #' # different size k's.
 #' res = list()
