@@ -21,7 +21,7 @@
 #' @param recursion_level - The current depth in the call stack caused by
 #'                          a recursive algorithm.
 #' @param coords - The x and y coordinates for each node in the network, to
-#'                remain static between images.
+#'                 remain static between images.
 #' @return 0
 #' @export graph.diffusionSnapShot
 #' @usage graph.diffusionSnapShot(adj_mat,G,output_dir,p1,startNode,
@@ -49,7 +49,6 @@
 #' coords = layout.fruchterman.reingold(ig)
 #' V(ig)$x = coords[,1]
 #' V(ig)$y = coords[,2]
-#' .GlobalEnv$imgNum = 1
 #' # Uncomment to run
 #' #graph.diffusionSnapShot(adj_mat,G,getwd(),1.0,"A","A",1,coords)
 graph.diffusionSnapShot = function(adj_mat, G, output_dir, p1,
@@ -63,8 +62,11 @@ graph.diffusionSnapShot = function(adj_mat, G, output_dir, p1,
     names(vals) = V(ig)$name
     vals[which(names(vals) %in% names(G))] = G
     V(ig)$label = sprintf("%s:%.2f", V(ig)$name, vals)
-    png(sprintf("%s/diffusionP1Movie%d.png", output_dir,
-                .GlobalEnv$imgNum), 500, 500)
+    curr_time = unclass(as.POSIXlt(Sys.time()))
+    curr_time = sprintf("%s-%s-%s-%s-%s-%.3f", curr_time$year, curr_time$mon, 
+                        curr_time$mday, curr_time$hour, curr_time$min, 
+                        as.numeric(curr_time$sec))
+    png(sprintf("%s/diffusionP1Movie%s.png", output_dir, curr_time),500,500)
     plot.igraph(ig, layout=coords, vertex.color=V(ig)$color,
                 vertex.label=V(ig)$label, vertex.label.dist = 3,
                 edge.width=5*abs(E(ig)$weight), mark.col="black", 
@@ -74,7 +76,6 @@ graph.diffusionSnapShot = function(adj_mat, G, output_dir, p1,
     legend("bottomright", legend=c("Visited", "Unvisited"),
             fill=c("red", "blue"))
     dev.off()
-    .GlobalEnv$imgNum = .GlobalEnv$imgNum + 1
     return(0)
 }
 

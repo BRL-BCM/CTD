@@ -3,7 +3,7 @@ Title: A Method for 'Connecting The Dots' in Weighted Graphs
 Version: 0.99.8
 Date: 2020-09-12
 Authors@R: person("Lillian", "Thistlethwaite", email="lillian.thistlethwaite@bcm.edu", role=c("aut", "cre"))
-Description: An R package for pattern discovery in weighted graphs. Two use cases are achieved: 1) Given a weighted graph and a subset of its nodes, do the nodes show significant connectedness? 2) Given a weighted graph and two subsets of its nodes, are the subsets close neighbors or distant?
+Description: A method for pattern discovery in weighted graphs. Two use cases are achieved: 1) Given a weighted graph and a subset of its nodes, do the nodes show significant connectedness? 2) Given a weighted graph and two subsets of its nodes, are the subsets close neighbors or distant?
 Depends: R (>= 4.0), gmp, igraph, stats, grDevices, graphics
 Suggests: 
     knitr,
