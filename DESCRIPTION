@@ -1,8 +1,8 @@
 Package: CTD
 Title: A Method for 'Connecting The Dots' in Weighted Graphs
-Version: 0.99.8
+Version: 1.00.0
 Date: 2020-09-12
-Authors@R: person("Lillian", "Thistlethwaite", email="lillian.thistlethwaite@bcm.edu", role=c("aut", "cre"))
+Authors@R: person("Lillian", "Thistlethwaite", email="lillian.thistlethwaite@gmail.com", role=c("aut", "cre"))
 Description: A method for pattern discovery in weighted graphs. Two use cases are achieved: 1) Given a weighted graph and a subset of its nodes, do the nodes show significant connectedness? 2) Given a weighted graph and two subsets of its nodes, are the subsets close neighbors or distant?
 Depends: R (>= 4.0), gmp, igraph, stats, grDevices, graphics
 Suggests: 
@@ -15,7 +15,6 @@ Suggests:
     testthat
 SystemRequirements: gmp (>=5.0)
 VignetteBuilder: knitr
-biocViews: BiomedicalInformatics, Metabolomics, SystemsBiology, GraphAndNetwork
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
