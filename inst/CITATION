@@ -8,16 +8,16 @@ citEntry(entry = "Article",
 		   as.person("Aleksandar Milosavljevic")),
   journal      = "PLoS Computational Biology",
   year         = "2021",
-  volume       = "",
-  number       = "",
-  pages        = "",
-  url          = "https://www.doi.org/10.1371/journal.pcbi.1008550",
+  volume       = "17",
+  number       = "1",
+  pages        = "e1008550",
+  url          = "https://doi.org/10.1371/ journal.pcbi.1008550",
 
   textVersion  =
-  paste("L.R. Thistlethwaite, V. Petrosyan, X. Li, M.J. Miller,",
-        "S.H. Elsea, A. Milosavljevic. (2021). CTD: an",
-        "information-theoretic algorithm to interpret sets of",
-	"metabolomic and transcriptomic perturbations in the",
-        "context of graphical models. Plos Comput Biol, .",
-	"https://www.doi.org/10.1371/journal.pcbi.1008550")
+  paste("Thistlethwaite LR, Petrosyan V, Li X, Miller MJ, Elsea SH,",
+	"Milosavljevic A. (2021). CTD: An information-theoretic ",
+	"algorithm to interpret sets of metabolomic and transcriptomic",
+	" perturbations in the context of graphical models. PLoS Comput",
+	" Biol 17(1): e1008550.",
+	"https://doi.org/10.1371/ journal.pcbi.1008550")
 )
