@@ -34,7 +34,6 @@ data(Wangler2017)
 \references{
 M.F. Wangler, et al. (2018). A metabolomic map of Zellweger 
 spectrum disorders reveals novel disease biomarkers. Genetics in 
-Medicine, 20: 1274-1283.
-(\href{https://doi.org/10.1038/gim.2017.262}{Article})
+Medicine, 20: 1274-1283. <doi:10.1038/gim.2017.262>
 }
 \keyword{datasets}

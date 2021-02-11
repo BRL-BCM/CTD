@@ -35,6 +35,6 @@ data(Miller2015)
 \references{
 Miller et al. (2015). Untargeted metabolomic analysis for the
 clinical screening of inborn errors of metabolism. J Inherit Metab Dis,
-38: 1029–1039. (\href{https://doi.org/10.1007/s10545-015-9843-7}{Article})
+38: 1029–1039. <doi:10.1007/s10545-015-9843-7>
 }
 \keyword{datasets}
