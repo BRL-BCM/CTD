@@ -17,4 +17,4 @@ Located in /vignette/CTD_Lab-Exercise.Rmd. It will take you across all the stage
 4. Calculate similarity between two node subsets, using a metric based on mutual information.
 
 ## References
-Thistlethwaite L.R., Petrosyan V., Li X., Miller M.J., Elsea S.H., Milosavljevic A. (2020). CTD: an information-theoretic method to interpret multivariate perturbations in the context of graphical models with applications in metabolomics and transcriptomics. Manuscript in review.
+Thistlethwaite L.R., Petrosyan V., Li X., Miller M.J., Elsea S.H., Milosavljevic A. (2021). CTD: an information-theoretic method to interpret multivariate perturbations in the context of graphical models with applications in metabolomics and transcriptomics. Plos Comput Biol, 17(1):e1008550. https://doi.org/10.1371/journal.pcbi.1008550.
