@@ -57,12 +57,14 @@ data.surrogateProfiles = function(data, std=1, ref_data) {
                             sprintf("control_surr%d",
                                     seq_len(ncol(c_surr)-ncol(ref_data))))
         rownames(c_surr)=rownames(ref_data)} else {c_surr=ref_data}
+    if (numSurr > ncol(data)){
     d_surr=d_surr[,c(seq_len(ncol(data)),
                     sample(seq(ncol(data)+1,ncol(d_surr)),
-                            numSurr-ncol(data)))]
+                            numSurr-ncol(data)))]}
+    if (numSurr > ncol(ref_data)){
     c_surr=c_surr[,c(seq_len(ncol(ref_data)),
                     sample(seq(ncol(ref_data)+1,ncol(c_surr)),
-                            numSurr-ncol(data)))]
+                            numSurr-ncol(data)))]}
     data_mx_surr=cbind(d_surr, c_surr)
     # Impute metabolites that are NA
     if (!is.null(ref_data)){data_mx_surr=data.imputeData(data_mx_surr,ref_data)
