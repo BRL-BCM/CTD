@@ -3,6 +3,7 @@ library(methods)
 library(argparser)
 require(huge)
 require(CTD)
+require(MASS)
 
 p <- arg_parser("Connect The Dots - Find most connected sub-graph from the set of graphs")
 # Add a positional argument
@@ -54,27 +55,31 @@ dim(arg_data)
 # Select the regularization parameter based on the "STARS" stability
 # estimate.
 #This will take 30 seconds - 1 minute.
-arg = huge(t(arg_data), method="glasso")
-plot(arg)
+###arg = huge(t(arg_data), method="glasso")
+###plot(arg)
 # This will take several minutes. For a faster option, you can use the
 # "ebic" criterion instead of "stars", but we recommend "stars".
-arg.select = huge.select(arg, criterion="stars")
-plot(arg.select)
+###arg.select = huge.select(arg, criterion="stars")
+###plot(arg.select)
 # This is the regularization parameter the STARS method selected.
-print(arg.select$opt.lambda)
+###print(arg.select$opt.lambda)
 # This is the corresponding inverse of the covariance matrix that corresponds
 # to the selected regularization level.
-arg_icov = as.matrix(arg.select$opt.icov)
+###arg_icov = as.matrix(arg.select$opt.icov)
 # Remove all "self" edges, as we are not interested in self-relationships.
-diag(arg_icov) = 0
-rownames(arg_icov) = rownames(arg_data)
-colnames(arg_icov) = rownames(arg_data)
+###diag(arg_icov) = 0
+###rownames(arg_icov) = rownames(arg_data)
+###colnames(arg_icov) = rownames(arg_data)
+
+# Write graph to file
+###write.matrix(arg_icov, file = 'arg_icov.csv', sep = '\t')
+arg_icov2 <- read.csv(file = 'arg_icov.csv', sep = '\t', check.names=FALSE) # TODO: Check what check names
+rownames(arg_icov2) = colnames(arg_icov2)
+arg_icov2 = as.matrix(arg_icov2)
 # Convert adjacency matrices to an igraph object.
-ig_arg = graph.adjacency(arg_icov, mode="undirected", weighted=TRUE,
+ig_arg = graph.adjacency(arg_icov2, mode="undirected", weighted=TRUE,
                          add.colnames="name")
-print(ig_arg)
-
-
+#print(ig_arg)
 
 
 # IV. The Encoding Process
@@ -104,11 +109,11 @@ print(S_arg)
 # S_arg.
 ranks = list()
 for (n in 1:length(S_arg)) {
-    ind = which(names(G)==names(S_arg)[n])
-    # probability_difussion starting from node with index ind
-    ranks[[n]]=singleNode.getNodeRanksN(ind,G,p1=1.0,thresholdDiff=0.01,
-                                        adj_mat,S=names(S_arg),
-                                        num.misses=log2(length(G)),TRUE)
+  ind = which(names(G)==names(S_arg)[n])
+  # probability_difussion starting from node with index ind
+  ranks[[n]]=singleNode.getNodeRanksN(ind,G,p1=1.0,thresholdDiff=0.01,
+                                      adj_mat,S=names(S_arg),
+                                      num.misses=log2(length(G)),TRUE)
 }
 names(ranks) = names(S_arg)
 # Vector ranks contains encodings for each node in S_arg
@@ -153,5 +158,3 @@ ptBSbyK[[ind.mx]] # all metabolites in the bitstring
 F = names(which(ptBSbyK[[ind.mx]]==1))
 print(F)
 print(p_value_F)
-
-
