@@ -7,14 +7,16 @@ require(MASS)
 
 p <- arg_parser("Connect The Dots - Find most connected sub-graph from the set of graphs")
 # Add a positional argument
-p <- add_argument(p, "--dataset", help="Dataset file name")
+p <- add_argument(p, "--disease", help="Disease dataset file name", default = 'vignettes/arg.csv')
+p <- add_argument(p, "--control", help="Control dataset file name", default = 'vignettes/control.csv')
 # Add a flag
-p <- add_argument(p, "--column_name", help="Name of the column containing concentrations", flag=TRUE)
-# Add another flag
-p <- add_argument(p, "--out", help="output file name", flag=TRUE)
+p <- add_argument(p, "--column_name", help="Name of the column containing concentrations")
+p <- add_argument(p, "--kmx", help="Number of highly perturbed nodes to consider", default=15)
+
+p <- add_argument(p, "--out", help="output file name")
 argv <- parse_args(p)
 
-print(argv$dataset)
+
 
 
 
@@ -22,7 +24,6 @@ print(argv$dataset)
 #Note all code chunks in sections I - IV may rely on lines in previous code
 #chunks, so do not empty your environment between code chunks.
 #```{r learn_graph}
-# Load the Miller2015_Heparin dataset
 data(Miller2015)  # TODO: Add support for user's input file instead od this
 # Only include metabolites that are present in >90% reference samples.
 fil.rate=as.numeric(Miller2015$`Times identifed in all 200 samples`[-1])/200
@@ -41,35 +42,19 @@ dim(data_mx)
 # Get data from all patients with Argininemia
 diags = Miller2015["diagnosis", grep("IEM", colnames(Miller2015))]
 arg_data = data_mx[,which(diags=="Argininemia")]
+# TODO: Align these two 196 vs 346 observations!!!!
+arg_data2 <- read.csv(file = argv$disease, check.names=FALSE, row.names=1)
 # Add surrogate disease and surrogate reference profiles based on 1 standard
 # deviation around profiles from real patients to improve rank of matrix when
 # learning Gaussian Markov Random Field network on data. While surrogate
 # profiles are not required, they tend to learn less complex networks
 # (i.e., networks with less edges) and in faster time.
+control_data <- read.csv(file = argv$control, check.names=FALSE, row.names=1)
 ind = which(diags=="No biochemical genetic diagnosis")
-arg_data=data.surrogateProfiles(arg_data, 1, ref_data = data_mx[,ind])
+arg_data=data.surrogateProfiles(arg_data, 1, ref_data = control_data) #data_mx[,ind])
 dim(arg_data)
 
-# Learn a Gaussian Markov Random Field model using the Graphical LASSO in
-# the R package "huge".
-# Select the regularization parameter based on the "STARS" stability
-# estimate.
-#This will take 30 seconds - 1 minute.
-###arg = huge(t(arg_data), method="glasso")
-###plot(arg)
-# This will take several minutes. For a faster option, you can use the
-# "ebic" criterion instead of "stars", but we recommend "stars".
-###arg.select = huge.select(arg, criterion="stars")
-###plot(arg.select)
-# This is the regularization parameter the STARS method selected.
-###print(arg.select$opt.lambda)
-# This is the corresponding inverse of the covariance matrix that corresponds
-# to the selected regularization level.
-###arg_icov = as.matrix(arg.select$opt.icov)
-# Remove all "self" edges, as we are not interested in self-relationships.
-###diag(arg_icov) = 0
-###rownames(arg_icov) = rownames(arg_data)
-###colnames(arg_icov) = rownames(arg_data)
+
 
 # Write graph to file
 ###write.matrix(arg_icov, file = 'arg_icov.csv', sep = '\t')
@@ -96,12 +81,20 @@ names(G) = V(ig_arg)$name
 
 ## IV.I Choose your node subset.
 
+target_patients = list('IEM_1006', 'IEM_1007')
+target_patient = 'IEM_1006'
 # Maximum subset size to inspect
-kmx=15
+kmx=argv$kmx
 # Get our node subset associated with the $KMX highest perturbed (up or down)
 # in our first Arginase deficiency sample.
-S_arg = sort(abs(arg_data[,1]), decreasing=TRUE)[1:kmx]
-print(S_arg)
+S_set = list()
+for (target_patient in target_patients){
+  patient_index = which(colnames(arg_data) == target_patient)
+  S_arg = sort(abs(arg_data[, patient_index]), decreasing=TRUE)[1:kmx]
+  S_set<-append(S_set, list(S_arg))
+  print(S_arg)
+}
+
 
 
 ## IV.II Get k node permutations.
