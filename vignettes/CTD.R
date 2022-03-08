@@ -49,6 +49,7 @@ experimental_df[] <- lapply(experimental_df, as.character)  # TODO remove?
 # (i.e., networks with less edges) and in faster time.
 control_data <- read.csv(file = argv$control, check.names=FALSE, row.names=1)
 
+target_patients = colnames(experimental_df)
 ind = which(diags=="No biochemical genetic diagnosis")
 experimental_df=data.surrogateProfiles(experimental_df, 1, ref_data = control_data) #data_mx[,ind])
 dim(experimental_df)
@@ -80,18 +81,36 @@ names(G) = V(ig_arg)$name
 
 ## IV.I Choose your node subset.
 
-target_patients = names(experimental_df)
+
 # Maximum subset size to inspect
 kmx=argv$kmx
 # Get our node subset associated with the $KMX highest perturbed (up or down)
 # in our first Arginase deficiency sample.
 S_set = list()
-for (target_patient in target_patients){
-  patient_index = which(colnames(experimental_df) == target_patient)
-  S_arg = sort(abs(experimental_df[, patient_index]), decreasing=TRUE)[1:kmx]
+
+
+
+
+for (pt in target_patients) {
+
+  temp = experimental_df[,order(pt)]
+  temp = as.data.frame(temp, row.names = rownames(experimental_df))
+  S_arg=rownames(temp)[1:kmx]
   S_set<-append(S_set, list(S_arg))
-  print(S_arg)
 }
+
+
+#for (target_patient in target_patients){
+#  print(rownames(experimental_df))
+  #patient_index = which(colnames(experimental_df) == target_patient)
+#  top_scores = sort(abs(experimental_df[,target_patient]),decreasing=TRUE)[1:kmx]
+
+  #S_arg = sort(abs(experimental_df[, patient_index]), decreasing=TRUE)[1:kmx]
+#  S_arg=c(S_arg,rownames(top_scores))
+
+#  S_set<-append(S_set, list(S_arg))
+ # print(S_arg)
+#}
 # TODO: Take union >50%
 
 
