@@ -7,7 +7,7 @@ require(MASS)
 
 p <- arg_parser("Connect The Dots - Find most connected sub-graph from the set of graphs")
 # Add a positional argument
-p <- add_argument(p, "--disease", help="Disease dataset file name", default = 'vignettes/arg.csv')
+p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = 'vignettes/arg.csv')
 p <- add_argument(p, "--control", help="Control dataset file name", default = 'vignettes/control.csv')
 # Add a flag
 p <- add_argument(p, "--column_name", help="Name of the column containing concentrations")
@@ -17,42 +17,41 @@ p <- add_argument(p, "--out", help="output file name")
 argv <- parse_args(p)
 
 
-
-
-
 ## I.II: Learn a graph from data.
 #Note all code chunks in sections I - IV may rely on lines in previous code
 #chunks, so do not empty your environment between code chunks.
 #```{r learn_graph}
-data(Miller2015)  # TODO: Add support for user's input file instead od this
+###data(Miller2015)  # TODO: Add support for user's input file instead od this
 # Only include metabolites that are present in >90% reference samples.
-fil.rate=as.numeric(Miller2015$`Times identifed in all 200 samples`[-1])/200
-names(fil.rate) = rownames(Miller2015)[-1]
-data_mx = Miller2015[,grep("IEM_", colnames(Miller2015))]
-data_mx = data_mx[which(fil.rate>0.90), ]
-dim(data_mx)
+###fil.rate=as.numeric(Miller2015$`Times identifed in all 200 samples`[-1])/200
+###names(fil.rate) = rownames(Miller2015)[-1]
+###data_mx = Miller2015[,grep("IEM_", colnames(Miller2015))]
+###data_mx = data_mx[which(fil.rate>0.90), ]
+###dim(data_mx)
 # Remove any metabolites where any profile has a z-score > 1000.
 # These are likely imputed raw values that were not z-scored.
-rmMets = names(which(apply(data_mx, 1, function(i) any(i>20))))
-if (length(rmMets)>0) {
-  data_mx = data_mx[-which(rownames(data_mx) %in% rmMets),]
-}
-dim(data_mx)
+###rmMets = names(which(apply(data_mx, 1, function(i) any(i>20))))
+###if (length(rmMets)>0) {
+###  data_mx = data_mx[-which(rownames(data_mx) %in% rmMets),]
+###}
+###dim(data_mx)
 
 # Get data from all patients with Argininemia
-diags = Miller2015["diagnosis", grep("IEM", colnames(Miller2015))]
-arg_data = data_mx[,which(diags=="Argininemia")]
+###diags = Miller2015["diagnosis", grep("IEM", colnames(Miller2015))]
+###experimental_df = data_mx[,which(diags=="Argininemia")]
 # TODO: Align these two 196 vs 346 observations!!!!
-arg_data2 <- read.csv(file = argv$disease, check.names=FALSE, row.names=1)
+experimental_df <- read.csv(file = argv$experimental, check.names=FALSE, row.names=1)
+experimental_df[] <- lapply(experimental_df, as.character)  # TODO remove?
 # Add surrogate disease and surrogate reference profiles based on 1 standard
 # deviation around profiles from real patients to improve rank of matrix when
 # learning Gaussian Markov Random Field network on data. While surrogate
 # profiles are not required, they tend to learn less complex networks
 # (i.e., networks with less edges) and in faster time.
 control_data <- read.csv(file = argv$control, check.names=FALSE, row.names=1)
+
 ind = which(diags=="No biochemical genetic diagnosis")
-arg_data=data.surrogateProfiles(arg_data, 1, ref_data = control_data) #data_mx[,ind])
-dim(arg_data)
+experimental_df=data.surrogateProfiles(experimental_df, 1, ref_data = control_data) #data_mx[,ind])
+dim(experimental_df)
 
 
 
@@ -81,19 +80,19 @@ names(G) = V(ig_arg)$name
 
 ## IV.I Choose your node subset.
 
-target_patients = list('IEM_1006', 'IEM_1007')
-target_patient = 'IEM_1006'
+target_patients = names(experimental_df)
 # Maximum subset size to inspect
 kmx=argv$kmx
 # Get our node subset associated with the $KMX highest perturbed (up or down)
 # in our first Arginase deficiency sample.
 S_set = list()
 for (target_patient in target_patients){
-  patient_index = which(colnames(arg_data) == target_patient)
-  S_arg = sort(abs(arg_data[, patient_index]), decreasing=TRUE)[1:kmx]
+  patient_index = which(colnames(experimental_df) == target_patient)
+  S_arg = sort(abs(experimental_df[, patient_index]), decreasing=TRUE)[1:kmx]
   S_set<-append(S_set, list(S_arg))
   print(S_arg)
 }
+# TODO: Take union >50%
 
 
 
@@ -120,10 +119,10 @@ ptBSbyK = mle.getPtBSbyK(names(S_arg), ranks)
 
 
 ## IV.IV Get encoding length of minimum length codeword.
-# arg_data is dataframe with diseases (and surrogates)
+# experimental_df is dataframe with diseases (and surrogates)
 # and z-values for each metabolite
-ind = which(colnames(arg_data) %in% names(diags))
-data_mx.pvals=apply(arg_data[,ind], c(1,2),
+ind = which(colnames(experimental_df) %in% names(diags))
+data_mx.pvals=apply(experimental_df[,ind], c(1,2),
                     function(i) 2*pnorm(abs(i), lower.tail=FALSE))
 ptID = "IEM_1006"
 res = mle.getEncodingLength(ptBSbyK, t(data_mx.pvals), ptID, G)
