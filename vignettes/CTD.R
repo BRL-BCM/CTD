@@ -88,32 +88,21 @@ kmx=argv$kmx
 # in our first Arginase deficiency sample.
 S_set = list()
 
-
-
-
+experimental_df = as.data.frame(experimental_df)
 for (pt in target_patients) {
-
-  temp = experimental_df[,order(pt)]
-  temp = as.data.frame(temp, row.names = rownames(experimental_df))
-  S_arg=rownames(temp)[1:kmx]
-  S_set<-append(S_set, list(S_arg))
+  sel = experimental_df[[pt]]
+  temp = experimental_df[order(sel), ]
+  S_patient=rownames(temp)[1:kmx]
+  S_set<-append(S_set, S_patient)
 }
-
-
-#for (target_patient in target_patients){
-#  print(rownames(experimental_df))
-  #patient_index = which(colnames(experimental_df) == target_patient)
-#  top_scores = sort(abs(experimental_df[,target_patient]),decreasing=TRUE)[1:kmx]
-
-  #S_arg = sort(abs(experimental_df[, patient_index]), decreasing=TRUE)[1:kmx]
-#  S_arg=c(S_arg,rownames(top_scores))
-
-#  S_set<-append(S_set, list(S_arg))
- # print(S_arg)
-#}
 # TODO: Take union >50%
+vec_s = unlist(S_set)
+occurances = as.data.frame(table(vec_s))
 
+S_disease_module_ind = which(occurances$Freq >= (length(target_patients) / 2.))
+S_disease_module = as.list(as.character(occurances[S_disease_module_ind, "vec_s"]))
 
+# TODO: Replace names(S_arg) with S_disease_module
 
 ## IV.II Get k node permutations.
 # Get the single-node encoding node ranks starting from each node in the subset
