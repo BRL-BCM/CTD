@@ -7,13 +7,12 @@ require(MASS)
 
 p <- arg_parser("Connect The Dots - Find the most connected sub-graph from the set of graphs")
 # Add a positional argument
-p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = 'vignettes/arg.csv')
-p <- add_argument(p, "--control", help="Control dataset file name", default = 'vignettes/control.csv')
-p <- add_argument(p, "--adj_matrix", help="CSV with adjecancy matric", default = 'arg_icov.csv')
+p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = 'data/example_argininemia/arg.csv')
+p <- add_argument(p, "--control", help="Control dataset file name", default = 'data/example_argininemia/control.csv')
+p <- add_argument(p, "--adj_matrix", help="CSV with adjecancy matric", default = 'data/example_argininemia/arg_adj.csv')
 # Add a flag
 p <- add_argument(p, "--column_name", help="Name of the column containing concentrations")
 p <- add_argument(p, "--kmx", help="Number of highly perturbed nodes to consider", default=15)
-
 p <- add_argument(p, "--out", help="output file name")
 argv <- parse_args(p)
 
@@ -36,7 +35,7 @@ experimental_df=data.surrogateProfiles(experimental_df, 1, ref_data = control_da
 dim(experimental_df)
 
 # Read input graph (adjacency matrix)
-adj_df <- read.csv(file = argv$adj_matrix, sep = '\t', check.names=FALSE) # TODO: Check what check names
+adj_df <- read.csv(file = argv$adj_matrix, sep = '\t', check.names=FALSE)
 rownames(adj_df) = colnames(adj_df)
 adj_df = as.matrix(adj_df)
 # Convert adjacency matrices to an igraph object.
@@ -69,8 +68,6 @@ occurances = as.data.frame(table(vec_s))
 S_disease_module_ind = which(occurances$Freq >= (length(target_patients) / 2.))  # TODO: Create apearance_threshold variable
 S_disease_module = as.list(as.character(occurances[S_disease_module_ind, "vec_s"]))
 
-# TODO: Replace names(S_arg) with S_disease_module
-
 ## IV.II Get k node permutations.
 # Get the single-node encoding node ranks starting from each node in the subset
 # S_arg.
@@ -83,28 +80,24 @@ for (n in 1:length(S_disease_module)) {
                                       num.misses=log2(length(G)),TRUE)
 }
 names(ranks) = S_disease_module
-# Vector ranks contains encodings for each node in S_arg
-# TODO: Why ranks contain 87 rows instead of 15?!
+# Vector ranks contains encodings for each node in S_disease_module
 
 ## IV.III Convert to bitstrings.
-
-# Get the bitstrings associated with the patient's perturbed metabolites in
-# "S_arg" based on the node ranks calculated in the previous step, "ranks".
+# Get the bitstrings associated with the disease module's metabolites
 ptBSbyK = mle.getPtBSbyK(unlist(S_disease_module), ranks)
 
-## IV.IV Get encoding length of minimum length codeword.
+## IV.IV Get encoding length of minimum length code word.
 # experimental_df is dataframe with diseases (and surrogates)
 # and z-values for each metabolite
 ind = which(colnames(experimental_df) %in% names(diags))
 data_mx.pvals=apply(experimental_df[,ind], c(1,2),
                     function(i) 2*pnorm(abs(i), lower.tail=FALSE))
-ptID = "IEM_1006"
+
+ptID = "IEM_1006" # TODO: Why we still need this?!
 res = mle.getEncodingLength(ptBSbyK, t(data_mx.pvals), ptID, G)
-# returns a subset of nosed that are highly connected
+# returns a subset of nodes that are highly connected
 ind.mx = which.max(res$d.score)
 res[ind.mx,]
-
-
 
 ## IV.V Get p-value of variable length encoding vs. fixed length encoding.
 
