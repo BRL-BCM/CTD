@@ -39,7 +39,7 @@ argv <- parse_args(p)
 # Get data from all patients with Argininemia
 ###diags = Miller2015["diagnosis", grep("IEM", colnames(Miller2015))]
 ###experimental_df = data_mx[,which(diags=="Argininemia")]
-# TODO: Align these two 196 vs 346 observations!!!!
+
 experimental_df <- read.csv(file = argv$experimental, check.names=FALSE, row.names=1)
 experimental_df[] <- lapply(experimental_df, as.character)  # TODO remove?
 # Add surrogate disease and surrogate reference profiles based on 1 standard
@@ -50,7 +50,7 @@ experimental_df[] <- lapply(experimental_df, as.character)  # TODO remove?
 control_data <- read.csv(file = argv$control, check.names=FALSE, row.names=1)
 
 target_patients = colnames(experimental_df)
-ind = which(diags=="No biochemical genetic diagnosis")
+### ind = which(diags=="No biochemical genetic diagnosis")
 experimental_df=data.surrogateProfiles(experimental_df, 1, ref_data = control_data) #data_mx[,ind])
 dim(experimental_df)
 
@@ -99,7 +99,7 @@ for (pt in target_patients) {
 vec_s = unlist(S_set)
 occurances = as.data.frame(table(vec_s))
 
-S_disease_module_ind = which(occurances$Freq >= (length(target_patients) / 2.))
+S_disease_module_ind = which(occurances$Freq >= (length(target_patients) / 2.))  # TODO: Create apearance_threshold variable
 S_disease_module = as.list(as.character(occurances[S_disease_module_ind, "vec_s"]))
 
 # TODO: Replace names(S_arg) with S_disease_module
@@ -108,14 +108,14 @@ S_disease_module = as.list(as.character(occurances[S_disease_module_ind, "vec_s"
 # Get the single-node encoding node ranks starting from each node in the subset
 # S_arg.
 ranks = list()
-for (n in 1:length(S_arg)) {
-  ind = which(names(G)==names(S_arg)[n])
+for (n in 1:length(S_disease_module)) {
+  ind = which(names(G)==S_disease_module[n])
   # probability_difussion starting from node with index ind
   ranks[[n]]=singleNode.getNodeRanksN(ind,G,p1=1.0,thresholdDiff=0.01,
-                                      adj_mat,S=names(S_arg),
+                                      adj_mat,S=S_disease_module,
                                       num.misses=log2(length(G)),TRUE)
 }
-names(ranks) = names(S_arg)
+names(ranks) = S_disease_module
 # Vector ranks contains encodings for each node in S_arg
 # TODO: Why ranks contain 87 rows instead of 15?!
 
@@ -123,8 +123,7 @@ names(ranks) = names(S_arg)
 
 # Get the bitstrings associated with the patient's perturbed metabolites in
 # "S_arg" based on the node ranks calculated in the previous step, "ranks".
-ptBSbyK = mle.getPtBSbyK(names(S_arg), ranks)
-
+ptBSbyK = mle.getPtBSbyK(unlist(S_disease_module), ranks)
 
 ## IV.IV Get encoding length of minimum length codeword.
 # experimental_df is dataframe with diseases (and surrogates)
@@ -150,7 +149,7 @@ res[ind.mx,]
 # 2^-d.score.
 p_value_F = 2^-res[ind.mx,"d.score"]
 # All metabolites in S_arg
-names(S_arg)
+S_disease_module
 # Which metabolites were in the 8 metabolite subset of patient IEM_1006's
 # top 15 perturbed metabolites that had the above p-value?
 ptBSbyK[[ind.mx]] # all metabolites in the bitstring
