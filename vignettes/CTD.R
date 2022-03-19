@@ -5,10 +5,11 @@ require(huge)
 require(CTD)
 require(MASS)
 
-p <- arg_parser("Connect The Dots - Find most connected sub-graph from the set of graphs")
+p <- arg_parser("Connect The Dots - Find the most connected sub-graph from the set of graphs")
 # Add a positional argument
 p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = 'vignettes/arg.csv')
 p <- add_argument(p, "--control", help="Control dataset file name", default = 'vignettes/control.csv')
+p <- add_argument(p, "--adj_matrix", help="CSV with adjecancy matric", default = 'arg_icov.csv')
 # Add a flag
 p <- add_argument(p, "--column_name", help="Name of the column containing concentrations")
 p <- add_argument(p, "--kmx", help="Number of highly perturbed nodes to consider", default=15)
@@ -16,74 +17,40 @@ p <- add_argument(p, "--kmx", help="Number of highly perturbed nodes to consider
 p <- add_argument(p, "--out", help="output file name")
 argv <- parse_args(p)
 
-
-## I.II: Learn a graph from data.
-#Note all code chunks in sections I - IV may rely on lines in previous code
-#chunks, so do not empty your environment between code chunks.
-#```{r learn_graph}
-###data(Miller2015)  # TODO: Add support for user's input file instead od this
-# Only include metabolites that are present in >90% reference samples.
-###fil.rate=as.numeric(Miller2015$`Times identifed in all 200 samples`[-1])/200
-###names(fil.rate) = rownames(Miller2015)[-1]
-###data_mx = Miller2015[,grep("IEM_", colnames(Miller2015))]
-###data_mx = data_mx[which(fil.rate>0.90), ]
-###dim(data_mx)
-# Remove any metabolites where any profile has a z-score > 1000.
-# These are likely imputed raw values that were not z-scored.
-###rmMets = names(which(apply(data_mx, 1, function(i) any(i>20))))
-###if (length(rmMets)>0) {
-###  data_mx = data_mx[-which(rownames(data_mx) %in% rmMets),]
-###}
-###dim(data_mx)
-
-# Get data from all patients with Argininemia
-###diags = Miller2015["diagnosis", grep("IEM", colnames(Miller2015))]
-###experimental_df = data_mx[,which(diags=="Argininemia")]
-
+# Read input dataframe with experimental (positive, disease) samples
 experimental_df <- read.csv(file = argv$experimental, check.names=FALSE, row.names=1)
 experimental_df[] <- lapply(experimental_df, as.character)  # TODO remove?
+
+# Read input dataframe with control samples
+control_data <- read.csv(file = argv$control, check.names=FALSE, row.names=1)
+
+target_patients = colnames(experimental_df)
+
+# TODO: Do we need surrogates?
 # Add surrogate disease and surrogate reference profiles based on 1 standard
 # deviation around profiles from real patients to improve rank of matrix when
 # learning Gaussian Markov Random Field network on data. While surrogate
 # profiles are not required, they tend to learn less complex networks
 # (i.e., networks with less edges) and in faster time.
-control_data <- read.csv(file = argv$control, check.names=FALSE, row.names=1)
-
-target_patients = colnames(experimental_df)
-### ind = which(diags=="No biochemical genetic diagnosis")
-experimental_df=data.surrogateProfiles(experimental_df, 1, ref_data = control_data) #data_mx[,ind])
+experimental_df=data.surrogateProfiles(experimental_df, 1, ref_data = control_data)
 dim(experimental_df)
 
-
-
-# Write graph to file
-###write.matrix(arg_icov, file = 'arg_icov.csv', sep = '\t')
-arg_icov2 <- read.csv(file = 'arg_icov.csv', sep = '\t', check.names=FALSE) # TODO: Check what check names
-rownames(arg_icov2) = colnames(arg_icov2)
-arg_icov2 = as.matrix(arg_icov2)
+# Read input graph (adjacency matrix)
+adj_df <- read.csv(file = argv$adj_matrix, sep = '\t', check.names=FALSE) # TODO: Check what check names
+rownames(adj_df) = colnames(adj_df)
+adj_df = as.matrix(adj_df)
 # Convert adjacency matrices to an igraph object.
-ig_arg = graph.adjacency(arg_icov2, mode="undirected", weighted=TRUE,
+igraph = graph.adjacency(adj_df, mode="undirected", weighted=TRUE,
                          add.colnames="name")
-#print(ig_arg)
-
 
 # IV. The Encoding Process
-#We're going to go back to our data using the Arginase deficiency network
-#model, and the Miller et al (2015) dataset.
-## IV.0 Re-define the Arginase deficiency network model
-
-print(ig_arg)
-adj_mat = as.matrix(get.adjacency(ig_arg, attr="weight"))
-G=vector(mode="list", length=length(V(ig_arg)$name))
+adj_mat = as.matrix(get.adjacency(igraph, attr="weight"))
+G=vector(mode="list", length=length(V(igraph)$name))
 G[1:length(G)] = 0
-names(G) = V(ig_arg)$name
-
+names(G) = V(igraph)$name
 
 ## IV.I Choose your node subset.
-
-
-# Maximum subset size to inspect
-kmx=argv$kmx
+kmx=argv$kmx  # Maximum subset size to inspect
 # Get our node subset associated with the $KMX highest perturbed (up or down)
 # in our first Arginase deficiency sample.
 S_set = list()
