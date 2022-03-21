@@ -93,7 +93,8 @@ ind = which(colnames(experimental_df) %in% names(diags))
 data_mx.pvals=apply(experimental_df[,ind], c(1,2),
                     function(i) 2*pnorm(abs(i), lower.tail=FALSE))
 
-ptID = "IEM_1006" # TODO: Why we still need this?!
+ptID = NULL # If we have here specific Patient ID the function will calculate
+            # Fisher fishers.Info and varPvalue
 res = mle.getEncodingLength(ptBSbyK, t(data_mx.pvals), ptID, G)
 # returns a subset of nodes that are highly connected
 ind.mx = which.max(res$d.score)
@@ -109,7 +110,7 @@ res[ind.mx,]
 # 2^-d.score.
 p_value_F = 2^-res[ind.mx,"d.score"]
 # All metabolites in S_arg
-S_disease_module
+S_disease_module  # TODO: Write these to output JSON!
 # Which metabolites were in the 8 metabolite subset of patient IEM_1006's
 # top 15 perturbed metabolites that had the above p-value?
 ptBSbyK[[ind.mx]] # all metabolites in the bitstring
