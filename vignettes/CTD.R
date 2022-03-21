@@ -4,6 +4,9 @@ library(argparser)
 require(huge)
 require(CTD)
 require(MASS)
+library(rjson)
+library(stringr)
+library(fs)
 
 p <- arg_parser("Connect The Dots - Find the most connected sub-graph from the set of graphs")
 # Add a positional argument
@@ -89,7 +92,7 @@ ptBSbyK = mle.getPtBSbyK(unlist(S_disease_module), ranks)
 ## IV.IV Get encoding length of minimum length code word.
 # experimental_df is dataframe with diseases (and surrogates)
 # and z-values for each metabolite
-ind = which(colnames(experimental_df) %in% names(diags))
+ind = which(colnames(experimental_df) %in% target_patients)
 data_mx.pvals=apply(experimental_df[,ind], c(1,2),
                     function(i) 2*pnorm(abs(i), lower.tail=FALSE))
 
@@ -118,3 +121,9 @@ ptBSbyK[[ind.mx]] # all metabolites in the bitstring
 F = names(which(ptBSbyK[[ind.mx]]==1))
 print(F)
 print(p_value_F)
+
+out_dict <- list(most_connected_nodes = S_disease_module,p_value = p_value_F)
+res_json = toJSON(out_dict, indent = 4)
+outfname = fs::path_file(argv$experimental)
+outfname = str_replace(outfname, 'csv', 'json')
+write(res_json, outfname)
