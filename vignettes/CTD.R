@@ -108,14 +108,13 @@ res[ind.mx,]
 # You can interpret the probability assigned to this metabolite set by
 # comparing it to a null encoding algorithm, which uses fixed-length codes
 # for all metabolites in the set. The "d.score" is the difference in bitlength
-# between the null and alternative encoding models. Using the Algorithmic
 # Significance theorem, we can estimate the upper bounds on a p-value by
 # 2^-d.score.
 p_value_F = 2^-res[ind.mx,"d.score"]
 # All metabolites in S_arg
-S_disease_module  # TODO: Write these to output JSON!
-# Which metabolites were in the 8 metabolite subset of patient IEM_1006's
-# top 15 perturbed metabolites that had the above p-value?
+S_disease_module
+# Which nodes were in the node subset of disease module
+# that had the above p-value?
 ptBSbyK[[ind.mx]] # all metabolites in the bitstring
 # just the F metabolites that are in S_arg that were were "found"
 F = names(which(ptBSbyK[[ind.mx]]==1))
