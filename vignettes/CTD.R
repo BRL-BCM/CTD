@@ -10,12 +10,17 @@ library(fs)
 
 p <- arg_parser("Connect The Dots - Find the most connected sub-graph from the set of graphs")
 # Add a positional argument
-p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = 'data/example_argininemia/arg.csv')
-p <- add_argument(p, "--control", help="Control dataset file name", default = 'data/example_argininemia/control.csv')
-p <- add_argument(p, "--adj_matrix", help="CSV with adjecancy matric", default = 'data/example_argininemia/arg_adj.csv')
+p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = 'data/example_1/experimental.csv')
+p <- add_argument(p, "--control", help="Control dataset file name", default = 'data/example_1/control.csv')
+p <- add_argument(p, "--adj_matrix", help="CSV with adjecancy matric", default = 'data/example_1/adj.tsv')
+
+#p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = 'data/example_argininemia/arg.csv')
+#p <- add_argument(p, "--control", help="Control dataset file name", default = 'data/example_argininemia/control.csv')
+#p <- add_argument(p, "--adj_matrix", help="CSV with adjecancy matric", default = 'data/example_argininemia/arg_adj.csv')
+
 # Add a flag
 p <- add_argument(p, "--column_name", help="Name of the column containing concentrations")
-p <- add_argument(p, "--kmx", help="Number of highly perturbed nodes to consider", default=15)
+p <- add_argument(p, "--kmx", help="Number of highly perturbed nodes to consider", default=5)
 p <- add_argument(p, "--out", help="output file name")
 argv <- parse_args(p)
 
@@ -60,7 +65,7 @@ S_set = list()
 experimental_df = as.data.frame(experimental_df)
 for (pt in target_patients) {
   sel = experimental_df[[pt]]
-  temp = experimental_df[order(sel), ]
+  temp = experimental_df[order(sel, decreasing=TRUE), ]
   S_patient=rownames(temp)[1:kmx]
   S_set<-append(S_set, S_patient)
 }
