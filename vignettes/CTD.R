@@ -2,17 +2,18 @@
 library(methods)
 library(argparser)
 require(huge)
-require(CTD)
 require(MASS)
 library(rjson)
 library(stringr)
 library(fs)
+source("./R/mle.getEncodingLength.r")
+source("./R/mle.getPtBSbyK.r")
 
 p <- arg_parser("Connect The Dots - Find the most connected sub-graph from the set of graphs")
 # Add a positional argument
-p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = 'data/example_1/experimental.csv')
-p <- add_argument(p, "--control", help="Control dataset file name", default = 'data/example_1/control.csv')
-p <- add_argument(p, "--adj_matrix", help="CSV with adjecancy matric", default = 'data/example_1/adj.tsv')
+p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = 'data/example_2/experimental.csv')
+p <- add_argument(p, "--control", help="Control dataset file name", default = 'data/example_2/control.csv')
+p <- add_argument(p, "--adj_matrix", help="CSV with adjecancy matric", default = 'data/example_2/adj.tsv')
 
 #p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = 'data/example_argininemia/arg.csv')
 #p <- add_argument(p, "--control", help="Control dataset file name", default = 'data/example_argininemia/control.csv')
@@ -100,13 +101,32 @@ ptBSbyK = mle.getPtBSbyK(unlist(S_disease_module), ranks)
 ind = which(colnames(experimental_df) %in% target_patients)
 data_mx.pvals=apply(experimental_df[,ind], c(1,2),
                     function(i) 2*pnorm(abs(i), lower.tail=FALSE))
+# p-value is area under curve of normal distribution on the right of the
+# specified z-score. pnorm generates normal distribution with mean=0, std=1,
+# which is exactly what z-scores are
 
-ptID = NULL # If we have here specific Patient ID the function will calculate
+ptID = 'P2' # If we have here specific Patient ID the function will calculate
             # Fisher fishers.Info and varPvalue
 res = mle.getEncodingLength(ptBSbyK, t(data_mx.pvals), ptID, G)
 # returns a subset of nodes that are highly connected
 ind.mx = which.max(res$d.score)
-res[ind.mx,]
+ind.mx = which(res$d.score == max(res$d.score) )
+highest_dscore_paths = res[ind.mx,]
+
+
+# Tiebraker 1: If several results have the same d-score take one with longest BS
+a1 = nchar(highest_dscore_paths$optimalBS)
+a2 = max(nchar(highest_dscore_paths$optimalBS))
+ind_F = which(nchar(highest_dscore_paths$optimalBS) == 
+                max(nchar(highest_dscore_paths$optimalBS)))
+ind_F = highest_dscore_paths[ind_F,]
+# Tiebraker 2: Take the one with the largest subsetSize
+index_highest = which(ind_F$subsetSize == 
+                        max(ind_F$subsetSize))
+ind_F = ind_F[index_highest,]
+ind_F = rownames(ind_F)
+F_info = res[ind_F,]
+
 
 ## IV.V Get p-value of variable length encoding vs. fixed length encoding.
 
@@ -115,14 +135,17 @@ res[ind.mx,]
 # for all metabolites in the set. The "d.score" is the difference in bitlength
 # Significance theorem, we can estimate the upper bounds on a p-value by
 # 2^-d.score.
-p_value_F = 2^-res[ind.mx,"d.score"]
+
+p_value_F = 2^-F_info$d.score
 # All metabolites in S_arg
 S_disease_module
 # Which nodes were in the node subset of disease module
 # that had the above p-value?
-ptBSbyK[[ind.mx]] # all metabolites in the bitstring
+ptBSbyK[[ind_F]] # all metabolites in the bitstring
 # just the F metabolites that are in S_arg that were were "found"
-F = names(which(ptBSbyK[[ind.mx]]==1))
+F_arr = ptBSbyK[[strtoi(ind_F)]]
+F = which(F_arr==1)
+F = names(F)
 print(F)
 print(p_value_F)
 
