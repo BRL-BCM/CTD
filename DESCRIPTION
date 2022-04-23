@@ -1,10 +1,10 @@
 Package: CTD
 Title: A Method for 'Connecting The Dots' in Weighted Graphs
-Version: 1.00.0
-Date: 2021-02-10
+Version: 1.00.1
+Date: 2022-04-22
 Authors@R: person("Lillian", "Thistlethwaite", email="lillian.thistlethwaite@gmail.com", role=c("aut", "cre"))
 Description: A method for pattern discovery in weighted graphs as outlined in Thistlethwaite et al. (2021) <doi:10.1371/journal.pcbi.1008550>. Two use cases are achieved: 1) Given a weighted graph and a subset of its nodes, do the nodes show significant connectedness? 2) Given a weighted graph and two subsets of its nodes, are the subsets close neighbors or distant?
-Depends: R (>= 4.0), gmp, igraph, stats, grDevices, graphics
+Depends: R (>= 4.0), igraph, stats, grDevices, graphics
 Suggests: 
     knitr,
     rmarkdown,
@@ -13,9 +13,8 @@ Suggests:
     gplots,
     RColorBrewer,
     testthat
-SystemRequirements: gmp (>=5.0)
 VignetteBuilder: knitr
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2

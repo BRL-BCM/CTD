@@ -20,7 +20,6 @@
 #' the d.score.
 #' @export mle.getEncodingLength
 #' @keywords minimum length encoding
-#' @importFrom gmp chooseZ
 #' @examples
 #' # Identify the most significantly connected subset for a given patients'
 #' # perturbations, given the network G
@@ -89,9 +88,9 @@ mle.getEncodingLength = function(bs, pvals, ptID, G) {
         results[row,"optimalBS"]=optBS.tmp
         results[row,"subsetSize"]=k
         results[row,"opt.T"]=found
-        results[row,"IS.null"]=log2(chooseZ(length(G), k))
+        results[row,"IS.null"]=log2(length(G))*k
         results[row,"IS.alt"]=e
-        results[row,"d.score"]=round(log2(chooseZ(length(G), k)) - e, 3)
+        results[row,"d.score"]=round(log2(length(G))*k - e, 3)
         row=row+1
     }
     return (results)
