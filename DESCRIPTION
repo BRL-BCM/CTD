@@ -1,6 +1,6 @@
 Package: CTD
 Title: A Method for 'Connecting The Dots' in Weighted Graphs
-Version: 1.10.0
+Version: 1.1.0
 Date: 2022-04-22
 Maintainer: Lillian Thistlethwaite <lillian.thistlethwaite@gmail.com>
 Author: Lillian Thistlethwaite [aut, cre]
