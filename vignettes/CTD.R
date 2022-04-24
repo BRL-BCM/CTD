@@ -1,24 +1,22 @@
 #!/usr/bin/env Rscript --vanilla
 library(methods)
 library(argparser)
-require(huge)
+#require(huge)
 require(MASS)
 library(rjson)
 library(stringr)
 library(fs)
+require(CTD)  # TODO: We need this for graph.adjecancy function!? Exclude it!
 source("./R/mle.getEncodingLength.r")
 source("./R/mle.getPtBSbyK.r")
+source("./R/data.surrogateProfiles.r")
+source("./R/data.imputeData.r")
+
 
 p <- arg_parser("Connect The Dots - Find the most connected sub-graph from the set of graphs")
-# Add a positional argument
 p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = 'data/example_2/experimental.csv')
 p <- add_argument(p, "--control", help="Control dataset file name", default = 'data/example_2/control.csv')
 p <- add_argument(p, "--adj_matrix", help="CSV with adjecancy matric", default = 'data/example_2/adj.tsv')
-
-#p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = 'data/example_argininemia/arg.csv')
-#p <- add_argument(p, "--control", help="Control dataset file name", default = 'data/example_argininemia/control.csv')
-#p <- add_argument(p, "--adj_matrix", help="CSV with adjecancy matric", default = 'data/example_argininemia/arg_adj.csv')
-
 # Add a flag
 p <- add_argument(p, "--column_name", help="Name of the column containing concentrations")
 p <- add_argument(p, "--kmx", help="Number of highly perturbed nodes to consider", default=5)
@@ -28,10 +26,8 @@ argv <- parse_args(p)
 # Read input dataframe with experimental (positive, disease) samples
 experimental_df <- read.csv(file = argv$experimental, check.names=FALSE, row.names=1)
 experimental_df[] <- lapply(experimental_df, as.character)  # TODO remove?
-
 # Read input dataframe with control samples
 control_data <- read.csv(file = argv$control, check.names=FALSE, row.names=1)
-
 target_patients = colnames(experimental_df)
 
 # TODO: Do we need surrogates?
@@ -51,35 +47,31 @@ adj_df = as.matrix(adj_df)
 igraph = graph.adjacency(adj_df, mode="undirected", weighted=TRUE,
                          add.colnames="name")
 
-# IV. The Encoding Process
+# The Encoding Process
 adj_mat = as.matrix(get.adjacency(igraph, attr="weight"))
 G=vector(mode="list", length=length(V(igraph)$name))
 G[1:length(G)] = 0
 names(G) = V(igraph)$name
 
-## IV.I Choose your node subset.
+## Choose node subset
 kmx=argv$kmx  # Maximum subset size to inspect
-# Get our node subset associated with the $KMX highest perturbed (up or down)
-# in our first Arginase deficiency sample.
 S_set = list()
-
 experimental_df = as.data.frame(experimental_df)
 for (pt in target_patients) {
   sel = experimental_df[[pt]]
   temp = experimental_df[order(sel, decreasing=TRUE), ]
   S_patient=rownames(temp)[1:kmx]
   S_set<-append(S_set, S_patient)
-}
-# TODO: Take union >50%
+} # Created list containing top kmx metabolites for every taget user
 vec_s = unlist(S_set)
 occurances = as.data.frame(table(vec_s))
-
-S_disease_module_ind = which(occurances$Freq >= (length(target_patients) / 2.))  # TODO: Create apearance_threshold variable
+# Keep in the disease_module the metabolites perturbed in at least 50% patients
+S_disease_module_ind = which(occurances$Freq >= (length(target_patients) / 2.))  
+# TODO: Create apearance_threshold variable (default 50%)
 S_disease_module = as.list(as.character(occurances[S_disease_module_ind, "vec_s"]))
 
-## IV.II Get k node permutations.
+## Get k node permutations
 # Get the single-node encoding node ranks starting from each node in the subset
-# S_arg.
 ranks = list()
 for (n in 1:length(S_disease_module)) {
   ind = which(names(G)==S_disease_module[n])
@@ -91,11 +83,11 @@ for (n in 1:length(S_disease_module)) {
 names(ranks) = S_disease_module
 # Vector ranks contains encodings for each node in S_disease_module
 
-## IV.III Convert to bitstrings.
+## Convert to bitstrings
 # Get the bitstrings associated with the disease module's metabolites
 ptBSbyK = mle.getPtBSbyK(unlist(S_disease_module), ranks)
 
-## IV.IV Get encoding length of minimum length code word.
+## Get encoding length of minimum length code word.
 # experimental_df is dataframe with diseases (and surrogates)
 # and z-values for each metabolite
 ind = which(colnames(experimental_df) %in% target_patients)
@@ -113,7 +105,7 @@ ind.mx = which.max(res$d.score)
 ind.mx = which(res$d.score == max(res$d.score) )
 highest_dscore_paths = res[ind.mx,]
 
-
+## Locate eencoding (F) with best d-score
 # Tiebraker 1: If several results have the same d-score take one with longest BS
 a1 = nchar(highest_dscore_paths$optimalBS)
 a2 = max(nchar(highest_dscore_paths$optimalBS))
@@ -137,17 +129,15 @@ F_info = res[ind_F,]
 # 2^-d.score.
 
 p_value_F = 2^-F_info$d.score
-# All metabolites in S_arg
-S_disease_module
-# Which nodes were in the node subset of disease module
-# that had the above p-value?
+S_disease_module # All metabolites in S
 ptBSbyK[[ind_F]] # all metabolites in the bitstring
 # just the F metabolites that are in S_arg that were were "found"
 F_arr = ptBSbyK[[strtoi(ind_F)]]
 F = which(F_arr==1)
 F = names(F)
-print(F)
-print(p_value_F)
+print(paste('Set of highly-connected perturbed metabolites F = {', toString(F), 
+            '} with p-value = ', p_value_F))
+#print(p_value_F)
 
 out_dict <- list(most_connected_nodes = S_disease_module,p_value = p_value_F)
 res_json = toJSON(out_dict, indent = 4)
