@@ -1,12 +1,11 @@
 #!/usr/bin/env Rscript --vanilla
-library(methods)
 library(argparser)
 require(huge)
 require(MASS)
 library(rjson)
 library(stringr)
 library(fs)
-require(CTD)  # TODO: We need this for graph.adjecancy function!? Exclude it!
+require(CTD)  # TODO: We need this for graph.adjacency function!? Exclude it!
 source("./R/mle.getEncodingLength.r")
 source("./R/mle.getPtBSbyK.r")
 source("./R/data.surrogateProfiles.r")
@@ -16,7 +15,7 @@ source("./R/data.imputeData.r")
 p <- arg_parser("Connect The Dots - Find the most connected sub-graph from the set of graphs")
 p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = 'data/example_argininemia/experimental.csv')
 p <- add_argument(p, "--control", help="Control dataset file name", default = 'data/example_argininemia/control.csv')
-p <- add_argument(p, "--adj_matrix", help="CSV with adjecancy matric", default = 'data/example_argininemia/adj.csv')
+p <- add_argument(p, "--adj_matrix", help="CSV with adjecancy matric", default = 'dat/example_argininemia/adj.csv')
 
 #p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = 'data/example_2/experimental.csv')
 #p <- add_argument(p, "--control", help="Control dataset file name", default = 'data/example_2/control.csv')
