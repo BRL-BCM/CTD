@@ -14,18 +14,18 @@ source("./R/data.imputeData.r")
 
 
 p <- arg_parser("Connect The Dots - Find the most connected sub-graph from the set of graphs")
-#p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = 'data/example_argininemia/experimental.csv')
-#p <- add_argument(p, "--control", help="Control dataset file name", default = 'data/example_argininemia/control.csv')
-#p <- add_argument(p, "--adj_matrix", help="CSV with adjecancy matric", default = 'data/example_argininemia/adj.csv')
+p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = 'data/example_argininemia/experimental.csv')
+p <- add_argument(p, "--control", help="Control dataset file name", default = 'data/example_argininemia/control.csv')
+p <- add_argument(p, "--adj_matrix", help="CSV with adjecancy matric", default = 'data/example_argininemia/adj.csv')
 
-p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = 'data/example_2/experimental.csv')
-p <- add_argument(p, "--control", help="Control dataset file name", default = 'data/example_2/control.csv')
-p <- add_argument(p, "--adj_matrix", help="CSV with adjecancy matric", default = 'data/example_2/adj.csv')
+#p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = 'data/example_2/experimental.csv')
+#p <- add_argument(p, "--control", help="Control dataset file name", default = 'data/example_2/control.csv')
+#p <- add_argument(p, "--adj_matrix", help="CSV with adjecancy matric", default = 'data/example_2/adj.csv')
 
 
 # Add a flag
 p <- add_argument(p, "--column_name", help="Name of the column containing concentrations")
-p <- add_argument(p, "--kmx", help="Number of highly perturbed nodes to consider", default=5)
+p <- add_argument(p, "--kmx", help="Number of highly perturbed nodes to consider", default=15)
 p <- add_argument(p, "--out", help="output file name")
 argv <- parse_args(p)
 
@@ -59,6 +59,7 @@ if (file.exists(argv$adj_matrix)){
   diag(adj_df) = 0
   rownames(adj_df) = rownames(experimental_df)
   colnames(adj_df) = rownames(experimental_df)
+  #write.table(adj_df, file = file.path('data', 'example_argininemia', 'adj.csv'), row.names=FALSE, sep=',')
 }
 # Convert adjacency matrices to an igraph object.
 igraph = graph.adjacency(adj_df, mode="undirected", weighted=TRUE,
@@ -113,7 +114,7 @@ data_mx.pvals=apply(experimental_df[,ind], c(1,2),
 # specified z-score. pnorm generates normal distribution with mean=0, std=1,
 # which is exactly what z-scores are
 
-ptID = 'P2' # If we have here specific Patient ID the function will calculate
+ptID = colnames(data_mx.pvals)[1] # If we have here specific Patient ID the function will calculate
             # Fisher fishers.Info and varPvalue
 res = mle.getEncodingLength(ptBSbyK, t(data_mx.pvals), ptID, G)
 # returns a subset of nodes that are highly connected
