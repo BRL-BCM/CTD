@@ -11,17 +11,10 @@ source("./R/mle.getPtBSbyK.r")
 source("./R/data.surrogateProfiles.r")
 source("./R/data.imputeData.r")
 
-
 p <- arg_parser("Connect The Dots - Find the most connected sub-graph from the set of graphs")
 p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = 'data/example_argininemia/experimental.csv')
 p <- add_argument(p, "--control", help="Control dataset file name", default = 'data/example_argininemia/control.csv')
-p <- add_argument(p, "--adj_matrix", help="CSV with adjecancy matric", default = 'dat/example_argininemia/adj.csv')
-
-#p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = 'data/example_2/experimental.csv')
-#p <- add_argument(p, "--control", help="Control dataset file name", default = 'data/example_2/control.csv')
-#p <- add_argument(p, "--adj_matrix", help="CSV with adjecancy matric", default = 'data/example_2/adj.csv')
-
-
+p <- add_argument(p, "--adj_matrix", help="CSV with adjecancy matric", default = 'data/example_argininemia/adj.csv')
 # Add a flag
 p <- add_argument(p, "--column_name", help="Name of the column containing concentrations")
 p <- add_argument(p, "--kmx", help="Number of highly perturbed nodes to consider", default=15)
@@ -155,7 +148,7 @@ print(paste('Set of highly-connected perturbed metabolites F = {', toString(F),
             '} with p-value = ', p_value_F))
 #print(p_value_F)
 
-out_dict <- list(most_connected_nodes = S_disease_module,p_value = p_value_F)
+out_dict <- list(most_connected_nodes = F,p_value = p_value_F)
 res_json = toJSON(out_dict, indent = 4)
 outfname = fs::path_file(argv$experimental)
 outfname = str_replace(outfname, 'csv', 'json')
