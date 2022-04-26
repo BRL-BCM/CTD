@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript --vanilla
 library(methods)
 library(argparser)
-#require(huge)
+require(huge)
 require(MASS)
 library(rjson)
 library(stringr)
@@ -14,9 +14,15 @@ source("./R/data.imputeData.r")
 
 
 p <- arg_parser("Connect The Dots - Find the most connected sub-graph from the set of graphs")
+#p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = 'data/example_argininemia/experimental.csv')
+#p <- add_argument(p, "--control", help="Control dataset file name", default = 'data/example_argininemia/control.csv')
+#p <- add_argument(p, "--adj_matrix", help="CSV with adjecancy matric", default = 'data/example_argininemia/adj.csv')
+
 p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = 'data/example_2/experimental.csv')
 p <- add_argument(p, "--control", help="Control dataset file name", default = 'data/example_2/control.csv')
-p <- add_argument(p, "--adj_matrix", help="CSV with adjecancy matric", default = 'data/example_2/adj.tsv')
+p <- add_argument(p, "--adj_matrix", help="CSV with adjecancy matric", default = 'data/example_2/adj.csv')
+
+
 # Add a flag
 p <- add_argument(p, "--column_name", help="Name of the column containing concentrations")
 p <- add_argument(p, "--kmx", help="Number of highly perturbed nodes to consider", default=5)
@@ -40,13 +46,23 @@ experimental_df=data.surrogateProfiles(experimental_df, 1, ref_data = control_da
 dim(experimental_df)
 
 # Read input graph (adjacency matrix)
-adj_df <- read.csv(file = argv$adj_matrix, sep = '\t', check.names=FALSE)
-rownames(adj_df) = colnames(adj_df)
-adj_df = as.matrix(adj_df)
+if (file.exists(argv$adj_matrix)){
+  adj_df <- read.csv(file = argv$adj_matrix, check.names=FALSE)
+  rownames(adj_df) = colnames(adj_df)
+  adj_df = as.matrix(adj_df)
+} else{
+  experimental = huge(t(experimental_df), method="glasso")
+  # This will take several minutes. For a faster option, you can use the
+  # "ebic" criterion instead of "stars", but we recommend "stars".
+  experimental.select = huge.select(experimental, criterion="stars")
+  adj_df = as.matrix(experimental.select$opt.icov)
+  diag(adj_df) = 0
+  rownames(adj_df) = rownames(experimental_df)
+  colnames(adj_df) = rownames(experimental_df)
+}
 # Convert adjacency matrices to an igraph object.
 igraph = graph.adjacency(adj_df, mode="undirected", weighted=TRUE,
                          add.colnames="name")
-
 # The Encoding Process
 adj_mat = as.matrix(get.adjacency(igraph, attr="weight"))
 G=vector(mode="list", length=length(V(igraph)$name))
