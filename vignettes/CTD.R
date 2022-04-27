@@ -5,16 +5,20 @@ require(MASS)
 library(rjson)
 library(stringr)
 library(fs)
-require(CTD)  # TODO: We need this for graph.adjacency function!? Exclude it!
+require(igraph)  # TODO: We need this for graph.adjacency function!? Exclude it!
 source("./R/mle.getEncodingLength.r")
 source("./R/mle.getPtBSbyK.r")
 source("./R/data.surrogateProfiles.r")
 source("./R/data.imputeData.r")
+source("./R/singleNode.getNodeRanksN.r")
+source("./R/graph.diffuseP1.r")
+source("./R/graph.connectToExt.r")
+source("./R/stat.fishersMethod.r")
 
 p <- arg_parser("Connect The Dots - Find the most connected sub-graph from the set of graphs")
 p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = 'data/example_argininemia/experimental.csv')
 p <- add_argument(p, "--control", help="Control dataset file name", default = 'data/example_argininemia/control.csv')
-p <- add_argument(p, "--adj_matrix", help="CSV with adjecancy matric", default = 'data/example_argininemia/adj.csv')
+p <- add_argument(p, "--adj_matrix", help="CSV with adjacancy matric", default = 'data/example_argininemia/adj.csv')
 # Add a flag
 p <- add_argument(p, "--column_name", help="Name of the column containing concentrations")
 p <- add_argument(p, "--kmx", help="Number of highly perturbed nodes to consider", default=15)
