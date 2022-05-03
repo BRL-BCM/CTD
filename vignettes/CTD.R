@@ -22,7 +22,7 @@ p <- add_argument(p, "--adj_matrix", help="CSV with adjacancy matric", default =
 # Add a flag
 p <- add_argument(p, "--disease_module", help="Comma separated list of graph G nodes to consider when searcing for most connected sub-graph")
 p <- add_argument(p, "--kmx", help="Number of highly perturbed nodes to consider. Ignored if disease_module is given.", default=15)
-p <- add_argument(p, "--out", help="output file name")
+p <- add_argument(p, "--present_in_perc", help="Percentage of patients having metabolite. Ignored if disease_module is given.", default=0.5)
 argv <- parse_args(p)
 
 # Read input dataframe with experimental (positive, disease) samples
@@ -80,8 +80,7 @@ if (is.na(argv$disease_module)){
   vec_s = unlist(S_set)
   occurances = as.data.frame(table(vec_s))
   # Keep in the disease_module the metabolites perturbed in at least 50% patients
-  S_disease_module_ind = which(occurances$Freq >= (length(target_patients) / 2.))
-  # TODO: Create apearance_threshold variable (default 50%)
+  S_disease_module_ind = which(occurances$Freq >= (length(target_patients) * argv$present_in_perc))
   S_disease_module = as.list(as.character(occurances[S_disease_module_ind, "vec_s"]))
 } else
 {
