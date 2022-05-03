@@ -5,7 +5,7 @@ require(MASS)
 library(rjson)
 library(stringr)
 library(fs)
-require(igraph)  # TODO: We need this for graph.adjacency function!? Exclude it!
+require(igraph)
 source("./R/mle.getEncodingLength.r")
 source("./R/mle.getPtBSbyK.r")
 source("./R/data.surrogateProfiles.r")
@@ -20,8 +20,8 @@ p <- add_argument(p, "--experimental", help="Experimental dataset file name", de
 p <- add_argument(p, "--control", help="Control dataset file name", default = 'data/example_argininemia/control.csv')
 p <- add_argument(p, "--adj_matrix", help="CSV with adjacancy matric", default = 'data/example_argininemia/adj.csv')
 # Add a flag
-p <- add_argument(p, "--column_name", help="Name of the column containing concentrations")
-p <- add_argument(p, "--kmx", help="Number of highly perturbed nodes to consider", default=15)
+p <- add_argument(p, "--disease_module", help="Comma separated list of graph G nodes to consider when searcing for most connected sub-graph")
+p <- add_argument(p, "--kmx", help="Number of highly perturbed nodes to consider. Ignored if disease_module is given.", default=15)
 p <- add_argument(p, "--out", help="output file name")
 argv <- parse_args(p)
 
@@ -70,19 +70,24 @@ names(G) = V(igraph)$name
 kmx=argv$kmx  # Maximum subset size to inspect
 S_set = list()
 experimental_df = as.data.frame(experimental_df)
-for (pt in target_patients) {
-  sel = experimental_df[[pt]]
-  temp = experimental_df[order(sel, decreasing=TRUE), ]
-  S_patient=rownames(temp)[1:kmx]
-  S_set<-append(S_set, S_patient)
-} # Created list containing top kmx metabolites for every taget user
-vec_s = unlist(S_set)
-occurances = as.data.frame(table(vec_s))
-# Keep in the disease_module the metabolites perturbed in at least 50% patients
-S_disease_module_ind = which(occurances$Freq >= (length(target_patients) / 2.))  
-# TODO: Create apearance_threshold variable (default 50%)
-S_disease_module = as.list(as.character(occurances[S_disease_module_ind, "vec_s"]))
-
+if (is.na(argv$disease_module)){
+  for (pt in target_patients) {
+    sel = experimental_df[[pt]]
+    temp = experimental_df[order(sel, decreasing=TRUE), ]
+    S_patient=rownames(temp)[1:kmx]
+    S_set<-append(S_set, S_patient)
+  } # Created list containing top kmx metabolites for every taget user
+  vec_s = unlist(S_set)
+  occurances = as.data.frame(table(vec_s))
+  # Keep in the disease_module the metabolites perturbed in at least 50% patients
+  S_disease_module_ind = which(occurances$Freq >= (length(target_patients) / 2.))
+  # TODO: Create apearance_threshold variable (default 50%)
+  S_disease_module = as.list(as.character(occurances[S_disease_module_ind, "vec_s"]))
+} else
+{
+  S_disease_module = as.list(unlist(str_split(argv$disease_module, ',')))
+  # TODO: Check if all given nodes are in G!
+}
 ## Get k node permutations
 # Get the single-node encoding node ranks starting from each node in the subset
 ranks = list()
