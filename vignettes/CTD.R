@@ -15,31 +15,36 @@ source("./R/graph.diffuseP1.r")
 source("./R/graph.connectToExt.r")
 source("./R/stat.fishersMethod.r")
 
-p <- arg_parser("Connect The Dots - Find the most connected sub-graph from the set of graphs")
+p <- arg_parser("Connect The Dots - Find the most connected sub-graph")
 p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = 'data/example_argininemia/experimental.csv')
 p <- add_argument(p, "--control", help="Control dataset file name", default = 'data/example_argininemia/control.csv')
 p <- add_argument(p, "--adj_matrix", help="CSV with adjacancy matric", default = 'data/example_argininemia/adj.csv')
 # Add a flag
-p <- add_argument(p, "--disease_module", help="Comma separated list of graph G nodes to consider when searcing for most connected sub-graph")
+p <- add_argument(p, "--disease_module", help="Comma-separated list of graph G nodes to consider when searching for the most connected sub-graph")
 p <- add_argument(p, "--kmx", help="Number of highly perturbed nodes to consider. Ignored if disease_module is given.", default=15)
 p <- add_argument(p, "--present_in_perc", help="Percentage of patients having metabolite. Ignored if disease_module is given.", default=0.5)
 argv <- parse_args(p)
 
 # Read input dataframe with experimental (positive, disease) samples
-experimental_df <- read.csv(file = argv$experimental, check.names=FALSE, row.names=1)
-experimental_df[] <- lapply(experimental_df, as.character)  # TODO remove?
-# Read input dataframe with control samples
-control_data <- read.csv(file = argv$control, check.names=FALSE, row.names=1)
-target_patients = colnames(experimental_df)
+if (file.exists(argv$experimental)){
+  experimental_df <- read.csv(file = argv$experimental, check.names=FALSE, row.names=1)
+  experimental_df[] <- lapply(experimental_df, as.character)  # TODO remove?
+  # Read input dataframe with control samples
+  control_data <- read.csv(file = argv$control, check.names=FALSE, row.names=1)
+  target_patients = colnames(experimental_df)
 
-# TODO: Do we need surrogates?
-# Add surrogate disease and surrogate reference profiles based on 1 standard
-# deviation around profiles from real patients to improve rank of matrix when
-# learning Gaussian Markov Random Field network on data. While surrogate
-# profiles are not required, they tend to learn less complex networks
-# (i.e., networks with less edges) and in faster time.
-experimental_df=data.surrogateProfiles(experimental_df, 1, ref_data = control_data)
-dim(experimental_df)
+  # TODO: Do we need surrogates?
+  # Add surrogate disease and surrogate reference profiles based on 1 standard
+  # deviation around profiles from real patients to improve rank of matrix when
+  # learning Gaussian Markov Random Field network on data. While surrogate
+  # profiles are not required, they tend to learn less complex networks
+  # (i.e., networks with less edges) and in faster time.
+  experimental_df=data.surrogateProfiles(experimental_df, 1, ref_data = control_data)
+  experimental_df = as.data.frame(experimental_df)
+} else{
+  target_patients = NA
+}
+
 
 # Read input graph (adjacency matrix)
 if (file.exists(argv$adj_matrix)){
@@ -69,7 +74,7 @@ names(G) = V(igraph)$name
 ## Choose node subset
 kmx=argv$kmx  # Maximum subset size to inspect
 S_set = list()
-experimental_df = as.data.frame(experimental_df)
+
 if (is.na(argv$disease_module)){
   for (pt in target_patients) {
     sel = experimental_df[[pt]]
@@ -107,6 +112,7 @@ ptBSbyK = mle.getPtBSbyK(unlist(S_disease_module), ranks)
 ## Get encoding length of minimum length code word.
 # experimental_df is dataframe with diseases (and surrogates)
 # and z-values for each metabolite
+# TODO: If graph and disease module are given do we still need experimental_df?
 ind = which(colnames(experimental_df) %in% target_patients)
 data_mx.pvals=apply(experimental_df[,ind], c(1,2),
                     function(i) 2*pnorm(abs(i), lower.tail=FALSE))
@@ -122,7 +128,7 @@ ind.mx = which.max(res$d.score)
 ind.mx = which(res$d.score == max(res$d.score) )
 highest_dscore_paths = res[ind.mx,]
 
-## Locate eencoding (F) with best d-score
+## Locate encoding (F) with best d-score
 # Tiebraker 1: If several results have the same d-score take one with longest BS
 a1 = nchar(highest_dscore_paths$optimalBS)
 a2 = max(nchar(highest_dscore_paths$optimalBS))
@@ -135,9 +141,6 @@ index_highest = which(ind_F$subsetSize ==
 ind_F = ind_F[index_highest,]
 ind_F = rownames(ind_F)
 F_info = res[ind_F,]
-
-
-## IV.V Get p-value of variable length encoding vs. fixed length encoding.
 
 # You can interpret the probability assigned to this metabolite set by
 # comparing it to a null encoding algorithm, which uses fixed-length codes
@@ -154,7 +157,6 @@ F = which(F_arr==1)
 F = names(F)
 print(paste('Set of highly-connected perturbed metabolites F = {', toString(F), 
             '} with p-value = ', p_value_F))
-#print(p_value_F)
 
 out_dict <- list(most_connected_nodes = F,p_value = p_value_F)
 res_json = toJSON(out_dict, indent = 4)
