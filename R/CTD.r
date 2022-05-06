@@ -164,7 +164,7 @@ print(paste('Set of highly-connected perturbed metabolites F = {', toString(F),
 
 out_dict <- list(most_connected_nodes = F,p_value = p_value_F)
 res_json = toJSON(out_dict, indent = 4)
-if (is.null(argv$out_name)){
+if (is.null(argv$output_name)){
   outfname = fs::path_file(argv$experimental)
   outfname = str_replace(outfname, 'csv', 'json')
 }else{
