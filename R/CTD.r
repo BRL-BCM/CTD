@@ -113,13 +113,16 @@ ptBSbyK = mle.getPtBSbyK(unlist(S_disease_module), ranks)
 # experimental_df is dataframe with diseases (and surrogates)
 # and z-values for each metabolite
 # TODO: If graph and disease module are given do we still need experimental_df?
-ind = which(colnames(experimental_df) %in% target_patients)
-data_mx.pvals=apply(experimental_df[,ind], c(1,2),
+if (file.exists(argv$experimental)){
+  ind = which(colnames(experimental_df) %in% target_patients)
+  data_mx.pvals=apply(experimental_df[,ind], c(1,2),
                     function(i) 2*pnorm(abs(i), lower.tail=FALSE))
-# p-value is area under curve of normal distribution on the right of the
-# specified z-score. pnorm generates normal distribution with mean=0, std=1,
-# which is exactly what z-scores are
-
+  # p-value is area under curve of normal distribution on the right of the
+  # specified z-score. pnorm generates normal distribution with mean=0, std=1,
+  # which is exactly what z-scores are
+}else{
+  data_mx.pvals = list(0)
+}
 ptID = colnames(data_mx.pvals)[1] # If we have here specific Patient ID the function will calculate
             # Fisher fishers.Info and varPvalue
 res = mle.getEncodingLength(ptBSbyK, t(data_mx.pvals), ptID, G)
