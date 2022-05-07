@@ -23,6 +23,7 @@ p <- add_argument(p, "--disease_module", help="Comma-separated list of graph G n
 p <- add_argument(p, "--kmx", help="Number of highly perturbed nodes to consider. Ignored if disease_module is given.", default=15)
 p <- add_argument(p, "--present_in_perc", help="Percentage of patients having metabolite. Ignored if disease_module is given.", default=0.5)
 p <- add_argument(p, "--output_name", help="Name of the output JSON file.", default=NA)
+p <- add_argument(p, "--out_graph_name", help="Name of the output graph adjecancy CSV file.", default=NA)
 
 argv <- parse_args(p)
 
@@ -61,7 +62,9 @@ if (file.exists(argv$adj_matrix)){
   diag(adj_df) = 0
   rownames(adj_df) = rownames(experimental_df)
   colnames(adj_df) = rownames(experimental_df)
-  #write.table(adj_df, file = file.path('data', 'example_argininemia', 'adj.csv'), row.names=FALSE, sep=',')
+  if (!is.na(argv$out_graph_name)){
+    write.table(adj_df, file = argv$out_graph_name, row.names=FALSE, sep=',')
+  }
 }
 # Convert adjacency matrices to an igraph object.
 igraph = graph.adjacency(adj_df, mode="undirected", weighted=TRUE,
