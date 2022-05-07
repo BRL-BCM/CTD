@@ -22,7 +22,7 @@ p <- add_argument(p, "--adj_matrix", help="CSV with adjacency matrix", default =
 p <- add_argument(p, "--disease_module", help="Comma-separated list of graph G nodes to consider when searching for the most connected sub-graph")
 p <- add_argument(p, "--kmx", help="Number of highly perturbed nodes to consider. Ignored if disease_module is given.", default=15)
 p <- add_argument(p, "--present_in_perc", help="Percentage of patients having metabolite. Ignored if disease_module is given.", default=0.5)
-p <- add_argument(p, "--output_name", help="Name of the output JSON file.", default=NULL)
+p <- add_argument(p, "--output_name", help="Name of the output JSON file.", default=NA)
 
 argv <- parse_args(p)
 
@@ -164,8 +164,12 @@ print(paste('Set of highly-connected perturbed metabolites F = {', toString(F),
 
 out_dict <- list(most_connected_nodes = F,p_value = p_value_F)
 res_json = toJSON(out_dict, indent = 4)
-if (is.null(argv$output_name)){
-  outfname = fs::path_file(argv$experimental)
+if (is.na(argv$output_name)){
+  if (argv$experimental == ''){
+    outfname = fs::path_file(argv$adj_matrix)
+  }else{
+    outfname = fs::path_file(argv$experimental)
+  }
   outfname = str_replace(outfname, 'csv', 'json')
 }else{
   outfname = argv$output_name
