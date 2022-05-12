@@ -1,0 +1,18 @@
+{
+    "S_disease_module":[
+        "4-androsten-3beta,17beta-diol disulfate 1",
+        "5-methyluridine (ribothymidine)",
+        "cysteine-glutathione disulfide",
+        "delta-tocopherol",
+        "n4-acetylcytidine",
+        "pantothenate (vitamin b5)",
+        "pipecolate",
+        "valylglycine"
+    ],
+    "most_connected_nodes":[
+"delta-tocopherol",
+"5-methyluridine (ribothymidine)",
+"valylglycine"
+    ],
+    "p_value":    0.000208307152859392
+}
