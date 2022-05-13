@@ -14,7 +14,7 @@ CTD can be run locally, inside Docker container or as a public tool on [Cancer G
 ### Running locally
  Install on R 4.2 and the following dependencies: ```huge, MASS, rjson, stringr, fs, igraph```
  Clone the repository: ```git clone https://github.com/BRL-BCM/CTD.git ```
-```sh
+```
 # Rscript R/CTD.r --help
 Connect The Dots - Find the most connected sub-graph
 
@@ -36,14 +36,14 @@ optional arguments:
                          Ignored if disease_module is given. [default:
                          0.5]
   -o, --output_name      Name of the output JSON file.
-  --out_graph_name       Name of the output graph adjecancy matrix CSV
+  --out_graph_name       Name of the output graph adjacency matrix CSV
                          file created by GLASSO.
 ```
 ### Running inside docker
 Download and install [Docker Desktop](https://www.docker.com/get-started).
 If experimental and control datasets are available in the current directory run:
 ```sh
-docker run -v $(PWD):/mnt vladimirkovacevic/ctd:1.3 Rscript /opt/CTD/R/CTD.r --experimental /mnt/experimental.csv --control /mnt/control.csv --output_name /mnt/output.json
+docker run -v $(PWD):/mnt vladimirkovacevic/ctd:1.4 Rscript /opt/CTD/R/CTD.r --experimental /mnt/experimental.csv --control /mnt/control.csv --output_name /mnt/output.json
 ```
 ### Running on the cloud Cancer Genomics Cloud platform
 CTD is available in the public apps galery on Cancer Genomics Cloud platform. After pulling it to the project all of its parameters and input files are possible to set and its execution can be easily started on the cloud instance.
