@@ -22,8 +22,8 @@ p <- add_argument(p, "--adj_matrix", help="CSV with adjacency matrix", default =
 p <- add_argument(p, "--disease_module", help="Comma-separated list of graph G nodes to consider when searching for the most connected sub-graph")
 p <- add_argument(p, "--kmx", help="Number of highly perturbed nodes to consider. Ignored if disease_module is given.", default=15)
 p <- add_argument(p, "--present_in_perc", help="Percentage of patients having metabolite. Ignored if disease_module is given.", default=0.5)
-p <- add_argument(p, "--output_name", help="Name of the output JSON file.", default=NA)
-p <- add_argument(p, "--out_graph_name", help="Name of the output graph adjecancy CSV file.", default=NA)
+p <- add_argument(p, "--output_name", help="Name of the output JSON file.")
+p <- add_argument(p, "--out_graph_name", help="Name of the output graph adjecancy CSV file.")
 
 argv <- parse_args(p)
 
@@ -165,7 +165,10 @@ F = names(F)
 print(paste('Set of highly-connected perturbed metabolites F = {', toString(F), 
             '} with p-value = ', p_value_F))
 
-out_dict <- list(most_connected_nodes = F,p_value = p_value_F)
+kmcm_probability = 2^-nchar(F_info$optimalBS)
+out_dict <- list(S_disease_module = S_disease_module,
+                 most_connected_nodes = F,p_value = p_value_F,
+                 kmcm_probability = kmcm_probability)
 res_json = toJSON(out_dict, indent = 4)
 if (is.na(argv$output_name)){
   if (argv$experimental == ''){
