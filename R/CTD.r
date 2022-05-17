@@ -89,29 +89,29 @@ if (is.na(argv$disease_module)){
   vec_s = unlist(S_set)
   occurances = as.data.frame(table(vec_s))
   # Keep in the disease_module the metabolites perturbed in at least 50% patients
-  S_disease_module_ind = which(occurances$Freq >= (length(target_patients) * argv$present_in_perc))
-  S_disease_module = as.list(as.character(occurances[S_disease_module_ind, "vec_s"]))
+  S_perturbed_nodes_ind = which(occurances$Freq >= (length(target_patients) * argv$present_in_perc))
+  S_perturbed_nodes = as.list(as.character(occurances[S_perturbed_nodes_ind, "vec_s"]))
 } else
 {
-  S_disease_module = as.list(unlist(str_split(argv$disease_module, ',')))
+  S_perturbed_nodes = as.list(unlist(str_split(argv$disease_module, ',')))
   # TODO: Check if all given nodes are in G!
 }
 ## Get k node permutations
 # Get the single-node encoding node ranks starting from each node in the subset
 ranks = list()
-for (n in 1:length(S_disease_module)) {
-  ind = which(names(G)==S_disease_module[n])
+for (n in 1:length(S_perturbed_nodes)) {
+  ind = which(names(G)==S_perturbed_nodes[n])
   # probability_difussion starting from node with index ind
   ranks[[n]]=singleNode.getNodeRanksN(ind,G,p1=1.0,thresholdDiff=0.01,
-                                      adj_mat,S=S_disease_module,
+                                      adj_mat,S=S_perturbed_nodes,
                                       num.misses=log2(length(G)),TRUE)
 }
-names(ranks) = S_disease_module
-# Vector ranks contains encodings for each node in S_disease_module
+names(ranks) = S_perturbed_nodes
+# Vector ranks contains encodings for each node in S_perturbed_nodes
 
 ## Convert to bitstrings
 # Get the bitstrings associated with the disease module's metabolites
-ptBSbyK = mle.getPtBSbyK(unlist(S_disease_module), ranks)
+ptBSbyK = mle.getPtBSbyK(unlist(S_perturbed_nodes), ranks)
 
 ## Get encoding length of minimum length code word.
 # experimental_df is dataframe with diseases (and surrogates)
@@ -156,7 +156,7 @@ F_info = res[ind_F,]
 # 2^-d.score.
 
 p_value_F = 2^-F_info$d.score
-S_disease_module # All metabolites in S
+S_perturbed_nodes # All metabolites in S
 ptBSbyK[[ind_F]] # all metabolites in the bitstring
 # just the F metabolites that are in S_arg that were were "found"
 F_arr = ptBSbyK[[strtoi(ind_F)]]
@@ -166,9 +166,11 @@ print(paste('Set of highly-connected perturbed metabolites F = {', toString(F),
             '} with p-value = ', p_value_F))
 
 kmcm_probability = 2^-nchar(F_info$optimalBS)
-out_dict <- list(S_disease_module = S_disease_module,
-                 most_connected_nodes = F,p_value = p_value_F,
-                 kmcm_probability = kmcm_probability)
+optimal_bitstring = F_info$optimalBS
+out_dict <- list(S_perturbed_nodes = S_perturbed_nodes,
+                 F_most_connected_nodes = F,p_value = p_value_F,
+                 kmcm_probability = kmcm_probability,
+                 optimal_bitstring = optimal_bitstring)
 res_json = toJSON(out_dict, indent = 4)
 if (is.na(argv$output_name)){
   if (argv$experimental == ''){
