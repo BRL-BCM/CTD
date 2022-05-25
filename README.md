@@ -43,7 +43,7 @@ optional arguments:
 Download and install [Docker Desktop](https://www.docker.com/get-started).
 If experimental and control datasets are available in the current directory run:
 ```sh
-docker run -v $(PWD):/mnt vladimirkovacevic/ctd:1.4 Rscript /opt/CTD/R/CTD.r --experimental /mnt/experimental.csv --control /mnt/control.csv --output_name /mnt/output.json
+docker run -it -v $(PWD):/mnt vladimirkovacevic/ctd:1.5 Rscript /opt/CTD/R/CTD.r --experimental /mnt/experimental.csv --control /mnt/control.csv --output_name /mnt/output.json
 ```
 ### Running on the cloud Cancer Genomics Cloud platform
 CTD is available in the public apps galery on Cancer Genomics Cloud platform. After pulling it to the project all of its parameters and input files are possible to set and its execution can be easily started on the cloud instance.
