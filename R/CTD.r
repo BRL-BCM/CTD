@@ -19,7 +19,7 @@ p <- arg_parser("Connect The Dots - Find the most connected sub-graph")
 p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = '')  # data/example_argininemia/experimental.csv
 p <- add_argument(p, "--control", help="Control dataset file name", default = '')            # data/example_argininemia/control.csv
 p <- add_argument(p, "--adj_matrix", help="CSV with adjacency matrix", default = '')         # data/example_argininemia/adj.csv
-p <- add_argument(p, "--disease_module", help="Comma-separated list of graph G nodes to consider when searching for the most connected sub-graph")
+p <- add_argument(p, "--disease_module", help="Comma-separated list or path to CSV of graph G nodes to consider when searching for the most connected sub-graph")
 p <- add_argument(p, "--kmx", help="Number of highly perturbed nodes to consider. Ignored if disease_module is given.", default=15)
 p <- add_argument(p, "--present_in_perc", help="Percentage of patients having metabolite. Ignored if disease_module is given.", default=0.5)
 p <- add_argument(p, "--output_name", help="Name of the output JSON file.")
@@ -91,6 +91,9 @@ if (is.na(argv$disease_module)){
   # Keep in the disease_module the metabolites perturbed in at least 50% patients
   S_perturbed_nodes_ind = which(occurances$Freq >= (length(target_patients) * argv$present_in_perc))
   S_perturbed_nodes = as.list(as.character(occurances[S_perturbed_nodes_ind, "vec_s"]))
+} else if (file.exists(argv$disease_module)){
+  s_module_df <- read.csv(file = argv$disease_module, check.names=FALSE)
+  S_perturbed_nodes <- as.list(s_module_df[ , ncol(s_module_df)])
 } else
 {
   S_perturbed_nodes = as.list(unlist(str_split(argv$disease_module, ',')))
