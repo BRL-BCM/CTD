@@ -173,7 +173,8 @@ optimal_bitstring = F_info$optimalBS
 out_dict <- list(S_perturbed_nodes = S_perturbed_nodes,
                  F_most_connected_nodes = F,p_value = p_value_F,
                  kmcm_probability = kmcm_probability,
-                 optimal_bitstring = optimal_bitstring)
+                 optimal_bitstring = optimal_bitstring,
+                 number_of_nodes_in_G = length(G))
 res_json = toJSON(out_dict, indent = 4)
 if (is.na(argv$output_name)){
   if (argv$experimental == ''){
