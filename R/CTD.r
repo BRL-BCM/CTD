@@ -99,6 +99,12 @@ if (is.na(argv$disease_module)){
   S_perturbed_nodes = as.list(unlist(str_split(argv$disease_module, ',')))
   # TODO: Check if all given nodes are in G!
 }
+## Check if all nodes from the S module are in graph
+for (s_node in S_perturbed_nodes){
+  if (!(s_node %in% rownames(adj_mat))){
+    stop(paste('Node ', s_node, ' not in graph. Exiting program.'))
+  }
+}
 ## Get k node permutations
 # Get the single-node encoding node ranks starting from each node in the subset
 ranks = list()
