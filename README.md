@@ -12,7 +12,7 @@ Another option is to provide weighted graph (adjecency matrix) and the list of n
 ## How to install
 CTD can be run locally, inside Docker container or as a public tool on [Cancer Genomics Cloud](https://cgc.sbgenomics.com/) platform.
 ### Running locally
- Install on R 4.2 and the following dependencies: ```huge, MASS, rjson, stringr, fs, igraph```
+ Install on R 4.2 and the following dependencies: ```huge, MASS, rjson, stringr, fs, igraph, argparser```
  Clone the repository: ```git clone https://github.com/BRL-BCM/CTD.git ```
 ```
 # Rscript R/CTD.r --help
@@ -41,9 +41,9 @@ optional arguments:
 ```
 ### Running inside docker
 Download and install [Docker Desktop](https://www.docker.com/get-started).
-If experimental and control datasets are available in the current directory run:
+If experimental and control datasets are available in the current directory (e. g. from ```data/example_argininemia```) run:
 ```sh
-docker run -it -v $(PWD):/mnt vladimirkovacevic/ctd:1.5 Rscript /opt/CTD/R/CTD.r --experimental /mnt/experimental.csv --control /mnt/control.csv --output_name /mnt/output.json
+docker run -it -v $(PWD):/mnt vladimirkovacevic/ctd:1.7 Rscript /opt/CTD/R/CTD.r --experimental /mnt/experimental.csv --control /mnt/control.csv --output_name /mnt/output.json
 ```
 ### Running on the cloud Cancer Genomics Cloud platform
 CTD is available in the public apps galery on Cancer Genomics Cloud platform. After pulling it to the project all of its parameters and input files are possible to set and its execution can be easily started on the cloud instance.
