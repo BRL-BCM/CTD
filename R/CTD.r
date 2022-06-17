@@ -21,7 +21,7 @@ p <- add_argument(p, "--control", help="Control dataset file name", default = ''
 p <- add_argument(p, "--adj_matrix", help="CSV with adjacency matrix", default = '')         # data/example_argininemia/adj.csv
 p <- add_argument(p, "--disease_module", help="Comma-separated list or path to CSV of graph G nodes to consider when searching for the most connected sub-graph")
 p <- add_argument(p, "--kmx", help="Number of highly perturbed nodes to consider. Ignored if disease_module is given.", default=15)
-p <- add_argument(p, "--present_in_perc", help="Percentage of patients having metabolite. Ignored if disease_module is given.", default=0.5)
+p <- add_argument(p, "--present_in_perc", help="Percentage of patients having metabolite for selection of S module. Ignored if disease_module is given.", default=0.5)
 p <- add_argument(p, "--output_name", help="Name of the output JSON file.")
 p <- add_argument(p, "--out_graph_name", help="Name of the output graph adjecancy CSV file.")
 
@@ -82,7 +82,7 @@ S_set = list()
 if (is.na(argv$disease_module)){
   for (pt in target_patients) {
     sel = experimental_df[[pt]]
-    temp = experimental_df[order(sel, decreasing=TRUE), ]
+    temp = experimental_df[order(abs(sel), decreasing=TRUE), ]
     S_patient=rownames(temp)[1:kmx]
     S_set<-append(S_set, S_patient)
   } # Created list containing top kmx metabolites for every taget user
@@ -105,7 +105,7 @@ for (s_node in S_perturbed_nodes){
     stop(paste('Node ', s_node, ' not in graph. Exiting program.'))
   }
 }
-## Get k node permutations
+## Walk through all the nodes in S module
 # Get the single-node encoding node ranks starting from each node in the subset
 ranks = list()
 for (n in 1:length(S_perturbed_nodes)) {
@@ -140,14 +140,11 @@ ptID = colnames(data_mx.pvals)[1] # If we have here specific Patient ID the func
             # Fisher fishers.Info and varPvalue
 res = mle.getEncodingLength(ptBSbyK, t(data_mx.pvals), ptID, G)
 # returns a subset of nodes that are highly connected
-ind.mx = which.max(res$d.score)
 ind.mx = which(res$d.score == max(res$d.score) )
 highest_dscore_paths = res[ind.mx,]
 
 ## Locate encoding (F) with best d-score
 # Tiebraker 1: If several results have the same d-score take one with longest BS
-a1 = nchar(highest_dscore_paths$optimalBS)
-a2 = max(nchar(highest_dscore_paths$optimalBS))
 ind_F = which(nchar(highest_dscore_paths$optimalBS) == 
                 max(nchar(highest_dscore_paths$optimalBS)))
 ind_F = highest_dscore_paths[ind_F,]
@@ -169,15 +166,15 @@ S_perturbed_nodes # All metabolites in S
 ptBSbyK[[ind_F]] # all metabolites in the bitstring
 # just the F metabolites that are in S_arg that were were "found"
 F_arr = ptBSbyK[[strtoi(ind_F)]]
-F = which(F_arr==1)
-F = names(F)
+Fs= which(F_arr==1)
+Fs= names(Fs)
 print(paste('Set of highly-connected perturbed metabolites F = {', toString(F), 
             '} with p-value = ', p_value_F))
 
 kmcm_probability = 2^-nchar(F_info$optimalBS)
 optimal_bitstring = F_info$optimalBS
 out_dict <- list(S_perturbed_nodes = S_perturbed_nodes,
-                 F_most_connected_nodes = F,p_value = p_value_F,
+                 F_most_connected_nodes = Fs,p_value = p_value_F,
                  kmcm_probability = kmcm_probability,
                  optimal_bitstring = optimal_bitstring,
                  number_of_nodes_in_G = length(G))
