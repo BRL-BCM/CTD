@@ -19,9 +19,9 @@ p <- arg_parser("Connect The Dots - Find the most connected sub-graph")
 p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = '')  # data/example_argininemia/experimental.csv
 p <- add_argument(p, "--control", help="Control dataset file name", default = '')            # data/example_argininemia/control.csv
 p <- add_argument(p, "--adj_matrix", help="CSV with adjacency matrix", default = '')         # data/example_argininemia/adj.csv
-p <- add_argument(p, "--disease_module", help="Comma-separated list or path to CSV of graph G nodes to consider when searching for the most connected sub-graph")
-p <- add_argument(p, "--kmx", help="Number of highly perturbed nodes to consider. Ignored if disease_module is given.", default=15)
-p <- add_argument(p, "--present_in_perc", help="Percentage of patients having metabolite for selection of S module. Ignored if disease_module is given.", default=0.5)
+p <- add_argument(p, "--s_module", help="Comma-separated list or path to CSV of graph G nodes to consider when searching for the most connected sub-graph")
+p <- add_argument(p, "--kmx", help="Number of highly perturbed nodes to consider. Ignored if S module is given.", default=15)
+p <- add_argument(p, "--present_in_perc_for_s", help="Percentage of patients having metabolite for selection of S module. Ignored if S module is given.", default=0.5)
 p <- add_argument(p, "--output_name", help="Name of the output JSON file.")
 p <- add_argument(p, "--out_graph_name", help="Name of the output graph adjecancy CSV file.")
 
@@ -79,7 +79,7 @@ names(G) = V(igraph)$name
 kmx=argv$kmx  # Maximum subset size to inspect
 S_set = list()
 
-if (is.na(argv$disease_module)){
+if (is.na(argv$s_module)){
   for (pt in target_patients) {
     sel = experimental_df[[pt]]
     temp = experimental_df[order(abs(sel), decreasing=TRUE), ]
@@ -88,15 +88,15 @@ if (is.na(argv$disease_module)){
   } # Created list containing top kmx metabolites for every taget user
   vec_s = unlist(S_set)
   occurances = as.data.frame(table(vec_s))
-  # Keep in the disease_module the metabolites perturbed in at least 50% patients
+  # Keep in the S module the metabolites perturbed in at least 50% patients
   S_perturbed_nodes_ind = which(occurances$Freq >= (length(target_patients) * argv$present_in_perc))
   S_perturbed_nodes = as.list(as.character(occurances[S_perturbed_nodes_ind, "vec_s"]))
-} else if (file.exists(argv$disease_module)){
-  s_module_df <- read.csv(file = argv$disease_module, check.names=FALSE)
+} else if (file.exists(argv$s_module)){
+  s_module_df <- read.csv(file = argv$s_module, check.names=FALSE)
   S_perturbed_nodes <- as.list(as.character(s_module_df[ , ncol(s_module_df)]))
 } else
 {
-  S_perturbed_nodes = as.list(unlist(str_split(argv$disease_module, ',')))
+  S_perturbed_nodes = as.list(unlist(str_split(argv$s_module, ',')))
   # TODO: Check if all given nodes are in G!
 }
 ## Check if all nodes from the S module are in graph
@@ -136,9 +136,10 @@ if (file.exists(argv$experimental)){
 }else{
   data_mx.pvals = list(0)
 }
-ptID = colnames(data_mx.pvals)[1] # If we have here specific Patient ID the function will calculate
-            # Fisher fishers.Info and varPvalue
-res = mle.getEncodingLength(ptBSbyK, t(data_mx.pvals), ptID, G)
+# If we have here specific Patient ID the function will calculate
+# Fisher fishers.Info and varPvalue but we'll pass NULL for now
+ptID = colnames(data_mx.pvals)[1]
+res = mle.getEncodingLength(ptBSbyK, t(data_mx.pvals), NULL, G)
 # returns a subset of nodes that are highly connected
 ind.mx = which(res$d.score == max(res$d.score) )
 highest_dscore_paths = res[ind.mx,]
@@ -168,7 +169,7 @@ ptBSbyK[[ind_F]] # all metabolites in the bitstring
 F_arr = ptBSbyK[[strtoi(ind_F)]]
 Fs= which(F_arr==1)
 Fs= names(Fs)
-print(paste('Set of highly-connected perturbed metabolites F = {', toString(F), 
+print(paste('Set of highly-connected perturbed metabolites F = {', toString(Fs),
             '} with p-value = ', p_value_F))
 
 kmcm_probability = 2^-nchar(F_info$optimalBS)
