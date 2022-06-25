@@ -69,4 +69,5 @@ Copyright (c) 2021 BCM, Houston, Texas
 
 ## References
 [1] Thistlethwaite L.R., Petrosyan V., Li X., Miller M.J., Elsea S.H., Milosavljevic A, [CTD](https://doi.org/10.1371/journal.pcbi.1008550): an information-theoretic method to interpret multivariate perturbations in the context of graphical models with applications in metabolomics and transcriptomics. Plos Comput Biol, 2021.
+
 [2] Lillian R. Thistlethwaite1, Xiqi Li, Lindsay C. Burrage, Kevin Riehle, Joseph G. Hacia, Nancy Braverman, Michael F. Wangler, Marcus J. Miller, Sarah H. Elsea & Aleksandar Milosavljevic, Clinical diagnosis of metabolic disorders using untargeted metabolomic profiling and disease‑specific networks learned from profiling data, scientific reports, 2022.
