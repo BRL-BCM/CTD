@@ -44,6 +44,7 @@ data.surrogateProfiles = function(data, std=1, ref_data) {
                                     seq_len(ncol(d_surr)-ncol(data))))
         rownames(d_surr)=rownames(data)} else {d_surr=data}
     if (numSurr>ncol(ref_data)) { # Generate control surrogates
+        rpt=ceiling(nrow(ref_data)/ncol(ref_data)/2)
         c_surr=matrix(NA, nrow=nrow(ref_data),
                       ncol=ncol(ref_data)+ncol(ref_data)*rpt)
         c_col = ncol(ref_data)+1
