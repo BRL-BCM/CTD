@@ -1,0 +1,21 @@
+{
+    "S_disease_module":[
+        "cinnamoylglycine",
+        "dihomolinoleate (20:2n6)",
+        "histidine",
+        "hwesasllr",
+        "theophylline",
+        "trigonelline (n'-methylnicotinate)",
+        "x - 12056",
+        "x - 12450",
+        "x - 16935",
+        "x - 17269",
+        "x - 17654"
+    ],
+    "most_connected_nodes":[
+"x - 16935",
+"x - 17654",
+"x - 12450"
+    ],
+    "p_value":    0.000416614305718783
+}
