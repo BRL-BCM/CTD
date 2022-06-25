@@ -8,13 +8,12 @@ RUN R -e "install.packages('MASS', repos='http://cran.rstudio.com/')"
 RUN R -e "install.packages('rjson', repos='http://cran.rstudio.com/')"
 RUN R -e "install.packages('stringr', repos='http://cran.rstudio.com/')"
 RUN R -e "install.packages('fs', repos='http://cran.rstudio.com/')"
-#RUN R -e "install.packages('CTD', repos='http://cran.rstudio.com/')"
+RUN R -e "install.packages('CTD', repos='http://cran.rstudio.com/')"
 
 WORKDIR /opt
 # Avoid pulling from docker cache in order to get the latest code from GitHub
 ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" skipcache
 RUN git clone https://github.com/BRL-BCM/CTD.git 
 WORKDIR /opt/CTD
-RUN git checkout origin/cmd-line
 
 COPY Dockerfile /opt
