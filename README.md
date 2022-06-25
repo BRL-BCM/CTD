@@ -1,14 +1,16 @@
+
 # Connect the dots
-Connect the dots (CTD) is a graph based algorithm used for finding the subsetset of highly connected nodes (F) of the selected set of nodes (S) inside a graph G. Its application is specially adapted for metabolomics, concretely for finding the highly connected subset of perturbed metabolites that can be used as the potential disease markers.
-Our novel network-based approach, CTD, “connects the dots” between metabolite perturbations observed in individual metabolomics profiles and a given disease state by calculating how connected those metabolites are in the context of a disease-specific network. It is consisted of several stages:
+Connect the dots (CTD) is a graph-based algorithm used for finding the subset of highly connected nodes (F) of the selected set of nodes (S) inside a graph G. Its application is specially adapted for metabolomics, concretely for finding the highly connected subset of perturbed metabolites that can be used as the potential disease markers.
+Our novel network-based approach, CTD, “connects the dots” between metabolite perturbations observed in individual metabolomics profiles and a given disease state by calculating how connected those metabolites are in the context of a disease-specific network. It consists of several stages:
 - Background knowledge graph generation
-- The encoding algorithm: including generating node permutations using a network walker, converting node permutations into bitstrings, and calculating the minimum encoding length between k codewords
+- The encoding algorithm: includes generating node permutations using a network walker, converting node permutations into bitstrings, and calculating the minimum encoding length between k codewords
 - Calculate the probability of a node subset based on the encoding length
 - Calculate similarity between two node subsets, using a metric based on mutual information.
 
 ## Usage
-CTD can receive as input experimental (disease) and control datasets with z-scores of metabolite perturbations. It will automatically predict metabolite relation graph (using Graphical LASSO algorithm) and disease module (S) containing set of ```kmx``` most perturbed metabolites. Then, the subset of most connected perturbed metabolites will be calculated and writen to output JSON file togeher with its p-value.
-Another option is to provide weighted graph (adjecency matrix) and the list of nodes of interest.
+CTD can receive as input experimental (disease) and control datasets with z-scores of metabolite perturbations. It will automatically predict metabolite relation graph (using Graphical LASSO algorithm) and disease module (S) containing set of ```kmx``` most perturbed metabolites. Then, the subset of most connected perturbed metabolites will be calculated and written to output JSON file together with its p-value.
+Another option is to provide a weighted graph (adjacency matrix) and a list of nodes of interest.
+
 ## How to install
 CTD can be run locally, inside Docker container or as a public tool on [Cancer Genomics Cloud](https://cgc.sbgenomics.com/) platform.
 ### Running locally
