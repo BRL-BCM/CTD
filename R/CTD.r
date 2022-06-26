@@ -6,14 +6,14 @@ library(rjson)
 library(stringr)
 library(fs)
 require(igraph)
-+source("./R/mle.getEncodingLength.r")
-+source("./R/mle.getPtBSbyK.r")
-+source("./R/data.surrogateProfiles.r")
-+source("./R/data.imputeData.r")
-+source("./R/singleNode.getNodeRanksN.r")
-+source("./R/graph.diffuseP1.r")
-+source("./R/graph.connectToExt.r")
-+source("./R/stat.fishersMethod.r")
+source("./R/mle.getEncodingLength.r")
+source("./R/mle.getPtBSbyK.r")
+source("./R/data.surrogateProfiles.r")
+source("./R/data.imputeData.r")
+source("./R/singleNode.getNodeRanksN.r")
+source("./R/graph.diffuseP1.r")
+source("./R/graph.connectToExt.r")
+source("./R/stat.fishersMethod.r")
 
 p <- arg_parser("Connect The Dots - Find the most connected sub-graph")
 p <- add_argument(p, "--experimental", help="Experimental dataset file name", default = '')  # data/example_argininemia/experimental.csv
@@ -190,7 +190,3 @@ if (is.na(argv$output_name)){
   outfname = argv$output_name
 }
 write(res_json, outfname)
-
-# Functions used from CTD module: mle.getEncodingLength.r, mle.getPtBSbyK.r,
-# data.surrogateProfiles.r, data.imputeData.r, singleNode.getNodeRanksN.r,
-# graph.diffuseP1.r, graph.connectToExt.r, stat.fishersMethod.r
