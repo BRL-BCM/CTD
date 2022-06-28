@@ -14,7 +14,7 @@ p <- add_argument(p, "--control", help="Control dataset file name", default = ''
 p <- add_argument(p, "--adj_matrix", help="CSV with adjacency matrix", default = '')         # data/example_argininemia/adj.csv
 p <- add_argument(p, "--s_module", help="Comma-separated list or path to CSV of graph G nodes to consider when searching for the most connected sub-graph")
 p <- add_argument(p, "--kmx", help="Number of highly perturbed nodes to consider. Ignored if S module is given.", default=15)
-p <- add_argument(p, "--present_in_perc_for_s", help="Percentage of patients having metabolite for selection of S module. Ignored if S module is given.", default=0.25)
+p <- add_argument(p, "--present_in_perc_for_s", help="Percentage of patients having metabolite for selection of S module. Ignored if S module is given.", default=0.5)
 p <- add_argument(p, "--output_name", help="Name of the output JSON file.")
 p <- add_argument(p, "--out_graph_name", help="Name of the output graph adjecancy CSV file.")
 argv <- parse_args(p)
@@ -81,7 +81,7 @@ if (is.na(argv$s_module)){
   vec_s = unlist(S_set)
   occurances = as.data.frame(table(vec_s))
   # Keep in the S module the metabolites perturbed in at least 50% patients
-  S_perturbed_nodes_ind = which(occurances$Freq >= (length(target_patients) * argv$present_in_perc_for_s))
+  S_perturbed_nodes_ind = which(occurances$Freq >= (length(target_patients) * argv$present_in_perc))
   S_perturbed_nodes = as.list(as.character(occurances[S_perturbed_nodes_ind, "vec_s"]))
 } else if (file.exists(argv$s_module)){
   s_module_df <- read.csv(file = argv$s_module, check.names=FALSE)
