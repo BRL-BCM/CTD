@@ -14,7 +14,7 @@ p <- add_argument(p, "--control", help="Control dataset file name", default = ''
 p <- add_argument(p, "--adj_matrix", help="CSV with adjacency matrix", default = '')         # data/example_argininemia/adj.csv
 p <- add_argument(p, "--s_module", help="Comma-separated list or path to CSV of graph G nodes to consider when searching for the most connected sub-graph")
 p <- add_argument(p, "--kmx", help="Number of highly perturbed nodes to consider. Ignored if S module is given.", default=15)
-p <- add_argument(p, "--present_in_perc_for_s", help="Percentage of patients having metabolite for selection of S module. Ignored if S module is given.", default=0.25)
+p <- add_argument(p, "--present_in_perc_for_s", help="Percentage of patients having metabolite for selection of S module. Ignored if S module is given.", default=0.5)
 p <- add_argument(p, "--output_name", help="Name of the output JSON file.")
 p <- add_argument(p, "--out_graph_name", help="Name of the output graph adjecancy CSV file.")
 p <- add_argument(p, "--glasso_criterion", help="Graph-ical Lasso prediction of the graph criterion. stars is default, ebic is faster.", default='stars')
@@ -50,6 +50,7 @@ if (file.exists(argv$adj_matrix)){
   experimental = huge(t(experimental_df), method="glasso")
   # This will take several minutes. For a faster option, you can use the
   # "ebic" criterion instead of "stars", but we recommend "stars".
+  message('Starting huge.select.')
   experimental.select = huge.select(experimental, criterion=argv$glasso_criterion)
   adj_df = as.matrix(experimental.select$opt.icov)
   diag(adj_df) = 0
@@ -59,7 +60,7 @@ if (file.exists(argv$adj_matrix)){
     write.table(adj_df, file = argv$out_graph_name, row.names=FALSE, sep=',')
   }
 }
-# Convert adjacency matrices to an igraph object.
+message('Convert adjacency matrices to an igraph object.')
 igraph = graph.adjacency(adj_df, mode="undirected", weighted=TRUE,
                          add.colnames="name")
 # The Encoding Process
@@ -92,6 +93,7 @@ if (is.na(argv$s_module)){
   S_perturbed_nodes = as.list(unlist(str_split(argv$s_module, ',')))
   # TODO: Check if all given nodes are in G!
 }
+message(paste('Selected perturbed nodes, S = : ', paste(S_perturbed_nodes, collapse=',')))
 ## Check if all nodes from the S module are in graph
 for (s_node in S_perturbed_nodes){
   if (!(s_node %in% rownames(adj_mat))){
@@ -99,7 +101,7 @@ for (s_node in S_perturbed_nodes){
   }
 }
 ## Walk through all the nodes in S module
-# Get the single-node encoding node ranks starting from each node in the subset
+message('Get the single-node encoding node ranks starting from each node')
 ranks = list()
 for (n in 1:length(S_perturbed_nodes)) {
   ind = which(names(G)==S_perturbed_nodes[n])
@@ -162,7 +164,7 @@ ptBSbyK[[ind_F]] # all metabolites in the bitstring
 F_arr = ptBSbyK[[strtoi(ind_F)]]
 Fs= which(F_arr==1)
 Fs= names(Fs)
-print(paste('Set of highly-connected perturbed metabolites F = {', toString(Fs),
+message(paste('Set of highly-connected perturbed metabolites F = {', toString(Fs),
             '} with p-value = ', p_value_F))
 
 kmcm_probability = 2^-nchar(F_info$optimalBS)
