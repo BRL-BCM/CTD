@@ -17,6 +17,7 @@ p <- add_argument(p, "--kmx", help="Number of highly perturbed nodes to consider
 p <- add_argument(p, "--present_in_perc_for_s", help="Percentage of patients having metabolite for selection of S module. Ignored if S module is given.", default=0.25)
 p <- add_argument(p, "--output_name", help="Name of the output JSON file.")
 p <- add_argument(p, "--out_graph_name", help="Name of the output graph adjecancy CSV file.")
+p <- add_argument(p, "--glasso_criterion", help="Graph-ical Lasso prediction of the graph criterion. stars is default, ebic is faster.", default='stars')
 argv <- parse_args(p)
 
 # Read input dataframe with experimental (positive, disease) samples
@@ -49,7 +50,7 @@ if (file.exists(argv$adj_matrix)){
   experimental = huge(t(experimental_df), method="glasso")
   # This will take several minutes. For a faster option, you can use the
   # "ebic" criterion instead of "stars", but we recommend "stars".
-  experimental.select = huge.select(experimental, criterion="stars")
+  experimental.select = huge.select(experimental, criterion=argv$glasso_criterion)
   adj_df = as.matrix(experimental.select$opt.icov)
   diag(adj_df) = 0
   rownames(adj_df) = rownames(experimental_df)
