@@ -17,7 +17,7 @@ CTD can be run locally, inside Docker container or as a public tool on [Cancer G
  Install on R 4.2 and the following dependencies: ```huge, MASS, rjson, stringr, fs, igraph, argparser, CTD```
  Clone the repository: ```git clone https://github.com/BRL-BCM/CTD.git ```
 ```
-# Rscript R/CTD.r --help
+# Rscript CTD.r --help
 Connect The Dots - Find the most connected sub-graph
 
 flags:
@@ -45,7 +45,7 @@ optional arguments:
 Download and install [Docker Desktop](https://www.docker.com/get-started).
 If experimental and control datasets are available in the current directory (e. g. from ```data/example_argininemia```) run:
 ```sh
-docker run -it -v $(PWD):/mnt vladimirkovacevic/ctd:1.9 Rscript /opt/CTD/R/CTD.r --experimental /mnt/experimental.csv --control /mnt/control.csv --output_name /mnt/output.json
+docker run -it -v $(PWD):/mnt vladimirkovacevic/ctd:2.0 Rscript /opt/CTD/CTD.r --experimental /mnt/experimental.csv --control /mnt/control.csv --output_name /mnt/output.json
 ```
 ### Running on the cloud Cancer Genomics Cloud platform
 CTD is available in the public apps galery on Cancer Genomics Cloud platform. After pulling it to the project all of its parameters and input files are possible to set and its execution can be easily started on the cloud instance.
@@ -55,11 +55,11 @@ CTD is available in the public apps galery on Cancer Genomics Cloud platform. Af
 
 Run example with a small graph and provided disease module:
 ```sh
-Rscript R/CTD.r --adj_matrix data/example_2/adj.csv --disease_module "S2,S4,S5,S7"
+Rscript CTD.r --adj_matrix data/example_2/adj.csv --disease_module "S2,S4,S5,S7"
 ```
 Run example with experimental arginenimia metabolite z-scores extracted from Miller 2015 data using [prepare_data.R script](data/example_argininemia/prepare_data.R):
 ```sh
-Rscript R/CTD.r --experimental data/example_argininemia/experimental.csv --control data/example_argininemia/control.csv --kmx 15
+Rscript CTD.r --experimental data/example_argininemia/experimental.csv --control data/example_argininemia/control.csv --kmx 15
 ```
 All stages of the analysis pipeline with examples are available in ```vignette/CTD_Lab-Exercise.Rmd```
 
