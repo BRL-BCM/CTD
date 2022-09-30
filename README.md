@@ -49,7 +49,7 @@ docker run -it -v $(PWD):/mnt vladimirkovacevic/ctd:2.0 Rscript /opt/CTD/CTD.r -
 ```
 ### Running on the cloud Cancer Genomics Cloud platform
 CTD is available in the public apps galery on Cancer Genomics Cloud platform. After pulling it to the project all of its parameters and input files are possible to set and its execution can be easily started on the cloud instance.
-![CGC task](data/images/cgc_task.png)
+![CGC task](inst/images/cgc_task.png)
 
 ## Examples
 
