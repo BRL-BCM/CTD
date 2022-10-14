@@ -75,5 +75,5 @@ data.surrogateProfiles = function(data, std=1, ref_data) {
         data_mx_surr=data_mx_surr[-which(var.met == 0),]}
     rownames(data_mx_surr) = tolower(rownames(data_mx_surr))
     data_mx_surr = apply(data_mx_surr, c(1, 2), as.numeric)
-    return(data_mx_surr)
+    return(as.data.frame(data_mx_surr))
 }
