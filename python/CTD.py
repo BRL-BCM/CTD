@@ -3,8 +3,9 @@ import sys
 import argparse
 import pandas as pd
 import numpy as np
-from igraph import Graph, _igraph
+from igraph import Graph
 from rpy2.robjects import r, pandas2ri, packages, globalenv
+from collections import Counter
 
 
 def eprint(args):
@@ -13,6 +14,7 @@ def eprint(args):
 huge = packages.importr("huge")
 r.source("./CTD/R/data.surrogateProfiles.r")
 r.source("./CTD/R/data.imputeData.r")
+r.source("/Users/nevenanikolic/Desktop/CTD/test_function.R")
 pandas2ri.activate()
 
 p = argparse.ArgumentParser(description="Connect The Dots - Find the most connected sub-graph")
@@ -20,8 +22,8 @@ p.add_argument("--experimental", help="Experimental dataset file name", default 
 p.add_argument("--control", help="Control dataset file name", default = '')            # data/example_argininemia/control.csv
 p.add_argument("--adj_matrix", help="CSV with adjacency matrix", default = '')         # data/example_argininemia/adj.csv
 p.add_argument("--s_module", help="Comma-separated list or path to CSV of graph G nodes to consider when searching for the most connected sub-graph")
-p.add_argument("--kmx", help="Number of highly perturbed nodes to consider. Ignored if S module is given.", default=15)
-p.add_argument("--present_in_perc_for_s", help="Percentage of patients having metabolite for selection of S module. Ignored if S module is given.", default=0.5)
+p.add_argument("--kmx", help="Number of highly perturbed nodes to consider. Ignored if S module is given.", default=15, type=int)
+p.add_argument("--present_in_perc_for_s", help="Percentage of patients having metabolite for selection of S module. Ignored if S module is given.", default=0.5, type=float)
 p.add_argument("--output_name", help="Name of the output JSON file.")
 p.add_argument("--out_graph_name", help="Name of the output graph adjecancy CSV file.")
 p.add_argument("--glasso_criterion", help="Graph-ical Lasso prediction of the graph criterion. stars is default, ebic is faster.", default='stars')
@@ -59,9 +61,27 @@ else:
 
 
 eprint('Convert adjacency matrices to an igraph object.')
-try:
-    igraph = Graph.Weighted_Adjacency(adj_df, mode='undirected')
-except _igraph.InternalError:
-    igraph = Graph.Weighted_Adjacency(adj_df, mode='upper')
+igraph = Graph.Weighted_Adjacency(adj_df, mode='max')
 
-print(igraph)
+# The Encoding Process
+adj_mat = igraph.get_adjacency(attribute="weight")
+
+G = {}
+for v in igraph.vs:
+    G[v['name']] = 0
+
+# Choose node subset
+kmx = argv.kmx  # Maximum subset size to inspect
+S_set = []
+
+if not argv.s_module:
+    for pt in target_patients:
+        temp = experimental_df.sort_values(by=pt, ascending=False)
+        S_patient = list(temp.index)[:kmx]
+        S_set += S_patient
+
+    # Created list containing top kmx metabolites for every target user
+    occurrences = Counter(S_set)
+
+    # Keep in the S module the metabolites perturbed in at least 50% patients
+    S_perturbed_nodes = [node for node in occurrences if occurrences[node] >= len(target_patients) * argv.present_in_perc_for_s]
