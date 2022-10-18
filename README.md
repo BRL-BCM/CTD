@@ -28,14 +28,14 @@ optional arguments:
   -e, --experimental     Experimental dataset file name [default: ]
   -c, --control          Control dataset file name [default: ]
   -a, --adj_matrix       CSV with adjacency matrix [default: ]
-  -d, --disease_module   Comma-separated list of graph G nodes to
+  -d, --s_module         Comma-separated list of graph G nodes to
                          consider when searching for the most connected
                          sub-graph
   -k, --kmx              Number of highly perturbed nodes to consider.
-                         Ignored if disease_module is given. [default:
+                         Ignored if s_module is given. [default:
                          15]
   -p, --present_in_perc  Percentage of patients having metabolite.
-                         Ignored if disease_module is given. [default:
+                         Ignored if s_module is given. [default:
                          0.5]
   -o, --output_name      Name of the output JSON file.
   --out_graph_name       Name of the output graph adjacency matrix CSV
@@ -55,7 +55,7 @@ CTD is available in the public apps galery on Cancer Genomics Cloud platform. Af
 
 Run example with a small graph and provided disease module:
 ```sh
-Rscript CTD.r --adj_matrix data/example_2/adj.csv --disease_module "S2,S4,S5,S7"
+Rscript CTD.r --adj_matrix data/example_2/adj.csv --s_module "m2,m4,m5,m7"
 ```
 Run example with experimental arginenimia metabolite z-scores extracted from Miller 2015 data using [prepare_data.R script](data/example_argininemia/prepare_data.R):
 ```sh
