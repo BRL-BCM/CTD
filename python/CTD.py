@@ -4,7 +4,7 @@ import argparse
 import pandas as pd
 import numpy as np
 from igraph import Graph
-from rpy2.robjects import r, pandas2ri, numpy2ri, packages, globalenv, ListVector
+from rpy2.robjects import r, pandas2ri, numpy2ri, packages, globalenv, ListVector, StrVector
 from collections import Counter
 
 
@@ -18,6 +18,8 @@ r.source("./CTD/R/singleNode.getNodeRanksN.r")
 r.source("./CTD/R/graph.diffuseP1.r")
 r.source("./CTD/R/graph.connectToExt.r")
 r.source("./CTD/R/stat.fishersMethod.r")
+r.source("./CTD/R/mle.getEncodingLength.r")
+r.source("./CTD/R/mle.getPtBSbyK.r")
 
 pandas2ri.activate()
 
@@ -105,14 +107,14 @@ for node in S_perturbed_nodes:
         eprint('Node "{}" not in graph. Exiting program.'.format(node))
         exit(1)
 
-# Walk through all the nodes in S module
-eprint('Get the single-node encoding node ranks starting from each node.')
-
 # Prepare for calling R function
 singleNode_getNodeRanksN = globalenv['singleNode.getNodeRanksN']
-G_r = ListVector(G)
-adj_mat = np.array(adj_mat.data)
+G_r = ListVector(G) # dict to named vector
+adj_mat = np.array(adj_mat.data) # igraph.datatypes.Matrix to numpy.ndarray
 ranks = {}
+
+# Walk through all the nodes in S module
+eprint('Get the single-node encoding node ranks starting from each node.')
 
 for node in S_perturbed_nodes:
     ind = [i+1 for i in range(0, len(G_r.names)) if G_r.names[i] == node][0]
@@ -128,7 +130,12 @@ for node in S_perturbed_nodes:
         verbose=True)
 
 # Vector ranks contains encodings for each node in S_perturbed_nodes
-ranks_r = ListVector(ranks)
+
+# Prepare for calling R function
+mle_getPtBSbyK = globalenv['mle.getPtBSbyK']
+ranks_r = ListVector(ranks) # dict to named vector
+S_perturbed_nodes_r = StrVector(S_perturbed_nodes) # mimics unlist method
 
 # Convert to bitstring
 # Get the bitstring associated with the disease module's metabolites
+ptBSbyK = mle_getPtBSbyK(S_perturbed_nodes_r, ranks_r)
