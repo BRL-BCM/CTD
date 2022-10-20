@@ -59,6 +59,10 @@
 singleNode.getNodeRanksN = function(n,G,p1,thresholdDiff,adj_mat,S=NULL,
                                     num.misses=NULL,verbose=FALSE,out_dir="",
                                     useLabels=FALSE,coords=NULL) {
+    
+    rownames(adj_mat) = names(G)
+    colnames(adj_mat) = names(G)
+    
     p0=1-p1
     if (is.null(S) && (!is.null(num.misses) || out_dir!="")) {
         print("You must also supply S if out_dir or num.misses is supplied")
