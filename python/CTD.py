@@ -23,14 +23,17 @@ r.source("./getNodeNames.R")
 
 pandas2ri.activate()
 
-p = argparse.ArgumentParser(description="Connect The Dots - Find the most connected sub-graph")
+p = argparse.ArgumentParser(description="Connect The Dots - Find the most connected subgraph")
 p.add_argument("--experimental", help="Experimental dataset file name",
                default='')
 p.add_argument("--control", help="Control dataset file name", default='')  # data/example_argininemia/control.csv
 p.add_argument("--adj_matrix", help="CSV with adjacency matrix", default='')  # data/example_argininemia/adj.csv
 p.add_argument("--s_module",
                help="Comma-separated list or path to CSV of graph G nodes to consider when searching for the most "
-                    "connected sub-graph.")
+                    "connected subgraph.")
+p.add_argument("--include_not_in_s",
+               help="Include the nodes not appearing in S (encoded with a zero in the optimal bitstring) "
+                    "in the most connected subgraph. These are excluded by default.", action="count")
 p.add_argument("--kmx", help="Number of highly perturbed nodes to consider. Ignored if S module is given.", default=15,
                type=int)
 p.add_argument("--present_in_perc_for_s",
@@ -210,13 +213,18 @@ get_node_names = globalenv['getNodeNames']
 # All metabolites in S
 print(S_perturbed_nodes)
 # All metabolites in the bitstring
-print(get_node_names(ptBSbyK, int(ind_F))) # tmp workaround
-
+print(list(get_node_names(ptBSbyK, int(ind_F)))) # tmp workaround
+print(ptBSbyK.rx2(int(ind_F)))
 # Just the F metabolites that are in S_arg that were were "found"
 
 # F_arr = ptBSbyK.rx2(int(ind_F)) <- np.array of encodings
 # Fs = np.where(F_arr == 1) <- np.array of indices
-Fs = list(get_node_names(ptBSbyK, int(ind_F), found=True)) # tmp workaround
+
+exclude_zeros = True
+if argv.include_not_in_s:
+    exclude_zeros = False
+
+Fs = list(get_node_names(ptBSbyK, int(ind_F), exclude_zeros))  # tmp workaround
 
 logging.debug('Set of highly-connected perturbed metabolites F = {} with p-value = {}'.format(Fs, p_value_F))
 
