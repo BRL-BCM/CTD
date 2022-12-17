@@ -74,7 +74,7 @@ def net_walk_snap_shot(adj_mat, G, output_dir, visited_nodes, S, coords, img_num
     jackpot_patch = mpatches.Patch(color='#02fe00', label='Jackpot Nodes')
     drawn_patch = mpatches.Patch(color='#c48080', label='Drawn Nodes')
     ax.legend(handles=[jackpot_patch, drawn_patch], loc='upper right')
-
+    
     plt.savefig(out_fig_name, dpi=100)
 
 
@@ -253,7 +253,7 @@ def diffuse_p1(p1, start_node, G, visited_nodes, threshold_diff, adj_mat, verbos
 
         for z in range(len(start_node_unvisited_nbors)):
             i_prob = p1 * abs(adj_mat2.loc[start_node_unvisited_nbors[z], start_node]) / w_edges_sum  # inherited prob
-            G[start_node_unvisited_nbors[z]] += i_prob
+            G[start_node_unvisited_nbors[z]] = G[start_node_unvisited_nbors[z]] + i_prob
 
             if verbose:
                 logging.debug(f'{n_tabs}child#{z} {start_node_unvisited_nbors[z]} got {i_prob}')
@@ -266,7 +266,7 @@ def diffuse_p1(p1, start_node, G, visited_nodes, threshold_diff, adj_mat, verbos
                        node in adj_mat2[abs(adj_mat2.loc[:, start_node_unvisited_nbors[z]]) > 0].index}
 
             if n_nbors and i_prob / 2 > threshold_diff and len(visited_nodes) + 1 < len(G):
-                G[start_node_unvisited_nbors[z]] -= i_prob / 2
+                G[start_node_unvisited_nbors[z]] = G[start_node_unvisited_nbors[z]] - i_prob / 2
                 if verbose:
                     logging.debug(f'{n_tabs}took {i_prob / 2} from child#{z}:{start_node_unvisited_nbors[z]} to send')
 
