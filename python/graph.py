@@ -1,4 +1,3 @@
-from igraph import Graph
 import igraph
 import numpy as np
 import matplotlib.pyplot as plt
@@ -37,7 +36,7 @@ def net_walk_snap_shot(adj_mat, G, output_dir, visited_nodes, S, coords, img_num
 
     """
 
-    ig = Graph.Weighted_Adjacency(adj_mat, mode='max')
+    ig = igraph.Graph.Weighted_Adjacency(adj_mat, mode='max')
     # adj mat has to be DataFrame currently
     # TODO: potentially change method so it works with matrix and add vertex_names as argument
 
@@ -74,7 +73,7 @@ def net_walk_snap_shot(adj_mat, G, output_dir, visited_nodes, S, coords, img_num
     jackpot_patch = mpatches.Patch(color='#02fe00', label='Jackpot Nodes')
     drawn_patch = mpatches.Patch(color='#c48080', label='Drawn Nodes')
     ax.legend(handles=[jackpot_patch, drawn_patch], loc='upper right')
-    
+
     plt.savefig(out_fig_name, dpi=100)
 
 
@@ -105,7 +104,7 @@ def diffusion_snap_shot(adj_mat, G, output_dir, p1, start_node, visited_nodes, c
 
     """
 
-    ig = Graph.Weighted_Adjacency(adj_mat, mode='max')
+    ig = igraph.Graph.Weighted_Adjacency(adj_mat, mode='max')
     # adj mat has to be DataFrame currently
     # TODO: potentially change method so it works with matrix and add vertex_names as argument
 
@@ -169,6 +168,7 @@ def connect_to_ext(adj_mat, start_node, visited_nodes):
     start_node_nbors = list(adj_mat[abs(adj_mat.loc[start_node, :]) > 0].index)
     start_node_unvisited_nbors = [node for node in start_node_nbors if node not in visited_nodes]
     vN = [node for node in visited_nodes if node != start_node]  # visited nodes excluding start node
+
     ext_connections = {}  # or None
 
     if vN and not start_node_unvisited_nbors:
@@ -262,8 +262,9 @@ def diffuse_p1(p1, start_node, G, visited_nodes, threshold_diff, adj_mat, verbos
                 diffusion_snap_shot(adj_mat=adj_mat, G=G, output_dir=out_dir, p1=p1, start_node=start_node,
                                     visited_nodes=visited_nodes, coords=coords, recursion_level=r_level)
 
-            n_nbors = {node: val for node, val in G.items() if
-                       node in adj_mat2[abs(adj_mat2.loc[:, start_node_unvisited_nbors[z]]) > 0].index}
+            unv = list(adj_mat2[abs(adj_mat2.loc[:, start_node_unvisited_nbors[z]]) > 0].index)
+            #n_nbors = [node for node in G.keys() if node in unv]
+            n_nbors = list(set(unv) & set(G.keys()))
 
             if n_nbors and i_prob / 2 > threshold_diff and len(visited_nodes) + 1 < len(G):
                 G[start_node_unvisited_nbors[z]] = G[start_node_unvisited_nbors[z]] - i_prob / 2
@@ -287,7 +288,11 @@ def diffuse_p1(p1, start_node, G, visited_nodes, threshold_diff, adj_mat, verbos
             logging.debug(f'{start_node} is singleton or stranded by visited n.bors')
             logging.debug('Diffuse p1 uniformly amongst all unvisited nodes.')
 
-        G.update({node: val + p1 / (len(G) - len(visited_nodes)) for node, val in G.items() if node not in visited_nodes})
+        for node, val in G.items():
+            if node not in visited_nodes:
+                G[node] = val + p1 / (len(G) - len(visited_nodes))
+
+        #G.update({node: val + p1 / (len(G) - len(visited_nodes)) for node, val in G.items() if node not in visited_nodes})
 
         if out_dir:
             diffusion_snap_shot(adj_mat=adj_mat, G=G, output_dir=out_dir, p1=p1, start_node=start_node,
