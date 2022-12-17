@@ -14,15 +14,20 @@ def single_node_get_node_ranks(n, G, p1, threshold_diff, adj_mat, S=None, num_mi
     ----------
     n : The index (out of a vector of node names) of the node ranking you want to calculate.
     G : A list of probabilities with list names being the node names of the network.
-    p1 : The probability that is preferentially distributed between network nodes by the probability diffusion algorithm based solely on network connectivity. The remaining probability (i.e., "p0") is uniformly distributed between network nodes, regardless of connectivity.
-    threshold_diff : When the probability diffusion algorithm exchanges this amount or less between nodes, the algorithm returns up the call stack.
+    p1 : The probability that is preferentially distributed between network nodes by the probability diffusion algorithm
+    based solely on network connectivity. The remaining probability (i.e., "p0") is uniformly distributed between
+    network nodes, regardless of connectivity.
+    threshold_diff : When the probability diffusion algorithm exchanges this amount or less between nodes, the algorithm
+     returns up the call stack.
     adj_mat : The adjacency matrix that encodes the edge weights for the network, G.
     S : A character vector of node names in the subset you want the network walker to find.
-    num_misses : The number of "misses" the network walker will tolerate before switching to fixed length codes for remaining nodes to be found.
-    verbose - If True, print statements will execute as progress is made. Default is False.
-    out_dir - If specified, a image sequence will generate in the output directory specified.
-    use_labels - If True, node names will display next to their respective modes in the network. If False, node names will not display. Only relevant if out_dir is specified.
-    coords - The x and y coordinates for each node in the network, to remain static between images.
+    num_misses : The number of "misses" the network walker will tolerate before switching to fixed length codes for
+    remaining nodes to be found.
+    verbose : If True, print statements will execute as progress is made. Default is False.
+    out_dir : If specified, a image sequence will generate in the output directory specified.
+    use_labels : If True, node names will display next to their respective modes in the network. If False, node names
+    will not display. Only relevant if out_dir is specified.
+    coords : The x and y coordinates for each node in the network, to remain static between images.
 
     Returns
     -------
