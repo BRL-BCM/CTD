@@ -299,3 +299,171 @@ def diffuse_p1(p1, start_node, G, visited_nodes, threshold_diff, adj_mat, verbos
                                 visited_nodes=visited_nodes, coords=coords, recursion_level=r_level)
 
     return G
+
+
+def diffuse_p1_iterative(p1, G, start_node, visited_nodes, adj_mat, threshold_diff=0.01, verbose=False, alpha=0.5):
+    """
+    Diffuse Probability P1 from a starting node
+
+    Iteratively diffuse probability from a starting node based on the connectivity of the network, representing the
+    likelihood that a variable is most influenced by a perturbation in the starting node.
+
+    Parameters
+    ----------
+    p1 : The probability being dispersed from the starting node, start_node, which is preferentially distributed between network
+    nodes by the probability diffusion algorithm based solely on network connectivity.
+    start_node : "Start node", or the node most recently visited by the network walker, from which p1 gets dispersed.
+    G : A list of probabilities, with names of the list being the node names in the network.
+    visited_nodes : "Visited nodes", or the history of previous draws in the node ranking sequence.
+    threshold_diff : When the probability diffusion algorithm exchanges this amount (threshold_diff) or less between
+    nodes, the algorithm returns up the call stack.
+    adj_mat : The adjacency matrix that encodes the edge weights for the network, G.
+    verbose : If debugging or tracking a diffusion event, verbose=True will activate print statements. Default is False.
+    alpha :
+
+    Returns
+    -------
+    G : A dictionary of returned probabilities after the diffusion of probability has truncated, with the keys being the
+    node names in the network.
+
+    Examples
+    --------
+    """
+
+    queue = [(start_node, p1, visited_nodes)]
+    path_end = False
+
+    while queue:
+
+        current_node, current_probability, visited_nodes = queue.pop(0)
+
+        lvl = len(visited_nodes) - 1
+
+        if verbose and path_end:
+            n_tabs = '\t' * (lvl - 1)
+            logging.debug(f'{n_tabs}child {current_node} got {2 * current_probability}')
+            logging.debug(f'{n_tabs}took {current_probability} from child {current_node} to send')
+
+        n_tabs = '\t' * lvl
+
+        if verbose:
+            logging.debug(
+                f'{n_tabs}prob. to diffuse:{current_probability} start node: {current_node}, visited nodes: {visited_nodes}')
+
+        path_end = False
+
+        adj_mat2 = connect_to_ext(adj_mat=adj_mat, start_node=current_node, visited_nodes=visited_nodes)
+
+        unvisited_nodes = G.keys() - visited_nodes
+        start_node_nbors = list(adj_mat2[abs(adj_mat2.loc[current_node, :]) > 0].index)
+        start_node_unvisited_nbors = [node for node in start_node_nbors if node not in visited_nodes]
+
+        if not start_node_unvisited_nbors:
+
+            path_end = True
+
+            if verbose:
+                logging.debug(f'{current_node} is singleton or stranded by visited n.bors')
+                logging.debug('Diffuse p1 uniformly amongst all unvisited nodes.')
+
+            if not unvisited_nodes:
+                continue
+
+            to_add = current_probability / len(unvisited_nodes)
+            for node in unvisited_nodes:
+                G[node] += to_add
+
+            continue
+
+        sum_weights = sum(adj_mat2.loc[list(start_node_unvisited_nbors), current_node])
+
+        k = 0
+
+        for node in start_node_unvisited_nbors:
+
+            inherited_prob = current_probability * adj_mat2.loc[node, current_node] / sum_weights
+            G[node] += inherited_prob
+
+            if verbose and not k:
+                try:
+                    logging.debug(f'{n_tabs}child {node} got {inherited_prob}')
+                except IndexError:
+                    pass
+
+            #unv = list(adj_mat2[abs(adj_mat2.loc[:, node]) > 0].index)
+            unv = adj_mat2[adj_mat2[node] != 0].index
+
+            n_nbors = list(set(unv) & set(G.keys()))
+
+            if n_nbors and inherited_prob * alpha > threshold_diff and len(visited_nodes) + 1 < len(G):
+                G[node] -= inherited_prob * alpha
+                queue.insert(k, (node, inherited_prob * alpha, visited_nodes + [node]))
+
+            k += 1
+
+        if verbose:
+            try:
+                logging.debug(f'{n_tabs}took {queue[0][1]} from child {queue[0][0]} to send')
+            except IndexError:
+                pass
+
+    return G
+
+
+def diffuse_p1_iterative_non_aligned(p1, G, start_node, visited_nodes, adj_mat, threshold_diff=0.01, alpha=0.5):
+    """
+    Diffuse Probability P1 from a starting node
+
+    Iteratively diffuse probability from a starting node based on the connectivity of the network, representing the
+    likelihood that a variable is most influenced by a perturbation in the starting node.
+
+    Parameters
+    ----------
+    p1 : The probability being dispersed from the starting node, start_node, which is preferentially distributed between network
+    nodes by the probability diffusion algorithm based solely on network connectivity.
+    start_node : "Start node", or the node most recently visited by the network walker, from which p1 gets dispersed.
+    G : A list of probabilities, with names of the list being the node names in the network.
+    visited_nodes : "Visited nodes", or the history of previous draws in the node ranking sequence.
+    threshold_diff : When the probability diffusion algorithm exchanges this amount (threshold_diff) or less between
+    nodes, the algorithm returns up the call stack.
+    adj_mat : The adjacency matrix that encodes the edge weights for the network, G.
+    alpha :
+
+    Returns
+    -------
+    G : A dictionary of returned probabilities after the diffusion of probability has truncated, with the keys being the
+    node names in the network.
+
+    Examples
+    --------
+    """
+
+    queue = [(start_node, p1, set(visited_nodes))]
+
+    while queue:
+
+        current_node, current_probability, visited_nodes = queue.pop(0)
+
+        unvisited_nodes = G.keys() - visited_nodes
+        start_node_unvisited_nodes = set(filter(lambda x: adj_mat.loc[current_node, x] > 0, unvisited_nodes))
+
+        if not len(start_node_unvisited_nodes):
+            if not len(unvisited_nodes):
+                continue
+            to_add = current_probability / len(unvisited_nodes)
+            for node in unvisited_nodes:
+                G[node] += to_add
+            continue
+
+        sum_weights = 0
+        for node in start_node_unvisited_nodes:
+            sum_weights += adj_mat.loc[current_node, node]
+        for node in start_node_unvisited_nodes:
+            inherited_prob = current_probability * (adj_mat.loc[current_node, node] / sum_weights)
+            G[node] += inherited_prob
+            if inherited_prob * alpha > threshold_diff and len(
+                    set(filter(lambda x: adj_mat.loc[node, x] > 0, unvisited_nodes))) > 0:
+                G[node] -= inherited_prob * alpha
+                queue.append((node, inherited_prob * alpha, visited_nodes.union({node})))
+
+    return G
