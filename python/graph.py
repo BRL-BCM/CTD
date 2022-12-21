@@ -165,29 +165,28 @@ def connect_to_ext(adj_mat, start_node, visited_nodes):
 
     """
 
-    #start_node_nbors = list(adj_mat[abs(adj_mat.loc[start_node, :]) > 0].index)
     ind = np.nonzero(adj_mat[start_node].values)
     start_node_nbors = adj_mat.index[ind]
 
     start_node_unvisited_nbors = [node for node in start_node_nbors if node not in visited_nodes]
     vN = [node for node in visited_nodes if node != start_node]  # visited nodes excluding start node
 
-    ext_connections = {}  # or None
+    ext_connections = {}
 
     if vN and not start_node_unvisited_nbors:
-        adj_mat_after = adj_mat.drop(labels=vN).drop(columns=vN)
-        connections = adj_mat[start_node]
-        conn_yes = connections[abs(connections) > 0].to_dict()
-        conn_no = connections[connections == 0]
-        conn_no = conn_no.drop([node for node in conn_no.index if node in vN or node == start_node]).to_dict()
+        adj_mat_after = adj_mat.drop(labels=vN).drop(columns=vN)  # TODO: try to optimize
 
-        if conn_no:
-            for n1 in conn_no:
-                if conn_yes:
-                    for n2 in conn_yes:
-                        if abs(adj_mat.loc[n2, n1]) > 0:
-                            conn_no[n1] = adj_mat.loc[n2, n1]
-                            ext_connections[n1] = conn_no[n1]
+        conn_ind = np.nonzero(adj_mat[start_node].values)
+        conn_yes = adj_mat.index[conn_ind]
+        conn_no = adj_mat.index.drop(conn_yes)
+        conn_no = conn_no.drop([node for node in conn_no if node in vN or node == start_node])
+
+        for n1 in conn_yes:
+            tmp = adj_mat.loc[n1, conn_no]
+            ind = np.nonzero(tmp.values)
+            for n2 in tmp.index[ind]:
+                w = adj_mat.loc[n1, n2]
+                ext_connections[n2] = w
 
         if ext_connections:
             adj_mat_after.loc[start_node, list(ext_connections.keys())] = list(ext_connections.values())
@@ -197,6 +196,39 @@ def connect_to_ext(adj_mat, start_node, visited_nodes):
         adj_mat_after = adj_mat
 
     return adj_mat_after
+
+    #start_node_nbors = list(adj_mat[abs(adj_mat.loc[start_node, :]) > 0].index)
+    # ind = np.nonzero(adj_mat[start_node].values)
+    # start_node_nbors = adj_mat.index[ind]
+    #
+    # start_node_unvisited_nbors = [node for node in start_node_nbors if node not in visited_nodes]
+    # vN = [node for node in visited_nodes if node != start_node]  # visited nodes excluding start node
+    #
+    # ext_connections = {}  # or None
+    #
+    # if vN and not start_node_unvisited_nbors:
+    #     adj_mat_after = adj_mat.drop(labels=vN).drop(columns=vN)
+    #     connections = adj_mat[start_node]
+    #     conn_yes = connections[abs(connections) > 0].to_dict()
+    #     conn_no = connections[connections == 0]
+    #     conn_no = conn_no.drop([node for node in conn_no.index if node in vN or node == start_node]).to_dict()
+    #
+    #     if conn_no:
+    #         for n1 in conn_no:
+    #             if conn_yes:
+    #                 for n2 in conn_yes:
+    #                     if abs(adj_mat.loc[n2, n1]) > 0:
+    #                         conn_no[n1] = adj_mat.loc[n2, n1]
+    #                         ext_connections[n1] = conn_no[n1]
+    #
+    #     if ext_connections:
+    #         adj_mat_after.loc[start_node, list(ext_connections.keys())] = list(ext_connections.values())
+    #         adj_mat_after.loc[list(ext_connections.keys()), start_node] = list(ext_connections.values())
+    #
+    # else:
+    #     adj_mat_after = adj_mat
+    #
+    # return adj_mat_after
 
 
 def diffuse_p1(p1, start_node, G, visited_nodes, threshold_diff, adj_mat, verbose=False, out_dir='', r_level=1,
