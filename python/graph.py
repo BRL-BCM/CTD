@@ -165,7 +165,10 @@ def connect_to_ext(adj_mat, start_node, visited_nodes):
 
     """
 
-    start_node_nbors = list(adj_mat[abs(adj_mat.loc[start_node, :]) > 0].index)
+    #start_node_nbors = list(adj_mat[abs(adj_mat.loc[start_node, :]) > 0].index)
+    ind = np.nonzero(adj_mat[start_node].values)
+    start_node_nbors = adj_mat.index[ind]
+
     start_node_unvisited_nbors = [node for node in start_node_nbors if node not in visited_nodes]
     vN = [node for node in visited_nodes if node != start_node]  # visited nodes excluding start node
 
@@ -184,7 +187,6 @@ def connect_to_ext(adj_mat, start_node, visited_nodes):
                     for n2 in conn_yes:
                         if abs(adj_mat.loc[n2, n1]) > 0:
                             conn_no[n1] = adj_mat.loc[n2, n1]
-
                             ext_connections[n1] = conn_no[n1]
 
         if ext_connections:
@@ -245,7 +247,9 @@ def diffuse_p1(p1, start_node, G, visited_nodes, threshold_diff, adj_mat, verbos
                             visited_nodes=visited_nodes, coords=coords, recursion_level=r_level)
 
     adj_mat2 = connect_to_ext(adj_mat=adj_mat, start_node=start_node, visited_nodes=visited_nodes)
-    start_node_nbors = list(adj_mat2[abs(adj_mat2.loc[start_node, :]) > 0].index)
+    #start_node_nbors = list(adj_mat2[abs(adj_mat2.loc[start_node, :]) > 0].index)
+    ind = np.nonzero(adj_mat2[start_node].values)
+    start_node_nbors = adj_mat2.index[ind]
     start_node_unvisited_nbors = [node for node in start_node_nbors if node not in visited_nodes]
 
     if start_node_unvisited_nbors:
@@ -262,9 +266,11 @@ def diffuse_p1(p1, start_node, G, visited_nodes, threshold_diff, adj_mat, verbos
                 diffusion_snap_shot(adj_mat=adj_mat, G=G, output_dir=out_dir, p1=p1, start_node=start_node,
                                     visited_nodes=visited_nodes, coords=coords, recursion_level=r_level)
 
-            unv = list(adj_mat2[abs(adj_mat2.loc[:, start_node_unvisited_nbors[z]]) > 0].index)
+            #unv = list(adj_mat2[abs(adj_mat2.loc[:, start_node_unvisited_nbors[z]]) > 0].index)
             #n_nbors = [node for node in G.keys() if node in unv]
-            n_nbors = list(set(unv) & set(G.keys()))
+            unv_ind = np.nonzero(adj_mat2[start_node_unvisited_nbors[z]].values)
+            unv = adj_mat2.index[unv_ind]
+            n_nbors = [x for x in unv if x in G]
 
             if n_nbors and i_prob / 2 > threshold_diff and len(visited_nodes) + 1 < len(G):
                 G[start_node_unvisited_nbors[z]] = G[start_node_unvisited_nbors[z]] - i_prob / 2
