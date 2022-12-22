@@ -51,10 +51,10 @@ def impute_data(data, ref):
         try:
             imputed_data.loc[i, cols] = i_val * np.random.uniform(low=0.99 * min_row, high=min_row, size=len(cols))
         except Exception:
+            # TODO: check which exception should be caught here and how to handle
             pass
 
     return imputed_data
-
 
 
 def surrogate_profiles(data, ref_data, std=1):
@@ -66,7 +66,8 @@ def surrogate_profiles(data, ref_data, std=1):
 
     Parameters
     ----------
-    data : Data matrix with observations (e.g., patient samples) as columns, features (e.g., metabolites or genes) as rows.
+    data : Data matrix with observations (e.g., patient samples) as columns, features (e.g., metabolites or genes)
+    as rows.
     std : The level of variability (standard deviation) around each observed feature's z-score you want to add to
     generate the surrogate profiles.
     ref_data : Data matrix for healthy control "reference" samples, observations (e.g., patient samples) as columns,
@@ -132,7 +133,28 @@ def surrogate_profiles(data, ref_data, std=1):
     else:
         c_surr = ref_data
 
-    # TODO: translate the rest
+    if num_surr > len(data.columns):
+        d_surr = d_surr.iloc[:, np.concatenate([np.array(range(len(data.columns))),
+                                                np.random.choice(range(len(data.columns), len(d_surr.columns)),
+                                                                 size=num_surr - len(data.columns))])]
 
-    return 0
+    if num_surr > len(ref_data.columns):
+        c_surr = c_surr.iloc[:, np.concatenate([np.array(range(len(ref_data.columns))),
+                                                np.random.choice(range(len(ref_data.columns), len(c_surr.columns)),
+                                                                 size=num_surr - len(data.columns))])]
 
+    data_mx_surr = pd.concat([d_surr, c_surr], axis=1)
+
+    # Impute metabolites that are NA
+    if len(ref_data):  # TODO: Check if this is the correct condition, is ref_data required input?
+        data_mx_surr = impute_data(data_mx_surr, ref_data)
+    else:
+        data_mx_surr = impute_data(data_mx_surr, data)
+
+    var_met = data_mx_surr.std(axis=1)
+    if len(var_met[var_met == 0]):
+        data_mx_surr = data_mx_surr.drop(var_met[var_met == 0].index)
+
+    data_mx_surr.index = data_mx_surr.index.str.lower()
+
+    return data_mx_surr
