@@ -1,17 +1,14 @@
-import pandas as pd
+from collections import Counter
 import os
 import argparse
 from scipy.stats import norm
+from sklearn import covariance
 import json
 from multiprocessing import Pool
 from functools import partial
 from graph import *
 import mle
 import data
-from rpy2.robjects import packages
-
-
-huge = packages.importr("huge")
 
 p = argparse.ArgumentParser(description="Connect The Dots - Find the most connected subgraph")
 p.add_argument("--experimental", help="Experimental dataset file name",
@@ -71,14 +68,12 @@ if __name__ == '__main__':
         adj_df.index = adj_df.columns
 
     else:
-        experimental = huge.huge(experimental_df.to_numpy().T, method='glasso')
-        # This will take several minutes. For a faster option, you can use the
-        # "ebic" criterion instead of "stars", but we recommend "stars".
-        logging.debug('Starting huge.select.')
-        experimental_select = huge.huge_select(experimental, criterion=argv.glasso_criterion)
-        adj_df = [values for (name, values) in experimental_select.items() if name == 'opt.icov'][0]
+        logging.debug('Starting GraphicalLassoCV.')
+        experimental = covariance.GraphicalLassoCV().fit(experimental_df.T)
+        adj_df = experimental.precision_
         np.fill_diagonal(adj_df, 0)
-        adj_df = pd.DataFrame(adj_df, index=experimental_df.index, columns=experimental_df.index)
+        adj_df = pd.DataFrame(adj_df, columns=experimental_df.index, index=experimental_df.index)
+
         if argv.out_graph_name:
             adj_df.to_csv(argv.out_graph_name, index=False)
 
@@ -91,7 +86,19 @@ if __name__ == '__main__':
     kmx = argv.kmx  # Maximum subset size to inspect
     S_set = []
 
-    if os.path.exists(argv.s_module):
+    if not argv.s_module:
+        for pt in target_patients:
+            temp = experimental_df.sort_values(by=pt, ascending=False)
+            S_patient = list(temp.index)[:kmx]
+            S_set += S_patient
+
+        # Created list containing top kmx metabolites for every target user
+        occurrences = Counter(S_set)
+
+        # Keep in the S module the metabolites perturbed in at least 50% patients
+        S_perturbed_nodes = [node for node in occurrences if
+                             occurrences[node] >= len(target_patients) * argv.present_in_perc_for_s]
+    elif os.path.exists(argv.s_module):
         s_module_df = pd.read_csv(argv.s_module)
         S_perturbed_nodes = [str(node) for node in s_module_df.iloc[:, -1]]
     else:
