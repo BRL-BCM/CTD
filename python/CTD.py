@@ -68,11 +68,12 @@ if __name__ == '__main__':
         adj_df.index = adj_df.columns
 
     else:
-        logging.debug('Starting GraphicalLassoCV.')
-        experimental = covariance.GraphicalLassoCV().fit(experimental_df.T)
-        adj_df = experimental.precision_
-        np.fill_diagonal(adj_df, 0)
-        adj_df = pd.DataFrame(adj_df, columns=experimental_df.index, index=experimental_df.index)
+        logging.debug('Starting graphical lasso.')
+
+        sample_cov = np.cov(experimental_df, bias=False)
+        _, icov = covariance.graphical_lasso(sample_cov, alpha=0.5)
+        np.fill_diagonal(icov, 0)
+        adj_df = pd.DataFrame(icov, columns=experimental_df.index, index=experimental_df.index)
 
         if argv.out_graph_name:
             adj_df.to_csv(argv.out_graph_name, index=False)
