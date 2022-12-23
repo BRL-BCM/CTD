@@ -43,7 +43,7 @@ def get_encoding_length(bs, G, pvals=None, pt_id=None):
 
         if pt_id and pvals is not None:
             row['patientID'] = pt_id
-            row['varPvalue'] = '/'.join(list(pvals.loc[pt_id, mets_k]))  # TODO: CHECK
+            row['varPvalue'] = '/'.join([str(pval) for pval in pvals.loc[pt_id, mets_k]])  # TODO: CHECK
 
         row['optimalBS'] = opt_bs_tmp
         row['subsetSize'] = k+1
