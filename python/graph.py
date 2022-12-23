@@ -5,23 +5,22 @@ import matplotlib.patches as mpatches
 from datetime import datetime
 import logging
 
-logging.getLogger().setLevel(logging.DEBUG)
-
 
 def net_walk_snap_shot(adj_mat, G, output_dir, visited_nodes, S, coords, img_num=1, use_labels=True):
 
     """
     Capture the current location of a network walker.
+
     A network walker steps towards the node that inherited the highest probability from the last node that it
     stepped into.
 
     Parameters
     ----------
     adj_mat : The adjacency matrix that encodes the edge weights for the network, G.
-    G : A list of probabilities, with names of the list being the node names in the network.
+    G : A dictionary of probabilities, with keys being the node names in the network.
     output_dir : The local directory at which you want still PNG images to be saved.
-    visited_nodes : A character vector of node names, storing the history of previous draws in the node ranking.
-    S : A character vector of node names in the subset you want the network walker to find.
+    visited_nodes : A list of node names, storing the history of previous draws in the node ranking.
+    S : A list of node names in the subset you want the network walker to find.
     coords : The x and y coordinates for each node in the network, to remain static between images.
     img_num : The image number for this snapshot. If images are being generated in a sequence, this serves as an
     iterator for file naming.
@@ -45,7 +44,7 @@ def net_walk_snap_shot(adj_mat, G, output_dir, visited_nodes, S, coords, img_num
     if use_labels:
         ig.vs['label'] = ig.vs['name']
     else:
-        ig.vs['label'] = ['' for i in range(len(ig.vs['name']))]
+        ig.vs['label'] = ['' for _ in range(len(ig.vs['name']))]
 
     ig.vs['cluster'] = [1 if node in visited_nodes else 0 for node in ig.vs['name']]
     communities = igraph.VertexClustering.FromAttribute(ig, 'cluster')
@@ -54,7 +53,7 @@ def net_walk_snap_shot(adj_mat, G, output_dir, visited_nodes, S, coords, img_num
     out_fig_name = f'{output_dir}/netWalkMovie{S.index(visited_nodes[0])}_{img_num}.png'
 
     visual_style = {
-        'vertex_color' : ig.vs['color'],
+        'vertex_color': ig.vs['color'],
         'vertex_label': ig.vs['name'],
         'vertex_size': [0.3 + round(50 * v, 0) for v in G.values()],
         'edge_width': 3 * np.abs(ig.es['weight']),
@@ -87,7 +86,7 @@ def diffusion_snap_shot(adj_mat, G, output_dir, p1, start_node, visited_nodes, c
     Parameters
     ----------
     adj_mat : The adjacency matrix that encodes the edge weights for the network, G.
-    G : A list of probabilities, with names of the list being the node names in the network.
+    G : A dictionary of probabilities, with keys being the node names in the network.
     output_dir : The local directory at which you want still PNG images to be saved.
     p1 : The probability being dispersed from the starting node, startNode, which is preferentially distributed between
     network nodes by the probability diffusion algorithm based solely on network connectivity.
@@ -128,7 +127,7 @@ def diffusion_snap_shot(adj_mat, G, output_dir, p1, start_node, visited_nodes, c
     visual_style = {
         'vertex_color': ig.vs['color'],
         'vertex_label': ig.vs['label'],
-        'vertex_label_dist': [3 for v in G.values()],
+        'vertex_label_dist': [3 for _ in G.values()],
         'edge_width': 5 * np.abs(ig.es['weight']),
         'mark_groups': True,
         'palette': palette,
@@ -160,21 +159,20 @@ def connect_to_ext(adj_mat, start_node, visited_nodes):
 
     Returns
     -------
-    adj_matAfter : The adjacency matrix where the start_node is now connected to its unvisited "extended" neighbors.
+    adj_mat_after : The adjacency matrix where the start_node is now connected to its unvisited "extended" neighbors.
     An extended neighbor is the neighbor of a neighbor.
 
     """
-
     ind = np.nonzero(adj_mat[start_node].values)
     start_node_nbors = adj_mat.index[ind]
 
     start_node_unvisited_nbors = [node for node in start_node_nbors if node not in visited_nodes]
     vN = [node for node in visited_nodes if node != start_node]  # visited nodes excluding start node
 
-    ext_connections = {}
+    ext_connections = {}  # or None
 
     if vN and not start_node_unvisited_nbors:
-        adj_mat_after = adj_mat.drop(labels=vN).drop(columns=vN)  # TODO: try to optimize
+        adj_mat_after = adj_mat.drop(labels=vN).drop(columns=vN)
 
         conn_ind = np.nonzero(adj_mat[start_node].values)
         conn_yes = adj_mat.index[conn_ind]
@@ -197,39 +195,6 @@ def connect_to_ext(adj_mat, start_node, visited_nodes):
 
     return adj_mat_after
 
-    #start_node_nbors = list(adj_mat[abs(adj_mat.loc[start_node, :]) > 0].index)
-    # ind = np.nonzero(adj_mat[start_node].values)
-    # start_node_nbors = adj_mat.index[ind]
-    #
-    # start_node_unvisited_nbors = [node for node in start_node_nbors if node not in visited_nodes]
-    # vN = [node for node in visited_nodes if node != start_node]  # visited nodes excluding start node
-    #
-    # ext_connections = {}  # or None
-    #
-    # if vN and not start_node_unvisited_nbors:
-    #     adj_mat_after = adj_mat.drop(labels=vN).drop(columns=vN)
-    #     connections = adj_mat[start_node]
-    #     conn_yes = connections[abs(connections) > 0].to_dict()
-    #     conn_no = connections[connections == 0]
-    #     conn_no = conn_no.drop([node for node in conn_no.index if node in vN or node == start_node]).to_dict()
-    #
-    #     if conn_no:
-    #         for n1 in conn_no:
-    #             if conn_yes:
-    #                 for n2 in conn_yes:
-    #                     if abs(adj_mat.loc[n2, n1]) > 0:
-    #                         conn_no[n1] = adj_mat.loc[n2, n1]
-    #                         ext_connections[n1] = conn_no[n1]
-    #
-    #     if ext_connections:
-    #         adj_mat_after.loc[start_node, list(ext_connections.keys())] = list(ext_connections.values())
-    #         adj_mat_after.loc[list(ext_connections.keys()), start_node] = list(ext_connections.values())
-    #
-    # else:
-    #     adj_mat_after = adj_mat
-    #
-    # return adj_mat_after
-
 
 def diffuse_p1(p1, start_node, G, visited_nodes, threshold_diff, adj_mat, verbose=False, out_dir='', r_level=1,
                coords=None):
@@ -237,17 +202,16 @@ def diffuse_p1(p1, start_node, G, visited_nodes, threshold_diff, adj_mat, verbos
     """
     Diffuse Probability P1 from a starting node
 
-    Recursively diffuse probability from a starting node based on the
-    connectivity of the network, representing the likelihood that a
-    variable is most influenced by a perturbation in the starting node.
+    Recursively diffuse probability from a starting node based on the connectivity of the network, representing the
+    likelihood that a variable is most influenced by a perturbation in the starting node.
 
 
     Parameters
     ----------
-    p1 : The probability being dispersed from the starting node, start_node, which is preferentially distributed between network
-     nodes by the probability diffusion algorithm based solely on network connectivity.
+    p1 : The probability being dispersed from the starting node, start_node, which is preferentially distributed between
+     network nodes by the probability diffusion algorithm based solely on network connectivity.
     start_node : "Start node", or the node most recently visited by the network walker, from which p1 gets dispersed.
-    G : A list of probabilities, with names of the list being the node names in the network.
+    G : A dictionary of probabilities, with keys being the node names in the network.
     visited_nodes : "Visited nodes", or the history of previous draws in the node ranking sequence.
     threshold_diff : When the probability diffusion algorithm exchanges this amount (threshold_diff) or less between
     nodes, the algorithm returns up the call stack.
@@ -279,7 +243,7 @@ def diffuse_p1(p1, start_node, G, visited_nodes, threshold_diff, adj_mat, verbos
                             visited_nodes=visited_nodes, coords=coords, recursion_level=r_level)
 
     adj_mat2 = connect_to_ext(adj_mat=adj_mat, start_node=start_node, visited_nodes=visited_nodes)
-    #start_node_nbors = list(adj_mat2[abs(adj_mat2.loc[start_node, :]) > 0].index)
+
     ind = np.nonzero(adj_mat2[start_node].values)
     start_node_nbors = adj_mat2.index[ind]
     start_node_unvisited_nbors = [node for node in start_node_nbors if node not in visited_nodes]
@@ -298,8 +262,6 @@ def diffuse_p1(p1, start_node, G, visited_nodes, threshold_diff, adj_mat, verbos
                 diffusion_snap_shot(adj_mat=adj_mat, G=G, output_dir=out_dir, p1=p1, start_node=start_node,
                                     visited_nodes=visited_nodes, coords=coords, recursion_level=r_level)
 
-            #unv = list(adj_mat2[abs(adj_mat2.loc[:, start_node_unvisited_nbors[z]]) > 0].index)
-            #n_nbors = [node for node in G.keys() if node in unv]
             unv_ind = np.nonzero(adj_mat2[start_node_unvisited_nbors[z]].values)
             unv = adj_mat2.index[unv_ind]
             n_nbors = [x for x in unv if x in G]
@@ -313,7 +275,8 @@ def diffuse_p1(p1, start_node, G, visited_nodes, threshold_diff, adj_mat, verbos
                     diffusion_snap_shot(adj_mat=adj_mat, G=G, output_dir=out_dir, p1=p1, start_node=start_node,
                                         visited_nodes=visited_nodes, coords=coords, recursion_level=r_level)
 
-                G = diffuse_p1(p1=i_prob / 2, start_node=start_node_unvisited_nbors[z], G=G, visited_nodes=visited_nodes + [start_node_unvisited_nbors[z]],
+                G = diffuse_p1(p1=i_prob / 2, start_node=start_node_unvisited_nbors[z], G=G,
+                               visited_nodes=visited_nodes + [start_node_unvisited_nbors[z]],
                                threshold_diff=threshold_diff, adj_mat=adj_mat, verbose=verbose, out_dir=out_dir,
                                coords=coords, r_level=r_level + 1)
 
@@ -330,8 +293,6 @@ def diffuse_p1(p1, start_node, G, visited_nodes, threshold_diff, adj_mat, verbos
             if node not in visited_nodes:
                 G[node] = val + p1 / (len(G) - len(visited_nodes))
 
-        #G.update({node: val + p1 / (len(G) - len(visited_nodes)) for node, val in G.items() if node not in visited_nodes})
-
         if out_dir:
             diffusion_snap_shot(adj_mat=adj_mat, G=G, output_dir=out_dir, p1=p1, start_node=start_node,
                                 visited_nodes=visited_nodes, coords=coords, recursion_level=r_level)
@@ -339,169 +300,109 @@ def diffuse_p1(p1, start_node, G, visited_nodes, threshold_diff, adj_mat, verbos
     return G
 
 
-def diffuse_p1_iterative(p1, G, start_node, visited_nodes, adj_mat, threshold_diff=0.01, verbose=False, alpha=0.5):
-    """
-    Diffuse Probability P1 from a starting node
+def single_node_get_node_ranks(n, G, p1, threshold_diff, adj_mat, S=None, num_misses=None, verbose=False, out_dir='',
+                               use_labels=False, coords=None):
 
-    Iteratively diffuse probability from a starting node based on the connectivity of the network, representing the
-    likelihood that a variable is most influenced by a perturbation in the starting node.
+    """
+    Generate single-node node rankings ("fixed" walk)
+
+    This function calculates the node rankings starting from a given perturbed variable in a subset of variables in
+    the network.
 
     Parameters
     ----------
-    p1 : The probability being dispersed from the starting node, start_node, which is preferentially distributed between network
-    nodes by the probability diffusion algorithm based solely on network connectivity.
-    start_node : "Start node", or the node most recently visited by the network walker, from which p1 gets dispersed.
-    G : A list of probabilities, with names of the list being the node names in the network.
-    visited_nodes : "Visited nodes", or the history of previous draws in the node ranking sequence.
-    threshold_diff : When the probability diffusion algorithm exchanges this amount (threshold_diff) or less between
-    nodes, the algorithm returns up the call stack.
+    n : The name of node ranking you want to calculate.
+    G : A dictionary of probabilities with keys being the node names of the network.
+    p1 : The probability that is preferentially distributed between network nodes by the probability diffusion algorithm
+    based solely on network connectivity. The remaining probability (i.e., "p0") is uniformly distributed between
+    network nodes, regardless of connectivity.
+    threshold_diff : When the probability diffusion algorithm exchanges this amount or less between nodes, the algorithm
+     returns up the call stack.
     adj_mat : The adjacency matrix that encodes the edge weights for the network, G.
-    verbose : If debugging or tracking a diffusion event, verbose=True will activate print statements. Default is False.
-    alpha :
+    S : A list of node names in the subset you want the network walker to find.
+    num_misses : The number of "misses" the network walker will tolerate before switching to fixed length codes for
+    remaining nodes to be found.
+    verbose : If True, print statements will execute as progress is made. Default is False.
+    out_dir : If specified, a image sequence will generate in the output directory specified.
+    use_labels : If True, node names will display next to their respective modes in the network. If False, node names
+    will not display. Only relevant if out_dir is specified.
+    coords : The x and y coordinates for each node in the network, to remain static between images.
 
     Returns
     -------
-    G : A dictionary of returned probabilities after the diffusion of probability has truncated, with the keys being the
-    node names in the network.
+    curr_ns - A list of node names in the order they were drawn by the probability diffusion algorithm.
 
     Examples
     --------
+
     """
 
-    queue = [(start_node, p1, visited_nodes)]
-    path_end = False
+    if verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
 
-    while queue:
+    p0 = 1 - p1
+    if not S and (num_misses or out_dir != ''):
+        print("You must also supply S if out_dir or num_misses is supplied.")
+        return 0
 
-        current_node, current_probability, visited_nodes = queue.pop(0)
+    if verbose:
+        logging.debug("Node ranking {} of {}.".format(n, len(G)))
 
-        lvl = len(visited_nodes) - 1
+    stop_iterating = False
+    start_node = n
+    curr_gph = G
+    count_misses = 0
+    curr_ns = [start_node]  # current node set
 
-        if verbose and path_end:
-            n_tabs = '\t' * (lvl - 1)
-            logging.debug(f'{n_tabs}child {current_node} got {2 * current_probability}')
-            logging.debug(f'{n_tabs}took {current_probability} from child {current_node} to send')
+    if out_dir:
+        net_walk_snap_shot(adj_mat=adj_mat, G=G, visited_nodes=curr_ns, S=S, output_dir=out_dir, coords=coords,
+                           img_num=len(curr_ns), use_labels=use_labels)
 
-        n_tabs = '\t' * lvl
+    while not stop_iterating:
+        curr_gph = {node: 0 for node in curr_gph.keys()}  # clear probabilities
+        base_p = p0 / (len(curr_gph) - len(curr_ns))
+        # set unvisited nodes to base_p
+        curr_gph.update({node: base_p for node in curr_gph.keys() if node not in curr_ns})
 
-        if verbose:
-            logging.debug(
-                f'{n_tabs}prob. to diffuse:{current_probability} start node: {current_node}, visited nodes: {visited_nodes}')
+        curr_gph = diffuse_p1(start_node=start_node, G=curr_gph, visited_nodes=curr_ns, p1=p1, adj_mat=adj_mat,
+                              threshold_diff=threshold_diff)
 
-        path_end = False
+        # Sanity check - p1_event should add up to roughly 1
+        p1_event = sum(curr_gph.values())
+        if abs(p1_event - 1) > threshold_diff:
+            extra_prob_to_diffuse = 1 - p1_event
+            curr_gph.update({node: 0 for node in curr_gph.keys() if node in curr_ns})
+            ind = [node for node in curr_gph.keys() if node not in curr_ns]
+            curr_gph.update({node: val + extra_prob_to_diffuse / len(ind) for node, val in curr_gph.items()
+                             if node in ind})
 
-        adj_mat2 = connect_to_ext(adj_mat=adj_mat, start_node=current_node, visited_nodes=visited_nodes)
+        # Set start_node to the node with the max probability in the new curr_gph
+        max_prob = max(curr_gph, key=curr_gph.get)
 
-        unvisited_nodes = G.keys() - visited_nodes
-        start_node_nbors = list(adj_mat2[abs(adj_mat2.loc[current_node, :]) > 0].index)
-        start_node_unvisited_nbors = [node for node in start_node_nbors if node not in visited_nodes]
+        # Break ties: When there are ties, choose the first of the winners.
+        start_node = max_prob
 
-        if not start_node_unvisited_nbors:
+        if out_dir:
+            net_walk_snap_shot(adj_mat=adj_mat, G=G, output_dir=out_dir, visited_nodes=curr_ns, S=S, coords=coords,
+                               img_num=len(curr_ns), use_labels=use_labels)
 
-            path_end = True
+        if S:  # draw until all members of S are found
+            if start_node in S:
+                count_misses = 0
+            else:
+                count_misses += 1
 
-            if verbose:
-                logging.debug(f'{current_node} is singleton or stranded by visited n.bors')
-                logging.debug('Diffuse p1 uniformly amongst all unvisited nodes.')
+            curr_ns.append(start_node)
 
-            if not unvisited_nodes:
-                continue
+            if count_misses > num_misses or all(node in curr_ns for node in S):
+                stop_iterating = True
+        else:
+            curr_ns.append(start_node)
+            if len(curr_ns) >= len(G):
+                stop_iterating = True
 
-            to_add = current_probability / len(unvisited_nodes)
-            for node in unvisited_nodes:
-                G[node] += to_add
+        if out_dir:
+            net_walk_snap_shot(adj_mat=adj_mat, G=G, output_dir=out_dir, visited_nodes=curr_ns, S=S, coords=coords,
+                               img_num=len(curr_ns), use_labels=use_labels)
 
-            continue
-
-        sum_weights = sum(adj_mat2.loc[list(start_node_unvisited_nbors), current_node])
-
-        k = 0
-
-        for node in start_node_unvisited_nbors:
-
-            inherited_prob = current_probability * adj_mat2.loc[node, current_node] / sum_weights
-            G[node] += inherited_prob
-
-            if verbose and not k:
-                try:
-                    logging.debug(f'{n_tabs}child {node} got {inherited_prob}')
-                except IndexError:
-                    pass
-
-            #unv = list(adj_mat2[abs(adj_mat2.loc[:, node]) > 0].index)
-            unv = adj_mat2[adj_mat2[node] != 0].index
-
-            n_nbors = list(set(unv) & set(G.keys()))
-
-            if n_nbors and inherited_prob * alpha > threshold_diff and len(visited_nodes) + 1 < len(G):
-                G[node] -= inherited_prob * alpha
-                queue.insert(k, (node, inherited_prob * alpha, visited_nodes + [node]))
-
-            k += 1
-
-        if verbose:
-            try:
-                logging.debug(f'{n_tabs}took {queue[0][1]} from child {queue[0][0]} to send')
-            except IndexError:
-                pass
-
-    return G
-
-
-def diffuse_p1_iterative_non_aligned(p1, G, start_node, visited_nodes, adj_mat, threshold_diff=0.01, alpha=0.5):
-    """
-    Diffuse Probability P1 from a starting node
-
-    Iteratively diffuse probability from a starting node based on the connectivity of the network, representing the
-    likelihood that a variable is most influenced by a perturbation in the starting node.
-
-    Parameters
-    ----------
-    p1 : The probability being dispersed from the starting node, start_node, which is preferentially distributed between network
-    nodes by the probability diffusion algorithm based solely on network connectivity.
-    start_node : "Start node", or the node most recently visited by the network walker, from which p1 gets dispersed.
-    G : A list of probabilities, with names of the list being the node names in the network.
-    visited_nodes : "Visited nodes", or the history of previous draws in the node ranking sequence.
-    threshold_diff : When the probability diffusion algorithm exchanges this amount (threshold_diff) or less between
-    nodes, the algorithm returns up the call stack.
-    adj_mat : The adjacency matrix that encodes the edge weights for the network, G.
-    alpha :
-
-    Returns
-    -------
-    G : A dictionary of returned probabilities after the diffusion of probability has truncated, with the keys being the
-    node names in the network.
-
-    Examples
-    --------
-    """
-
-    queue = [(start_node, p1, set(visited_nodes))]
-
-    while queue:
-
-        current_node, current_probability, visited_nodes = queue.pop(0)
-
-        unvisited_nodes = G.keys() - visited_nodes
-        start_node_unvisited_nodes = set(filter(lambda x: adj_mat.loc[current_node, x] > 0, unvisited_nodes))
-
-        if not len(start_node_unvisited_nodes):
-            if not len(unvisited_nodes):
-                continue
-            to_add = current_probability / len(unvisited_nodes)
-            for node in unvisited_nodes:
-                G[node] += to_add
-            continue
-
-        sum_weights = 0
-        for node in start_node_unvisited_nodes:
-            sum_weights += adj_mat.loc[current_node, node]
-        for node in start_node_unvisited_nodes:
-            inherited_prob = current_probability * (adj_mat.loc[current_node, node] / sum_weights)
-            G[node] += inherited_prob
-            if inherited_prob * alpha > threshold_diff and len(
-                    set(filter(lambda x: adj_mat.loc[node, x] > 0, unvisited_nodes))) > 0:
-                G[node] -= inherited_prob * alpha
-                queue.append((node, inherited_prob * alpha, visited_nodes.union({node})))
-
-    return G
+    return curr_ns, n

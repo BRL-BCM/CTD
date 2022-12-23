@@ -62,7 +62,7 @@ def surrogate_profiles(data, ref_data, std=1):
     """
     Generate surrogate profiles
 
-    Fill in a data matrix rank with surrogate profiles., when your data is low n, high p.
+    Fill in a data matrix rank with surrogate profiles when your data is low n, high p.
 
     Parameters
     ----------

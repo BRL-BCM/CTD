@@ -13,15 +13,14 @@ def get_encoding_length(bs, G, pvals=None, pt_id=None):
     Parameters
     ----------
     bs : A list of bitstrings associated with a given patient's perturbed variables.
-    G : A list of probabilities with list names being the node names of the background graph.
+    G : A dictionary of probabilities with keys being the node names of the background graph.
     pvals : The matrix that gives the perturbation strength significance for all variables (columns)
     for each patient (rows).
     pt_id : The row name in pvals corresponding to the patient you specifically want encoding information for.
 
-
     Returns
     -------
-    res - List of dictionaries. For every bitstring provided in bs input parameter, a dictionary is returned with the
+    res : A DataFrame that for every bitstring provided in bs input parameter, a row is returned with the
     following data: the patientID; the bitstring evaluated where T denotes a hit and 0 denotes a miss; the subsetSize,
     or the number of hits in the bitstring; the individual p-values associated with the variable's perturbations,
     delimited by '/'; Shannon's entropy, IS.null; the minimum encoding length IS.alt; and IS.null-IS.alt,the d.score.
@@ -55,7 +54,7 @@ def get_encoding_length(bs, G, pvals=None, pt_id=None):
 
         res.append(row)
 
-    return res
+    return pd.DataFrame(res)
 
 
 def get_pt_bs_by_k(S, ranks, num_misses=None):
@@ -68,13 +67,13 @@ def get_pt_bs_by_k(S, ranks, num_misses=None):
 
     Parameters
     ----------
-    S : A character vector of node names describing the node subset to be encoded
-    ranks : The list of node ranks calculated over all possible nodes, starting with each node in subset of interest.
+    S : List of node names describing the node subset to be encoded
+    ranks : A dictionary of node ranks calculated over all possible nodes, starting with each node in subset of interest.
     num_misses : The number of misses tolerated by the network walker before path truncation occurs.
 
     Returns
     -------
-    pt_by_k - a dictionary of bitstrings.
+    pt_by_k : A dictionary of bitstrings.
 
     Examples
     --------
