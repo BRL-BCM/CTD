@@ -36,8 +36,6 @@ def net_walk_snap_shot(adj_mat, G, output_dir, visited_nodes, S, coords, img_num
     """
 
     ig = igraph.Graph.Weighted_Adjacency(adj_mat, mode='max')
-    # adj mat has to be DataFrame currently
-    # TODO: potentially change method so it works with matrix and add vertex_names as argument
 
     ig.vs['color'] = ['white' if ig.vs['name'][i] not in S else 'green' for i in range(len(G))]
 
@@ -104,8 +102,6 @@ def diffusion_snap_shot(adj_mat, G, output_dir, p1, start_node, visited_nodes, c
     """
 
     ig = igraph.Graph.Weighted_Adjacency(adj_mat, mode='max')
-    # adj mat has to be DataFrame currently
-    # TODO: potentially change method so it works with matrix and add vertex_names as argument
 
     G = {node: val for node, val in G.items() if node in ig.vs['name']}
 
