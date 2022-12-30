@@ -12,6 +12,8 @@ CTD can receive as input experimental (disease) and control datasets with z-scor
 Another option is to provide a weighted graph (adjacency matrix) and a list of nodes of interest.
 
 ## How to install
+**Python implementation of CTD should be used as R will no longer be maintained. Performance comparison between two implementations can be seen at the bottom of the page.**.
+
 CTD can be run locally, inside Docker container or as a public tool on [Cancer Genomics Cloud](https://cgc.sbgenomics.com/) platform.
 ### Running locally
  Install on Python 3.9 and the following dependencies: ```matplotlib, numpy, pandas, python_igraph, scikit_learn, scipy, CTD```
@@ -77,6 +79,16 @@ Open /Colab_CTD_PLOSCB.ipynb in Google Colab to reproduce some results from This
 1. Visualize individual or average cohort metabolomics profiles on comprehensive or individual pathway maps from MetaboLync, curated by Metabolon.
 2. Estimate the probability and significance of a metabolite set against different disease-specific network contexts using CTD.
 3. Use CTD as feature selection method and a covariate in Partial Least Square (PLS) regression.
+
+## Performance comparison - R vs Python
+
+| S module size 	| R      	| Python - num_processes=1 	| Python - num_processes=2 	| Python - num_processes=4 	| Python - num_processes=8 	| Python - num_processes=12 	|
+|---------------	|--------	|--------------------------	|--------------------------	|--------------------------	|--------------------------	|---------------------------	|
+| 5             	| 87.864 	| 17.722                   	| 17.609                   	| 16.116                   	| 16.737                   	| 18.134                    	|
+| 10            	|        	|                          	|                          	|                          	|                          	|                           	|
+| 20            	|        	|                          	|                          	|                          	|                          	|                           	|
+| 50            	|        	|                          	|                          	|                          	|                          	|                           	|
+| 100           	|        	|                          	|                          	|                          	|                          	|                           	|
 
 ## References
 [1] Thistlethwaite L.R., Petrosyan V., Li X., Miller M.J., Elsea S.H., Milosavljevic A, [CTD](https://doi.org/10.1371/journal.pcbi.1008550): an information-theoretic method to interpret multivariate perturbations in the context of graphical models with applications in metabolomics and transcriptomics. Plos Comput Biol, 2021.
