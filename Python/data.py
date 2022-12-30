@@ -82,6 +82,9 @@ def surrogate_profiles(data, ref_data, std=1):
 
     """
 
+    if not ref_data:
+        ref_data = pd.DataFrame()
+
     # Match metabolites between data and ref matrices
     ref_ind_in_data = [i for i in data.index if i in ref_data.index]
     data_ind_in_ref = [i for i in ref_data.index if i in data.index]
@@ -146,7 +149,7 @@ def surrogate_profiles(data, ref_data, std=1):
     data_mx_surr = pd.concat([d_surr, c_surr], axis=1)
 
     # Impute metabolites that are NA
-    if ref_data is not None:  # TODO: Check if ref_data is a required input and adjust previous lines accordingly
+    if len(ref_data):
         data_mx_surr = impute_data(data_mx_surr, ref_data)
     else:
         data_mx_surr = impute_data(data_mx_surr, data)
