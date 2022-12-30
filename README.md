@@ -24,9 +24,9 @@ flags:
   -h, --help             show this help message and exit
 
 optional arguments:
-  --experimental              Experimental dataset file name
-  --control                   Control dataset file name
-  --adj_matrix                CSV with adjacency matrix
+  --experimental              Experimental dataset file name.
+  --control                   Control dataset file name.
+  --adj_matrix                CSV with adjacency matrix.
   --s_module                  Comma-separated list or path to CSV of graph G
                               nodes to consider when searching for the most
                               connected subgraph.
@@ -41,7 +41,7 @@ optional arguments:
   --out_graph_name            Name of the output graph adjacency CSV file.
   --num_processes             Number of worker processes to use for
                               parallelisation. Default is to use the number
-                              returned by os.cpu_count()
+                              returned by os.cpu_count().
   -v, --verbose               Enable verbose logging.
 ```
 ### Running inside docker

@@ -14,10 +14,10 @@ import os
 cpu_count = os.cpu_count()
 
 p = argparse.ArgumentParser(description="Connect The Dots - Find the most connected subgraph")
-p.add_argument("--experimental", help="Experimental dataset file name",
+p.add_argument("--experimental", help="Experimental dataset file name.",
                default='')
-p.add_argument("--control", help="Control dataset file name", default='')  # data/example_argininemia/control.csv
-p.add_argument("--adj_matrix", help="CSV with adjacency matrix", default='')  # data/example_argininemia/adj.csv
+p.add_argument("--control", help="Control dataset file name.", default='')  # data/example_argininemia/control.csv
+p.add_argument("--adj_matrix", help="CSV with adjacency matrix.", default='')  # data/example_argininemia/adj.csv
 p.add_argument("--s_module",
                help="Comma-separated list or path to CSV of graph G nodes to consider when searching for the most "
                     "connected subgraph.")
@@ -32,7 +32,7 @@ p.add_argument("--present_in_perc_for_s",
 p.add_argument("--output_name", help="Name of the output JSON file.")
 p.add_argument("--out_graph_name", help="Name of the output graph adjacency CSV file.")
 p.add_argument("--num_processes", help="Number of worker processes to use for parallelisation. Default is to use the "
-                                       "number returned by os.cpu_count()", default=cpu_count, type=int)
+                                       "number returned by os.cpu_count().", default=cpu_count, type=int)
 p.add_argument("-v", "--verbose", action="count", help="Enable verbose logging.")
 
 if __name__ == '__main__':
