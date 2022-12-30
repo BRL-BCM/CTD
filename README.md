@@ -16,7 +16,7 @@ Another option is to provide a weighted graph (adjacency matrix) and a list of n
 
 CTD can be run locally, inside Docker container or as a public tool on [Cancer Genomics Cloud](https://cgc.sbgenomics.com/) platform.
 ### Running locally
- Install on Python 3.9 and the following dependencies: ```matplotlib, numpy, pandas, python_igraph, scikit_learn, scipy, CTD```
+ Install on Python 3.9 and the following dependencies: ```matplotlib, numpy, pandas, python_igraph, scikit_learn, scipy, CTD```.
  Clone the repository: ```git clone https://github.com/BRL-BCM/CTD.git ```
 ```
 # python CTD.py --help
@@ -89,7 +89,7 @@ For performance comparison, *Kegg* graph with 6.476 nodes was used. Disease modu
 | 5             	| 87.864  	| 17.722                   	| 17.609                   	| 16.116                   	| 16.737                   	| 18.134                    	|
 | 10            	| 197.282 	| 26.564                   	| 22.311                   	| 23.826                   	| 24.053                   	| 25.399                    	|
 | 20            	| 256.565 	| 50.927                   	| 37.482                   	| 28.596                   	| 32.792                   	| 33.251                    	|
-| 50            	|         	|                          	|                          	|                          	|                          	|                           	|
+| 50            	| 656.646 	| 130.716                  	| 85.812                   	| 51.648                   	| 49.679                   	| 52.641                    	|
 | 100           	|         	|                          	|                          	|                          	|                          	|                           	|
 
 ## References
