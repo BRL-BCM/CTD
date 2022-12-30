@@ -44,15 +44,12 @@ if __name__ == '__main__':
     # Read input dataframe with experimental (positive, disease) samples
     if os.path.exists(argv.experimental):
         experimental_df = pd.read_csv(argv.experimental)
-        #   experimental_df[] <- lapply(experimental_df, as.character)  # TODO remove?
+        control_data = None
         if os.path.exists(argv.control):
             control_data = pd.read_csv(argv.control, index_col=0)
-        else:
-            control_data = None
 
         target_patients = list(experimental_df.columns)
 
-        # TODO: Do we need surrogates?
         # Add surrogate disease and surrogate reference profiles based on 1 standard
         # deviation around profiles from real patients to improve rank of matrix when
         # learning Gaussian Markov Random Field network on data. While surrogate
