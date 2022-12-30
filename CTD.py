@@ -26,16 +26,13 @@ p.add_argument("--include_not_in_s",
                     "in the most connected subgraph. These are excluded by default.", action="count")
 p.add_argument("--kmx", help="Number of highly perturbed nodes to consider. Ignored if S module is given.", default=15,
                type=int)
-p.add_argument("--num_processes", help="Number of worker processes to use for parallelization. Default is to use the "
-                                       "number returned by os.cpu_count()", default=cpu_count, type=int)
 p.add_argument("--present_in_perc_for_s",
                help="Percentage of patients having metabolite for selection of S module. Ignored if S module is given.",
                default=0.5, type=float)
 p.add_argument("--output_name", help="Name of the output JSON file.")
 p.add_argument("--out_graph_name", help="Name of the output graph adjecancy CSV file.")
-p.add_argument("--glasso_criterion",
-               help="Graph-ical Lasso prediction of the graph criterion. 'stars' is default, 'ebic' is faster.",
-               default='stars')
+p.add_argument("--num_processes", help="Number of worker processes to use for parallelisation. Default is to use the "
+                                       "number returned by os.cpu_count()", default=cpu_count, type=int)
 p.add_argument("-v", "--verbose", action="count", help="Enable verbose logging.")
 
 if __name__ == '__main__':
