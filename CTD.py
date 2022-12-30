@@ -1,14 +1,17 @@
 from collections import Counter
-import os
 import argparse
 from scipy.stats import norm
 from sklearn import covariance
 import json
 from multiprocessing import Pool
 from functools import partial
-from graph import *
-import mle
-import data
+import pandas as pd
+from Python import data, graph, mle
+import logging
+import numpy as np
+import os
+
+cpu_count = os.cpu_count()
 
 p = argparse.ArgumentParser(description="Connect The Dots - Find the most connected subgraph")
 p.add_argument("--experimental", help="Experimental dataset file name",
@@ -23,6 +26,8 @@ p.add_argument("--include_not_in_s",
                     "in the most connected subgraph. These are excluded by default.", action="count")
 p.add_argument("--kmx", help="Number of highly perturbed nodes to consider. Ignored if S module is given.", default=15,
                type=int)
+p.add_argument("--num_processes", help="Number of worker processes to use for parallelization. Default is to use the "
+                                       "number returned by os.cpu_count()", default=cpu_count, type=int)
 p.add_argument("--present_in_perc_for_s",
                help="Percentage of patients having metabolite for selection of S module. Ignored if S module is given.",
                default=0.5, type=float)
@@ -37,8 +42,7 @@ if __name__ == '__main__':
 
     argv = p.parse_args()
 
-    if argv.verbose:
-        logging.getLogger().setLevel(logging.DEBUG)
+    logging.getLogger().setLevel(logging.DEBUG)
 
     # Read input dataframe with experimental (positive, disease) samples
     if os.path.exists(argv.experimental):
@@ -64,9 +68,8 @@ if __name__ == '__main__':
 
     # Read input graph (adjacency matrix)
     if os.path.exists(argv.adj_matrix):
-        adj_df = pd.read_csv(argv.adj_matrix, index_col=0)  # keep as DataFrame for now
+        adj_df = pd.read_csv(argv.adj_matrix)  # keep as DataFrame for now
         adj_df.index = adj_df.columns
-
     else:
         logging.debug('Starting graphical lasso.')
 
@@ -116,16 +119,23 @@ if __name__ == '__main__':
     # Walk through all the nodes in S module
     logging.debug('Get the single-node encoding node ranks starting from each node.')
 
-    pool = Pool() # TODO: add some limit to the number of processes
-    ranks_collection = pool.map(partial(single_node_get_node_ranks, G=G, p1=1.0, threshold_diff=0.01, adj_mat=adj_df,
-                                        S=S_perturbed_nodes, num_misses=np.log2(len(G))), S_perturbed_nodes)
-    pool.close()
-    pool.join()
-
     # Dictionary ranks contains encodings for each node in S_perturbed_nodes
     ranks = {}
-    for tup in ranks_collection:
-        ranks[tup[1]] = tup[0]
+
+    if argv.num_processes == 1:
+        for node in S_perturbed_nodes:
+            ranks[node], _ = graph.single_node_get_node_ranks(n=node, G=G, p1=1.0, threshold_diff=0.01, adj_mat=adj_df,
+                                                              S=S_perturbed_nodes, num_misses=np.log2(len(G)))
+    else:
+        pool = Pool(argv.num_processes)
+        ranks_collection = pool.map(partial(graph.single_node_get_node_ranks, G=G, p1=1.0, threshold_diff=0.01,
+                                            adj_mat=adj_df, S=S_perturbed_nodes, num_misses=np.log2(len(G))),
+                                    S_perturbed_nodes)
+        pool.close()
+        pool.join()
+
+        for tup in ranks_collection:
+            ranks[tup[1]] = tup[0]
 
     # Convert to bitstring
     # Get the bitstring associated with the disease module's metabolites
@@ -205,8 +215,10 @@ if __name__ == '__main__':
     else:
         outfname = argv.output_name
 
+    outrname = outfname.replace('.json', '_ranks.json')
+
     with open(outfname, 'w') as f:
         json.dump(out_dict, f, indent=4)
 
-    with open(f'ranks_{outfname}', 'w') as f:
+    with open(outrname, 'w') as f:
         json.dump(ranks, f, indent=4)

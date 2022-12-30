@@ -193,3 +193,8 @@ if (is.na(argv$output_name)){
   outfname = argv$output_name
 }
 write(res_json, outfname)
+
+res_ranks = toJSON(ranks)
+outrname = str_replace(outfname, '.json', '_ranks.json')
+write(res_ranks, outrname)
+

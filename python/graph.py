@@ -172,7 +172,6 @@ def connect_to_ext(adj_mat, start_node, visited_nodes):
     ext_connections = {}  # or None
 
     if vN and not start_node_unvisited_nbors:
-        #adj_mat_after = adj_mat.drop(labels=vN).drop(columns=vN)
         keep = adj_mat.index.drop(vN)
         adj_mat_after = adj_mat.loc[keep, keep]
 

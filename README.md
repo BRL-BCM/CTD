@@ -14,10 +14,10 @@ Another option is to provide a weighted graph (adjacency matrix) and a list of n
 ## How to install
 CTD can be run locally, inside Docker container or as a public tool on [Cancer Genomics Cloud](https://cgc.sbgenomics.com/) platform.
 ### Running locally
- Install on R 4.2 and the following dependencies: ```huge, MASS, rjson, stringr, fs, igraph, argparser, CTD```
+ Install on Python 3.9 and the following dependencies: ```matplotlib, numpy, pandas, python_igraph, scikit_learn, scipy, CTD```
  Clone the repository: ```git clone https://github.com/BRL-BCM/CTD.git ```
 ```
-# Rscript CTD.r --help
+# python CTD.py --help
 Connect The Dots - Find the most connected sub-graph
 
 flags:
@@ -55,11 +55,11 @@ CTD is available in the public apps galery on Cancer Genomics Cloud platform. Af
 
 Run example with a small graph and provided disease module:
 ```sh
-Rscript CTD.r --adj_matrix data/example_2/adj.csv --s_module "m2,m4,m5,m7"
+python CTD.py --adj_matrix data/example_2/adj.csv --s_module "m2,m4,m5,m7"
 ```
 Run example with experimental arginenimia metabolite z-scores extracted from Miller 2015 data using [prepare_data.R script](data/example_argininemia/prepare_data.R):
 ```sh
-Rscript CTD.r --experimental data/example_argininemia/experimental.csv --control data/example_argininemia/control.csv --kmx 15
+python CTD.py --experimental data/example_argininemia/experimental.csv --control data/example_argininemia/control.csv --kmx 15
 ```
 All stages of the analysis pipeline with examples are available in ```vignette/CTD_Lab-Exercise.Rmd```
 
