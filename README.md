@@ -24,18 +24,25 @@ flags:
   -h, --help             show this help message and exit
 
 optional arguments:
-  --experimental  Experimental dataset file name
-  --control       Control dataset file name
-  --adj_matrix    CSV with adjacency matrix
-  --s_module      Comma-separated list or path to CSV of graph G nodes to consider when searching for the most connected subgraph.
-  --include_not_in_s    Include the nodes not appearing in S (encoded with a zero in the optimal bitstring) in the most connected subgraph.
-  These are excluded by default.
-  --kmx           Number of highly perturbed nodes to consider. Ignored if S module is given.
-  --present_in_perc_for_s Percentage of patients having metabolite for selection of S module. Ignored if S module is given.
-  --output_name   Name of the output JSON file.
-  --out_graph_name Name of the output graph adjecancy CSV file.
-  --num_processes Number of worker processes to use for parallelisation. Default is to use the number returned by os.cpu_count()
-  -v, --verbose   Enable verbose logging.
+  --experimental              Experimental dataset file name
+  --control                   Control dataset file name
+  --adj_matrix                CSV with adjacency matrix
+  --s_module                  Comma-separated list or path to CSV of graph G
+                              nodes to consider when searching for the most
+                              connected subgraph.
+  --include_not_in_s          Include the nodes not appearing in S (encoded with
+                              a zero in the optimal bitstring) in the most
+                              connected subgraph. These are excluded by default.
+  --kmx                       Number of highly perturbed nodes to consider.
+                              Ignored if S module is given.
+  --present_in_perc_for_s     Percentage of patients having metabolite for
+                              selection of S module. Ignored if S module is given.
+  --output_name               Name of the output JSON file.
+  --out_graph_name            Name of the output graph adjacency CSV file.
+  --num_processes             Number of worker processes to use for
+                              parallelisation. Default is to use the number
+                              returned by os.cpu_count()
+  -v, --verbose               Enable verbose logging.
 ```
 ### Running inside docker
 Download and install [Docker Desktop](https://www.docker.com/get-started).
