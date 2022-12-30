@@ -82,9 +82,6 @@ def surrogate_profiles(data, ref_data, std=1):
 
     """
 
-    if ref_data is None:
-        ref_data = pd.DataFrame()
-
     # Match metabolites between data and ref matrices
     ref_ind_in_data = [i for i in data.index if i in ref_data.index]
     data_ind_in_ref = [i for i in ref_data.index if i in data.index]
