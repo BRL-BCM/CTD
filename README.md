@@ -92,6 +92,8 @@ For performance comparison, *Kegg* graph with 6.476 nodes was used. Disease modu
 | 50            	| 656.646s  	| 130.716s                 	| 85.812s                  	| 51.648s                  	| 49.679s                    	| 52.641s                     	|
 | 100           	| 1081.971s 	| 186.723s                 	| 114.262s                 	| 72.712s                  	| 60.5s                      	| 60.795s                     	|
 
+\* Tested on machine with 2.6 GHz 6-Core Intel Core i7 processor and 16 GB RAM.
+
 ## References
 [1] Thistlethwaite L.R., Petrosyan V., Li X., Miller M.J., Elsea S.H., Milosavljevic A, [CTD](https://doi.org/10.1371/journal.pcbi.1008550): an information-theoretic method to interpret multivariate perturbations in the context of graphical models with applications in metabolomics and transcriptomics. Plos Comput Biol, 2021.
 
