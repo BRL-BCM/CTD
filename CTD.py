@@ -43,10 +43,12 @@ if __name__ == '__main__':
 
     # Read input dataframe with experimental (positive, disease) samples
     if os.path.exists(argv.experimental):
-        experimental_df = pd.read_csv(argv.experimental)
-        control_data = None
-        if os.path.exists(argv.control):
+        experimental_df = pd.read_csv(argv.experimental, index_col=0)
+        try:
             control_data = pd.read_csv(argv.control, index_col=0)
+        except FileNotFoundError as e:
+            logging.debug('Control data must be provided if running with --experimental.')
+            raise e
 
         target_patients = list(experimental_df.columns)
 
