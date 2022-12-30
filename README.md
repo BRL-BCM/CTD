@@ -12,7 +12,7 @@ CTD can receive as input experimental (disease) and control datasets with z-scor
 Another option is to provide a weighted graph (adjacency matrix) and a list of nodes of interest.
 
 ## How to install
-**Python implementation of CTD should be used as R will no longer be maintained. Performance comparison between two implementations can be seen at the bottom of the page.**.
+**Python implementation of CTD should be used as R will no longer be maintained.** Performance comparison between the two implementations can be found at the bottom of the page.
 
 CTD can be run locally, inside Docker container or as a public tool on [Cancer Genomics Cloud](https://cgc.sbgenomics.com/) platform.
 ### Running locally
