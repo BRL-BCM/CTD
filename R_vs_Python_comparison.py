@@ -3,9 +3,10 @@ import time
 import subprocess
 import zipfile
 import json
-import pandas as pd
 import random
 import os
+
+import pandas as pd
 
 cpu_count = os.cpu_count()
 p = argparse.ArgumentParser(description="Connect The Dots - R vs Python")
