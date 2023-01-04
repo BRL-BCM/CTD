@@ -35,20 +35,20 @@ def get_encoding_length(bs, G, pvals=None, pt_id=None):
     for k in range(len(bs)):
         row = {}
         opt_bs = bs[k]
-        mets_k = [d[0] for d in opt_bs if d[1] == 1]
-        found = sum([d[1] for d in opt_bs])
+        mets_k = [d[0] for d in opt_bs if d[1] == 1]  # node rankings that found at least k nodes
+        found = sum([d[1] for d in opt_bs])  # number of ranks that found at least k nodes
         not_found = k - found + 1
-        e = (not_found + 1) * np.log2(len(G)) + len(opt_bs) - 1
-        opt_bs_tmp = ''.join(['T' if d[1] == 1 else '0' for d in opt_bs])
+        e = (not_found + 1) * np.log2(len(G)) + len(opt_bs) - 1  # encoding length
+        opt_bs_tmp = ''.join(['T' if d[1] == 1 else '0' for d in opt_bs])  # T denotes a hit and 0 denotes a miss
 
         if pt_id and pvals is not None:
             row['patientID'] = pt_id
             row['varPvalue'] = '/'.join([str(pval) for pval in pvals.loc[pt_id, mets_k]]) 
 
-        row['optimalBS'] = opt_bs_tmp
-        row['subsetSize'] = k+1
+        row['optimalBS'] = opt_bs_tmp  # optimal bitstring
+        row['subsetSize'] = k+1  # assume k=0 corresponds to subset of size 1
         row['opt.T'] = found
-        row['IS.null'] = np.float32(np.log2(len(G)) * (k + 1))
+        row['IS.null'] = np.float32(np.log2(len(G)) * (k + 1))  # Shannon's entropy
         row['IS.alt'] = np.float32(e)
         row['d.score'] = round(row['IS.null'] - e, 3)
 
