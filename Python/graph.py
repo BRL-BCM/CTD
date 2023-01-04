@@ -1,10 +1,10 @@
+import logging
+from datetime import datetime
+
 import igraph
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
-from datetime import datetime
-import logging
-
 
 def net_walk_snap_shot(adj_mat, G, output_dir, visited_nodes, S, coords, img_num=1, use_labels=True):
 
@@ -342,7 +342,7 @@ def single_node_get_node_ranks(n, G, p1, threshold_diff, adj_mat, S=None, num_mi
         return 0
 
     if verbose:
-        logging.debug("Node ranking {} of {}.".format(n, len(G)))
+        logging.debug("Node ranking {} of {}.".format(list(G).index(n) + 1, len(G)))
 
     stop_iterating = False
     start_node = n
@@ -361,7 +361,7 @@ def single_node_get_node_ranks(n, G, p1, threshold_diff, adj_mat, S=None, num_mi
         curr_gph.update({node: base_p for node in curr_gph.keys() if node not in curr_ns})
 
         curr_gph = diffuse_p1(start_node=start_node, G=curr_gph, visited_nodes=curr_ns, p1=p1, adj_mat=adj_mat,
-                              threshold_diff=threshold_diff)
+                              threshold_diff=threshold_diff, verbose=verbose)
 
         # Sanity check - p1_event should add up to roughly 1
         p1_event = sum(curr_gph.values())
