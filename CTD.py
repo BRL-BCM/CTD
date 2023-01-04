@@ -1,15 +1,16 @@
-from collections import Counter
 import argparse
-from scipy.stats import norm
-from sklearn import covariance
 import json
+import os
+import logging
+from sklearn import covariance
+from collections import Counter
 from multiprocessing import Pool
 from functools import partial
+
 import pandas as pd
-from Python import data, graph, mle
-import logging
 import numpy as np
-import os
+from scipy.stats import norm
+from Python import data, graph, mle
 
 cpu_count = os.cpu_count()
 
@@ -39,7 +40,10 @@ if __name__ == '__main__':
 
     argv = p.parse_args()
 
-    logging.getLogger().setLevel(logging.DEBUG)
+    verbose = False
+    if argv.verbose:
+        verbose = True
+        logging.getLogger().setLevel(logging.DEBUG)
 
     # Read input dataframe with experimental (positive, disease) samples
     if os.path.exists(argv.experimental):
@@ -118,15 +122,18 @@ if __name__ == '__main__':
     # Dictionary ranks contains encodings for each node in S_perturbed_nodes
     ranks = {}
 
+    # If num_processes is set to 1, standard for loop will be used instead of creating multiprocessing pool with a
+    # single process to avoid overhead
     if argv.num_processes == 1:
         for node in S_perturbed_nodes:
             ranks[node], _ = graph.single_node_get_node_ranks(n=node, G=G, p1=1.0, threshold_diff=0.01, adj_mat=adj_df,
-                                                              S=S_perturbed_nodes, num_misses=np.log2(len(G)))
+                                                              S=S_perturbed_nodes, num_misses=np.log2(len(G)),
+                                                              verbose=verbose)
     else:
         pool = Pool(argv.num_processes)
         ranks_collection = pool.map(partial(graph.single_node_get_node_ranks, G=G, p1=1.0, threshold_diff=0.01,
-                                            adj_mat=adj_df, S=S_perturbed_nodes, num_misses=np.log2(len(G))),
-                                    S_perturbed_nodes)
+                                            adj_mat=adj_df, S=S_perturbed_nodes, num_misses=np.log2(len(G)),
+                                            verbose=verbose), S_perturbed_nodes)
         pool.close()
         pool.join()
 
@@ -140,7 +147,6 @@ if __name__ == '__main__':
     # Get encoding length of minimum length code word.
     # experimental_df is dataframe with diseases (and surrogates)
     # and z-values for each metabolite
-    # TODO: If graph and disease module are given do we still need experimental_df?
 
     if os.path.exists(argv.experimental):
         data_mx_pvals = experimental_df[target_patients].apply(lambda x: 2 * norm.sf(abs(x)))
@@ -182,7 +188,7 @@ if __name__ == '__main__':
     # All metabolites in the bitstring
     logging.debug(f'All metabolites in the bitstring: {[d[0] for d in pt_bs_by_k[ind_F]]}')
 
-    # Just the F metabolites that are in S_arg that were were "found"
+    # Just the F metabolites that are in S module that were were "found"
     keep_nodes = [1]
     if argv.include_not_in_s:
         keep_nodes = [0, 1]
