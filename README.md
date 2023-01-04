@@ -44,7 +44,8 @@ optional arguments:
   --num_processes             Number of worker processes to use for
                               parallelisation. Default is to use the number
                               returned by os.cpu_count().
-  -v, --verbose               Enable verbose logging.
+  -v, --verbose               Set verbose logging level.
+
 ```
 ### Running inside docker
 Download and install [Docker Desktop](https://www.docker.com/get-started).
@@ -61,6 +62,7 @@ CTD is available in the public apps galery on Cancer Genomics Cloud platform. Af
 Run example with a small graph and provided disease module:
 ```sh
 python CTD.py --adj_matrix data/example_2/adj.csv --s_module "m2,m4,m5,m7"
+
 ```
 Run example with experimental arginenimia metabolite z-scores extracted from Miller 2015 data using [prepare_data.R script](data/example_argininemia/prepare_data.R):
 ```sh
