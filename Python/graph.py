@@ -192,7 +192,7 @@ def connect_to_ext(adj_mat, start_node, visited_nodes):
     return adj_mat_after
 
 
-def diffuse_p1(p1, start_node, G, visited_nodes, threshold_diff, adj_mat, verbose=False, out_dir='', r_level=1,
+def diffuse_p1(p1, start_node, G, visited_nodes, threshold_diff, adj_mat, verbose=None, out_dir='', r_level=1,
                coords=None):
 
     """
@@ -231,7 +231,7 @@ def diffuse_p1(p1, start_node, G, visited_nodes, threshold_diff, adj_mat, verbos
 
     n_tabs = '\t' * (r_level - 1)  # for verbose statements
 
-    if verbose:
+    if verbose == 2:
         logging.debug(f'{n_tabs}prob. to diffuse:{p1} start_node: {start_node}, visitedNodes: {visited_nodes}')
 
     if out_dir:
@@ -251,7 +251,7 @@ def diffuse_p1(p1, start_node, G, visited_nodes, threshold_diff, adj_mat, verbos
             i_prob = p1 * abs(adj_mat2.loc[start_node_unvisited_nbors[z], start_node]) / w_edges_sum  # inherited prob
             G[start_node_unvisited_nbors[z]] = G[start_node_unvisited_nbors[z]] + i_prob
 
-            if verbose:
+            if verbose == 2:
                 logging.debug(f'{n_tabs}child#{z} {start_node_unvisited_nbors[z]} got {i_prob}')
 
             if out_dir:
@@ -264,7 +264,7 @@ def diffuse_p1(p1, start_node, G, visited_nodes, threshold_diff, adj_mat, verbos
 
             if n_nbors and i_prob / 2 > threshold_diff and len(visited_nodes) + 1 < len(G):
                 G[start_node_unvisited_nbors[z]] = G[start_node_unvisited_nbors[z]] - i_prob / 2
-                if verbose:
+                if verbose == 2:
                     logging.debug(f'{n_tabs}took {i_prob / 2} from child#{z}:{start_node_unvisited_nbors[z]} to send')
 
                 if out_dir:
@@ -281,7 +281,7 @@ def diffuse_p1(p1, start_node, G, visited_nodes, threshold_diff, adj_mat, verbos
                                 visited_nodes=visited_nodes, coords=coords, recursion_level=r_level)
     else:
 
-        if verbose:
+        if verbose == 2:
             logging.debug(f'{start_node} is singleton or stranded by visited n.bors')
             logging.debug('Diffuse p1 uniformly amongst all unvisited nodes.')
 
@@ -296,7 +296,7 @@ def diffuse_p1(p1, start_node, G, visited_nodes, threshold_diff, adj_mat, verbos
     return G
 
 
-def single_node_get_node_ranks(n, G, p1, threshold_diff, adj_mat, S=None, num_misses=None, verbose=False, out_dir='',
+def single_node_get_node_ranks(n, G, p1, threshold_diff, adj_mat, S=None, num_misses=None, verbose=None, out_dir='',
                                use_labels=False, coords=None):
 
     """
@@ -333,15 +333,13 @@ def single_node_get_node_ranks(n, G, p1, threshold_diff, adj_mat, S=None, num_mi
 
     """
 
-    if verbose:
-        logging.getLogger().setLevel(logging.DEBUG)
-
     p0 = 1 - p1
     if not S and (num_misses or out_dir != ''):
         print("You must also supply S if out_dir or num_misses is supplied.")
         return 0
 
     if verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
         logging.debug("Node ranking {} of {}.".format(list(G).index(n) + 1, len(G)))
 
     stop_iterating = False

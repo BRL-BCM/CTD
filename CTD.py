@@ -34,15 +34,13 @@ p.add_argument("--output_name", help="Name of the output JSON file.")
 p.add_argument("--out_graph_name", help="Name of the output graph adjacency CSV file.")
 p.add_argument("--num_processes", help="Number of worker processes to use for parallelisation. Default is to use the "
                                        "number returned by os.cpu_count().", default=cpu_count, type=int)
-p.add_argument("-v", "--verbose", action="count", help="Enable verbose logging.")
+p.add_argument("-v", "--verbose", help="Set verbose logging level.", type=int, default=None)
 
 if __name__ == '__main__':
 
     argv = p.parse_args()
 
-    verbose = False
     if argv.verbose:
-        verbose = True
         logging.getLogger().setLevel(logging.DEBUG)
 
     # Read input dataframe with experimental (positive, disease) samples
@@ -128,12 +126,12 @@ if __name__ == '__main__':
         for node in S_perturbed_nodes:
             ranks[node], _ = graph.single_node_get_node_ranks(n=node, G=G, p1=1.0, threshold_diff=0.01, adj_mat=adj_df,
                                                               S=S_perturbed_nodes, num_misses=np.log2(len(G)),
-                                                              verbose=verbose)
+                                                              verbose=argv.verbose)
     else:
         pool = Pool(argv.num_processes)
         ranks_collection = pool.map(partial(graph.single_node_get_node_ranks, G=G, p1=1.0, threshold_diff=0.01,
                                             adj_mat=adj_df, S=S_perturbed_nodes, num_misses=np.log2(len(G)),
-                                            verbose=verbose), S_perturbed_nodes)
+                                            verbose=argv.verbose), S_perturbed_nodes)
         pool.close()
         pool.join()
 
