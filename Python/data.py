@@ -51,7 +51,6 @@ def impute_data(data, ref):
         try:
             imputed_data.loc[i, cols] = i_val * np.random.uniform(low=0.99 * min_row, high=min_row, size=len(cols))
         except Exception:
-            # TODO: check which exception should be caught here and how to handle
             pass
 
     return imputed_data
