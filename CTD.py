@@ -34,6 +34,7 @@ p.add_argument("--output_name", help="Name of the output JSON file.")
 p.add_argument("--out_graph_name", help="Name of the output graph adjacency CSV file.")
 p.add_argument("--num_processes", help="Number of worker processes to use for parallelisation. Default is to use the "
                                        "number returned by os.cpu_count().", default=cpu_count, type=int)
+p.add_argument("--out_all_paths", help="Output table with all paths and its stats.", action='store_true')
 p.add_argument("-v", "--verbose", help="Set verbose logging level.", type=int, default=None)
 
 if __name__ == '__main__':
@@ -222,3 +223,9 @@ if __name__ == '__main__':
 
     with open(outrname, 'w') as f:
         json.dump(ranks, f, indent=4)
+    if argv.out_all_paths:
+        paths_df = pd.DataFrame(np.array([','.join(z) for z in [[y[0] for y in x] for x in pt_bs_by_k]]).T,
+                                columns=['Nodes'])
+        paths_df = paths_df.merge(res, left_index=True, right_index=True)
+        out_paths_name = outfname.replace('.json', '_all_paths.csv')
+        paths_df.to_csv(out_paths_name, index=False)
