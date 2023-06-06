@@ -35,6 +35,7 @@ p.add_argument("--out_graph_name", help="Name of the output graph adjacency CSV 
 p.add_argument("--num_processes", help="Number of worker processes to use for parallelisation. Default is to use the "
                                        "number returned by os.cpu_count().", default=cpu_count, type=int)
 p.add_argument("--out_all_paths", help="Output table with all paths and its stats.", action='store_true')
+p.add_argument("--pen_p_val", help="Penalize p-val with n choose k instead k*log2(n)", action='store_true')
 p.add_argument("-v", "--verbose", help="Set verbose logging level.", type=int, default=None)
 
 if __name__ == '__main__':
@@ -162,7 +163,7 @@ if __name__ == '__main__':
         pt_id = None
 
     # Returns a subset of nodes that are highly connected
-    res = mle.get_encoding_length(bs=pt_bs_by_k, G=G, pvals=data_mx_pvals.T, pt_id=pt_id)
+    res = mle.get_encoding_length(bs=pt_bs_by_k, G=G, pvals=data_mx_pvals.T, pt_id=pt_id, pen_p_val=argv.pen_p_val)
     ind_mx = np.where(res['d.score'] == res['d.score'].max())
     highest_dscore_paths = res.iloc[ind_mx]
 
