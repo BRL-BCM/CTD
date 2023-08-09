@@ -118,7 +118,7 @@ def get_pt_bs_by_k(S, ranks, num_misses=None):
     # For each k, find the ranks that found at least k in S. Which node
     # rankings, from different start nodes, found the first k soonest?
     pt_by_k = []
-    for k in range(len(S)):
+    for k in range(1, len(S) + 1):
         pt_by_k_tmp = pt_bit_string
         best_ind = {}
 
