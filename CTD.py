@@ -92,7 +92,7 @@ if __name__ == '__main__':
 
     if not argv.s_module:
         for pt in target_patients:
-            temp = experimental_df.sort_values(by=pt, ascending=False)
+            temp = experimental_df.sort_values(by=pt, key=abs, ascending=False)
             S_patient = list(temp.index)[:kmx]
             S_set += S_patient
 

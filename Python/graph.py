@@ -245,7 +245,7 @@ def diffuse_p1(p1, start_node, G, visited_nodes, threshold_diff, adj_mat, verbos
     start_node_unvisited_nbors = [node for node in start_node_nbors if node not in visited_nodes]
 
     if start_node_unvisited_nbors:
-        w_edges_sum = sum(adj_mat2.loc[start_node_unvisited_nbors, start_node])
+        w_edges_sum = sum(abs(adj_mat2.loc[start_node_unvisited_nbors, start_node]))
 
         for z in range(len(start_node_unvisited_nbors)):
             i_prob = p1 * abs(adj_mat2.loc[start_node_unvisited_nbors[z], start_node]) / w_edges_sum  # inherited prob
