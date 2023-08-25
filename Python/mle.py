@@ -40,7 +40,7 @@ def get_encoding_length(bs, G, pvals=None, pt_id=None, pen_p_val=False):
         found = sum([d[1] for d in opt_bs])  # number of ranks that found at least k nodes
         not_found = k - found + 1
         if pen_p_val:
-            e = math.comb(len(G), (not_found + 1)) + len(opt_bs) - 1  # encoding length
+            e = np.log2(math.comb(len(G), (not_found + 1))) + len(opt_bs) - 1  # encoding length
         else:
             e = (not_found + 1) * np.log2(len(G)) + len(opt_bs) - 1  # encoding length
         opt_bs_tmp = ''.join(['T' if d[1] == 1 else '0' for d in opt_bs])  # T denotes a hit and 0 denotes a miss
@@ -53,7 +53,7 @@ def get_encoding_length(bs, G, pvals=None, pt_id=None, pen_p_val=False):
         row['subsetSize'] = k+1  # assume k=0 corresponds to subset of size 1
         row['opt.T'] = found
         if pen_p_val:
-            row['IS.null'] = np.float32(math.comb(len(G), (k + 1)))
+            row['IS.null'] = np.float32(np.log2(np.float32(math.comb(len(G), (k + 1)))))
         else:
             row['IS.null'] = np.float32(np.log2(len(G)) * (k + 1))  # Shannon's entropy
         row['IS.alt'] = np.float32(e)
