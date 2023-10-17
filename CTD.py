@@ -121,6 +121,7 @@ if __name__ == '__main__':
 
     # Dictionary ranks contains encodings for each node in S_perturbed_nodes
     ranks = {}
+    cum_prob_gba = {node: 0 for node in G.keys()}  # Cumulative probability used by Guilt By Association
 
     # If num_processes is set to 1, standard for loop will be used instead of creating multiprocessing pool with a
     # single process to avoid overhead
@@ -128,12 +129,12 @@ if __name__ == '__main__':
         for node in S_perturbed_nodes:
             ranks[node], _ = graph.single_node_get_node_ranks(n=node, G=G, p1=1.0, threshold_diff=0.01, adj_mat=adj_df,
                                                               S=S_perturbed_nodes, num_misses=np.log2(len(G)),
-                                                              verbose=argv.verbose)
+                                                              verbose=argv.verbose, cum_prob=cum_prob_gba)
     else:
         pool = Pool(argv.num_processes)
         ranks_collection = pool.map(partial(graph.single_node_get_node_ranks, G=G, p1=1.0, threshold_diff=0.01,
                                             adj_mat=adj_df, S=S_perturbed_nodes, num_misses=np.log2(len(G)),
-                                            verbose=argv.verbose), S_perturbed_nodes)
+                                            verbose=argv.verbose, cum_prob=cum_prob_gba), S_perturbed_nodes)
         pool.close()
         pool.join()
 
@@ -230,3 +231,11 @@ if __name__ == '__main__':
         paths_df = paths_df.merge(res, left_index=True, right_index=True)
         out_paths_name = outfname.replace('.json', '_all_paths.csv')
         paths_df.to_csv(out_paths_name, index=False)
+
+    cum_prob_gba = {node: prob for node, prob in cum_prob_gba.items() if node not in S_perturbed_nodes}
+    gba_df = pd.DataFrame(cum_prob_gba, index=['Importance']).T
+    gba_df.sort_values(by='Importance', inplace=True, ascending=False)
+    gba_df.reset_index(inplace=True)
+    gba_df.columns = ['Node_id', 'Importance']
+    out_gba_name = outfname.replace('.json', '_gba.csv')
+    gba_df.to_csv(out_gba_name, index=False)

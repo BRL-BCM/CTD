@@ -297,7 +297,7 @@ def diffuse_p1(p1, start_node, G, visited_nodes, threshold_diff, adj_mat, verbos
 
 
 def single_node_get_node_ranks(n, G, p1, threshold_diff, adj_mat, S=None, num_misses=None, verbose=None, out_dir='',
-                               use_labels=False, coords=None):
+                               use_labels=False, coords=None, cum_prob=None):
 
     """
     Generate single-node node rankings ("fixed" walk)
@@ -323,6 +323,7 @@ def single_node_get_node_ranks(n, G, p1, threshold_diff, adj_mat, S=None, num_mi
     use_labels : If True, node names will display next to their respective modes in the network. If False, node names
     will not display. Only relevant if out_dir is specified.
     coords : The x and y coordinates for each node in the network, to remain static between images.
+    cum_prob : Cumulative probability used by GBA
 
     Returns
     -------
@@ -360,6 +361,8 @@ def single_node_get_node_ranks(n, G, p1, threshold_diff, adj_mat, S=None, num_mi
 
         curr_gph = diffuse_p1(start_node=start_node, G=curr_gph, visited_nodes=curr_ns, p1=p1, adj_mat=adj_mat,
                               threshold_diff=threshold_diff, verbose=verbose)
+        # Update GBA cumulative probability
+        cum_prob.update({key: cum_prob.get(key, 0) + curr_gph.get(key, 0) for key in cum_prob.keys()})
 
         # Sanity check - p1_event should add up to roughly 1
         p1_event = sum(curr_gph.values())
