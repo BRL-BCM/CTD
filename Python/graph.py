@@ -297,7 +297,7 @@ def diffuse_p1(p1, start_node, G, visited_nodes, threshold_diff, adj_mat, verbos
 
 
 def single_node_get_node_ranks(n, G, p1, threshold_diff, adj_mat, S=None, num_misses=None, verbose=None, out_dir='',
-                               use_labels=False, coords=None, cum_prob=None):
+                               use_labels=False, coords=None):
 
     """
     Generate single-node node rankings ("fixed" walk)
@@ -334,6 +334,7 @@ def single_node_get_node_ranks(n, G, p1, threshold_diff, adj_mat, S=None, num_mi
 
     """
 
+    cum_prob_gba = {node: 0 for node in G.keys()}
     p0 = 1 - p1
     if not S and (num_misses or out_dir != ''):
         print("You must also supply S if out_dir or num_misses is supplied.")
@@ -362,7 +363,7 @@ def single_node_get_node_ranks(n, G, p1, threshold_diff, adj_mat, S=None, num_mi
         curr_gph = diffuse_p1(start_node=start_node, G=curr_gph, visited_nodes=curr_ns, p1=p1, adj_mat=adj_mat,
                               threshold_diff=threshold_diff, verbose=verbose)
         # Update GBA cumulative probability
-        cum_prob.update({key: cum_prob.get(key, 0) + curr_gph.get(key, 0) for key in cum_prob.keys()})
+        cum_prob_gba.update({key: cum_prob_gba.get(key, 0) + curr_gph.get(key, 0) for key in cum_prob_gba.keys()})
 
         # Sanity check - p1_event should add up to roughly 1
         p1_event = sum(curr_gph.values())
@@ -402,4 +403,4 @@ def single_node_get_node_ranks(n, G, p1, threshold_diff, adj_mat, S=None, num_mi
             net_walk_snap_shot(adj_mat=adj_mat, G=G, output_dir=out_dir, visited_nodes=curr_ns, S=S, coords=coords,
                                img_num=len(curr_ns), use_labels=use_labels)
 
-    return curr_ns, n
+    return curr_ns, n, cum_prob_gba

@@ -127,19 +127,29 @@ if __name__ == '__main__':
     # single process to avoid overhead
     if argv.num_processes == 1:
         for node in S_perturbed_nodes:
-            ranks[node], _ = graph.single_node_get_node_ranks(n=node, G=G, p1=1.0, threshold_diff=0.01, adj_mat=adj_df,
-                                                              S=S_perturbed_nodes, num_misses=np.log2(len(G)),
-                                                              verbose=argv.verbose, cum_prob=cum_prob_gba)
+            ranks[node], _, prob_gba = graph.single_node_get_node_ranks(n=node, G=G, p1=1.0, threshold_diff=0.01,
+                                                                        adj_mat=adj_df, S=S_perturbed_nodes,
+                                                                        num_misses=np.log2(len(G)),
+                                                                        verbose=argv.verbose)
+            # Sum of all probabilities spilled to nodes during diffusion walk
+            cum_prob_gba.update({key: cum_prob_gba.get(key, 0) + prob_gba.get(key, 0) for key in cum_prob_gba.keys()})
+
     else:
         pool = Pool(argv.num_processes)
         ranks_collection = pool.map(partial(graph.single_node_get_node_ranks, G=G, p1=1.0, threshold_diff=0.01,
                                             adj_mat=adj_df, S=S_perturbed_nodes, num_misses=np.log2(len(G)),
-                                            verbose=argv.verbose, cum_prob=cum_prob_gba), S_perturbed_nodes)
+                                            verbose=argv.verbose), S_perturbed_nodes)
         pool.close()
         pool.join()
 
+        cum_prob_gba_all = dict()
         for tup in ranks_collection:
             ranks[tup[1]] = tup[0]
+            cum_prob_gba_all[tup[1]] = tup[2]
+        # Collect and aggregate all probabilities spilled to nodes during diffusion walk
+        for node1, dict1 in cum_prob_gba_all.items():
+            for node2, prob in dict1.items():
+                cum_prob_gba[node2] += prob
 
     # Convert to bitstring
     # Get the bitstring associated with the disease module's metabolites
