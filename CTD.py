@@ -10,7 +10,7 @@ from functools import partial
 import pandas as pd
 import numpy as np
 from scipy.stats import norm
-from Python import data, graph, mle
+from Python import data, graph, mle, gba_analysis
 
 cpu_count = os.cpu_count()
 
@@ -249,3 +249,5 @@ if __name__ == '__main__':
     gba_df.columns = ['Node_id', 'Importance']
     out_gba_name = outfname.replace('.json', '_gba.csv')
     gba_df.to_csv(out_gba_name, index=False)
+   
+
