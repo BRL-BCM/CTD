@@ -1,0 +1,241 @@
+import json
+import random
+import pandas as pd
+
+import csv
+import numpy as np
+import argparse
+import warnings
+import scipy.sparse.csgraph
+import abc
+
+def split_80_20(array:list[str], generator_seed:int=42)->tuple[list[str],list[str]]:
+    # Calculate the split index (80% of the list)
+    split_index = int(len(array) * 0.8)
+
+    # Shuffle the list randomly
+    random.seed(generator_seed)
+    random.shuffle(array)
+
+    # Split the list into two lists
+    anchors = array[:split_index]  # First 80% elements
+    targets = array[split_index:]  # Remaining 20% elements
+
+    return (anchors, targets)
+
+def find_centers_of_S(distances_inside_S : pd.DataFrame, verbose=False)->tuple[list[str],float]:
+    # Calculate the eccentricity for each node
+    eccentricities : pd.Series = np.amax(distances_inside_S, axis=1)
+    sorted_eccentricities = eccentricities.sort_values()
+
+    # Find the index of the node with the minimum eccentricity
+    min_eccentricity = np.amin(eccentricities) 
+    center_node_indices = list(np.where(eccentricities == min_eccentricity)[0])
+    center_node_labels = distances_inside_S.columns[center_node_indices]
+
+    if(verbose):
+        print(f"Sorted node eccentricities are \n {sorted_eccentricities}")
+        print(f"The center of the graph consists of nodes {list(center_node_labels)}.")
+        print(f"Graph radius is {min_eccentricity}.")
+    return center_node_labels, min_eccentricity
+
+
+class DistanceMetric(abc.ABC):
+    def __init__(self, distances_from_S:pd.DataFrame, use_min_distance:bool=True):
+        self._distances_from_S = distances_from_S
+        self._use_min_distance = use_min_distance
+        self._distance_dict = {}
+
+    def set_key_points(self, key_points):
+        self._key_points = key_points
+
+    def get_key_points(self)->list[str]:
+        return self._key_points
+
+    @abc.abstractmethod
+    def get_key_points(self):
+        pass
+
+    @abc.abstractmethod
+    def calculate_distance(self, Y_label):
+        pass 
+
+    @abc.abstractmethod
+    def print_info(self):
+        pass
+
+class RadialDistanceMetric(DistanceMetric):
+    def __init__(self, distances_from_S: pd.DataFrame, use_min_distance:bool=True):
+        super().__init__(distances_from_S, use_min_distance)
+
+    def get_key_points(self)->list[str]:
+        
+        S = list(self._distances_from_S.index)
+        distances_inside_S : pd.DataFrame = self._distances_from_S[S]
+        self._key_points, self._radius = find_centers_of_S(distances_inside_S)
+        return self._key_points
+
+    def calculate_distance(self, Y_label):
+        if (Y_label in self._distance_dict.keys()):
+            return self._distance_dict[Y_label]
+        else:
+            if (self._use_min_distance):
+                distance = min(list(self._distances_from_S.loc[self.get_key_points(), Y_label]))
+            else:
+                distance = max(list(self._distances_from_S.loc[self.get_key_points(), Y_label]))
+            self._distance_dict[Y_label] = distance
+            return distance
+
+    def print_info(self):
+        print("Radial distance metric")
+        if (self._use_min_distance):
+            print(f"Using minimal distance from the centers {self._key_points}.")
+        print(f"Radius of S is {self._radius}")
+
+def construct_information_hop_matrix(adj_mat : pd.DataFrame, S : list[str], verbose=False):
+
+    # For information distance calculation, only the absolute values of the edge weights are used
+    adj_mat = adj_mat.abs()
+
+    # print("(Non-negative) adjacency matrix")
+    # print(adj_mat)
+
+    degrees = adj_mat.sum(axis=0)
+    
+    # Print nodes with outdegree equal to 0
+    deg_zero_nodes = list(np.where(degrees == 0)[0])
+    deg_zero_node_labels = adj_mat.columns[deg_zero_nodes]
+    if verbose:
+        print(f"Nodes with degree 0 are {deg_zero_node_labels}")
+
+    S_zero_degs = [node for node in S if node in deg_zero_node_labels]
+    if (len(S_zero_degs) > 0):
+        warnings.warn(f"There are {len(S_zero_degs)} zero degree nodes in S and they are {S_zero_degs}.")
+    
+    if verbose:
+        print(f"Dropping {len(deg_zero_node_labels)} zero degree nodes from the dataframe.")
+    adj_mat = adj_mat.drop(deg_zero_node_labels, axis=0)
+    adj_mat = adj_mat.drop(deg_zero_node_labels, axis=1)
+    degrees = degrees[degrees != 0]
+
+    # Normalize each element of the adjacency matrix by the degree of the source node
+    with np.errstate(divide='ignore', invalid='ignore'):
+        normalized_adj_mat = adj_mat.div(degrees, axis=0)
+    
+    if verbose:
+        print("Normalized adjacency matrix")
+        print(normalized_adj_mat)
+
+    # Create the information hop matrix
+    IHM = pd.DataFrame()
+
+    # Apply the transformation -log(normalized_adj_mat[i,j])
+    # Use np.where to handle division by zero and logarithm of zero gracefully
+    with np.errstate(divide='ignore', invalid='ignore'):
+        IHM = np.abs(-np.log(normalized_adj_mat))
+
+    if verbose:
+        print("Information hop distance matrix")
+        print(IHM)
+
+    return IHM
+
+def calculate_distances_from_S(adj_mat:pd.DataFrame, S:list[str], verbose=False)->tuple[pd.DataFrame, float, pd.DataFrame]:
+    S_indices = [adj_mat.index.get_loc(label) for label in S]
+
+    # scipy dijkstra implementation treats edge weights of 0 as non-existent edges, therefore,
+    # we need to replace all 0s with 1e-7 (smaller values are treated as 0), and all np.inf values with 0
+    replacement_for_zero = 1e-7
+    adjusted_adjacency_matrix = adj_mat.replace(0, replacement_for_zero)
+    adjusted_adjacency_matrix.replace(np.inf, 0, inplace = True) 
+
+    if (verbose):
+        print("Adjusted adjacency matrix:")
+        print(adjusted_adjacency_matrix)
+
+    dst_mat = scipy.sparse.csgraph.dijkstra(adjusted_adjacency_matrix, True, S_indices, False, False, np.inf, False)
+    distances_from_S = pd.DataFrame(dst_mat, index=S, columns=adjusted_adjacency_matrix.columns)
+
+    if (verbose):
+        print("Distances from S to all nodes:")
+        print(distances_from_S)
+
+    distances_inside_S : pd.DataFrame = distances_from_S[S]
+    if (verbose):
+        print("Distances in S:")
+        print(distances_inside_S)
+
+    S_diameter = distances_inside_S.max().max()
+    if (verbose):
+        print(f"Diameter of S is {S_diameter}")
+    if (S_diameter == np.inf):
+        warnings.warn("The diameter of S is reported to be infinite!")
+
+    return distances_from_S, S_diameter, distances_inside_S
+
+# def criterion_all_distances_from_S(distances_from_S: pd.DataFrame, Y_label: str, T: float):
+#     return distances_from_S[Y_label].max() < T  
+    
+# def criterion_any_distance_from_S(distances_from_S: pd.DataFrame, Y_label: str, T: float):
+#     return distances_from_S[Y_label].min() < T  
+
+# #TODO: change to work with DistanceMetric
+# def criterion_radial_distance(distances_from_S: pd.DataFrame, Y_label:str, T: float)->bool:
+
+
+#     S = list(distances_from_S.index)
+#     distances_inside_S : pd.DataFrame = distances_from_S[S]
+
+#     # Only calculate the centers and radius of S the first time, later just reuse it.
+#     if (not hasattr(criterion_radial_distance, "centers")):
+#         centers, radius = find_centers_of_S(distances_inside_S)
+#         criterion_radial_distance.centers = centers
+#         criterion_radial_distance.radius = radius
+    
+#     if (criterion_radial_distance.radius > radial_distance(distances_from_S, criterion_radial_distance.centers, Y_label) ):
+#         return True
+#     else:
+#         return False
+
+
+# for radial distance, pass RadialDistanceMetric
+# TODO: for boundary distance, pass BoundaryDistanceMetric 
+# returns a dataframe with node rankings by GBA principle
+def get_rankings_by_gba(distances_from_S:pd.DataFrame, distance_metric:DistanceMetric, use_K=False, K=50)->pd.DataFrame:
+    #TODO adjust K to depend on the size of S
+    ranking_distances = {}
+    S = list(distances_from_S.index)
+    for label in list(distances_from_S.columns):
+        ranking_distance:float = distance_metric.calculate_distance(label)
+        ranking_distances[label] = ranking_distance
+    ranking_distances = {node: distance for node, distance in ranking_distances.items() if node not in S}
+    rankings_df = pd.DataFrame(ranking_distances, index=['Importance']).T
+    rankings_df.sort_values(by='Importance', inplace=True, ascending=True)
+    rankings_df.reset_index(inplace=True)
+    rankings_df.columns = ['Node_id', 'Importance']
+    return rankings_df
+
+# def extend_S(adj_mat, S, inclusion_criterion = criterion_radial_distance, verbose=False):
+#     distances_from_s, S_diameter, distances_inside_S = calculate_distances_from_S(adj_mat, S)
+    
+#     # Set the threshold to the information diameter of S
+#     # S_radius = S_diameter / 2
+#     #extended_S = [label for label in adj_mat.columns if criterion(distances_from_s, label, T)]
+    
+#     #TODO change T based on used criterion
+#     T = S_diameter / 2
+#     extended_S = [label for label in adj_mat.columns if inclusion_criterion(distances_from_s, label, T)]
+#     if verbose:
+#         print(f"Extended S consists of these {len(extended_S)} nodes: {extended_S}")
+#     new_S_nodes = [node for node in extended_S if node not in S]
+#     if verbose:
+#         print(f"Found {len(new_S_nodes)} nodes in extended S that are not in S: {new_S_nodes}")
+#     return extended_S
+
+# TODO: reverse direction and do Dijkstra
+def calculate_information_distance_from_set(S, Y):
+    pass
+
+
+
+
