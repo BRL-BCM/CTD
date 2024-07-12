@@ -129,10 +129,14 @@ for index, row in diseases_df.iterrows(): # loop over diseases
         S = read_S(path_disease_S)
         anchors, targets = gba_analysis.split_80_20(S, generator_seed=seed)
 
-        anchors_path = f"data/{disease_name}/anchors_{seed}.csv"
+        results_directory_path = f"results/{disease_name}/seed_{seed}"
+        if not os.path.exists(results_directory_path):
+            os.makedirs(results_directory_path)
+
+        anchors_path = results_directory_path+f"/anchors_{seed}.csv"
         write_list_to_csv(anchors, anchors_path)
 
-        targets_path = f"data/{disease_name}/targets_{seed}.csv"
+        targets_path = results_directory_path+f"/targets_{seed}.csv"
         write_list_to_csv(targets, targets_path)
 
         # Uncomment if you want to also run CTD_GBA1 on the data
@@ -180,11 +184,8 @@ for index, row in diseases_df.iterrows(): # loop over diseases
         print(f"Test suit {index} took {test_execution_time} seconds to complete.")
 
 results_dtype_dict = {'test_name':'str', 
-                      # 'ndgc_ctd':'float',
-                      # 'time_ctd':'float', 
                       'ndgc':'float', 
-                      'time':'float', 
-                      # 'time_total':'float', 
+                      'time':'float',  
                       'split_name':'str'}
 results_columns = ['test_name', 'ndgc', 'time', 'split_name']
 # results_columns = ['test_name', 'ndgc_ctd', 'time_ctd', 'ndgc_nextid', 'time_nextid', 'time_total', 'split_name']
