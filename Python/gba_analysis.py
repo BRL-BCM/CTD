@@ -4,7 +4,6 @@ import pandas as pd
 
 import csv
 import numpy as np
-import argparse
 import warnings
 import scipy.sparse.csgraph
 import abc
@@ -39,12 +38,28 @@ def find_centers_of_S(distances_inside_S : pd.DataFrame, verbose=False)->tuple[l
         print(f"Graph radius is {min_eccentricity}.")
     return center_node_labels, min_eccentricity
 
+# Returns nodes in S that have a neighbour not in S
+def find_inner_boundary_of_S(adjacency_matrix: pd.DataFrame, S_list: list[str])->list[str]:
+
+    degrees = adjacency_matrix.sum(axis = 1)
+    adj_S = adjacency_matrix.loc[S_list, S_list]   
+    degrees_in_S = adj_S.sum(axis = 1) 
+
+    # Set for storing nodes that are in the inner boundary
+    inner_boundary_nodes = set()    
+
+    # Iterate over nodes in S
+    for node in S_list:
+        if (degrees[node] != degrees_in_S[node]):
+            inner_boundary_nodes.add(node)
+    return list(inner_boundary_nodes)
 
 class DistanceMetric(abc.ABC):
     def __init__(self, distances_from_S:pd.DataFrame, use_min_distance:bool=True):
         self._distances_from_S = distances_from_S
         self._use_min_distance = use_min_distance
         self._distance_dict = {}
+        self._key_points = None
 
     def set_key_points(self, key_points):
         self._key_points = key_points
@@ -69,10 +84,10 @@ class RadialDistanceMetric(DistanceMetric):
         super().__init__(distances_from_S, use_min_distance)
 
     def get_key_points(self)->list[str]:
-        
-        S = list(self._distances_from_S.index)
-        distances_inside_S : pd.DataFrame = self._distances_from_S[S]
-        self._key_points, self._radius = find_centers_of_S(distances_inside_S)
+        if self._key_points is None:
+            S = list(self._distances_from_S.index)
+            distances_inside_S : pd.DataFrame = self._distances_from_S[S]
+            self._key_points, self._radius = find_centers_of_S(distances_inside_S)
         return self._key_points
 
     def calculate_distance(self, Y_label):
@@ -91,6 +106,36 @@ class RadialDistanceMetric(DistanceMetric):
         if (self._use_min_distance):
             print(f"Using minimal distance from the centers {self._key_points}.")
         print(f"Radius of S is {self._radius}")
+
+class BoundaryDistanceMetric(DistanceMetric):
+    def __init__(self, adjacency_matrix: pd.DataFrame, distances_from_S: pd.DataFrame, use_min_distance:bool=True):
+        super().__init__(distances_from_S, use_min_distance)
+        self._adjacency_matrix = adjacency_matrix
+
+    # Key points for the boundary distance metric are the inner graph boundary
+    def get_key_points(self)->list[str]:
+        if self._key_points is None:
+            S = list(self._distances_from_S.index)
+            # A node belongs to the inner boundary of S if it has a neighbour outside of S 
+            self._key_points = find_inner_boundary_of_S(adjacency_matrix=self._adjacency_matrix, S_list=S)
+        return self._key_points
+
+    def calculate_distance(self, Y_label):
+        if (Y_label in self._distance_dict.keys()):
+            return self._distance_dict[Y_label]
+        else:
+            if (self._use_min_distance):
+                distance = min(list(self._distances_from_S.loc[self.get_key_points(), Y_label]))
+            else:
+                distance = max(list(self._distances_from_S.loc[self.get_key_points(), Y_label]))
+            self._distance_dict[Y_label] = distance
+            return distance
+
+    def print_info(self):
+        print("Boundary distance metric")
+        if (self._use_min_distance):
+            print(f"Using minimal distance from the boundary formed from nodes {self._key_points}.")
+        
 
 def construct_information_hop_matrix(adj_mat : pd.DataFrame, S : list[str], verbose=False):
 
@@ -153,7 +198,9 @@ def calculate_distances_from_S(adj_mat:pd.DataFrame, S:list[str], verbose=False)
         print("Adjusted adjacency matrix:")
         print(adjusted_adjacency_matrix)
 
-    dst_mat = scipy.sparse.csgraph.dijkstra(adjusted_adjacency_matrix, True, S_indices, False, False, np.inf, False)
+    dst_mat = scipy.sparse.csgraph.dijkstra(csgraph=adjusted_adjacency_matrix, directed=True, 
+                                            indices=S_indices, return_predecessors=False, unweighted=False, 
+                                            limit=np.inf, min_only=False)
     distances_from_S = pd.DataFrame(dst_mat, index=S, columns=adjusted_adjacency_matrix.columns)
 
     if (verbose):
