@@ -83,6 +83,8 @@ class NextID_GBATest :
 
         self._rankings_df:pd.DataFrame = gba_analysis.get_rankings_by_gba(distances_from_S, distance_metric=distance)
         self._ndcg_score = rankings.ndcg(self._rankings_df, self._targets)
+        self._ranks:list = self._rankings_df.index[self._rankings_df['Node_id'].isin(self._targets)].tolist()
+        #out_radial_name = outfname.replace('.json', '_gba_radial.csv')
 
         # Write results
         results_directory_path = f"results/{self._disease_name}/seed_{seed}"
@@ -104,9 +106,9 @@ lung_adenocarcinoma = Disease("lung_adenocarcinoma", "data/lung_adenocarcinoma/L
 psoriasis = Disease("psoriasis", "data/psoriasis/Psoriasis_large_adj.csv", "data/psoriasis/Psoriasis_all_genes_large.csv")
 ulcerative_colitis = Disease("ulcerative_colitis", "data/ulcerative_colitis/Ulcerative_Colitis_large_adj.csv", "data/ulcerative_colitis/Ulcerative_Colitis_all_genes_large.csv")
 
-# disease_list = [breast_carcinoma]
-disease_list = [arthritis, asthma, chron_pulmo, dilated_cardiomyopath, breast_carcinoma,
-               lung_adenocarcinoma, psoriasis, ulcerative_colitis]
+disease_list = [arthritis]
+# disease_list = [arthritis, asthma, chron_pulmo, dilated_cardiomyopath, breast_carcinoma,
+#                lung_adenocarcinoma, psoriasis, ulcerative_colitis]
 diseases_df = pd.DataFrame(disease_list)
 
 split_seeds = [42, 45, 55, 100, 420] #TODO generate and use more splits?
@@ -160,21 +162,20 @@ for index, row in diseases_df.iterrows(): # loop over diseases
         for metric in distance_metrics_used:
             
             nextid_start_time = time.time()
-            test = NextID_GBATest(disease_name=disease_name, metric_description=metric, adj_matrix_path=path_disease_adj, s_path=path_disease_S, 
+            disease_test = NextID_GBATest(disease_name=disease_name, metric_description=metric, adj_matrix_path=path_disease_adj, s_path=path_disease_S, 
                                         split_precalculated=True, anchors=anchors, targets=targets)
-            test.run()
+            disease_test.run()
             nextid_end_time = time.time()
             nextid_time = nextid_end_time - nextid_start_time
-            
-
             # Append to results dataframe
             new_test_result = {'test_name':test_name+"_" + metric, 
                       # 'ndgc_ctd':ndcg_ctd_gba,
                       # 'time_ctd':ctd_time, 
-                      'ndgc':test._ndcg_score, 
+                      'ndgc':disease_test._ndcg_score, 
                       'time':nextid_time, 
                       # 'time_total':test_execution_time, 
-                      'split_name':f"generated_{seed}"}
+                      'split_name':f"generated_{seed}",
+                      'ranks': ','.join(map(str, disease_test._ranks))}
             results_list.append(new_test_result)
             print(f"NextID_GBA test for {disease_name} using {metric} completed and took {nextid_time} seconds.\n")
 
@@ -186,8 +187,9 @@ for index, row in diseases_df.iterrows(): # loop over diseases
 results_dtype_dict = {'test_name':'str', 
                       'ndgc':'float', 
                       'time':'float',  
-                      'split_name':'str'}
-results_columns = ['test_name', 'ndgc', 'time', 'split_name']
+                      'split_name':'str',
+                      'ranks': 'str'}
+results_columns = ['test_name', 'ndgc', 'time', 'split_name', 'ranks']
 # results_columns = ['test_name', 'ndgc_ctd', 'time_ctd', 'ndgc_nextid', 'time_nextid', 'time_total', 'split_name']
 benchmark_results_df:pd.DataFrame = pd.DataFrame(data=results_list, columns=results_columns)
 benchmark_results_df.astype(results_dtype_dict)
