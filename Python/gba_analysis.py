@@ -283,6 +283,42 @@ def get_rankings_by_gba(distances_from_S:pd.DataFrame, distance_metric:DistanceM
 def calculate_information_distance_from_set(S, Y):
     pass
 
+def calculate_volume(A:list[str], adj_mat:pd.DataFrame)->float:
+    submatrix:pd.DataFrame = adj_mat.loc[A, :]
+    volume: float = adj_mat[A].to_numpy().sum()
+    return volume
 
+def calculate_cut(S:list[str], adj_mat:pd.DataFrame)->float:
+    # Ensure S is a list or set of nodes
+    S = list(S)
+    # Complement of S (all nodes not in S)
+    all_nodes = set(adj_mat.index)
+    S_complement = list(all_nodes - set(S))
+    
+    # Extract the submatrix corresponding to edges between S and S_complement
+    cut_matrix = adj_mat.loc[S, S_complement]
+    
+    # Sum the weights of the edges in the cut
+    cut_value = cut_matrix.to_numpy().sum()
+    
+    return cut_value
+
+# Calculate the conductance of a node set S, given by the total weight of edges starting in S and ending out of S divided 
+# by the minimum of volumes of S and V\S, where the volume of node set A is given by the sum of weights of all edges starting in A
+def calculate_conductance(S:list[str], adj_mat: pd.DataFrame)->float:
+    # Calculate the volume of S
+    vol_S:float = calculate_volume(S, adj_mat)
+    
+    # Calculate the volume of the complement of S
+    all_nodes = set(adj_mat.index)
+    S_complement = list(all_nodes - set(S))
+    vol_S_complement:float = calculate_volume(S_complement, adj_mat)
+    
+    # Calculate the cut between S and S_complement
+    cut_value = calculate_cut(S, adj_mat)
+
+    # Compute the conductance
+    conductance = cut_value / min(vol_S, vol_S_complement)
+    return conductance
 
 
