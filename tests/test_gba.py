@@ -16,6 +16,7 @@ sys.path.append(python_dir)
 
 import gba_analysis, rankings
 
+
 def write_list_to_csv(lst:list[str], path:str, header_column:str='x'):
     with open(path, mode='w', newline='') as file:
         writer = csv.writer(file)
@@ -70,6 +71,10 @@ class NextID_GBATest :
         # Construct information hop matrix used for information distance-based neighbourhood extension
         IHM = gba_analysis.construct_information_hop_matrix(self._adj_df, self._anchors)
 
+        # Check the conductance of S
+        self._conductance = gba_analysis.calculate_conductance(self._S_nodes, self._adj_df)
+        print(f"Conductance of S is {self._conductance}.")
+
         #gba_analysis.extend_S(IHM, self._anchors, gba_analysis.criterion_radial_distance)
 
         # distance = None
@@ -111,10 +116,13 @@ disease_list = [arthritis]
 #                lung_adenocarcinoma, psoriasis, ulcerative_colitis]
 diseases_df = pd.DataFrame(disease_list)
 
-split_seeds = [42, 45, 55, 100, 420] #TODO generate and use more splits?
+
+#split_seeds = [42]
+split_seeds = [42, 45, 55, 100, 420, 20, 40, 18, 22, 157, 1356, 2023, 872, 143, 67, 10000, 1024, 7, 13, 144] #TODO generate and use more splits?
 distance_metrics_used = ["radial_min", "boundary_min"]
-#distance_metrics_used = ["boundary_min"]
 results_list: list[dict] = []
+
+total_time_start = time.time()
 
 for index, row in diseases_df.iterrows(): # loop over diseases
     for seed in split_seeds:
@@ -141,7 +149,7 @@ for index, row in diseases_df.iterrows(): # loop over diseases
         targets_path = results_directory_path+f"/targets_{seed}.csv"
         write_list_to_csv(targets, targets_path)
 
-        # Uncomment if you want to also run CTD_GBA1 on the data
+        # Uncomment if you want to also run CTD_GBA1 on the data - DEPRECATED
 
         # print(f"Running CTD tests for {disease_name}")
         # ctd_start_time = time.time()
@@ -184,13 +192,16 @@ for index, row in diseases_df.iterrows(): # loop over diseases
                
         print(f"Test suit {index} took {test_execution_time} seconds to complete.")
 
+total_time_end = time.time()
+total_time = total_time_end - total_time_start
+print(f"\nAll tests completed in {total_time} seconds.")
+
 results_dtype_dict = {'test_name':'str', 
                       'ndgc':'float', 
                       'time':'float',  
                       'split_name':'str',
                       'ranks': 'str'}
 results_columns = ['test_name', 'ndgc', 'time', 'split_name', 'ranks']
-# results_columns = ['test_name', 'ndgc_ctd', 'time_ctd', 'ndgc_nextid', 'time_nextid', 'time_total', 'split_name']
 benchmark_results_df:pd.DataFrame = pd.DataFrame(data=results_list, columns=results_columns)
 benchmark_results_df.astype(results_dtype_dict)
 benchmark_results_df.to_csv("results/benchmark_results.csv", index=False, header=True)
