@@ -7,6 +7,10 @@ import numpy as np
 import warnings
 import scipy.sparse.csgraph
 import abc
+import math
+
+import scipy.sparse as sp
+from scipy.sparse.linalg import eigs, eigsh
 
 def split_80_20(array:list[str], generator_seed:int=42)->tuple[list[str],list[str]]:
     # Calculate the split index (80% of the list)
@@ -145,27 +149,43 @@ def construct_information_hop_matrix(adj_mat : pd.DataFrame, S : list[str], verb
     # print("(Non-negative) adjacency matrix")
     # print(adj_mat)
 
-    degrees = adj_mat.sum(axis=0)
+    outdegrees = adj_mat.sum(axis=1)
+    indegrees = adj_mat.sum(axis=0)
     
     # Print nodes with outdegree equal to 0
-    deg_zero_nodes = list(np.where(degrees == 0)[0])
-    deg_zero_node_labels = adj_mat.columns[deg_zero_nodes]
+    outdeg_zero_nodes = list(np.where(outdegrees == 0)[0])
+    outdeg_zero_node_labels = adj_mat.columns[outdeg_zero_nodes]
     if verbose:
-        print(f"Nodes with degree 0 are {deg_zero_node_labels}")
+        print(f"Nodes with outdegree 0 are {outdeg_zero_node_labels}")
 
-    S_zero_degs = [node for node in S if node in deg_zero_node_labels]
-    if (len(S_zero_degs) > 0):
-        warnings.warn(f"There are {len(S_zero_degs)} zero degree nodes in S and they are {S_zero_degs}.")
-    
+    # Print nodes with indegree equal to 0
+    indeg_zero_nodes = list(np.where(indegrees == 0)[0])
+    indeg_zero_node_labels = adj_mat.columns[indeg_zero_nodes]
     if verbose:
-        print(f"Dropping {len(deg_zero_node_labels)} zero degree nodes from the dataframe.")
-    adj_mat = adj_mat.drop(deg_zero_node_labels, axis=0)
-    adj_mat = adj_mat.drop(deg_zero_node_labels, axis=1)
-    degrees = degrees[degrees != 0]
+        print(f"Nodes with indegree 0 are {indeg_zero_node_labels}")
+
+    S_zero_outdeg_labels = [node for node in S if node in outdeg_zero_node_labels]
+    S_zero_indeg_labels = [node for node in S if node in indeg_zero_node_labels]
+    if (len(S_zero_outdeg_labels) > 0):
+        warnings.warn(f"There are {len(S_zero_outdeg_labels)} zero outdegree nodes in S and they are {S_zero_outdeg_labels}.")
+    if (len(S_zero_indeg_labels) > 0):
+        warnings.warn(f"There are {len(S_zero_indeg_labels)} zero indegree nodes in S and they are {S_zero_indeg_labels}.")
+    S_zero_total_deg_labels = list(set(S_zero_outdeg_labels).intersection(S_zero_indeg_labels))
+    if (len(S_zero_total_deg_labels) > 0):
+        warnings.warn(f"There are {len(S_zero_total_deg_labels)} nodes in S with a total degree of 0 and they are {S_zero_total_deg_labels}.")
+
+    total_deg_zero_node_labels = set(indeg_zero_node_labels).intersection(set(outdeg_zero_node_labels))
+    if verbose:
+        print(f"Dropping {len(total_deg_zero_node_labels)} nodes with total degree equal to 0 from the dataframe.")
+    adj_mat = adj_mat.drop(total_deg_zero_node_labels, axis=0)
+    adj_mat = adj_mat.drop(total_deg_zero_node_labels, axis=1)
+    
+    #outdegrees = outdegrees[outdegrees != 0]
+    outdegrees = adj_mat.sum(axis=1)
 
     # Normalize each element of the adjacency matrix by the degree of the source node
     with np.errstate(divide='ignore', invalid='ignore'):
-        normalized_adj_mat = adj_mat.div(degrees, axis=0)
+        normalized_adj_mat = adj_mat.div(outdegrees, axis=0)
     
     if verbose:
         print("Normalized adjacency matrix")
@@ -322,3 +342,59 @@ def calculate_conductance(S:list[str], adj_mat: pd.DataFrame)->float:
     return conductance
 
 
+def find_fiedler_eigenvalue(matrix):
+    """
+    Finds the second smallest eigenvalue (Fiedler eigenvalue) of a given sparse matrix.
+    Assumes the input matrix is symmetric and all fields are positive.
+    
+    Parameters:
+        matrix (scipy.sparse.csr_matrix): The sparse matrix for which to find the second smallest eigenvalue.
+
+    Returns:
+        float: The second smallest eigenvalue.
+        numpy.ndarray: The corresponding eigenvector (Fiedler vector).
+    """
+
+    
+    # Ensure the matrix is sparse and symmetric
+    assert sp.issparse(matrix), "Input matrix must be sparse."
+    
+    # Find the two smallest eigenvalues using the eigs method
+    # Since we are interested in the second smallest eigenvalue, we use k=2
+    eigenvalues, eigenvectors = eigs(matrix, k=2, which='SR')
+    
+    # The second smallest eigenvalue is at index 1
+    fiedler_eigenvalue = eigenvalues[1]
+    fiedler_vector = eigenvectors[:, 1]
+    
+    return fiedler_eigenvalue, fiedler_vector
+
+def calculate_Cheeger_bounds(matrix):
+    fiedler_eigenvalue, _ = find_fiedler_eigenvalue(matrix)
+    lower_bound = fiedler_eigenvalue / 2
+    upper_bound = math.sqrt(2*fiedler_eigenvalue)
+    return lower_bound, upper_bound
+
+# Example usage
+if __name__ == "__main__":
+    # Create a random sparse matrix for demonstration
+    size = 100  # Size of the matrix (100x100)
+    density = 0.1  # Approximate density of non-zero elements (10%)
+    
+    # Generate a random sparse matrix
+    random_matrix = sp.random(size, size, density=density)
+
+    random_matrix.data = np.abs(random_matrix.data)
+    
+    # Symmetrize the matrix (just for demonstration purposes)
+    symmetric_matrix = (random_matrix + random_matrix.T) / 2
+    
+    # Call the function to get the second smallest eigenvalue and vector
+    eigenvalue, eigenvector = find_fiedler_eigenvalue(symmetric_matrix)
+    
+    print(f"Second smallest eigenvalue: {eigenvalue}")
+    assert eigenvalue>=0, "Fiedler eigenvalue of G can not be less than zero!"
+
+    lower_bound, upper_bound = calculate_Cheeger_bounds(symmetric_matrix)
+
+    print(f"Cheeger bounds for the isoperimetric number are {lower_bound}, {upper_bound}")
