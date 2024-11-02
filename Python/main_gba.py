@@ -32,6 +32,9 @@ def main(args=None):
     adj_df.index = adj_df.columns
     s_nodes = pd.read_csv(args.s_nodes).astype(str).squeeze().values
 
+    # DEBUG: TODO delete this!
+    # has_non_zero = (adj_df.loc['6905'] != 0).any()
+
     # Construct information hop matrix used for information distance-based neighbourhood extension
     IHM = gba_analysis.construct_information_hop_matrix(adj_df, s_nodes)
 
@@ -48,9 +51,24 @@ def main(args=None):
         distance:gba_analysis.BoundaryDistanceMetric = gba_analysis.BoundaryDistanceMetric(adj_df, distances_from_S, use_min_distance=True)
 
     rankings_df = gba_analysis.get_rankings_by_gba(distances_from_S, distance_metric=distance)
-    outfname = os.path.basename(args.s_nodes).replace('.csv', f'_{np.round(conductance, 3)}_gba_ranks.csv')
+    
+    graph_name_path:str = os.path.basename(args.adj_path)
+    male_index = graph_name_path.upper().find("MALE")
+    female_index = graph_name_path.upper().find("FEMALE")
+    gender:str = ""
+    if (male_index > -1):
+        gender += "M"
+    if (female_index > -1):
+        gender += "F"
+    
+    root = os.getcwd()
+    results_path = os.path.join(root, "results", "elma_trajectories")
+    os.makedirs(results_path, exist_ok=True)
+    
+    outfname = os.path.join(root, "results", "elma_trajectories", os.path.basename(args.s_nodes).replace('.csv', f'_{gender}_{np.round(conductance, 3)}_gba_ranks.csv'))
     rankings_df.to_csv(outfname, index=False)
-
 
 if __name__ == "__main__":
     main()
+
+    #python Python/main_gba.py --s_nodes data/Male_female_and_trajectories/trajectory_0.csv --adj_path data/Male_female_and_trajectories/1-Matrix_ML_NET_Male_Female_adj.csv
