@@ -53,8 +53,8 @@ def main(args=None):
     rankings_df = gba_analysis.get_rankings_by_gba(distances_from_S, distance_metric=distance)
     
     graph_name_path:str = os.path.basename(args.adj_path)
-    male_index = graph_name_path.upper().find("MALE")
-    female_index = graph_name_path.upper().find("FEMALE")
+    male_index = graph_name_path.upper().find("_MALE")
+    female_index = graph_name_path.upper().find("_FEMALE")
     gender:str = ""
     if (male_index > -1):
         gender += "M"
