@@ -304,8 +304,7 @@ def calculate_information_distance_from_set(S, Y):
     pass
 
 def calculate_volume(A:list[str], adj_mat:pd.DataFrame)->float:
-    submatrix:pd.DataFrame = adj_mat.loc[A, :]
-    volume: float = adj_mat[A].to_numpy().sum()
+    volume: float = adj_mat.loc[A, :].to_numpy().sum()
     return volume
 
 def calculate_cut(S:list[str], adj_mat:pd.DataFrame)->float:
