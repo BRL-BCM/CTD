@@ -111,14 +111,15 @@ lung_adenocarcinoma = Disease("lung_adenocarcinoma", "data/lung_adenocarcinoma/L
 psoriasis = Disease("psoriasis", "data/psoriasis/Psoriasis_large_adj.csv", "data/psoriasis/Psoriasis_all_genes_large.csv")
 ulcerative_colitis = Disease("ulcerative_colitis", "data/ulcerative_colitis/Ulcerative_Colitis_large_adj.csv", "data/ulcerative_colitis/Ulcerative_Colitis_all_genes_large.csv")
 
-disease_list = [arthritis]
+input_disease = Disease(sys.argv[1], sys.argv[2], sys.argv[3])
+disease_list = [input_disease]
 # disease_list = [arthritis, asthma, chron_pulmo, dilated_cardiomyopath, breast_carcinoma,
 #                lung_adenocarcinoma, psoriasis, ulcerative_colitis]
 diseases_df = pd.DataFrame(disease_list)
 
 
 #split_seeds = [42]
-split_seeds = [42, 45, 55, 100, 420, 20, 40, 18, 22, 157, 1356, 2023, 872, 143, 67, 10000, 1024, 7, 13, 144] #TODO generate and use more splits?
+split_seeds = [42, 45, 55, 100, 420]#, 20, 40, 18, 22, 157, 1356, 2023, 872, 143, 67, 10000, 1024, 7, 13, 144] #TODO generate and use more splits?
 distance_metrics_used = ["radial_min", "boundary_min"]
 results_list: list[dict] = []
 
