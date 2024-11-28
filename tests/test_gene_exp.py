@@ -10,6 +10,8 @@ import pandas as pd
 import seaborn as sns
 import umap
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler
+import warnings
 
 
 def calculate_volume(A:list[str], adj_mat:pd.DataFrame)->float:
@@ -49,6 +51,70 @@ def calculate_conductance(S:list[str], adj_mat: pd.DataFrame)->float:
     conductance = cut_value / min(vol_S, vol_S_complement)
     return conductance
 
+def construct_information_hop_matrix(adj_mat : pd.DataFrame, S : list[str], verbose=False):
+
+    # For information distance calculation, only the absolute values of the edge weights are used
+    adj_mat = adj_mat.abs()
+
+    # print("(Non-negative) adjacency matrix")
+    # print(adj_mat)
+
+    outdegrees = adj_mat.sum(axis=1)
+    indegrees = adj_mat.sum(axis=0)
+    
+    # Print nodes with outdegree equal to 0
+    outdeg_zero_nodes = list(np.where(outdegrees == 0)[0])
+    outdeg_zero_node_labels = adj_mat.columns[outdeg_zero_nodes]
+    if verbose:
+        print(f"Nodes with outdegree 0 are {outdeg_zero_node_labels}")
+
+    # Print nodes with indegree equal to 0
+    indeg_zero_nodes = list(np.where(indegrees == 0)[0])
+    indeg_zero_node_labels = adj_mat.columns[indeg_zero_nodes]
+    if verbose:
+        print(f"Nodes with indegree 0 are {indeg_zero_node_labels}")
+
+    S_zero_outdeg_labels = [node for node in S if node in outdeg_zero_node_labels]
+    S_zero_indeg_labels = [node for node in S if node in indeg_zero_node_labels]
+    if (len(S_zero_outdeg_labels) > 0):
+        warnings.warn(f"There are {len(S_zero_outdeg_labels)} zero outdegree nodes in S and they are {S_zero_outdeg_labels}.")
+    if (len(S_zero_indeg_labels) > 0):
+        warnings.warn(f"There are {len(S_zero_indeg_labels)} zero indegree nodes in S and they are {S_zero_indeg_labels}.")
+    S_zero_total_deg_labels = list(set(S_zero_outdeg_labels).intersection(S_zero_indeg_labels))
+    if (len(S_zero_total_deg_labels) > 0):
+        warnings.warn(f"There are {len(S_zero_total_deg_labels)} nodes in S with a total degree of 0 and they are {S_zero_total_deg_labels}.")
+
+    total_deg_zero_node_labels = set(indeg_zero_node_labels).intersection(set(outdeg_zero_node_labels))
+    if verbose:
+        print(f"Dropping {len(total_deg_zero_node_labels)} nodes with total degree equal to 0 from the dataframe.")
+    adj_mat = adj_mat.drop(total_deg_zero_node_labels, axis=0)
+    adj_mat = adj_mat.drop(total_deg_zero_node_labels, axis=1)
+    
+    #outdegrees = outdegrees[outdegrees != 0]
+    outdegrees = adj_mat.sum(axis=1)
+
+    # Normalize each element of the adjacency matrix by the degree of the source node
+    with np.errstate(divide='ignore', invalid='ignore'):
+        normalized_adj_mat = adj_mat.div(outdegrees, axis=0)
+    
+    if verbose:
+        print("Normalized adjacency matrix")
+        print(normalized_adj_mat)
+
+    # Create the information hop matrix
+    IHM = pd.DataFrame()
+
+    # Apply the transformation -log(normalized_adj_mat[i,j])
+    # Use np.where to handle division by zero and logarithm of zero gracefully
+    with np.errstate(divide='ignore', invalid='ignore'):
+        IHM = np.abs(-np.log(normalized_adj_mat))
+
+    if verbose:
+        print("Information hop distance matrix")
+        print(IHM)
+
+    return IHM
+
 cluster_palette = ["#1f77b4", "#ff7f0e", "#279e68", "#d62728", "#aa40fc", "#aa40fc", \
                   "#e377c2", "#b5bd61", "#17becf", "#aec7e8", "#ffbb78", "#98df8a", "#ff9896", \
                   "#c5b0d5", "#c49c94", "#f7b6d2", "#dbdb8d", "#9edae5", "#ad494a", "#8c6d31", \
@@ -77,7 +143,7 @@ cluster_palette = ["#1f77b4", "#ff7f0e", "#279e68", "#d62728", "#aa40fc", "#aa40
                   "#FFFF00", "#006F00"]
 
 
-path = '../data/GBA2_v5/dsa_exp_download/'
+path = './data/GBA2_v5/dsa_exp_download/'
 diseases = {'DSA05072': 'Ulcerative colitis', 
     'DSA08946': 'Invasive Breast Carcinoma',
     'DSA01344': 'Asthma',
@@ -94,7 +160,7 @@ n_clusters = 40
 
 for disease_id, disease in diseases.items():
     disease_name = disease.replace(' ', '_')
-    profile_df = pd.read_csv(f'{path}{disease_id}_profile.csv')
+    profile_df = pd.read_csv(f'{path}{disease_id}_profile.csv', skiprows = 1)
     profile_df.set_index('GeneID', inplace=True)
     profile_df = profile_df.T
 
@@ -137,7 +203,8 @@ for disease_id, disease in diseases.items():
         cov_estimator = EmpiricalCovariance().fit(cov_ctrl)
         inv_ctrl = cov_estimator.precision_
         
-    diff_df = cov_case_ctrl - inv_ctrl
+    diff_df = inv_cov_case_ctrl - inv_ctrl
+    diff_df = diff_df.astype('float64')
     diff_df = np.abs(diff_df)
     diff_df = pd.DataFrame(np.maximum(diff_df, diff_df.T), index=highly_variable_df.index, columns=highly_variable_df.index ) # keep it symetric
 
@@ -152,10 +219,43 @@ for disease_id, disease in diseases.items():
 
     # Fit the model and get cluster labels
     labels = clustering.fit_predict(diff_df)
-    
+
+    # UMAP can work with pre-computed distance matrices. Therefore, we calculate information hop distances from diff_df and paas it to umap.
+    ihm_diff_df = construct_information_hop_matrix(diff_df, diff_df.columns, verbose=True)
+
+    # The umap projection can not work if there are NaNs, +inf or -inf values or values that don't fit in float32,
+    # so we need to perform the appropriate checks before applying umap and, if needed, perform re-scaling!    
+    nans = ihm_diff_df.isna().sum()  # Check for NaNs
+    plus_infs = (ihm_diff_df == float('inf')).sum()  # Check for positive infinity
+    minus_infs = (ihm_diff_df == float('-inf')).sum()  # Check for negative infinity
+
+    print(f"There are {nans} NaNs")
+    print(f"There are {plus_infs} +inf values")
+    print(f"There are {minus_infs} -inf values")
+
+    # Check for values that are too large or too small to fit into float32
+    float32_min = np.finfo(np.float32).min
+    float32_max = np.finfo(np.float32).max
+
+    # Check which values exceed the float32 range
+    too_large = (ihm_diff_df > float32_max) | (ihm_diff_df < float32_min)
+    problematic_value_count = too_large.sum().sum() # TODO: Fix this!
+
+    # Print the columns and rows where values are too large
+    print(f"There are {problematic_value_count} values in the matrix that don't fit into float32!")  # Shows how many problematic values in each column
+
+    if (problematic_value_count > 0):
+        print("Applying scaling for umap inputs.")
+        # Initialize MinMaxScaler to scale data to a [0, 1] range
+        scaler = MinMaxScaler()
+
+        # Scale the matrix
+        ihm_diff_df = scaler.fit_transform(ihm_diff_df)
+
+
     # Apply UMAP
-    umap_model = umap.UMAP(n_components=2, random_state=42)  # For 2D projection
-    umap_embedding = umap_model.fit_transform(diff_df)
+    umap_model = umap.UMAP(n_components=2, random_state=42, metric="precomputed")  # For 2D projection
+    umap_embedding = umap_model.fit_transform(ihm_diff_df)
 
     # Step 2: Create a DataFrame with UMAP coordinates and labels
     df_umap = pd.DataFrame(umap_embedding, columns=['UMAP1', 'UMAP2'])
