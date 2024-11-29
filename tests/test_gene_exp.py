@@ -12,7 +12,7 @@ import umap
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 import warnings
-
+from sklearn.covariance import LedoitWolf, OAS
 
 def calculate_volume(A:list[str], adj_mat:pd.DataFrame)->float:
     volume: float = adj_mat.loc[A, :].to_numpy().sum()
@@ -181,10 +181,28 @@ for disease_id, disease in diseases.items():
     control_df = highly_variable_df.loc[meta_df['status'] == 'control'].T
     highly_variable_df = highly_variable_df.T
     print(case_df.shape, control_df.shape)
-    
+
+    # # Fit Graphical Lasso to estimate the precision matrix of case + control
+    # glasso = GraphicalLasso(alpha=0.1, max_iter=200)  # Regularization parameter (tune as needed)
+    # glasso.fit(highly_variable_df.T)
+    # inv_cov_case_ctrl = glasso.precision_
+
+    # # Fit Graphical Lasso to estimate the precision matrix of case + control
+    # glasso = GraphicalLasso(alpha=0.1, max_iter=200)  # Regularization parameter (tune as needed)
+    # glasso.fit(control_df.T)
+    # inv_cov_ctrl = glasso.precision_
+
+    # Step 3: Threshold the precision matrix to create an adjacency matrix
+    #threshold = 0.1  # Set a threshold for sparsity
+    #adjacency_matrix = (np.abs(precision_matrix) > threshold).astype(int)
+    #np.fill_diagonal(adjacency_matrix, 0)  # Remove self-loops
+
     # Create graph
     # Disease + control
-    cov_case_ctrl = np.cov(highly_variable_df, bias=False)
+    # Fit Ledoit-Wolf covariance estimator
+    lw = LedoitWolf()
+    cov_case_ctrl = lw.fit(highly_variable_df.T).covariance_
+    #cov_case_ctrl = np.cov(highly_variable_df, bias=False)
     try:
         inv_cov_case_ctrl = np.linalg.inv(cov_case_ctrl)
     except np.linalg.LinAlgError:
@@ -194,16 +212,19 @@ for disease_id, disease in diseases.items():
         inv_cov_case_ctrl = cov_estimator.precision_
 
     #  control
-    cov_ctrl = np.cov(control_df, bias=False)
+    # Fit Ledoit-Wolf covariance estimator
+    lw = LedoitWolf()
+    cov_ctrl = lw.fit(control_df.T).covariance_
+    #cov_ctrl = np.cov(control_df, bias=False)
     try:
-        inv_ctrl = np.linalg.inv(cov_ctrl)
+        inv_cov_ctrl = np.linalg.inv(cov_ctrl)
     except np.linalg.LinAlgError:
         print("Covariance matrix is singular, attempting regularized inversion")
         # Regularize with scikit-learn's EmpiricalCovariance if matrix is singular
         cov_estimator = EmpiricalCovariance().fit(cov_ctrl)
-        inv_ctrl = cov_estimator.precision_
+        inv_cov_ctrl = cov_estimator.precision_
         
-    diff_df = inv_cov_case_ctrl - inv_ctrl
+    diff_df = inv_cov_case_ctrl - inv_cov_ctrl
     diff_df = diff_df.astype('float64')
     diff_df = np.abs(diff_df)
     diff_df = pd.DataFrame(np.maximum(diff_df, diff_df.T), index=highly_variable_df.index, columns=highly_variable_df.index ) # keep it symetric
@@ -318,7 +339,7 @@ for disease_id, disease in diseases.items():
     s_path = f'{path}{disease_name}_exp_s.csv'
     s_df.to_csv(s_path, index=False)
     
-    command = f"python ../tests/test_gba.py {disease_name} {g_path} {s_path} >> {path}gba2.log"
+    command = f"python ./tests/test_gba.py {disease_name} {g_path} {s_path} >> {path}gba2_{disease_name}.log"
     os.system(command)
-    
+    print("Done")
   
