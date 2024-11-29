@@ -205,4 +205,4 @@ results_dtype_dict = {'test_name':'str',
 results_columns = ['test_name', 'ndgc', 'time', 'split_name', 'ranks']
 benchmark_results_df:pd.DataFrame = pd.DataFrame(data=results_list, columns=results_columns)
 benchmark_results_df.astype(results_dtype_dict)
-benchmark_results_df.to_csv("results/benchmark_results.csv", index=False, header=True)
+benchmark_results_df.to_csv(f"results/benchmark_results_{sys.argv[1]}.csv", index=False, header=True)
