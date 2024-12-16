@@ -13,107 +13,16 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 import warnings
 from sklearn.covariance import LedoitWolf, OAS
+import sys
 
-def calculate_volume(A:list[str], adj_mat:pd.DataFrame)->float:
-    volume: float = adj_mat.loc[A, :].to_numpy().sum()
-    return volume
+# Get the root directory
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
-def calculate_cut(S:list[str], adj_mat:pd.DataFrame)->float:
-    # Ensure S is a list or set of nodes
-    S = list(S)
-    # Complement of S (all nodes not in S)
-    all_nodes = set(adj_mat.index)
-    S_complement = list(all_nodes - set(S))
-    
-    # Extract the submatrix corresponding to edges between S and S_complement
-    cut_matrix = adj_mat.loc[S, S_complement]
-    
-    # Sum the weights of the edges in the cut
-    cut_value = cut_matrix.to_numpy().sum()
-    
-    return cut_value
+# Add the Python directory to sys.path
+python_dir = os.path.join(root_dir, 'Python')
+sys.path.append(python_dir)
 
-# Calculate the conductance of a node set S, given by the total weight of edges starting in S and ending out of S divided 
-# by the minimum of volumes of S and V\S, where the volume of node set A is given by the sum of weights of all edges starting in A
-def calculate_conductance(S:list[str], adj_mat: pd.DataFrame)->float:
-    # Calculate the volume of S
-    vol_S:float = calculate_volume(S, adj_mat)
-    
-    # Calculate the volume of the complement of S
-    all_nodes = set(adj_mat.index)
-    S_complement = list(all_nodes - set(S))
-    vol_S_complement:float = calculate_volume(S_complement, adj_mat)
-    
-    # Calculate the cut between S and S_complement
-    cut_value = calculate_cut(S, adj_mat)
-
-    # Compute the conductance
-    conductance = cut_value / min(vol_S, vol_S_complement)
-    return conductance
-
-def construct_information_hop_matrix(adj_mat : pd.DataFrame, S : list[str], verbose=False):
-
-    # For information distance calculation, only the absolute values of the edge weights are used
-    adj_mat = adj_mat.abs()
-
-    # print("(Non-negative) adjacency matrix")
-    # print(adj_mat)
-
-    outdegrees = adj_mat.sum(axis=1)
-    indegrees = adj_mat.sum(axis=0)
-    
-    # Print nodes with outdegree equal to 0
-    outdeg_zero_nodes = list(np.where(outdegrees == 0)[0])
-    outdeg_zero_node_labels = adj_mat.columns[outdeg_zero_nodes]
-    if verbose:
-        print(f"Nodes with outdegree 0 are {outdeg_zero_node_labels}")
-
-    # Print nodes with indegree equal to 0
-    indeg_zero_nodes = list(np.where(indegrees == 0)[0])
-    indeg_zero_node_labels = adj_mat.columns[indeg_zero_nodes]
-    if verbose:
-        print(f"Nodes with indegree 0 are {indeg_zero_node_labels}")
-
-    S_zero_outdeg_labels = [node for node in S if node in outdeg_zero_node_labels]
-    S_zero_indeg_labels = [node for node in S if node in indeg_zero_node_labels]
-    if (len(S_zero_outdeg_labels) > 0):
-        warnings.warn(f"There are {len(S_zero_outdeg_labels)} zero outdegree nodes in S and they are {S_zero_outdeg_labels}.")
-    if (len(S_zero_indeg_labels) > 0):
-        warnings.warn(f"There are {len(S_zero_indeg_labels)} zero indegree nodes in S and they are {S_zero_indeg_labels}.")
-    S_zero_total_deg_labels = list(set(S_zero_outdeg_labels).intersection(S_zero_indeg_labels))
-    if (len(S_zero_total_deg_labels) > 0):
-        warnings.warn(f"There are {len(S_zero_total_deg_labels)} nodes in S with a total degree of 0 and they are {S_zero_total_deg_labels}.")
-
-    total_deg_zero_node_labels = set(indeg_zero_node_labels).intersection(set(outdeg_zero_node_labels))
-    if verbose:
-        print(f"Dropping {len(total_deg_zero_node_labels)} nodes with total degree equal to 0 from the dataframe.")
-    adj_mat = adj_mat.drop(total_deg_zero_node_labels, axis=0)
-    adj_mat = adj_mat.drop(total_deg_zero_node_labels, axis=1)
-    
-    #outdegrees = outdegrees[outdegrees != 0]
-    outdegrees = adj_mat.sum(axis=1)
-
-    # Normalize each element of the adjacency matrix by the degree of the source node
-    with np.errstate(divide='ignore', invalid='ignore'):
-        normalized_adj_mat = adj_mat.div(outdegrees, axis=0)
-    
-    if verbose:
-        print("Normalized adjacency matrix")
-        print(normalized_adj_mat)
-
-    # Create the information hop matrix
-    IHM = pd.DataFrame()
-
-    # Apply the transformation -log(normalized_adj_mat[i,j])
-    # Use np.where to handle division by zero and logarithm of zero gracefully
-    with np.errstate(divide='ignore', invalid='ignore'):
-        IHM = np.abs(-np.log(normalized_adj_mat))
-
-    if verbose:
-        print("Information hop distance matrix")
-        print(IHM)
-
-    return IHM
+import gba_analysis
 
 cluster_palette = ["#1f77b4", "#ff7f0e", "#279e68", "#d62728", "#aa40fc", "#aa40fc", \
                   "#e377c2", "#b5bd61", "#17becf", "#aec7e8", "#ffbb78", "#98df8a", "#ff9896", \
@@ -242,7 +151,7 @@ for disease_id, disease in diseases.items():
     labels = clustering.fit_predict(diff_df)
 
     # UMAP can work with pre-computed distance matrices. Therefore, we calculate information hop distances from diff_df and paas it to umap.
-    ihm_diff_df = construct_information_hop_matrix(diff_df, diff_df.columns, verbose=True)
+    ihm_diff_df = gba_analysis.construct_information_hop_matrix(diff_df, diff_df.columns, verbose=True, use_max_distance=True)
 
     # The umap projection can not work if there are NaNs, +inf or -inf values or values that don't fit in float32,
     # so we need to perform the appropriate checks before applying umap and, if needed, perform re-scaling!    
@@ -305,6 +214,7 @@ for disease_id, disease in diseases.items():
     conductances = []
     min_cond = 1
     min_cond_node = -1
+    highlight_ax = None
     for row in range(nrows):
         for col in range(n_clusters//nrows):
             df_part = df_umap[labels==label]
@@ -318,15 +228,22 @@ for disease_id, disease in diseases.items():
             axs[row, col].set_ylim(ymin,ymax)
 
             clusters[label] = [highly_variable_df.index[i] for i, value in enumerate(labels) if value == label]
-            cond = np.round(calculate_conductance(clusters[label], (diff_df)), 3)
+            cond = np.round(gba_analysis.calculate_conductance(clusters[label], (diff_df)), 3)
             conductances.append(cond)
             axs[row, col].set_title(f'{label} ({len(df_part)}): {cond}', size=20)
             if (cond < min_cond) and (len(df_part) <= 100) and (len(df_part) > 20):
                 min_cond = cond
                 min_cond_node = label
+                highlight_ax = axs[row, col]  # Store the axis of the subplot to highlight
 
             label += 1
             #         sns.despine(bottom=True, left=True, ax=axs[row, col])
+    
+    # Highlight the subplot with the minimum conductance
+    if highlight_ax:
+        highlight_ax.patch.set_edgecolor('red')  # Set red border color
+        highlight_ax.patch.set_linewidth(4)      # Set border thickness
+
     plt.savefig(f'{path}{disease_name}_exp_umap_per_cluster.png', dpi=200, bbox_inches='tight')
     plt.close()
     print(f'Smallest conductance in cluster: {min_cond_node} ({min_cond})')

@@ -140,8 +140,8 @@ class BoundaryDistanceMetric(DistanceMetric):
         if (self._use_min_distance):
             print(f"Using minimal distance from the boundary formed from nodes {self._key_points}.")
         
-
-def construct_information_hop_matrix(adj_mat : pd.DataFrame, S : list[str], verbose=False):
+# If use_max_distance = True, "hardcoding" with log2(|v|) bits is allowed and maximal single hop distance between nodes is set log2(|v|).
+def construct_information_hop_matrix(adj_mat : pd.DataFrame, S : list[str], verbose=False, use_max_distance=True):
 
     # For information distance calculation, only the absolute values of the edge weights are used
     adj_mat = adj_mat.abs()
@@ -156,13 +156,13 @@ def construct_information_hop_matrix(adj_mat : pd.DataFrame, S : list[str], verb
     outdeg_zero_nodes = list(np.where(outdegrees == 0)[0])
     outdeg_zero_node_labels = adj_mat.columns[outdeg_zero_nodes]
     if verbose:
-        print(f"Nodes with outdegree 0 are {outdeg_zero_node_labels}")
+        print(f"Nodes with outdegree 0 are {list(outdeg_zero_node_labels)}")
 
     # Print nodes with indegree equal to 0
     indeg_zero_nodes = list(np.where(indegrees == 0)[0])
     indeg_zero_node_labels = adj_mat.columns[indeg_zero_nodes]
     if verbose:
-        print(f"Nodes with indegree 0 are {indeg_zero_node_labels}")
+        print(f"Nodes with indegree 0 are {list(indeg_zero_node_labels)}")
 
     S_zero_outdeg_labels = [node for node in S if node in outdeg_zero_node_labels]
     S_zero_indeg_labels = [node for node in S if node in indeg_zero_node_labels]
@@ -175,10 +175,11 @@ def construct_information_hop_matrix(adj_mat : pd.DataFrame, S : list[str], verb
         warnings.warn(f"There are {len(S_zero_total_deg_labels)} nodes in S with a total degree of 0 and they are {S_zero_total_deg_labels}.")
 
     total_deg_zero_node_labels = set(indeg_zero_node_labels).intersection(set(outdeg_zero_node_labels))
-    if verbose:
-        print(f"Dropping {len(total_deg_zero_node_labels)} nodes with total degree equal to 0 from the dataframe.")
-    adj_mat = adj_mat.drop(total_deg_zero_node_labels, axis=0)
-    adj_mat = adj_mat.drop(total_deg_zero_node_labels, axis=1)
+    if (use_max_distance == False):
+        if verbose:
+            print(f"Dropping {len(total_deg_zero_node_labels)} nodes with total degree equal to 0 from the dataframe.")
+        adj_mat = adj_mat.drop(total_deg_zero_node_labels, axis=0)
+        adj_mat = adj_mat.drop(total_deg_zero_node_labels, axis=1)
     
     #outdegrees = outdegrees[outdegrees != 0]
     outdegrees = adj_mat.sum(axis=1)
@@ -197,11 +198,22 @@ def construct_information_hop_matrix(adj_mat : pd.DataFrame, S : list[str], verb
     # Apply the transformation -log(normalized_adj_mat[i,j])
     # Use np.where to handle division by zero and logarithm of zero gracefully
     with np.errstate(divide='ignore', invalid='ignore'):
-        IHM = np.abs(-np.log(normalized_adj_mat))
+        IHM = np.abs(-np.log2(normalized_adj_mat))
 
-    if verbose:
-        print("Information hop distance matrix")
-        print(IHM)
+    if (use_max_distance):
+        # All edges with weight greater than log2(|V|) cost more bits than "hardcoding" the label of the destination node with log2(|V|) bits.
+        # Therefore, we need to replace all values in IHM greater than log2(|V|) with log2(|V|).
+        N = IHM.shape[0]
+        hardcoding_distance = math.log2(N)
+        IHM[IHM > hardcoding_distance] = hardcoding_distance
+
+        # There could be nodes with outdegree equal to 0.
+        # Applying the normalized log transform will produce NaNs for all fields in the rows corresponding to these nodes.
+        # Therefore, we need to replace all NaNs in IHM with log2(|V|).
+        IHM = IHM.fillna(hardcoding_distance)
+
+    # Replace main diagonal with 0
+    np.fill_diagonal(IHM.values, 0)
 
     return IHM
 
@@ -353,7 +365,6 @@ def find_fiedler_eigenvalue(matrix):
         float: The second smallest eigenvalue.
         numpy.ndarray: The corresponding eigenvector (Fiedler vector).
     """
-
     
     # Ensure the matrix is sparse and symmetric
     assert sp.issparse(matrix), "Input matrix must be sparse."
@@ -376,24 +387,47 @@ def calculate_Cheeger_bounds(matrix):
 
 # Example usage
 if __name__ == "__main__":
-    # Create a random sparse matrix for demonstration
-    size = 100  # Size of the matrix (100x100)
-    density = 0.1  # Approximate density of non-zero elements (10%)
+    # # Create a random sparse matrix for demonstration
+    # size = 100  # Size of the matrix (100x100)
+    # density = 0.1  # Approximate density of non-zero elements (10%)
     
-    # Generate a random sparse matrix
-    random_matrix = sp.random(size, size, density=density)
+    # # Generate a random sparse matrix
+    # random_matrix = sp.random(size, size, density=density)
 
-    random_matrix.data = np.abs(random_matrix.data)
+    # random_matrix.data = np.abs(random_matrix.data)
     
-    # Symmetrize the matrix (just for demonstration purposes)
-    symmetric_matrix = (random_matrix + random_matrix.T) / 2
+    # # Symmetrize the matrix (just for demonstration purposes)
+    # symmetric_matrix = (random_matrix + random_matrix.T) / 2
     
-    # Call the function to get the second smallest eigenvalue and vector
-    eigenvalue, eigenvector = find_fiedler_eigenvalue(symmetric_matrix)
+    # # Call the function to get the second smallest eigenvalue and vector
+    # eigenvalue, eigenvector = find_fiedler_eigenvalue(symmetric_matrix)
     
-    print(f"Second smallest eigenvalue: {eigenvalue}")
-    assert eigenvalue>=0, "Fiedler eigenvalue of G can not be less than zero!"
+    # print(f"Second smallest eigenvalue: {eigenvalue}")
+    # assert eigenvalue>=0, "Fiedler eigenvalue of G can not be less than zero!"
 
-    lower_bound, upper_bound = calculate_Cheeger_bounds(symmetric_matrix)
+    # lower_bound, upper_bound = calculate_Cheeger_bounds(symmetric_matrix)
 
-    print(f"Cheeger bounds for the isoperimetric number are {lower_bound}, {upper_bound}")
+    # print(f"Cheeger bounds for the isoperimetric number are {lower_bound}, {upper_bound}")
+
+    data = np.array(
+    [[0, 6, 2, 0],
+    [0, 0, 0, 0],
+    [0, 4, 0, 0],
+    [0, 0, 0, 0]]
+    )
+
+    adj_mat = pd.DataFrame(data)
+
+    print("Adjacency matrix:\n")
+    print(adj_mat)
+
+    IHM = construct_information_hop_matrix(adj_mat, list(adj_mat.columns), True, True)
+    
+    print("Information hop matrix:\n")
+    print(IHM)
+
+    S = [1,2]
+
+    distances = calculate_distances_from_S(pd.DataFrame(IHM), S)[0]
+    print(distances)
+
