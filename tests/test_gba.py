@@ -119,7 +119,7 @@ diseases_df = pd.DataFrame(disease_list)
 
 
 #split_seeds = [42]
-split_seeds = [42, 45, 55, 100, 420]#, 20, 40, 18, 22, 157, 1356, 2023, 872, 143, 67, 10000, 1024, 7, 13, 144] #TODO generate and use more splits?
+split_seeds = [42, 45, 55, 100, 420, 20, 40, 18, 22, 157]#, 1356, 2023, 872, 143, 67, 10000, 1024, 7, 13, 144] #TODO generate and use more splits?
 distance_metrics_used = ["radial_min", "boundary_min"]
 results_list: list[dict] = []
 
