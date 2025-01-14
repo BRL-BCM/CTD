@@ -24,6 +24,13 @@ def main(args=None):
         type=str,
         default="boundary",
     )
+    parser.add_argument(
+        "-o",
+        "--outpath",
+        help="Output path",
+        type=str,
+        default="./results",
+    )
 
     args = parser.parse_args()
     metric = args.metric
@@ -51,21 +58,9 @@ def main(args=None):
         distance:gba_analysis.BoundaryDistanceMetric = gba_analysis.BoundaryDistanceMetric(adj_df, distances_from_S, use_min_distance=True)
 
     rankings_df = gba_analysis.get_rankings_by_gba(distances_from_S, distance_metric=distance)
+    os.makedirs(args.outpath, exist_ok=True)
     
-    graph_name_path:str = os.path.basename(args.adj_path)
-    male_index = graph_name_path.upper().find("_MALE")
-    female_index = graph_name_path.upper().find("_FEMALE")
-    gender:str = ""
-    if (male_index > -1):
-        gender += "M"
-    if (female_index > -1):
-        gender += "F"
-    
-    root = os.getcwd()
-    results_path = os.path.join(root, "results", "elma_trajectories")
-    os.makedirs(results_path, exist_ok=True)
-    
-    outfname = os.path.join(root, "results", "elma_trajectories", os.path.basename(args.s_nodes).replace('.csv', f'_{gender}_{np.round(conductance, 3)}_gba_ranks.csv'))
+    outfname = os.path.join(args.outpath, os.path.basename(args.s_nodes).replace('.csv', f'_{np.round(conductance, 3)}_gba_ranks.csv'))
     rankings_df.to_csv(outfname, index=False)
 
 if __name__ == "__main__":
