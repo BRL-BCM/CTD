@@ -4,6 +4,7 @@ import json
 import subprocess
 import tempfile
 import argparse
+import math
 
 def run_ctd(adj_matrix, s_module):
     """
@@ -41,6 +42,57 @@ def write_nodes_to_csv(nodes, path):
         f.write("x\n")
         for n in nodes:
             f.write(f"{n}\n")
+
+def calculate_penalized_score(p_union, f_union, f_a, f_b):
+    """
+    Calculate penalized p-value score for union analysis.
+
+    Formula:
+    Score_union = -log(p_union) * (|F_union| / max(|F_A|, |F_B|))
+
+    This score combines:
+    - Statistical significance: -log(p_union) - higher when p-value is smaller
+    - Improvement ratio: |F_union| / max(|F_A|, |F_B|) - how much union improves over best individual
+
+    Parameters:
+    -----------
+    p_union : float
+        P-value for the union analysis
+    f_union : int
+        Number of F nodes found in union
+    f_a : int
+        Number of F nodes found in set A
+    f_b : int
+        Number of F nodes found in set B
+
+    Returns:
+    --------
+    float : Penalized score, or None if calculation not possible
+
+    Notes:
+    ------
+    - Returns None if p_union is 0, NA, or invalid
+    - Returns None if max(|F_A|, |F_B|) is 0 (to avoid division by zero)
+    - Higher scores indicate better combinations (more significant + more improvement)
+    """
+    try:
+        # Validate inputs
+        if p_union is None or p_union == "NA" or p_union <= 0:
+            return None
+
+        f_max = max(f_a, f_b)
+        if f_max == 0:
+            return None
+
+        # Calculate score
+        # -log(p) increases as p decreases (more significant)
+        # |F_union| / max(|F_A|, |F_B|) increases with improvement
+        score = -math.log(p_union) * (f_union / f_max)
+
+        return score
+
+    except (ValueError, TypeError, ZeroDivisionError):
+        return None
 
 def main():
     parser = argparse.ArgumentParser(
@@ -83,6 +135,29 @@ def main():
     union_result = run_ctd(adj_matrix, union_file)
     results["UNION"] = union_result
 
+    # Calculate penalized score for union
+    penalized_score = None
+    if len(s_modules) >= 2:
+        # Get F node counts from first two modules (assuming we're comparing two sets)
+        f_counts = []
+        for s_module in s_modules[:2]:
+            F_nodes = results[s_module].get("F_most_connected_nodes", [])
+            f_counts.append(len(F_nodes))
+
+        # Get union metrics
+        p_union = union_result.get("p_value", "NA")
+        F_union_nodes = union_result.get("F_most_connected_nodes", [])
+        f_union = len(F_union_nodes)
+
+        # Calculate penalized score
+        if len(f_counts) >= 2:
+            penalized_score = calculate_penalized_score(
+                p_union,
+                f_union,
+                f_counts[0],
+                f_counts[1]
+            )
+
     # Reporting
     print("\n=== CTD Results Summary ===")
     for key, res in results.items():
@@ -92,6 +167,18 @@ def main():
         print(f"  p-value: {p_val}")
         print(f"  |F|: {len(F_nodes)}")
         print(f"  F nodes (first 10): {F_nodes[:10]}{'...' if len(F_nodes) > 10 else ''}")
+
+    # Print penalized score
+    if penalized_score is not None:
+        print(f"\n=== Penalized P-Value Score ===")
+        print(f"  Score_union = -log(p_union) * (|F_union| / max(|F_A|, |F_B|))")
+        print(f"  Score: {penalized_score:.4f}")
+        print(f"\n  Interpretation:")
+        print(f"    - Higher score = Better combination (more significant + more improvement)")
+        print(f"    - Combines statistical significance with improvement ratio")
+    else:
+        print(f"\n=== Penalized P-Value Score ===")
+        print(f"  Score: NA (insufficient data or invalid p-value)")
 
 if __name__ == "__main__":
     main()
