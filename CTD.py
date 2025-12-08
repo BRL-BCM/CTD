@@ -37,6 +37,8 @@ p.add_argument("--num_processes", help="Number of worker processes to use for pa
 p.add_argument("--out_all_paths", help="Output table with all paths and its stats.", action='store_true')
 p.add_argument("--pen_p_val", help="Penalize p-val with n choose k instead k*log2(n)", action='store_true')
 p.add_argument("-v", "--verbose", help="Set verbose logging level.", type=int, default=None)
+p.add_argument("--gba", help="Output GBA cumulative entropy scores.", action='store_true')
+p.add_argument("--ranks", help="Output rank nodes for every node in S.", action='store_true')
 
 if __name__ == '__main__':
 
@@ -228,13 +230,13 @@ if __name__ == '__main__':
     else:
         outfname = argv.output_name
 
-    outrname = outfname.replace('.json', '_ranks.json')
-
     with open(outfname, 'w') as f:
         json.dump(out_dict, f, indent=4)
 
-    with open(outrname, 'w') as f:
-        json.dump(ranks, f, indent=4)
+    if argv.ranks:
+        outrname = outfname.replace('.json', '_ranks.json')
+        with open(outrname, 'w') as f:
+            json.dump(ranks, f, indent=4)
     if argv.out_all_paths:
         paths_df = pd.DataFrame(np.array([','.join(z) for z in [[y[0] for y in x] for x in pt_bs_by_k]]).T,
                                 columns=['Nodes'])
@@ -242,10 +244,11 @@ if __name__ == '__main__':
         out_paths_name = outfname.replace('.json', '_all_paths.csv')
         paths_df.to_csv(out_paths_name, index=False)
 
-    cum_prob_gba = {node: prob for node, prob in cum_prob_gba.items() if node not in S_perturbed_nodes}
-    gba_df = pd.DataFrame(cum_prob_gba, index=['Importance']).T
-    gba_df.sort_values(by='Importance', inplace=True, ascending=False)
-    gba_df.reset_index(inplace=True)
-    gba_df.columns = ['Node_id', 'Importance']
-    out_gba_name = outfname.replace('.json', '_gba.csv')
-    gba_df.to_csv(out_gba_name, index=False)
+    if argv.gba:
+        cum_prob_gba = {node: prob for node, prob in cum_prob_gba.items() if node not in S_perturbed_nodes}
+        gba_df = pd.DataFrame(cum_prob_gba, index=['Importance']).T
+        gba_df.sort_values(by='Importance', inplace=True, ascending=False)
+        gba_df.reset_index(inplace=True)
+        gba_df.columns = ['Node_id', 'Importance']
+        out_gba_name = outfname.replace('.json', '_gba.csv')
+        gba_df.to_csv(out_gba_name, index=False)
